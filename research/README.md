@@ -32,7 +32,7 @@ workflow runs; agents launched directly write to `raw/` themselves.
 ## Status
 
 **All research streams are closed.** `raw/01`–`raw/07` are complete; every finding has been folded
-into the four design documents. Nothing is in flight.
+into the design documents (`10`, `20`, `30`, `40`–`43`, and `../DESIGN.md`). Nothing is in flight.
 
 **Settled:** distribution, library boundary, grid model, theming, chart core (d3 primitives, own
 SVG tree), grid engine (`react-grid-layout@2/core`), render boundary (RSC-safe `<Chart>` +
@@ -42,15 +42,36 @@ mode with the Playwright provider), **accessibility markup** (`role="graphics-do
 `role="img"`), the **`--gx-*` token tree** (183 specified tokens, four-tier provenance), and the
 **docs stack** (Fumadocs + Shiki + StackBlitz, no playground library).
 
-**Design written:** the responsive ladder, the package graph, the milestone plan.
+**Design written:** the responsive ladder, the package graph, the milestone plan, and — closing the
+three gaps that read as specified but weren't — the **`ChartPlan` field contract** (`40`), **text
+metrics as a plan input** (`41`), the **reconciled A–E type scale** (`42`), and the **two-theme
+architecture with the token lint-gate allowlist** (`43`).
+
+Four things those documents changed rather than merely added, worth knowing before reading the
+older files:
+
+- **`planChart()` takes five parameters**, not four — `policy` (thresholds *and* `fontMetrics`)
+  applied before resolution, `overrides` forced after.
+- **The presentation / plan-input split runs by consequence, not by token name.** Six text-measurement
+  properties are plan inputs; `20-architecture.md` §3.2's table was wrong about `font-family` and is
+  corrected in place.
+- **`--gx-label-landmark-grade` supersedes both `landmark-weight` spellings**, and retargets Carbon's
+  semibold to `GRAD` — because `wght` changes glyph advances and would invalidate the metrics table.
+- **`prevClass` is settled out of the resolver**, not deferred.
 
 **Open — and it is now a short list:**
 
 1. **Project name and npm scope.** Blocking for publish, not for code. Everything is `@gx/*`
    placeholder; `raw/06` §6.0 verified the prefix appears only as the first path segment, so the
    rename is one regex plus one generator constant plus one template-literal type.
-2. **51 `--gx-*` names referenced but never specified** — must each get a row or be deleted before
-   the token tree ships. See `30-implementation-plan.md` B1.
+2. **43 `--gx-*` names referenced but never specified** — must each get a row or be deleted before
+   the token tree ships. See `30-implementation-plan.md` B1. (Was 51; `42-typography.md` §4
+   specified eight.)
 3. **Six UNVERIFIED token defaults** the research agent declined to guess at. Same section.
+4. **Whether Roboto Flex ships `tnum`** (`41-text-metrics.md` §4.1) and the **`safetyFactor`**
+   calibration (§4.2). These block *generating the metrics table* at A2, not A1.
+5. **The six neutral-theme hex values** and the five composition pairs with no structural guarantee
+   (`43-theming.md` §4–§5). Derivable at B1; deliberately not guessed.
 
-**Next:** Milestone A1. Nothing blocks it.
+**Next:** Milestone A1. Nothing blocks it — and the A2–A4 pointers it hands off to now resolve to
+real specifications rather than to each other.

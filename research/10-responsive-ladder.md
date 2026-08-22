@@ -41,17 +41,22 @@ measured px (via RO)  ─┘         ▲               ▲
 1. `useElementSize()` — one `ResizeObserver` per widget, `contentBoxSize`, rAF-batched.
 2. `resolveSizeClass({ cols, rows, width, height })` → a `SizeClass` plus an `aspect` bucket.
    Cells alone are not enough: 12 cells at 1440px is a very different box than 12 cells at 2560px.
-3. `planChart(type, ctx, shape, overrides)` → a **`ChartPlan`**: a plain, serialisable,
-   fully-overridable object of feature flags and numbers.
+3. `planChart(type, ctx, shape, policy, overrides)` → a **`ChartPlan`**: a plain, serialisable,
+   fully-overridable object of feature flags and numbers. Full field list: `40-chart-plan.md` §3–§4.
 4. The renderer is dumb. It draws exactly what the plan says. No renderer ever calls `window`.
 
 The `ChartPlan` being a plain object is the whole design. It makes the behaviour inspectable,
 testable without a DOM, snapshot-able, isomorphic (see decision 7), and **overridable at any level**:
 
 ```tsx
-<Chart plan={{ legend: 'hidden', ticks: { x: 4 } }} />        // hard override
-<Chart planFn={(p, ctx) => ({ ...p, aggregateAfter: 5 })} />  // programmatic
+<Chart plan={{ legend: { placement: 'absent' },              // hard override
+               axes: { x: { ticks: { mode: 'count', count: 4 } } } }} />
+<Chart planFn={(p, ctx) => ({ ...p, aggregate: { ...p.aggregate, after: 5 } })} />  // programmatic
 ```
+
+⚠ These read `legend: 'hidden'` / `ticks: { x: 4 }` at seed time — shorthand written before the type
+existed. `'hidden'` is not a placement, and hiding is the one thing Conceal Means Gone
+(`DESIGN.md:233`) forbids. Settled shapes: `40-chart-plan.md` §4.4 and §4.8.
 
 ### 1.1 ⚠ The containment rule — non-negotiable
 
@@ -455,8 +460,8 @@ retrieved makes the claim.)*
    deadband if flicker is still observable. If we keep one, express it as a **fraction of the
    boundary width** (~2–3%), not an absolute — 8 px means very different things at a 120 px boundary
    and a 1200 px one. ⚠ Corrects the architecture doc, which specified an absolute 8 px.
-2. **Does `prevClass` still belong in the resolver?** If animation solves flicker, the resolver can
-   stay a pure function of size alone — simpler, and it keeps server and client identical.
+2. ~~Does `prevClass` still belong in the resolver?~~ — ✅ **resolved: no.** `planChart()` ships as a
+   pure function of size alone. See `40-chart-plan.md` §9 and `20-architecture.md` §3.3.
 3. **Bar geometry has no published numbers.** Talbot, Setlur & Agrawala 2014, *Four Experiments on
    the Perception of Bar Charts*, is the most likely home for a minimum bar width. Confirmed to
    exist, no open-access PDF. Worth an ACM DL retrieval.

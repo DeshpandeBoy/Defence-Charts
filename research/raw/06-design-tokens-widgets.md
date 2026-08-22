@@ -1216,7 +1216,7 @@ https://carbondesignsystem.com/data-visualization/chart-anatomy/:
 | "If data is available during an axis break, re-style line segments to use **0.5px stroke** and hide circles representing data points." | `--gx-line-stroke-width-muted: 0.5px` + a conceal rule |
 | "When the graphic translation of the data is **less than 3 degrees**, a callout is used to clearly associate the label with the slice." | `--gx-arc-label-callout-below-deg: 3` |
 | "If the data translates as **less than 1 degree**, a slice will not be rendered on the chart" | `--gx-arc-min-render-deg: 1` |
-| "Whenever data crosses into a new time cycle, such as a new day, month, or year, **semibold the label** to make it a 'landmark' label" | `--gx-axis-label-landmark-weight: 600` |
+| "Whenever data crosses into a new time cycle, such as a new day, month, or year, **semibold the label** to make it a 'landmark' label" | `--gx-label-landmark-grade: 150` (⚠ retargeted from `font-weight` to `GRAD` — `42-typography.md` §3) |
 | "Never change axis ticks increments to accommodate data availability." | a *constraint on the planner*, not a token: tick intervals must stay uniform across ladder rungs |
 | "Never interpolate between periods when data is unavailable. Always label both the start and end point during which data is not available." | gap handling is explicit, not implicit |
 
@@ -1433,7 +1433,7 @@ tier table, and it is the only one of the three that survives being handed to a 
 | `--gx-legend-label-font-size` | Nivo 10, Highcharts `0.8em` bold | Nivo, Highcharts |
 | `--gx-value-label-font-size`, `--gx-value-label-font-weight` | Highcharts `0.7em`/bold, Adobe 700 | Highcharts, Adobe |
 | `--gx-value-label-halo-width`, `--gx-value-label-halo-color` | Highcharts `textOutline: '1px contrast'`; Nivo `outlineWidth`/`outlineColor`/`outlineOpacity`; Adobe `DIRECT_LABEL_BACKGROUND_STROKE_WIDTH = 4` | three independent systems |
-| `--gx-axis-label-landmark-weight` | semibold time-cycle boundary labels | Carbon (§4.4) |
+| `--gx-label-landmark-grade` | semibold-equivalent time-cycle boundary labels, via `GRAD` | Carbon (§4.4), retargeted — `42-typography.md` §3 |
 
 Note the halo row: **three independent systems all found they needed a text outline for labels over
 marks**, and all three expose it. Nivo exposes it most granularly (width + colour + opacity as three
@@ -1709,9 +1709,10 @@ font-size: clamp(
 | `--gx-label-rotate-limit` | `80deg` | A-impl | Highcharts `labels.autoRotationLimit: 80` |
 | `--gx-label-stagger-lines` / `-stagger-max` | `0` / `5` | A-impl | Highcharts `staggerLines: 0`, `maxStaggerLines: 5` |
 | `--gx-label-step` | `0` | A-impl | Highcharts `labels.step: 0` (tick-dropping stride) |
-| `--gx-label-landmark-weight` | `600` | A-impl | Carbon: "Whenever data crosses into a new time cycle … semibold the label to make it a 'landmark' label" |
+| `--gx-label-landmark-grade` | `150` | B | ⚠ **Superseded `--gx-label-landmark-weight: 600` (A-impl, Carbon).** `wght` changes glyph advance widths and would silently widen the two labels with the tightest collision budget; `GRAD` verifiably does not. Clamped to Roboto Flex's verified `GRAD` ceiling of +150 (≈ weight 550), below Carbon's +200. `42-typography.md` §3 |
 | `--gx-label-degrade-order` | `abbreviate split rotate transpose` | B | Talbot 2010 supplies the first three ("rotation … a last resort"); `transpose` is ours (via `05`) |
-| `--gx-axis-title-font-size` / `-font-weight` | `11px` / `700` | A-impl | Vega `guide-title: { fontSize: 11, fontWeight: 'bold' }` |
+| `--gx-axis-title-font-size` / `-font-weight` | **`12px`** / `700` | **B** / A-impl | ⚠ **Size changed from Vega's 11px and demoted from A-impl.** At 11px it tied with `--gx-label-font-size: 11px`, making `DESIGN.md:123`'s ordering (`axis label ≤ legend < axis title`) unsatisfiable for *any* legend value. Vega's own scale keeps the gap open at `guide-label: 10`; taking the label to 11 (tier B) closed it. Weight unchanged: Vega `guide-title: { fontWeight: 'bold' }`. `42-typography.md` §2 |
+| `--gx-legend-label-font-size` / `-font-weight` | `11px` / `500` | B / B | Was referenced (§ inventory) but never specified. Set to rank D's size, separated from it by weight — a legend has its own region and needs no size to distinguish it. `42-typography.md` §2.1 |
 | `--gx-axis-title-padding` | `4px` | A-impl | Vega `axis.titlePadding: 4` (Spectrum 16) |
 | `--gx-title-font-size` / `-font-weight` | `13px` / `700` | A-impl | Vega `group-title: { fontSize: 13, fontWeight: 'bold' }` (Spectrum 18) |
 | `--gx-title-offset` | `4px` | A-impl | Vega `title.offset: 4` (Spectrum 10) |

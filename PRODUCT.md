@@ -27,6 +27,8 @@ Frontend/app developers who embed charts and dashboard widgets into their own pr
 
 A chart + grid widget library where a chart changes **what information it shows**, not just its pixel dimensions, as the space it's given changes ("the responsive ladder"). Paired with deep, per-widget, CSS-level control (~183 named tokens) over every stroke, gap, tick, and colour. Success looks like: a widget dragged smaller becomes a genuinely different, honest chart rather than an unreadable shrunken one, and any single widget can be restyled from a stylesheet with no JS and no re-render.
 
+⚠ **Six of those tokens are the exception, and the exception is load-bearing.** `font-family`, `font-size`, `font-weight`, `font-feature-settings`, `font-stretch`, and `letter-spacing` change the outcome of a fit-or-collide decision, so overriding them in CSS alone would let the planner keep predicting labels fit while the browser collides them (`research/41-text-metrics.md` §2). They are authored as typed values and their custom properties are *generated* from those values, so the two cannot drift. Everything else — every colour, length, opacity, dash, radius — restyles from CSS exactly as claimed.
+
 ## Positioning
 
 The combination of three things, none of which coexist elsewhere in the charting field (per `research/00-decisions.md` and `raw/06`):
@@ -60,9 +62,9 @@ A from-scratch, standalone public open-source npm project — not derived from o
   - `react` (`<AutoChart>`, tooltips, crosshairs, brushing, clickable legends) is the only client-only (`"use client"`) layer.
   - `grid` is the 12-column dashboard shell; it only ever reports box size to a widget, it never decides what the widget shows. Per-widget minimum sizes are a deliberate addition Basedash lacks.
 - **No DOM measurement in the planner.** `planChart()` may not call `getComputedTextLength`, `getBBox`, `getTotalLength`, or `getBoundingClientRect`; text width comes from a character-advance table. Non-negotiable because jsdom throws and happy-dom silently returns `0` on all four, which would let broken label-collision layouts pass tests forever.
-- **Two token mechanisms, never mixed:** CSS custom properties drive *presentation* only (server can't read them); anything that changes what `planChart()` decides is a typed value through a `<GxConfig>` component, so server and client always agree.
+- **Two token mechanisms, never mixed:** CSS custom properties drive *presentation* only (server can't read them); anything that changes what `planChart()` decides is a typed value through a `<GxConfig>` component, so server and client always agree. ⚠ The split runs by **consequence, not by token name** — the test is *"does this token's value change the outcome of a fit-or-collide decision?"* Six do, all text-measurement properties (`research/41-text-metrics.md` §2); their custom properties are generated from the typed values rather than authored alongside them.
 - **ESM-only**, `tsdown` with `unbundle: true` (the only tested config where `"use client"` survives the build) — protected by a CI job that builds a real Next.js app and greps the output.
-- **Undecided, not to be invented:** the project name and npm scope (currently `@gx/*` placeholder — blocks publishing, not code); 51 `--gx-*` token names referenced but not yet specified; 6 token defaults the research explicitly declined to guess at.
+- **Undecided, not to be invented:** the project name and npm scope (currently `@gx/*` placeholder — blocks publishing, not code); 43 `--gx-*` token names referenced but not yet specified; 6 token defaults the research explicitly declined to guess at; the six neutral-theme hex values, which are derivable at B1 rather than guessable; and whether Roboto Flex ships `tnum`, which blocks generating the metrics table.
 
 ## Brand Commitments
 
@@ -73,8 +75,8 @@ Load-bearing commitments. Full statements and their reasoning live in `DESIGN.md
 - **Every series hue is a real named emission line at a stated wavelength**, computed wavelength → CIE 1931 XYZ → linear sRGB → OKLCH. Hue is inherited from the physics and is not adjustable; a hue with no wavelength behind it does not enter the palette.
 - **Colour is signal.** Charcoal is the default state of every surface; colour applied to something that does not encode a value is a defect.
 - **Hue carries series identity for at most six series** — measured, not assumed. Past six, dash pattern and point shape take over. Hue *and* dash *and* point shape are active simultaneously by default: redundancy is the system's normal operating mode, not an accessibility toggle a consumer switches on.
-- **No shadows, no glows, no blurs, no translucency, no gradients, no corner radius.** Absent, not softened. Depth is communicated only by 1px hairlines and by ground value.
-- **Stroke weights increase as a widget gets smaller** — a deliberate, documented divergence from Adobe Spectrum, which verifiably scales them down (`research/00-decisions.md`, "What the provenance tier does and does not mean").
+- **No shadows, no glows, no blurs, no translucency, no gradients, no corner radius.** Absent, not softened. Depth is communicated only by 1px hairlines and by ground value. ⚠ Shadows and corner radius are **Rail-only** — the neutral theme restores both, which is what the escape hatch is for; the elevation tokens exist as *names* in both themes precisely so a class can swap them (`research/43-theming.md` §3.2). **Gradients are the exception to the exception**: banned in every theme, because the reason is semantic — a gradient encodes a value that varies where no value varies — and a semantic ban does not relax into a stylistic preference.
+- **Stroke weights increase as a widget gets smaller** — a deliberate, documented divergence from Adobe Spectrum, which verifiably scales them down (`research/00-decisions.md`, "What the provenance tier does and does not mean"). ⚠ Unlike shadows and corners, this one is **cross-theme**: it exists for a legibility reason, not a visual one, so the neutral theme keeps it. That is the general test — *every divergence that exists for a measurement or legibility reason is cross-theme; every divergence that exists for a visual reason is Rail-only* (`research/43-theming.md` §7).
 
 ⚠ The palette's own acceptance criteria — the 4.5 contrast floor and the ΔE separation targets — are **this project's own choices and carry no external authority** (`DESIGN.md:247`). No minimum-contrast or minimum-colour-separation threshold exists anywhere in the research. Cite them as ours.
 
@@ -104,7 +106,7 @@ No real product screenshots, testimonials, pricing, or deployment exist yet — 
 
 1. Deciding what to draw (`planChart()`, pure and data-only) is strictly separated from drawing it (`<Chart>`, hook-free) — nearly every other architectural choice follows from this split.
 2. A chart at a small size is a different, honest chart, not a shrunken one. Size boundaries come from published perception research, not taste — and every threshold ships labelled with where it actually came from, including when it's our own invention.
-3. Every visual property is controllable per-widget from ordinary CSS with zero re-render; anything that would make the server and the client disagree is deliberately kept out of that mechanism.
+3. Every visual property is controllable per-widget from ordinary CSS with zero re-render; anything that would make the server and the client disagree is deliberately kept out of that mechanism — which is why the six text-measurement properties are typed values with generated custom properties rather than plain CSS.
 4. Reuse hard, already-solved problems (d3 for scales/shapes, `react-grid-layout/core` for collision and compaction) rather than reinventing them, so effort concentrates on the genuinely novel parts.
 5. Prove the idea on the smallest possible slice before building breadth — one chart type, fully working end-to-end, before more chart types, more tokens, or the grid shell.
 

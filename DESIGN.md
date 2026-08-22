@@ -120,9 +120,13 @@ Five ranks, taken from the world's own plate and mapped to chart roles. Rank is 
 | D | Align | Axis labels, tick labels |
 | E | Index | Data labels, annotations, footnotes |
 
-Sizes ascend in the order: data label < axis label ≤ legend < axis title < chart title. Exact sizes are `[to be resolved during implementation]`.
+Sizes ascend in the order: data label < axis label ≤ legend < axis title < chart title. **Resolved** (`research/42-typography.md` §2.1): A Display 13px/700 · B Title 12px/700 · C Signal 11px/500 · D Align 11px/400 · E Index 10px/400. Four distinct sizes for five ranks; C and D share a size and separate by weight, which is what the `≤` was left open for.
 
-The typeface pairing is `[to be resolved during implementation]`. The requirement it must satisfy: a variable grotesque with true tabular figures and a genuine optical-size axis. The world's specimen plate calls for `VAR OPTICAL`, and `font-optical-sizing: auto` is expected to be on globally so that small labels thicken correctly rather than being scaled-down large type.
+⚠ Rank sets size; **placement** sets weight. Text drawn over a mark or a filled region carries extra weight for legibility against a non-ground background — which is why data labels (rank E) ship at 700, matching Highcharts and Spectrum independently, without being promoted in the reading hierarchy.
+
+The typeface is **Roboto Flex** (`research/41-text-metrics.md` §4). The requirement it satisfies: a variable grotesque with a genuine optical-size axis. Its `opsz` axis runs **8–144**, verified against Google Fonts `METADATA.pb`; Inter was rejected because its `opsz` bottoms out at 14 and our entire label range (11px default, 10px floor) sits below it, where `font-optical-sizing: auto` clamps and does nothing — precisely where this requirement was written to apply. Roboto Flex also carries a `GRAD` axis, which Inter lacks; see the note on landmark emphasis below. `font-optical-sizing: auto` is on globally so that small labels thicken correctly rather than being scaled-down large type.
+
+⚠ **`tnum` support in Roboto Flex is UNVERIFIED.** The Tabular Rule below depends on it. The Roboto Flex README documents no OpenType features at all, and `METADATA.pb` lists axes, not features. Resolve by inspecting the released variable font's `GSUB` table before the metrics table is generated — this blocks generation, not merely documentation.
 
 **The Tabular Rule.** Numbers that a reader will compare vertically or that update in place get `tabular-nums`; running prose does not. Axis tick labels, data labels, and any value that animates between states are tabular — proportional figures make a column of numbers ragged and make an updating value jitter. Applying `tabular-nums` globally is the opposite error and is equally wrong.
 
@@ -189,6 +193,8 @@ Depth is communicated by exactly two means:
 
 There are no cards. A grouping is made by a hairline boundary and by spacing, never by a raised or floating surface. Elevation tokens exist in name only and resolve to nothing — a widget cannot opt into a shadow.
 
+⚠ **A widget cannot; a theme can.** Keeping the elevation token *names* alive while resolving them to nothing is what lets the neutral escape-hatch theme resolve them to real shadows by swapping one class (`research/43-theming.md` §3.2). It is the only reason to name a token that resolves to nothing. The consequence for the token tree: `--gx-elevation-*` and `--gx-*-corner-radius` must exist as names in **both** themes — a token defined in one theme only cannot be swapped by a class.
+
 ---
 
 ## Shapes
@@ -233,17 +239,30 @@ Point shapes carry series identity alongside hue (circle, square, triangle, diam
 - Don't express a size-boundary deadband in fixed pixels if one proves necessary. It must be a percentage of the boundary: 8px means very different things at a 120px boundary and a 1200px one.
 - Don't assert a minimum legible font size as though it were published.
 
+⚠ **Which of these Don'ts survive a theme switch.** This document specifies the *default* theme, and a
+neutral escape-hatch theme ships alongside it (`research/43-theming.md`). The test for whether a rule
+crosses the boundary is **why it exists**, not how strongly it is worded:
+
+| Crosses into the neutral theme | Rail-only |
+|---|---|
+| redundant encoding · no hue alone past six · never equal lightness · the Separate Alarm Rule · Conceal Means Gone · `tabular-nums` per role · no CSS variable into `planChart()` · everything through a token · **no gradients** · stroke weights increasing as size decreases | shadows · corner radius · the Left-Edge State Rule · the cool charcoal ramp · emission-line hue derivation |
+
+The gradient ban sits on the left because its reason is semantic — *a gradient encodes a value that
+varies where no value varies* — and a semantic ban does not relax into a stylistic preference. The
+Zero-Shadow and Square Corner rules sit on the right because their reasons are about this world's
+look. Stroke weight sits on the left because it is legibility, not taste.
+
 ### Unresolved at seed time
 
 Recorded so they are not quietly invented later:
 
-- Typeface pairing, exact type sizes, and the line-height scale.
+- ~~Typeface pairing, exact type sizes, and the line-height scale.~~ **Resolved** — Roboto Flex, the A–E scale above, and `--gx-label-line-spacing: 1.2em` (`research/41-text-metrics.md` §4, `research/42-typography.md` §2.1 and §4.3). ⚠ The line-spacing value is **Tier C**, invented: Talbot's 1.5em is a *horizontal* label-spacing finding and citing it for leading would be borrowed authority.
 - Spacing scale steps and the rail's exact offset.
 - Motion *easing* curves. Durations are settled (300ms rescale / 1000ms mark movement); `--gx-motion-easing` is one of six token defaults the research explicitly declined to guess at, and it must not be given a Tier A label for looking plausible. The other five: the `--gx-axis-translate` half-pixel default, Spectrum's named dash-ramp arrays, `--gx-widget-gap`, `--gx-plot-border-width`, and `--gx-line-join` — where ECharts verifiably ships `bevel`, contradicting the intuitive `round`.
 - Sequential and diverging ramps for continuous data.
-- 51 token names are referenced by the research but not yet specified; each needs a row or deletion before the token tree ships.
+- 43 token names are referenced by the research but not yet specified; each needs a row or deletion before the token tree ships. (Was 51; `research/42-typography.md` §4 specified eight of them.)
 - Whether animation alone smooths the family boundaries is an open empirical question. If dragging still flickers after transitions ship, a deadband follows — as a percentage, per the rule above.
-- Two token names disagree across research sections and must be reconciled to one (`--gx-axis-label-landmark-weight` vs `--gx-label-landmark-weight`).
+- The typeface's `tnum` support is unverified — see the note under Typography. The Tabular Rule depends on it, and it blocks metrics-table generation rather than merely documentation.
 - No minimum-contrast or minimum-colour-separation threshold exists anywhere in the research. The 4.5 contrast floor and the ΔE separation targets used to derive this palette are **this project's own choices** and carry no external authority.
 - The Okabe-Ito hex values and ColorBrewer's colour-blind-safe flags remain unverified against primary sources; neither is relied on for any value in this document.
 - The project itself is still unnamed, and the `--gx-*` token prefix is a placeholder.

@@ -50,7 +50,7 @@ size + dataShape + overrides ──▶ planChart() ──▶ ChartPlan ──▶
 | ⚠ `@gx/core` may not call **any DOM measurement API** — `getComputedTextLength`, `getBBox`, `getTotalLength`, `getBoundingClientRect` | Text width comes from a character-advance model instead. Required for the server path, and the only way the ladder is testable: jsdom throws on all of these and happy-dom returns `0` for all of them. See §6a. |
 | `@gx/primitives` may not import `react-dom`, may not use state/effects/refs | Keeps the RSC path real. Allowed hooks: `useMemo`, `useCallback`, `useId` only — verified present in React 19's `react-server` build. |
 | Only `@gx/react` and `@gx/grid` carry `"use client"` | One boundary, declared once, in the two packages that genuinely need it. `react-grid-layout@2.2.4` ships none of its own, so `@gx/grid` must supply it. |
-| No package emits a raw hex, rgb, hsl, or `px` literal in CSS | Enforced by the ported token lint gate. |
+| No package emits a raw hex, rgb, hsl, or `px` literal in CSS | Enforced by the ported token lint gate, with one narrow allowlist: the theme source files of `@gx/tokens`, and only in custom-property declaration values (`43-theming.md` §6.1). CI asserts the gate both passes there and *fails* on a planted hex elsewhere. |
 
 **Why a `@gx/charts-*` package per chart type is *not* in this graph:** it was in the original
 sketch, but per-type packages fragment the plan resolver, which needs a single switch over chart
@@ -86,15 +86,22 @@ type DataShape = {
 };
 
 // The output. Plain, serialisable, snapshot-testable, hand-authorable.
-type ChartPlan = { /* see 10-responsive-ladder.md for the full field list */ };
+// Full field list: 40-chart-plan.md §3–§4.
+type ChartPlan = { /* … */ };
 
 function planChart(
   type: ChartType,
   ctx: SizeContext,
   shape: DataShape,
-  overrides?: PlanOverrides,
+  policy?: Partial<PlanPolicy>,   // thresholds + fontMetrics; applied BEFORE resolution
+  overrides?: PlanOverrides,      // DeepPartial<ChartPlan>; forced AFTER resolution
 ): ChartPlan;
 ```
+
+⚠ `policy` and `overrides` were previously one argument. They are separated because they apply at
+different times, and merging them makes `aggregateAfter` ambiguous — as policy it is a threshold the
+resolver consults, as an override it is a decided value the resolver may not revise. See
+`40-chart-plan.md` §5.
 
 `DataShape` rather than the data itself is deliberate: it keeps the resolver cheap, keeps it pure,
 and means a plan can be computed server-side from metadata alone.
@@ -106,11 +113,16 @@ Cascading, highest wins — modelled on Vega-Lite's `config` cascade:
 ```
 1. library defaults
 2. theme-level overrides         <GxConfig charts={{ line: { ... } }}>
-3. per-chart props               <Chart plan={{ legend: 'hidden' }}>
-4. planFn                        <Chart planFn={(p, ctx) => ({ ...p, aggregateAfter: 5 })}>
+3. per-chart props               <Chart plan={{ legend: { placement: 'absent' } }}>
+4. planFn                        <Chart planFn={(p, ctx) => ({ ...p, aggregate: { after: 5 } })}>
 ```
 
 `planFn` last so an escape hatch can always see and amend the fully-resolved plan.
+
+⚠ Both examples were `legend: 'hidden'` / `aggregateAfter: 5` at seed time. `'hidden'` is not a
+placement — it is a *visibility*, and the Conceal Means Gone rule (`DESIGN.md:233`) forbids hiding
+a dropped element rather than removing it, so the shorthand named the one behaviour the system bans.
+The settled shapes are `LegendPlan` and `AggregatePlan`, `40-chart-plan.md` §4.4 and §4.8.
 
 #### ⚠ The token split — corrected against `raw/07` §8.6
 
@@ -124,8 +136,24 @@ The fix is a rule about which tokens exist in which mechanism:
 
 | Class | Examples | Mechanism | May feed `planChart()`? |
 |---|---|---|---|
-| **Presentation tokens** | stroke width, colour ramp, corner radius, font family, gap, transition duration | **CSS custom properties.** Consumed by the render tree as `var(--gx-*)` at paint time. | **Never.** |
-| **Plan-input tokens** | `tick-target-spacing`, `plot-height-saturation`, `categories-max-radial`, `aggregate-after`, minimum cell size | **TypeScript token objects**, passed through `<GxConfig>` or props. Plain serialisable values. | **Yes — only these.** |
+| **Presentation tokens** | stroke width, colour ramp, corner radius, gap, transition duration, `GRAD` | **CSS custom properties.** Consumed by the render tree as `var(--gx-*)` at paint time. | **Never.** |
+| **Plan-input tokens** | `tick-target-spacing`, `plot-height-saturation`, `categories-max-radial`, `aggregate-after`, minimum cell size, **`fontMetrics`** | **TypeScript token objects**, passed through `<GxConfig>` or props. Plain serialisable values. | **Yes — only these.** |
+
+⚠ **Corrected: `font-family` was previously listed as a presentation token, and that was wrong.**
+The test is not "is this visual?" but **"does this value change the outcome of a fit-or-collide
+decision?"** Six tokens do: `font-family`, `font-size`, `font-weight`, `font-feature-settings`,
+`font-stretch`, and `letter-spacing`. All are plan inputs. A consumer who swapped `--gx-font-family`
+for a wider face under the old classification would move rendered text width while the planner kept
+its built-in advance table — the plan says the labels fit, the browser collides them, and nothing in
+the system can detect it. Full argument: `41-text-metrics.md` §2.
+
+`GRAD` is the one font axis that stays presentation: it is verified to change typographic colour
+without changing advance widths, which is why landmark emphasis uses it instead of `font-weight`
+(`41-text-metrics.md` §3, `42-typography.md` §3).
+
+To avoid two sources of truth, the CSS custom properties for those six are **generated from** the
+typed token objects by `@gx/tokens`. One authored value, two emitted forms. Overriding the generated
+CSS variable directly is the documented footgun.
 
 **Rule: tokens may drive presentation, never plan inputs.** A presentation token can change freely,
 client-side, per-widget, without the plan knowing — that is exactly the granular control the product
@@ -159,9 +187,11 @@ animation second, deadband only if flicker is still observable in practice. If w
 must be a **fraction of the boundary width (~2–3%)**, not an absolute — 8 px means very different
 things at a 120 px boundary and a 1200 px one.
 
-**Consequence for the contract:** if animation is sufficient, `planChart()` stays a pure function of
-size alone with no `prevClass` — simpler, and server and client stay identical. Decide empirically
-during Milestone A, not now.
+**Consequence for the contract — settled:** `planChart()` **is** a pure function of size alone, with
+no `prevClass`. `ChartPlan` has no such field and `SizeContext` gains none. Containment prevents the
+true loop (a deadband only slows one), animation converts flicker into smear, and §6a makes purity
+load-bearing for testability as well as for the server path. Revisit only if flicker is still
+observable at A5 — and then as `PlanPolicy`, so the resolver stays pure. `40-chart-plan.md` §9.
 
 **Test that protects this:** drag every chart type across every rung boundary and assert the
 `ResizeObserver` loop error never fires.
@@ -220,7 +250,7 @@ Other settled points:
 - **Pin TypeScript 6.0.3, not the 7.0.2 latest.** TanStack Table, TanStack Query and Base UI all pin
   6.0.3, and tsdown itself warns that TS 7 support is experimental.
 - `"sideEffects": ["*.css"]` on any package shipping CSS; `false` elsewhere.
-- Token lint gate (rejects raw hex/rgb/hsl colours, raw `px` values, and gradients; requires `var(--...)`) written on day one.
+- Token lint gate (rejects raw hex/rgb/hsl colours, raw `px` values, and gradients; requires `var(--...)`) written on day one. Allowlist and both-directions CI assertion: `43-theming.md` §6.
 - Corroboration that this is a real stack and not a bet: TanStack Table 9 and TanStack Query 5 both
   build on tsdown@0.22.14 today; Mantine is on Rolldown 1.1.4.
 - **`react-grid-layout@2.2.4` emits no `"use client"` anywhere in its published output** — confirming
@@ -304,7 +334,11 @@ exists to remove.
    succeeds *and* grep the output for the directive.
 4. **Tree-shaking assertion** (§6e) — converts "import one chart, ship one chart" into a gate.
 5. **Public-API surface test** (§6e) — the `ts-morph` walk for missing/forbidden exported types.
-6. **Token lint gate** — rejects raw hex/rgb/hsl colours, raw `px` values, and gradients; requires `var(--...)`.
+6. **Token lint gate** — rejects raw hex/rgb/hsl colours, raw `px` values, and gradients; requires
+   `var(--...)`. Allowlisted only in `packages/tokens/src/themes/**/*.css`, and only in
+   custom-property declaration values (`43-theming.md` §6.1). ⚠ Run in **both** directions: a gate
+   never observed to fail is a job that exits 0. ⚠ It is CSS-only, so an SVG presentation attribute
+   in TSX (`<line stroke="#ddd" />`) slips through — see §6.2 there for the A1 decision that closes it.
 7. **`@gx/core` imports nothing from React** — a one-line dependency-cruiser rule protecting the
    single most valuable property in the architecture.
 
@@ -617,7 +651,7 @@ Playwright test per chart type, both contexts, same baseline.
 2. **Token prefix.** `--gx-*` placeholder; pending `raw/06-design-tokens-widgets.md` §6.
 3. ~~Hysteresis validation~~ — ✅ resolved in §3.3 against `raw/05`. Containment first, animation
    second, deadband only if flicker survives both.
-4. **Whether `prevClass` in the resolver is worth the purity cost.** Now leaning strongly *no*: §6a
-   makes purity load-bearing for testability as well as for the server path. Decide empirically in
-   Milestone A; the bar for reintroducing state is now higher than it was.
+4. ~~Whether `prevClass` in the resolver is worth the purity cost~~ — ✅ **resolved: no.** Settled in
+   §3.3 and `40-chart-plan.md` §9. `planChart()` ships pure. Revisit only if A5 shows flicker, and
+   then via `PlanPolicy` rather than resolver state.
 5. ✅ Build stack — resolved in §5. ✅ Test stack — resolved in §6.

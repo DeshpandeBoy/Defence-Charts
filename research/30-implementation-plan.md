@@ -26,12 +26,28 @@ That is why it comes first.
 - **Declare every peer dependency explicitly.** With `unbundle: true` and an undeclared peer,
   Rolldown silently inlines `react/jsx-runtime` into the output.
 - Write the token lint gate (rejects raw hex/rgb/hsl colours, raw `px` values, and gradients). Day one, not later —
-  it is much harder to retrofit token discipline than to start with it.
-- CI: typecheck, lint, token gate, test. Nothing else yet.
+  it is much harder to retrofit token discipline than to start with it. Three things it needs that
+  no seed document specified, all now in `43-theming.md` §6:
+  - **The allowlist**, which is narrow in two dimensions at once — `packages/tokens/src/themes/**/*.css`,
+    and *only* as the value of a `--gx-*` custom-property declaration. `color: #b4e4fd;` stays rejected
+    even inside the tokens file; the gradient ban has no allowlist at all. Without this the gate fails
+    on the tokens package on the day it is mandated.
+  - **A planted raw hex in a non-allowlisted package**, asserted to fail CI. A gate never observed to
+    fail is not a gate.
+  - ⚠ **A decision on SVG presentation attributes.** `<line stroke="#ddd" />` in `@gx/primitives` is
+    not CSS and stylelint will not see it. Recommendation: primitives carry no visual attributes at
+    all and take everything from classes — the same discipline that makes per-widget CSS theming work.
+    Decide it here; a gate with a known hole is worse than a documented absence.
+- CI: typecheck, lint, token gate (both directions), test. Nothing else yet.
 - Decide the name and claim the npm scope. **Blocking for publish, not for code.**
 
 ### A2. `@gx/core` types
-- `SizeContext`, `DataShape`, `ChartPlan`, `ChartType`, `PlanOverrides`.
+- `SizeContext`, `DataShape`, `ChartPlan`, `ChartType`, `PlanOverrides`, `PlanPolicy`, `FontMetrics`.
+  **`ChartPlan` is fully specified in `40-chart-plan.md` §3–§4** — field list, per-field provenance
+  tier, and the six line/area rungs hand-authored — so A2 transcribes a settled contract rather than
+  inventing one under scaffolding pressure. `planChart()` takes **five** parameters:
+  `(type, ctx, shape, policy?, overrides?)`; `policy` carries thresholds *and* `fontMetrics`, applied
+  before resolution, and `overrides` is forced after it.
 - `resolveSizeClass()` — the six size families, anchored to the published plot-height boundaries
   (6 / 24 / 40 / 80 px), not to invented numbers.
 - `measureText()` from a **character-advance model** (font-size × per-character metrics table). ⚠ Now
@@ -39,6 +55,18 @@ That is why it comes first.
   `getTotalLength` or `getBoundingClientRect`. jsdom throws on all of them; happy-dom returns `0` for
   all of them, which silently means *"every label fits"* — a label-collision test would pass forever
   while shipping the bug. See `20-architecture.md` §6a.
+- ⚠ **The metrics table is a plan input, not a hidden constant** (`41-text-metrics.md`). Six CSS
+  properties change the outcome of a fit-or-collide decision — `font-family`, `font-size`,
+  `font-weight`, `font-feature-settings`, `font-stretch`, `letter-spacing` — so all six are typed
+  values on `PlanPolicy`, and `@gx/tokens` *generates* their CSS custom properties from those typed
+  objects. One authored value, two emitted forms; a consumer cannot move one without the other.
+  Signature: `measureText(text, rank, metrics, letterSpacing?)`. The table is keyed **by type rank**
+  (A–E), not by font size, because the scale ships weights 400/500/700 and `wght` changes advances.
+- ⚠ **Two things block table generation, not merely documentation** (`41-text-metrics.md` §4.1, §4.2):
+  whether Roboto Flex actually ships `tnum` (inspect `GSUB` on the released TTF — `fonttools ttx -t GSUB`),
+  and the `safetyFactor`, which must be calibrated against the fallback stack the library will
+  actually hit (SF, Segoe UI Variable, Roboto, DejaVu Sans) because the library must not ship the font.
+  Where `measureText()` is inexact it must err **wide**.
 - No React anywhere. Enforced by a dependency-boundary lint rule, not by convention.
 
 ### A3. `planChart()` for line/area only
