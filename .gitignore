@@ -1,0 +1,43 @@
+# --- Agent tooling (vendored by `npx impeccable install`) ---
+# Nine near-identical ~3.4MB copies of the same installed skill, one per
+# agent harness. Reproducible with `npx impeccable install`; not project source.
+.agent/
+.agents/
+.claude/
+.codex/
+.cursor/
+.gemini/
+.kiro/
+.pi/
+
+# --- Impeccable working state ---
+# .impeccable/world/ and decision-payload.json are deliberately NOT ignored:
+# the board and hero images are the visual reference DESIGN.md is built on,
+# and the payload records how that world was chosen.
+.impeccable/questions/
+.impeccable/live/
+.impeccable/cache/
+
+# --- Node / build (nothing here yet; Milestone A1 will need it) ---
+node_modules/
+dist/
+build/
+.turbo/
+*.tsbuildinfo
+.next/
+coverage/
+.vitest/
+playwright-report/
+test-results/
+
+# --- Env / secrets ---
+.env
+.env.*
+!.env.example
+
+# --- OS / editor ---
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/

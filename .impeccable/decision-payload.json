@@ -1,0 +1,228 @@
+{
+  "title": "Choose the visual world for the chart library",
+  "question": "The roll assigned The Vienna Method (ISOTYPE). Keep it, take an alternate, or re-roll.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "The Vienna Method",
+      "kicker": "THE ROLL",
+      "lineage": "Otto Neurath & Gerd Arntz, ISOTYPE / Gesellschafts- und Wirtschaftsmuseum Wien, 1925-1940",
+      "thesis": "The founding doctrine of this field already states our product thesis: a sign is never made bigger to show a larger quantity — you repeat the sign. More space buys more information, never a bigger picture. The library ships as the modern instrument of that 1925 rule, and refuses the category default of a white card, an 8px radius, a 20%-grey hairline and a blue-first ramp.",
+      "palette": [
+        "#c1272d",
+        "#1b4f9c",
+        "#e5a400",
+        "#1f7a4d",
+        "#141414",
+        "#fbfbf9"
+      ],
+      "materials": [
+        "flat linocut colour, no modelling",
+        "hard edges, zero shadow, zero gradient",
+        "silhouette as the primary channel",
+        "printed register marks and rules"
+      ],
+      "viewport": "A widget at each rung of the ladder, laid out as one plate: Micro is a single monumental numeral, Tile adds one repeated unit-sign of trend, Strip becomes a bare line on a baseline, Panel gains its axis and gridline, Canvas its direct labels, Stage its callouts and its data table. Every rung is a finished statement in flat colour, none is a shrunken version of the one after it. No card chrome anywhere; the plate itself is the frame.",
+      "risk": "Flat saturated colour at page scale is unfamiliar in developer tooling and will read as opinionated. If the palette is applied as accents on a neutral ground instead of as fields, it collapses into the category default wearing a nicer palette.",
+      "raised": [
+        {
+          "from": "challenger-emission-rail",
+          "raise": "Redundant encoding becomes law, not a setting: every series carries hue AND dash AND shape simultaneously, never hue alone, and every mark registers against one declared baseline rail. Arntz's pictograms already differ by silhouette before they differ by colour; the rail makes that discipline mechanical."
+        },
+        {
+          "from": "challenger-six-pack",
+          "raise": "The alert channel is locked shut against the categorical sequence: caution amber and alarm red are a separate namespace no series colour may ever enter, so 'series 5 is red' can never collide with 'red means error'. And every rung that states a value also states its direction of travel."
+        },
+        {
+          "from": "challenger-deep-dive",
+          "raise": "Each size family publishes what it cannot honestly encode, not only what it shows — the way red simply stops being available at depth. Below 40px of plot height the y-axis is not shrunk, it is declared unavailable."
+        },
+        {
+          "from": "challenger-terminal-yellow",
+          "raise": "A concealed element is gone, never greyed, and each rung re-signs itself completely rather than diffing the rung below — the way a wayfinding panel drops a closed route entirely and restates the whole decision after every turn."
+        },
+        {
+          "from": "challenger-j-card",
+          "raise": "Every rung declares a hard ink budget and admits content only if the budget covers it, the way a side of tape is timed to fill exactly and must not overflow."
+        },
+        {
+          "from": "challenger-sneaker-wall",
+          "raise": "The Micro rung is designed to be read in a column of siblings, as an index entry on a shelf edge, never as an isolated specimen."
+        }
+      ],
+      "board": "https://impeccable.style/worlds/cards/operate-c-emission-line-rail.webp"
+    },
+    {
+      "id": "model-pick",
+      "label": "The Admiralty Chart",
+      "kicker": "IMPECCABLE'S PICK",
+      "lineage": "nautical charts and aeronautical sectionals; cartographic generalisation",
+      "thesis": "Cartography solved our exact problem centuries ago: a harbour chart and a coastal chart of the same water show genuinely different information, not the same information at two zooms. The ladder is generalisation, and this world names it.",
+      "palette": [
+        "#d6197d",
+        "#0d5c8a",
+        "#8fd4e8",
+        "#1a1a1a",
+        "#ffffff"
+      ],
+      "materials": [
+        "magenta overprint",
+        "flat water tints",
+        "hairline isobaths",
+        "sounding numerals set tight"
+      ],
+      "viewport": "One widget shown at three scales side by side, the way a chart catalogue shows its sheet coverage: each scale carrying its own soundings, its own labels, its own hazards.",
+      "risk": "It is a spatial grammar borrowed for non-spatial data. Isobaths, soundings and overprint all imply geography, and a bar chart wearing them invites a reading the data does not support. Also the closest world on this table to the one I would have picked unprompted, which is exactly why the roll refused it."
+    },
+    {
+      "id": "challenger-emission-rail",
+      "label": "The Emission-Line Rail",
+      "verdict": "competitive",
+      "lineage": "glass spectrograms; emission spectroscopy plates",
+      "thesis": "A charcoal continuum crossed by hairlines at seven named wavelengths, where state is line height, dash and doubling — never hue.",
+      "palette": [
+        "#2b2b2e",
+        "#e8e4d9",
+        "#7b5cff",
+        "#3fd4c8",
+        "#ffd166"
+      ],
+      "materials": [
+        "procedural banded continuum",
+        "1px absolutely-placed emission lines",
+        "graphite matting"
+      ],
+      "viewport": "Every widget as a plate hanging off one off-centre calibrated rail, open plates blooming, closed ones staying hairline stubs.",
+      "case": "Holds audience identification — spectroscopy is quantitative display and this audience reads it fluently — and its 'state is line form, not hue' rule is Okabe-Ito CUD rule 1 stated as a visual system. Loses product clarity: this library must ship a 6-to-12 hue categorical palette where colour IS the series channel, and a world that bans hue as a state channel fights its own token tree.",
+      "risk": "Charcoal-only forecloses the light theme this library must ship as a first-class peer.",
+      "board": "https://impeccable.style/worlds/cards/operate-c-emission-line-rail.webp",
+      "hero": "https://impeccable.style/worlds/cards/operate-c-emission-line-rail-hero.webp"
+    },
+    {
+      "id": "challenger-six-pack",
+      "label": "The Night Instrument Six-Pack",
+      "verdict": "competitive",
+      "lineage": "small-aircraft night instrument panels",
+      "thesis": "Six luminous gauges, each owning one truth, read in a practiced cross-check sweep with nothing visible outside the glass.",
+      "palette": [
+        "#0a0a0a",
+        "#e8e8e0",
+        "#7fff9f",
+        "#ffb000",
+        "#e02b2b"
+      ],
+      "materials": [
+        "matte black panel",
+        "luminous markings",
+        "damped needle physics"
+      ],
+      "viewport": "A dashboard as a fixed constellation of gauges, each showing trend as well as value, stacking by criticality on narrow screens.",
+      "case": "Holds audience identification decisively — the word dashboard comes from this world and developers building one identify with it instantly. Its 'every gauge shows trend as well as value' is our Tile rung verbatim, and its reserved caution channel is our alert-namespace rule. Loses product clarity: radium-green on near-black is a dark-only world that cannot host twelve categorical hues or a first-class light theme.",
+      "risk": "Skeuomorphic gauges are a strong pull toward drawing dials the library does not ship.",
+      "board": "https://impeccable.style/worlds/cards/signals-instruments-night-flight-six-pack.webp",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-night-flight-six-pack-hero.webp"
+    },
+    {
+      "id": "challenger-deep-dive",
+      "label": "The Mesophotic Descent",
+      "verdict": "competitive",
+      "lineage": "technical deep diving down a volcanic island wall",
+      "thesis": "Depth stages as the ladder: warm red drains away at forty metres and the instrument tells you so, rather than pretending the channel is still there.",
+      "palette": [
+        "#04121f",
+        "#0a3d5c",
+        "#2fb8d4",
+        "#f2f5f7"
+      ],
+      "materials": [
+        "ground deepening by stage",
+        "marine-snow particle texture",
+        "one thermocline band"
+      ],
+      "viewport": "A vertical profile where each size family is a depth stage, with one axis ruling every line of the interface.",
+      "case": "Holds product clarity: the stage model is a genuine analogue for the six size families, and 'the last warm red drains at forty metres' is our 40px no-y-axis threshold rendered as a physical fact. Loses audience identification: frontend developers do not identify with technical diving, and an abyssal ground forces dark-only.",
+      "risk": "Atmosphere-first worlds tempt gradients and glow, both of which this library's own lint gate rejects.",
+      "board": "https://impeccable.style/worlds/cards/rivers-tides-ocean-depths-mesophotic-deep-dive.webp"
+    },
+    {
+      "id": "challenger-terminal-yellow",
+      "label": "Terminal Yellow Wayfinding",
+      "verdict": "declined",
+      "lineage": "international airport sign systems",
+      "palette": [
+        "#ffd400",
+        "#000000",
+        "#ffffff"
+      ],
+      "materials": [
+        "hung panel bands",
+        "edge-locked arrows"
+      ],
+      "case": "Loses both axes. Yellow reserved for one purpose starves a library whose deliverable is a twelve-hue categorical palette, and a wayfinding grammar reads as navigation rather than quantitative display.",
+      "kept": "Each rung re-signs itself completely rather than diffing the rung below, and a concealed element drops off entirely instead of greying out.",
+      "hero": "https://impeccable.style/worlds/cards/wayfinding-cartography-signage-terminal-yellow-wayfinding-hero.webp"
+    },
+    {
+      "id": "challenger-j-card",
+      "label": "The Mixtape J-Card",
+      "verdict": "declined",
+      "lineage": "hand-lettered cassette inlays",
+      "palette": [
+        "#2b4b9b",
+        "#ffffff",
+        "#c8102e"
+      ],
+      "materials": [
+        "ballpoint on lined inlay stock",
+        "folded flap"
+      ],
+      "case": "Loses both axes. Handwriting destroys tabular figures and 10px label legibility, which is the entire substance of a chart's type, and a folded-sheet topology has nothing to say about a resizable grid.",
+      "kept": "A rung declares a hard budget and admits content only if the budget covers it, the way a side is timed to fill exactly and must not overflow.",
+      "hero": "https://impeccable.style/worlds/cards/vernacular-ephemera-cassette-j-card-hero.webp"
+    },
+    {
+      "id": "challenger-sneaker-wall",
+      "label": "The Sneaker Archive Wall",
+      "verdict": "declined",
+      "lineage": "stacked shoeboxes read by their end labels",
+      "palette": [
+        "#d4622a",
+        "#1a1a1a",
+        "#faf7f2"
+      ],
+      "materials": [
+        "box board",
+        "one-line silhouette art",
+        "tissue interiors"
+      ],
+      "case": "Loses both axes. Hinging lids and 3D transforms are decoration for a library that renders SVG on a server with zero JavaScript, and the end-label grid is generic once the box is removed.",
+      "kept": "The smallest rung is designed to be read in a column of siblings, as an index entry on a shelf edge.",
+      "hero": "https://impeccable.style/worlds/cards/textiles-weave-drape-fashion-sneaker-box-stacks-hero.webp"
+    }
+  ],
+  "canon": true,
+  "canonCard": {
+    "label": "The category standard",
+    "thesis": "What a charting library ships: a white card, an 8px radius, a soft shadow, a light-grey hairline grid, a blue-first categorical ramp and a neutral UI sans. Executed impeccably rather than ironically.",
+    "palette": [
+      "#ffffff",
+      "#111827",
+      "#2563eb",
+      "#e5e7eb"
+    ],
+    "materials": [
+      "elevated card",
+      "hairline grid",
+      "neutral UI sans"
+    ],
+    "viewport": "A tidy dashboard of rounded white cards, each holding a chart, exactly as the field expects.",
+    "risk": "Indistinguishable from Recharts, Nivo and Tremor by design — which for a library whose entire pitch is that it is different is the one risk that touches the product's claim."
+  },
+  "reroll": {
+    "registers": [
+      "safer",
+      "bolder"
+    ]
+  },
+  "steer": true
+}
