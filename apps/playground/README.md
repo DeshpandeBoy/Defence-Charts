@@ -23,36 +23,61 @@ That seam is the architecture, and this page is where you can watch it hold:
 - **The ladder** — which of the six size families the current footprint resolves to, and
   what the line/area ladder says renders at that rung.
 - **`SizeContext`** — the resolver's first input, in full.
-- **Published thresholds** — 6 / 24 / 40 / 80 px, and which the current height clears.
-  These are findings, not preferences; each one is why a boundary sits where it does.
+- **Published thresholds** — 6 / 24 / 40 / 80 px, and which the current **plot** height
+  clears. These are findings, not preferences; each one is why a boundary sits where it
+  does. The widget height is shown beside it, and the gap between the two is the chrome.
 - **`tickCountForWidth()`** — `max(2, round(width / 100))`, with no upper cap.
+- **`planChart()`** — the resolved `ChartPlan`, as formatted JSON, recomputed on every
+  resize. Chart type and series count are controls, because both change the plan and
+  neither is a size.
 - **`measureText()`** — the predicted width drawn as a bar behind the string the browser
   actually laid out, so the current table's over-estimate is a thing you can see.
 
+## The two things to actually watch
+
+**The plot height, not the widget height.** The thresholds are compared against what is
+left after the value region, x-axis band and legend band take their share. That vertical
+chain is **Tier B** — ours, consistent with the corpus but not drawn from it, because the
+published work fixes only the horizontal order. Drag until a threshold flips and the plan
+above it changes in the same frame.
+
+**The fingerprint returns.** Drag out past a boundary and back in: the hash beside the plan
+must land on exactly the value it had before. A plan is a pure function of size and shape
+with no memory of approach direction — gate **G10** asserts it in CI, and this is the same
+claim with your hand on the handle. Hysteresis is deliberately absent (§9); if it ever
+creeps back in as a "small fix", this is where you would see it first.
+
 ## What is deliberately missing
 
-**There is no chart.** `planChart()` lands at **A3** and the renderer at **A4**. Drawing a
-placeholder would make the playground look further along than the library is, which is the
-one thing a progress view must not do. What exists today is A2: the plan contract, size
-classification, and text measurement.
+**There is still no chart.** The renderer lands at **A4**. Drawing a placeholder would make
+the playground look further along than the library is, which is the one thing a progress
+view must not do. What exists today is `@gx/core` through **A3**: the plan contract, size
+classification, text measurement, and the resolver that turns the first two into a
+decision. The JSON panel is what a renderer would be handed.
 
-## Two open questions this page makes visible rather than hides
+Chart types other than line and area are missing for the same reason — `planChart()`
+**throws** for them rather than falling back to a plan it cannot justify.
 
-1. **Nominal cell size.** `resolveSizeClass()` takes grid *cells*, because that is the unit
-   the published ladder is written in. A chart rendered outside a dashboard grid has no
-   cells, and no document in the corpus says what one pixel-derived cell is worth. Rather
-   than pick a number that would quietly harden into a default, the conversion is a slider
-   you have to move by hand. See `packages/core/src/context.ts` and
-   `research/40-chart-plan.md` §11.
+## The remaining open question this page makes visible
 
-2. **`PROVISIONAL_FONT_METRICS` over-estimates, and by how much is on screen.** The default
-   table ships zero per-character coverage and a ~1 em latin fallback band — an honest upper
-   bound, not an average dressed up as one. It is blocked on `research/41-text-metrics.md`
-   §4.1 and §4.2. The consequence: labels will degrade earlier than they should, and any A3
-   snapshot involving `maxChars` or `axisLabelDegrade` is provisional.
+Standalone charts now use `sizeContextFromPixels()` and its exported 100 px nominal-cell
+default. The number is explicitly **Tier C** — project-owned and configurable, not dressed
+up as a research finding. Grid-owned charts bypass it and pass their real footprint.
 
-   The "this browser" figure beside it is one machine with one set of installed fonts. It is
-   an illustration, **not** the calibration §4.2 needs.
+**Which face is actually painting, and therefore what the ratio means.** The metrics table
+is real now — measured offline from a content-pinned Roboto Flex by
+`scripts/generate-font-metrics.mjs` — and it ships with `safetyFactor: 1.57`, the widest
+advance ratio observed across the reachable fallback faces. The panel shows two ratios
+because they answer different questions: `over-estimate` includes that margin and must
+never drop below `1.00×`, and `margin divided out` removes it, showing how closely the
+table tracks the glyphs this browser chose.
+
+The playground does not bundle the reference face — `research/41-text-metrics.md` §7 keeps
+font files out of the build — so on most machines this reads a fallback, and the panel says
+which. That is a fair test of the safety factor and **not** a test of the table: one
+browser on one machine with one set of installed fonts is an illustration, and §4.2's
+controlled `fonttools` pass is the calibration. Segoe UI Variable stays **UNVERIFIED**:
+Windows-only, unobtainable here, and never estimated.
 
 ## Gate coverage
 

@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { resolveAspect, resolveSizeClass } from './context.ts'
+import {
+  DEFAULT_NOMINAL_CELL_SIZE,
+  resolveAspect,
+  resolveSizeClass,
+  sizeContextFromPixels,
+} from './context.ts'
 import type { SizeClass } from './plan.ts'
 
 /**
@@ -171,5 +176,62 @@ describe('resolveAspect', () => {
     // `square` specifically because it is the band that triggers no special handling.
     // Falling back to `ultrawide` would make a 0-height widget try to facet.
     expect(resolveAspect(width, height)).toBe('square')
+  })
+})
+
+describe('sizeContextFromPixels', () => {
+  it('uses the exported 100 px Tier C default', () => {
+    expect(DEFAULT_NOMINAL_CELL_SIZE).toBe(100)
+    expect(sizeContextFromPixels(300, 300)).toMatchObject({
+      width: 300,
+      height: 300,
+      cols: 3,
+      rows: 3,
+      aspect: 'square',
+      sizeClass: 'panel',
+    })
+  })
+
+  it.each([
+    [100, 100, 'micro'],
+    [200, 100, 'tile'],
+    [300, 100, 'strip'],
+    [300, 300, 'panel'],
+    [600, 500, 'canvas'],
+    [900, 600, 'stage'],
+  ] as const)('%i×%i px maps to %s at the default cell size', (width, height, expected) => {
+    expect(sizeContextFromPixels(width, height).sizeClass).toBe(expected)
+  })
+
+  it('accepts an explicit nominal cell size', () => {
+    expect(sizeContextFromPixels(300, 300, 50)).toMatchObject({
+      cols: 6,
+      rows: 6,
+      sizeClass: 'canvas',
+    })
+  })
+
+  it('caps a standalone footprint at twelve columns', () => {
+    expect(sizeContextFromPixels(5000, 800).cols).toBe(12)
+  })
+
+  it.each([
+    [0, 100, 100],
+    [100, 0, 100],
+    [Number.NaN, 100, 100],
+    [100, 100, 0],
+    [100, 100, Number.POSITIVE_INFINITY],
+  ])('collapses a degenerate %p×%p box or %p px cell to Micro', (width, height, cell) => {
+    expect(sizeContextFromPixels(width, height, cell)).toMatchObject({
+      cols: 0,
+      rows: 0,
+      sizeClass: 'micro',
+    })
+  })
+
+  it('returns a frozen, serialisable value', () => {
+    const context = sizeContextFromPixels(640, 480)
+    expect(Object.isFrozen(context)).toBe(true)
+    expect(JSON.parse(JSON.stringify(context))).toStrictEqual(context)
   })
 })

@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest'
 
+import { ROBOTO_FLEX_METRICS } from './font-metrics.generated.ts'
 import type { FontMetrics, GlyphAdvances, TypeRank } from './text.ts'
-import { measureText, PROVISIONAL_FONT_METRICS, RANK_FONT_SIZE } from './text.ts'
+import { DEFAULT_TYPOGRAPHY, measureText, RANK_FONT_SIZE } from './text.ts'
 
 /**
  * A deliberately tiny, fully-known table, so every assertion below is arithmetic rather
@@ -19,7 +20,12 @@ function tableWith(advances: Record<string, number>): GlyphAdvances {
 
 const TEST_METRICS: FontMetrics = {
   family: 'test',
-  generatedWith: { featureSettings: "'tnum' 1", variationSettings: '', opticalSizing: 'none' },
+  generatedWith: {
+    featureSettings: "'tnum' 1",
+    variationSettings: '',
+    opticalSizing: 'none',
+    stretch: 'normal',
+  },
   byRank: {
     A: tableWith({ i: 0.2, W: 0.9, '0': 0.6 }),
     B: tableWith({ i: 0.2, W: 0.9, '0': 0.6 }),
@@ -202,44 +208,103 @@ describe('measureText', () => {
   })
 })
 
-describe('PROVISIONAL_FONT_METRICS', () => {
-  // ⚠ These tests pin the *shape* and the *error direction* of the placeholder. They do
-  // not validate its numbers, because it has none worth validating — it is a typed hole
-  // until `research/41-text-metrics.md` §4.1 and §4.2 are closed.
-
-  it('announces itself as unverified in the family name', () => {
-    // The family string is the only thing a developer sees in a debugger, so it says so
-    // there rather than only in a comment.
-    expect(PROVISIONAL_FONT_METRICS.family).toMatch(/UNVERIFIED/)
+describe('DEFAULT_TYPOGRAPHY', () => {
+  it('keeps every fit-sensitive input and its metrics together', () => {
+    expect(DEFAULT_TYPOGRAPHY).toMatchObject({
+      family: expect.any(String),
+      featureSettings: ROBOTO_FLEX_METRICS.generatedWith.featureSettings,
+      stretch: ROBOTO_FLEX_METRICS.generatedWith.stretch,
+      opticalSizing: ROBOTO_FLEX_METRICS.generatedWith.opticalSizing,
+      metrics: ROBOTO_FLEX_METRICS,
+    })
   })
 
-  it('ships no per-character coverage at all', () => {
-    // An empty table is honest. A partial one would measure common characters precisely and
-    // everything else at the fallback, producing a width that looks calibrated and is not.
+  /**
+   * ⚠ The pairing above is the whole safety property, so it is worth saying what breaks
+   * without it. `FontMetrics` describes advances measured *under a specific rendering
+   * configuration*. Author `featureSettings` here as a literal and someone can change the
+   * CSS without regenerating the table; the planner then measures one rendering and the
+   * browser draws another, and every label is off by an amount nothing reports. Reading
+   * both from one object means there is nothing to keep in sync.
+   */
+  it('does not author the feature settings separately from the table', () => {
+    expect(DEFAULT_TYPOGRAPHY.featureSettings).toBe("'tnum' 1")
+    expect(DEFAULT_TYPOGRAPHY.featureSettings).not.toBe('normal')
+  })
+
+  it('is the source of the rank-size compatibility view', () => {
     for (const rank of ['A', 'B', 'C', 'D', 'E'] as const satisfies readonly TypeRank[]) {
-      expect(Object.keys(PROVISIONAL_FONT_METRICS.byRank[rank].advances)).toHaveLength(0)
+      expect(RANK_FONT_SIZE[rank]).toBe(DEFAULT_TYPOGRAPHY.byRank[rank].fontSize)
     }
   })
 
-  it('errs wide: no Latin character measures narrower than its own font size', () => {
-    // ⚠ §6.1 — *"where measureText() is inexact, it must err wide."* The latin band is
-    // ~1 em, an upper bound on the widest common Latin glyph, so every measurement is a
-    // genuine over-estimate rather than an average dressed up as one.
-    for (const ch of 'iWl0@ .') {
-      expect(measureText(ch, 'C', PROVISIONAL_FONT_METRICS)).toBeGreaterThanOrEqual(
-        RANK_FONT_SIZE.C,
-      )
+  it('is frozen through every authored rank', () => {
+    expect(Object.isFrozen(DEFAULT_TYPOGRAPHY)).toBe(true)
+    expect(Object.isFrozen(DEFAULT_TYPOGRAPHY.byRank)).toBe(true)
+    for (const style of Object.values(DEFAULT_TYPOGRAPHY.byRank)) {
+      expect(Object.isFrozen(style)).toBe(true)
+    }
+  })
+})
+
+describe('ROBOTO_FLEX_METRICS', () => {
+  // ⚠ `scripts/generate-font-metrics.test.mjs` checks the *generator*. These check the
+  // shipped constant — the thing `measureText()` actually reads — for the two properties
+  // the resolver depends on and a generator change could quietly drop.
+
+  it('names the face it was measured from, so a debugger shows it', () => {
+    // The predecessor of this constant was a placeholder whose family string read
+    // `UNVERIFIED — no table generated`. That string was the only place the hole was
+    // visible at runtime, and this is its replacement: a real face name means a real table.
+    expect(ROBOTO_FLEX_METRICS.family).toBe('Roboto Flex')
+    expect(ROBOTO_FLEX_METRICS.family).not.toMatch(/UNVERIFIED/)
+  })
+
+  it('covers every rank with a real per-character table', () => {
+    // ⚠ Per rank, not once. Optical sizing and weight both move advances, so a table that
+    // covered rank C and fell back to a band for rank D would produce a width that looks
+    // calibrated and is not — precisely what the placeholder refused to fake.
+    for (const rank of ['A', 'B', 'C', 'D', 'E'] as const satisfies readonly TypeRank[]) {
+      expect(Object.keys(ROBOTO_FLEX_METRICS.byRank[rank].advances).length).toBeGreaterThan(60)
     }
   })
 
-  it('does not stack a second conservative factor on top of a worst-case band', () => {
-    // The band is already an upper bound. A safetyFactor above 1 would compound two
-    // over-estimates into a width no layout could satisfy.
-    expect(PROVISIONAL_FONT_METRICS.safetyFactor).toBe(1)
+  it('the five ranks are genuinely different tables, not one table copied', () => {
+    // If the generator ever collapsed to a single measurement pass, every rank would agree
+    // and every assertion above would still pass.
+    const widths = (['A', 'B', 'C', 'D', 'E'] as const).map(
+      (rank) => ROBOTO_FLEX_METRICS.byRank[rank].advances['M'],
+    )
+    expect(new Set(widths).size).toBeGreaterThan(1)
+  })
+
+  /**
+   * ⚠ §6.1 — *"where `measureText()` is inexact, it must err **wide**."* With a real
+   * advance table the guarantee no longer comes from a worst-case band; it comes from
+   * `safetyFactor`, calibrated against the reachable fallback faces. A value below 1 would
+   * turn every measurement into a potential collision, and it is exactly the kind of number
+   * a well-meaning "the labels look too spaced out" change would reach for first.
+   */
+  it('errs wide by calibration rather than by band', () => {
+    expect(ROBOTO_FLEX_METRICS.safetyFactor).toBeGreaterThan(1)
+    expect(ROBOTO_FLEX_METRICS.safetyFactor).toBe(1.57)
+  })
+
+  it('a measured string comes out wider than the bare advances predict', () => {
+    // The safety factor is applied, not merely stored. A generator that emitted the field
+    // while `measureText` ignored it would pass every test above.
+    const bare = [...'Revenue'].reduce(
+      (sum, ch) => sum + (ROBOTO_FLEX_METRICS.byRank.C.advances[ch] ?? 0),
+      0,
+    )
+    expect(measureText('Revenue', 'C', ROBOTO_FLEX_METRICS)).toBeCloseTo(
+      bare * RANK_FONT_SIZE.C * ROBOTO_FLEX_METRICS.safetyFactor,
+      6,
+    )
   })
 
   it('is frozen, so a consumer cannot mutate the shared default in place', () => {
-    expect(Object.isFrozen(PROVISIONAL_FONT_METRICS)).toBe(true)
+    expect(Object.isFrozen(ROBOTO_FLEX_METRICS)).toBe(true)
   })
 })
 

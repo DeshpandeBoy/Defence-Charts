@@ -100,10 +100,9 @@ const FAMILY_MINIMA = [
  * explain where the cell boundaries fall rather than replacing them. Plot height in px
  * refines decisions *within* a rung (see `SizeContext`), it does not choose the rung.
  *
- * ⚠ **Open**: a chart rendered outside a grid has no cells. `@gx/react` will have to
- * derive a nominal footprint from px, and the nominal cell size for that conversion is
- * not yet specified anywhere in the corpus. Flagged rather than invented — see
- * `research/40-chart-plan.md` §11.
+ * A chart rendered outside a grid gets a virtual footprint from
+ * `sizeContextFromPixels()`. Its nominal cell size is an explicit Tier C policy rather
+ * than a second, hidden size ladder.
  *
  * Pure: no measurement, no state, no clock.
  *
@@ -123,6 +122,48 @@ export function resolveSizeClass(cols: number, rows: number): SizeClass {
     if (c >= family.cols && r >= family.rows) return family.sizeClass
   }
   return 'micro'
+}
+
+/**
+ * Nominal square cell used by standalone charts. **C** — ours and unsourced.
+ *
+ * Exported so `<AutoChart>` can expose the default and a consumer can replace it without
+ * recreating the conversion. Grid-owned charts never use this value; their real `w`/`h`
+ * footprint remains authoritative.
+ */
+export const DEFAULT_NOMINAL_CELL_SIZE = 100
+
+/**
+ * Measured pixels → complete standalone `SizeContext`.
+ *
+ * The virtual grid is capped at twelve columns to preserve the dashboard model. Rows are
+ * intentionally unbounded: `resolveSizeClass()` already saturates at Stage, while raw
+ * height remains available for within-rung planning.
+ */
+export function sizeContextFromPixels(
+  width: number,
+  height: number,
+  nominalCellSize = DEFAULT_NOMINAL_CELL_SIZE,
+): SizeContext {
+  const measurable =
+    Number.isFinite(width) &&
+    Number.isFinite(height) &&
+    Number.isFinite(nominalCellSize) &&
+    width > 0 &&
+    height > 0 &&
+    nominalCellSize > 0
+
+  const cols = measurable ? Math.min(12, Math.floor(width / nominalCellSize)) : 0
+  const rows = measurable ? Math.floor(height / nominalCellSize) : 0
+
+  return Object.freeze({
+    width,
+    height,
+    cols,
+    rows,
+    aspect: resolveAspect(width, height),
+    sizeClass: resolveSizeClass(cols, rows),
+  })
 }
 
 /**

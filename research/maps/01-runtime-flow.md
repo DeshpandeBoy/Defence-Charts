@@ -88,7 +88,7 @@ an override it is a decided value the resolver is forbidden to revise.
 
 ```mermaid
 flowchart LR
-    p["<b>PlanPolicy</b><br/>thresholds + fontMetrics"] -->|"BEFORE<br/>resolution"| r(("planChart&#40;&#41;"))
+    p["<b>PlanPolicy</b><br/>thresholds + atomic typography"] -->|"BEFORE<br/>resolution"| r(("planChart&#40;&#41;"))
     r -->|"AFTER<br/>resolution"| o["<b>PlanOverrides</b><br/>DeepPartial&lt;ChartPlan&gt;"]
     o --> plan["ChartPlan"]
 

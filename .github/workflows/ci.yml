@@ -87,3 +87,7 @@ jobs:
       - name: Gate G3 — "use client" survives the build, and only where it should
         if: '!cancelled()'
         run: pnpm lint:boundary
+
+      - name: Gate G17 — fitting typography CSS matches its typed plan input
+        if: '!cancelled()'
+        run: pnpm lint:typography

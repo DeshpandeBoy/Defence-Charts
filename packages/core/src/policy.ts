@@ -17,8 +17,8 @@
 
 import type { DataShape, SizeContext } from './context.ts'
 import type { ChartPlan, ChartType } from './plan.ts'
-import type { FontMetrics } from './text.ts'
-import { PROVISIONAL_FONT_METRICS } from './text.ts'
+import type { FittingTypography } from './text.ts'
+import { DEFAULT_TYPOGRAPHY } from './text.ts'
 
 /**
  * **INPUT** to `planChart()`. Plan-input tokens per `research/20-architecture.md` §3.2 —
@@ -27,7 +27,7 @@ import { PROVISIONAL_FONT_METRICS } from './text.ts'
  * ⚠ The class boundary is the whole point of decision 10. These values change what the
  * resolver *decides*, so they cannot travel as CSS: the resolver does not read the
  * cascade, and a value it cannot read cannot be one it depends on. Presentation tokens
- * (colour, radii, `font-family`) go the other way — CSS only, never an input here.
+ * (colour and radii) go the other way — CSS only, never an input here.
  *
  * Every field carries its provenance tier. A-lit is published and cited; B is ours and
  * consistent with the corpus; C is ours and unsourced. The tiers are not decoration —
@@ -92,29 +92,44 @@ export type PlanPolicy = {
    * attached to the wrong finding is worse than an admitted gap, because it stops anyone
    * from checking.
    *
-   * ⚠ Unrelated to grid-cell geometry despite the name — see the open question on
-   * `resolveSizeClass` in `./context.ts`, which is a *different* missing number.
+  * ⚠ Unrelated to grid-cell geometry despite the name — standalone grid geometry uses
+  * `DEFAULT_NOMINAL_CELL_SIZE` in `./context.ts`, a different Tier C number.
    */
   readonly minCellSize: number
 
   /**
-   * The character-advance table (`research/41-text-metrics.md`).
+   * Fraction of the box the value region may claim, `0..1`. **C** — ours, unsourced.
    *
-   * ⚠ A plan input rather than a hidden constant, because six CSS properties change the
-   * outcome of a fit-or-collide decision. A consumer who overrides `--gx-font-family` with
-   * a wider face and *cannot* also move the metrics gets a planner that says the labels fit
-   * while the browser collides them. Moving one without the other is the supported footgun;
-   * it is named in `research/20-architecture.md` §3.2 rather than prevented, because
-   * preventing it would mean the resolver reading CSS.
+   * ⚠ **Added at A3, and it amends `research/40-chart-plan.md` §5.** The §5 list has no
+   * such field because §5 predates the vertical-layout question, which A3 discovered:
+   * the Tile rung picks its mark by measured plot height, plot height needs the value
+   * region's height, and the value region asks for `valueTypeScale: 'fit'`.
+   *
+   * ⚠ Resolving `'fit'` as **a budget rather than a type size** is what closes §11 item 2
+   * (*"Until `FontMetrics` exists, `'fit'` is unimplementable"*). The band is decided from
+   * the box alone; the renderer then fits type within it. Nothing measures a value string
+   * at plan time, so no metrics table is required and the region provably cannot grow the
+   * box. See `./layout.ts`.
+   *
+   * A share rather than a px figure so it degrades sensibly at every rung instead of
+   * starving the small ones.
    */
-  readonly fontMetrics: FontMetrics
+  readonly valueRegionMaxShare: number
+
+  /**
+   * All six fit-sensitive typography values plus the character-advance table measured
+   * under them (`research/41-text-metrics.md`). Replaced whole so a caller cannot move the
+   * rendered font while leaving the planner's table behind.
+   */
+  readonly typography: FittingTypography
 }
 
 /**
  * **APPLIED AFTER** resolution. Forced values, deep-partial.
  *
  * ⚠ Unions are **atomic** here — see `DeepPartial`. You may not half-override a
- * discriminated union.
+ * discriminated union. A *nullable object* is the one exception, and it is not really one:
+ * `axes.y2` takes a partial because `null` is not a variant a key could have belonged to.
  */
 export type PlanOverrides = DeepPartial<ChartPlan>
 
@@ -132,10 +147,29 @@ export type PlanOverrides = DeepPartial<ChartPlan>
  * ⚠ **Arrays are replaced whole too.** `regionOrder` is an order; a partial order is not a
  * weaker order, it is a different one.
  *
+ * ⚠ **`null` is stripped before the union test, and that distinction is the whole subtlety.**
+ * `AxisPlan | null` is a union by `IsUnion`'s reckoning, so the rule above would make
+ * `axes.y2` atomic and forbid `{ y2: { visible: true } }` outright. But the reason unions are
+ * atomic does not apply to it: a partial `LegendPlan` is ambiguous about *which variant* it is
+ * completing, whereas a partial `AxisPlan | null` can only be completing the one object member
+ * — `null` is not a shape a key can belong to. `./overrides.ts` merges such a patch onto a
+ * declared base (`NULL_BASE_DEFAULTS`) and gets a total `AxisPlan` back, which is the
+ * behaviour A3 settled on after finding that atomicity *"protects a field from a bad merge;
+ * it does not make a partial total."* This clause is what stops the type from forbidding it.
+ *
+ * The weakening is exactly as narrow as that argument. `Exclude<T, null>` removes `null` and
+ * nothing else, and whatever remains still faces the union test — so `MarkSpec | null`, were
+ * it ever to exist, would stay atomic and merely gain its `| null` back.
+ *
  * The `[T] extends [...]` brackets suppress distribution — without them the conditional
  * splits the union apart before `IsUnion` can observe that it was one.
  */
-export type DeepPartial<T> = [T] extends [readonly unknown[]]
+export type DeepPartial<T> = null extends T
+  ? DeepPartialOf<Exclude<T, null>> | null
+  : DeepPartialOf<T>
+
+/** `DeepPartial` with the nullable case already peeled off. Not exported; see above. */
+type DeepPartialOf<T> = [T] extends [readonly unknown[]]
   ? T
   : IsUnion<T> extends true
     ? T
@@ -169,10 +203,9 @@ export type PlanChartFn = (
  * published result (Heer & Bostock 2010, p < 0.001) rather than expressing taste. The C
  * numbers are genuinely open and may be moved freely.
  *
- * ⚠ `fontMetrics` defaults to `PROVISIONAL_FONT_METRICS`, which is a **typed hole, not a
- * measurement** — see its docblock in `./text.ts`. Every width it reports is a deliberate
- * over-estimate, so any label-degradation behaviour observed against this default is
- * provisional.
+ * ⚠ `typography.metrics` is a **typed hole, not a measurement** — see its docblock in
+ * `./text.ts`. Every width it reports is a deliberate over-estimate, so any
+ * label-degradation behaviour observed against this default is provisional.
  */
 export const DEFAULT_POLICY: PlanPolicy = Object.freeze({
   tickTargetSpacing: 100,
@@ -189,16 +222,16 @@ export const DEFAULT_POLICY: PlanPolicy = Object.freeze({
   pointBudget: 2000,
   substitute: true,
   minCellSize: 8,
-  fontMetrics: PROVISIONAL_FONT_METRICS,
+  valueRegionMaxShare: 0.5,
+  typography: DEFAULT_TYPOGRAPHY,
 }) satisfies PlanPolicy
 
 /**
  * `DEFAULT_POLICY` merged with a caller's partial.
  *
- * ⚠ Shallow by design. Every `PlanPolicy` field is a scalar except `fontMetrics`, and
- * `fontMetrics` must be replaced whole rather than merged: a table half from the reference
- * face and half from somewhere else describes no real font, and `generatedWith` would then
- * describe only part of its own table. That is the `tnum` trap wearing a different hat.
+ * ⚠ Shallow by design. `typography` must be replaced whole rather than merged: styles
+ * from one face and a table from another describe no real rendered text. That is the
+ * `tnum` trap wearing a different hat.
  */
 export function resolvePolicy(policy?: Partial<PlanPolicy>): PlanPolicy {
   if (policy === undefined) return DEFAULT_POLICY

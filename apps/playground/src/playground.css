@@ -343,6 +343,28 @@ code {
   font-variant-numeric: var(--gx-numeric-variant);
 }
 
+/* --- The resolved plan --------------------------------------------------------------- */
+
+.plan-json {
+  /*
+   * Tall enough that a rung change is visible without scrolling, capped so the panel below
+   * it stays reachable while you drag. Scrolls rather than truncating: a plan with a hidden
+   * tail is exactly the "looks complete, isn't" shape this project keeps naming.
+   */
+  max-height: 22rem;
+  margin: calc(var(--gx-gap) * 2) 0 0;
+  padding: calc(var(--gx-gap) * 1.5);
+  overflow: auto;
+  border: 1px solid var(--pg-rule);
+  border-radius: var(--gx-corner-radius);
+  background: var(--pg-recede);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: var(--gx-annotation-font-size);
+  line-height: 1.5;
+  color: var(--pg-fg-dim);
+  tab-size: 2;
+}
+
 /* --- Prose -------------------------------------------------------------------------- */
 
 .note {

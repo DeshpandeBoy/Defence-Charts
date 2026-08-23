@@ -95,7 +95,7 @@ function planChart(
   type: ChartType,
   ctx: SizeContext,
   shape: DataShape,
-  policy?: Partial<PlanPolicy>,   // thresholds + fontMetrics; applied BEFORE resolution
+  policy?: Partial<PlanPolicy>,   // thresholds + atomic typography; applied BEFORE resolution
   overrides?: PlanOverrides,      // DeepPartial<ChartPlan>; forced AFTER resolution
 ): ChartPlan;
 ```
@@ -139,7 +139,7 @@ The fix is a rule about which tokens exist in which mechanism:
 | Class | Examples | Mechanism | May feed `planChart()`? |
 |---|---|---|---|
 | **Presentation tokens** | stroke width, colour ramp, corner radius, gap, transition duration, `GRAD` | **CSS custom properties.** Consumed by the render tree as `var(--gx-*)` at paint time. | **Never.** |
-| **Plan-input tokens** | `tick-target-spacing`, `plot-height-saturation`, `categories-max-radial`, `aggregate-after`, minimum cell size, **`fontMetrics`** | **TypeScript token objects**, passed through `<GxConfig>` or props. Plain serialisable values. | **Yes — only these.** |
+| **Plan-input tokens** | `tick-target-spacing`, `plot-height-saturation`, `categories-max-radial`, `aggregate-after`, minimum cell size, **atomic fitting typography + `FontMetrics`** | **TypeScript token objects**, passed through `<GxConfig>` or props. Plain serialisable values. | **Yes — only these.** |
 
 ⚠ **Corrected: `font-family` was previously listed as a presentation token, and that was wrong.**
 The test is not "is this visual?" but **"does this value change the outcome of a fit-or-collide
@@ -153,9 +153,10 @@ the system can detect it. Full argument: `41-text-metrics.md` §2.
 without changing advance widths, which is why landmark emphasis uses it instead of `font-weight`
 (`41-text-metrics.md` §3, `42-typography.md` §3).
 
-To avoid two sources of truth, the CSS custom properties for those six are **generated from** the
-typed token objects by `@gx/tokens`. One authored value, two emitted forms. Overriding the generated
-CSS variable directly is the documented footgun.
+To avoid two sources of truth, `PlanPolicy.typography` replaces all six values and the matching
+metrics atomically, while `@gx/tokens` generates their CSS custom properties from the default object.
+Gate **G17** checks the committed CSS byte-for-byte. One authored value, two emitted forms.
+Overriding a generated CSS variable directly is the documented footgun.
 
 **Rule: tokens may drive presentation, never plan inputs.** A presentation token can change freely,
 client-side, per-widget, without the plan knowing — that is exactly the granular control the product

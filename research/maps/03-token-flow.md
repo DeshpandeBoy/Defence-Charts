@@ -22,7 +22,7 @@ flowchart TD
     end
 
     subgraph plan["PLAN INPUT — typed TS objects"]
-        q1["&lt;GxConfig&gt; provides FontMetrics<br/>+ thresholds"]
+        q1["&lt;GxConfig&gt; provides fitting typography<br/>+ thresholds"]
         q2["PlanPolicy"]
         q3["planChart&#40;&#41;"]
         q4["ChartPlan"]
@@ -59,10 +59,10 @@ plot width. The server has to know them before it can lay anything out.
 
 ```mermaid
 flowchart LR
-    t["<b>Typed FontMetrics object</b><br/>font-family · font-size · font-weight<br/>font-feature-settings · font-stretch · letter-spacing"]
+    t["<b>Atomic fitting typography</b><br/>font-family · font-size · font-weight<br/>font-feature-settings · font-stretch · letter-spacing · metrics"]
     t --> gen["<b>generator</b>"]
     gen --> css["--gx-* custom properties<br/><i>so the browser paints what<br/>the server measured</i>"]
-    gen --> ts["FontMetrics as PlanPolicy input<br/><i>so the server can measure at all</i>"]
+    gen --> ts["Typography as PlanPolicy input<br/><i>so server and CSS measure the same text</i>"]
 
     classDef s fill:#2f1b3d,stroke:#c084fc,color:#f6ecff
     classDef o fill:#123a2a,stroke:#4ade80,color:#eafff3

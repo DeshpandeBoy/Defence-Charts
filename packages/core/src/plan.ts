@@ -315,7 +315,7 @@ export type NarrativePlan = {
    * Type size for the value region: a number in px, or `'fit'` to derive it from the box.
    *
    * ⚠ The only field requiring text measurement at plan time. It resolves through
-   * `measureText()` and the `FontMetrics` plan-input token (`./text.ts`), **never**
+  * `measureText()` and the atomic typography plan input (`./text.ts`), **never**
    * through the DOM (decision 10, gate G2). Containment-safe: type size is derived FROM
    * the box and cannot grow it, provided the value region clips rather than overflows.
    */

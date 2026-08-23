@@ -1,43 +1,42 @@
 import type { SizeContext } from '@gx/core'
 import {
   DEFAULT_POLICY,
-  resolveAspect,
-  resolveSizeClass,
+  DEFAULT_NOMINAL_CELL_SIZE,
+  sizeContextFromPixels,
   tickCountForWidth,
 } from '@gx/core'
 import { useState } from 'react'
 
 import { LadderStrip } from './LadderStrip.tsx'
+import type { PlaygroundChartType } from './PlanPanel.tsx'
+import { PlanPanel, resolveForPlayground } from './PlanPanel.tsx'
 import { TextMetricsPanel } from './TextMetricsPanel.tsx'
 import { useElementSize } from './useElementSize.ts'
 
 /**
  * The resize lab.
  *
- * ⚠ **There is no chart here, and that is not an omission.** `planChart()` lands at A3 and
- * the renderer at A4; what exists today is `@gx/core`'s A2 surface — the plan *contract*,
- * size classification, and text measurement. Drawing a placeholder chart would make the
- * playground look further along than the library is, which is the one thing a progress
- * view must not do.
+ * ⚠ **There is still no chart here, and that is not an omission.** The renderer lands at A4;
+ * what exists today is `@gx/core` through A3 — the plan contract, size classification, text
+ * measurement, and now the resolver that turns the first two into a decision. Drawing a
+ * placeholder chart would make the playground look further along than the library is, which
+ * is the one thing a progress view must not do.
  *
- * What it does show is every input the resolver will consult and every published threshold
- * those inputs cross, live, as you drag the handle.
+ * What it shows is every input the resolver consults, every published threshold those inputs
+ * cross, and the plan it resolves to — live, as you drag the handle.
+ *
+ * ⚠ **The chart type and series count live here, not in `PlanPanel`.** They are plan
+ * *inputs*, exactly like the size this component already owns, and the threshold list needs
+ * the plot box they produce. Two components each resolving their own plan would put two
+ * disagreeing plot heights on one page.
  */
 export function App() {
   const [ref, size] = useElementSize<HTMLDivElement>()
-  const [cellSize, setCellSize] = useState(100)
+  const [type, setType] = useState<PlaygroundChartType>('line')
+  const [series, setSeries] = useState(3)
 
-  const cols = cellSize > 0 ? Math.floor(size.width / cellSize) : 0
-  const rows = cellSize > 0 ? Math.floor(size.height / cellSize) : 0
-
-  const ctx: SizeContext = {
-    width: size.width,
-    height: size.height,
-    cols,
-    rows,
-    aspect: resolveAspect(size.width, size.height),
-    sizeClass: resolveSizeClass(cols, rows),
-  }
+  const ctx: SizeContext = sizeContextFromPixels(size.width, size.height)
+  const resolved = resolveForPlayground(ctx, type, series)
 
   return (
     <main className="lab">
@@ -49,8 +48,8 @@ export function App() {
           by <code>@gx/core</code>, which has never seen the DOM.
         </p>
         <p className="note">
-          Milestone A2. <code>planChart()</code> arrives at A3 and the renderer at A4, so
-          there is deliberately no chart to look at yet.
+          Milestone A3. The renderer arrives at A4, so there is deliberately no chart to look
+          at — only the plan one would be drawn from.
         </p>
       </header>
 
@@ -62,7 +61,7 @@ export function App() {
               {Math.round(size.width)} × {Math.round(size.height)} px
             </span>
             <span>
-              {cols} × {rows} cells · {ctx.aspect}
+              {ctx.cols} × {ctx.rows} cells · {ctx.aspect}
             </span>
           </div>
         </div>
@@ -86,8 +85,8 @@ export function App() {
           <dl className="kv">
             <Row k="width" v={`${size.width.toFixed(1)} px`} />
             <Row k="height" v={`${size.height.toFixed(1)} px`} />
-            <Row k="cols" v={String(cols)} />
-            <Row k="rows" v={String(rows)} />
+            <Row k="cols" v={String(ctx.cols)} />
+            <Row k="rows" v={String(ctx.rows)} />
             <Row k="aspect" v={ctx.aspect} />
             <Row k="sizeClass" v={ctx.sizeClass} />
           </dl>
@@ -95,27 +94,14 @@ export function App() {
 
         <section>
           <h2>Nominal cell size</h2>
-          <label className="control">
-            <input
-              type="range"
-              min={40}
-              max={200}
-              step={5}
-              value={cellSize}
-              onChange={(e) => {
-                setCellSize(Number(e.target.value))
-              }}
-            />
-            <output>{cellSize} px</output>
-          </label>
-          <p className="warn">
-            <strong>This control is an open question, not a feature.</strong>{' '}
-            <code>resolveSizeClass()</code> takes grid <em>cells</em>, because that is what
-            the published ladder is written in. A chart rendered outside a dashboard grid
-            has no cells, and no document in the corpus says what one pixel-derived cell is
-            worth. Rather than pick a number and let it harden into a default, the
-            playground makes the conversion something you have to move by hand — so the gap
-            is visible every time anyone uses it.
+          <dl className="kv">
+            <Row k="standalone default" v={`${DEFAULT_NOMINAL_CELL_SIZE} px`} />
+          </dl>
+          <p className="note">
+            <code>sizeContextFromPixels()</code> converts a standalone chart into a virtual
+            square-cell footprint. The 100 px default is explicitly Tier C: a project-owned,
+            configurable policy rather than a research finding. Dashboard charts bypass it
+            and use the grid’s real columns and rows.
           </p>
         </section>
 
@@ -127,34 +113,50 @@ export function App() {
           </p>
           <ul className="thresholds">
             <Threshold
-              height={size.height}
+              height={resolved.box.height}
               at={DEFAULT_POLICY.horizonMinHeight}
               label="a 2-band horizon is still readable"
               cite="Heer 2009"
             />
             <Threshold
-              height={size.height}
+              height={resolved.box.height}
               at={DEFAULT_POLICY.plotHeightOptimal}
               label="optimal for a line; below this, change encoding"
               cite="Heer 2009"
             />
             <Threshold
-              height={size.height}
+              height={resolved.box.height}
               at={DEFAULT_POLICY.plotHeightMinValues}
               label="below this, value-estimation error rises (p < 0.001)"
               cite="Heer & Bostock 2010"
             />
             <Threshold
-              height={size.height}
+              height={resolved.box.height}
               at={DEFAULT_POLICY.plotHeightSaturation}
               label="little benefit beyond; extra space buys content, not plot"
               cite="Heer & Bostock 2010"
             />
           </ul>
+          <dl className="kv">
+            <Row
+              k="plot box"
+              v={`${resolved.box.width.toFixed(1)} × ${resolved.box.height.toFixed(1)} px`}
+            />
+            <Row k="widget height" v={`${size.height.toFixed(1)} px`} />
+          </dl>
           <p className="note">
-            ⚠ Compared against the <em>widget</em> height here. The real resolver compares
-            against <em>plot</em> height — what is left after axes and labels take their
-            share — which A3 computes and A2 cannot.
+            ⚠ Compared against <em>plot</em> height, which is what the resolver compares
+            against — not the widget height beside it. The difference between those two
+            numbers is everything the chrome takes: the value region, the x-axis band and the
+            legend band, resolved in that fixed order by <code>resolvePlotBox()</code>. A2
+            could only show the widget height and said so; the gap is why that was a
+            placeholder rather than an approximation.
+          </p>
+          <p className="note">
+            ⚠ The vertical chain is <strong>Tier B</strong> — ours, consistent with the
+            corpus but not drawn from it. The published work fixes the <em>horizontal</em>
+            order and is silent on how a widget box becomes a plot box, so these four
+            thresholds are findings being applied to a height of our own construction.
           </p>
         </section>
 
@@ -170,6 +172,14 @@ export function App() {
             watch it step one at a time.
           </p>
         </section>
+
+        <PlanPanel
+          resolved={resolved}
+          type={type}
+          series={series}
+          onType={setType}
+          onSeries={setSeries}
+        />
 
         <TextMetricsPanel />
       </aside>

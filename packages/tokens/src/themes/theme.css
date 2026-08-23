@@ -16,6 +16,7 @@
  */
 
 @layer gx.tokens, gx.theme, gx.overrides;
+@import './typography.css' layer(gx.tokens);
 
 @layer gx.tokens {
   /*
@@ -71,30 +72,10 @@
     --gx-elevation-raised: none;
     --gx-elevation-overlay: none;
 
-    /* --- Typography. research/42-typography.md §4; ranks A through E. --- */
-    --gx-font-family: 'Roboto Flex', 'Roboto Flex Fallback', system-ui, sans-serif;
-    --gx-font-optical-sizing: auto;
-    --gx-numeric-variant: tabular-nums;
-
-    --gx-title-font-size: 13px; /* A  */
-    --gx-title-font-weight: 700;
-    --gx-subtitle-font-size: 12px; /* A− */
-    --gx-subtitle-font-weight: 400;
-    --gx-axis-title-font-size: 12px; /* B  — demoted from A-impl 11px, §2 */
-    --gx-axis-title-font-weight: 700;
-    --gx-legend-label-font-size: 11px; /* C  */
-    --gx-legend-label-font-weight: 500;
-    --gx-label-font-size: 11px; /* D  */
-    --gx-label-font-weight: 400;
+    /* --- Typography. Fit-sensitive values are generated in typography.css. --- */
     --gx-label-font-size-min: 10px;
     --gx-label-landmark-grade: 150; /* GRAD, never wght — wght changes glyph advances
                                        and would invalidate the metrics table */
-    --gx-value-label-font-size: 10px; /* E  */
-    --gx-value-label-font-weight: 700;
-    --gx-annotation-font-size: 10px;
-    --gx-annotation-font-weight: 400;
-
-    --gx-crosshair-label-font-size: 11px;
     --gx-label-line-spacing: 1.2em;
 
     /* --- Spacing. A calc() multiplier is not a length literal — 43-theming.md §6.2. --- */

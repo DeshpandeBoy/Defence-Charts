@@ -53,7 +53,7 @@ architecture with the token lint-gate allowlist** (`43`).
 Four things those documents changed rather than merely added, worth knowing before reading the
 older files:
 
-- **`planChart()` takes five parameters**, not four — `policy` (thresholds *and* `fontMetrics`)
+- **`planChart()` takes five parameters**, not four — `policy` (thresholds and atomic fitting typography)
   applied before resolution, `overrides` forced after.
 - **The presentation / plan-input split runs by consequence, not by token name.** Six text-measurement
   properties are plan inputs; `20-architecture.md` §3.2's table was wrong about `font-family` and is

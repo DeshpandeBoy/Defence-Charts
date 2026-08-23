@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 
+import { ROBOTO_FLEX_METRICS } from './font-metrics.generated.ts'
 import type { PlanOverrides, PlanPolicy } from './policy.ts'
 import { DEFAULT_POLICY, resolvePolicy } from './policy.ts'
-import { PROVISIONAL_FONT_METRICS } from './text.ts'
+import { DEFAULT_TYPOGRAPHY } from './text.ts'
 
 describe('DEFAULT_POLICY', () => {
   describe('the A-lit numbers, which are findings rather than preferences', () => {
@@ -94,10 +95,11 @@ describe('DEFAULT_POLICY', () => {
     })
   })
 
-  it('defaults fontMetrics to the provisional table, and to nothing invented', () => {
+  it('defaults typography to the atomic default with the measured table', () => {
     // ⚠ Identity, not deep equality. Any *other* table in this slot would be numbers we
     // made up, and it would look exactly as authoritative as a measured one.
-    expect(DEFAULT_POLICY.fontMetrics).toBe(PROVISIONAL_FONT_METRICS)
+    expect(DEFAULT_POLICY.typography).toBe(DEFAULT_TYPOGRAPHY)
+    expect(DEFAULT_POLICY.typography.metrics).toBe(ROBOTO_FLEX_METRICS)
   })
 
   it('is frozen, so one consumer cannot move the library default for every other', () => {
@@ -119,7 +121,7 @@ describe('resolvePolicy', () => {
     const resolved = resolvePolicy({ pointBudget: 500 })
     expect(resolved.pointBudget).toBe(500)
     expect(resolved.tickTargetSpacing).toBe(DEFAULT_POLICY.tickTargetSpacing)
-    expect(resolved.fontMetrics).toBe(DEFAULT_POLICY.fontMetrics)
+    expect(resolved.typography).toBe(DEFAULT_POLICY.typography)
   })
 
   it('does not mutate DEFAULT_POLICY', () => {
@@ -131,14 +133,15 @@ describe('resolvePolicy', () => {
     expect(Object.isFrozen(resolvePolicy({ pointBudget: 500 }))).toBe(true)
   })
 
-  it('replaces fontMetrics whole rather than merging it', () => {
-    // ⚠ Shallow on purpose. A table half from the reference face and half from somewhere
-    // else describes no real font, and `generatedWith` would then describe only part of
-    // its own table — the `tnum` trap wearing a different hat.
-    const mine = { ...PROVISIONAL_FONT_METRICS, family: 'Mine', safetyFactor: 1.2 }
-    const resolved = resolvePolicy({ fontMetrics: mine })
-    expect(resolved.fontMetrics).toBe(mine)
-    expect(resolved.fontMetrics.family).toBe('Mine')
+  it('replaces typography whole rather than merging it', () => {
+    const mine = {
+      ...DEFAULT_TYPOGRAPHY,
+      family: 'Mine, sans-serif',
+      metrics: { ...ROBOTO_FLEX_METRICS, family: 'Mine', safetyFactor: 1.2 },
+    }
+    const resolved = resolvePolicy({ typography: mine })
+    expect(resolved.typography).toBe(mine)
+    expect(resolved.typography.metrics.family).toBe('Mine')
   })
 
   it('is pure across repeated calls', () => {
@@ -178,8 +181,34 @@ describe('PlanOverrides — DeepPartial', () => {
     expect(partial).toBeDefined()
   })
 
-  it('requires a TickPlan to name its mode', () => {
-    const whole = { axes: { x: { ticks: { mode: 'count', count: 4 } } } } satisfies PlanOverrides
+  /**
+   * ⚠ The counterweight to the test above, and the pair has to be read together. `AxisPlan |
+   * null` is a union too, so the atomicity rule as first written forbade this — which would
+   * have been the wrong answer, because `null` is not a variant a key could have belonged to
+   * and so a partial here is unambiguous about what it completes. `./overrides.ts` merges it
+   * onto a declared base and returns a total `AxisPlan`.
+   *
+   * Both tests exist because the fix is a *weakening*: without the one above, the weakening
+   * could widen to admit half a `LegendPlan` and nothing would fail.
+   */
+  it('lets a nullable object take a partial, unlike a union of variants', () => {
+    const partial = { axes: { y2: { visible: true } } } satisfies PlanOverrides
+    expect(partial.axes.y2.visible).toBe(true)
+
+    // And `null` survives the weakening — it is a value, not a missing key (§1.4).
+    const off = { axes: { y2: null } } satisfies PlanOverrides
+    expect(off.axes.y2).toBeNull()
+  })
+
+  it('keeps a nullable *union* atomic, so the exception is exactly one clause wide', () => {
+    // `marks.primary` is a `MarkSpec` union. Nullability is not what makes a partial safe —
+    // having a single object member is — so a nullable union must stay whole.
+    // @ts-expect-error — a partial `MarkSpec` is not assignable, with or without a `| null`.
+    const partial = { marks: { primary: { area: true } } } satisfies PlanOverrides
+    expect(partial).toBeDefined()
+  })
+
+  it('requires a TickPlan to name its mode', () => {    const whole = { axes: { x: { ticks: { mode: 'count', count: 4 } } } } satisfies PlanOverrides
     expect(whole.axes.x.ticks.count).toBe(4)
 
     // @ts-expect-error — `count` without `mode` would produce a tick plan nothing can read.

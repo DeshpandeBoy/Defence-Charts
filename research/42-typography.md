@@ -181,8 +181,28 @@ retiring it from the 51-unspecified list.
 |---|---|---|---|
 | `--gx-font-family` | `"Roboto Flex", "Roboto Flex Fallback", system-ui, sans-serif` | **B** · New | Reference face per `41-text-metrics.md` §4; the stack is ours |
 | `--gx-font-optical-sizing` | `auto` | **B** · New | `DESIGN.md:125` — *"expected to be on globally so that small labels thicken correctly"* |
-| `--gx-numeric-variant` | `tabular-nums` | **B** · New | `DESIGN.md:127` Tabular Rule. ⚠ `tnum` support in Roboto Flex is **UNVERIFIED** — `41-text-metrics.md` §4.1 |
+| `--gx-numeric-variant` | `tabular-nums` | **B** · New | `DESIGN.md:127` Tabular Rule. ⚠ Kept for the **fallback** faces, not for Roboto Flex — see below |
+| `--gx-font-feature-settings` | `'tnum' 1` | **B** · New | Same reason. Inert on Roboto Flex, load-bearing on SF |
 | `--gx-font-family-mono` | *(unset)* | — | `raw/06:1424` — optional, for values where a tabular face is unavailable. Unset when `--gx-numeric-variant` works. |
+
+⚠ **Roboto Flex ships no `tnum`, and the Tabular Rule holds anyway.** `41-text-metrics.md` §4.1
+settles this: the released variable TTF's `GSUB` carries `liga`, `locl`, `pnum` and `rvrn` — no
+`tnum`. What makes the rule hold is the `pnum` lookup, which maps `uni0030 → uni0030.prop`. The
+substitution runs *away* from tabular, so the **default** figures are the tabular set: all ten
+digits at `1156/2048` em, measured. Nothing needs to be switched on to get tabular figures on the
+reference face.
+
+So the declaration above is retained for a different reason than the one it was written for. SF —
+the `system-ui` fallback on Apple platforms — ships proportional figures by default (nine distinct
+digit widths, measured) and a real `tnum` to correct them. A consumer who does not load Roboto Flex
+renders in SF, and without the declaration their digits would not be tabular. **The token is for
+the stack, not for the reference face.**
+
+⚠ **The load-bearing rule is the negative one.** `proportional-nums` / `pnum` must never be applied
+to text measured against `ROBOTO_FLEX_METRICS`, because on this face that is precisely the setting
+that invalidates the table — it substitutes ten distinct proportional widths for the one tabular
+width the advances were measured at. A "make the numbers look more natural" change is the plausible
+route in.
 
 ⚠ `--gx-numeric-variant` is applied **per role, never globally** — `DESIGN.md:127`: *"Applying
 `tabular-nums` globally is the opposite error and is equally wrong."* It goes on tick labels, data
@@ -281,8 +301,12 @@ optical size. `41-text-metrics.md` §5 is amended accordingly.
 
 ## 7. Open, and deliberately not invented
 
-1. **`tnum` in Roboto Flex** — `--gx-numeric-variant: tabular-nums` is unenforceable until verified
-   (`41-text-metrics.md` §4.1).
+1. ~~**`tnum` in Roboto Flex**~~ — **closed.** `41-text-metrics.md` §4.1 inspected the released
+   variable TTF: no `tnum`, but the default figures are already tabular and `pnum` is the switch
+   away from them. The token survives for the fallback stack and the rule becomes a prohibition on
+   `pnum`; see §4.1 above. ⚠ **Segoe UI Variable remains UNVERIFIED** — Windows-only and not
+   obtainable on the machine that did the measuring, so it was left unmeasured rather than
+   estimated. The tier system exists so that this is a recorded gap rather than a plausible number.
 2. **Is `GRAD: 150` a legible landmark at 11px?** (§3) — visual check at A4; fallback is a charcoal
    step, not a weight bump.
 3. **`--gx-label-line-spacing: 1.2em`** (§4.3) — Tier C with no source. If the `split` degrade step

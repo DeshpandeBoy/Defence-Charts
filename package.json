@@ -25,8 +25,10 @@
     "lint:tokens": "node scripts/check-tokens.mjs",
     "lint:determinism": "node scripts/check-determinism.mjs",
     "lint:boundary": "node scripts/check-boundary.mjs",
+    "lint:typography": "node scripts/generate-typography-css.mjs",
+    "generate:typography": "pnpm --filter @gx/core build && node scripts/generate-typography-css.mjs --write",
     "test": "vitest run",
-    "verify": "pnpm typecheck && pnpm lint && pnpm lint:deps && pnpm lint:tokens && pnpm lint:determinism && pnpm test && pnpm build && pnpm lint:boundary"
+    "verify": "pnpm typecheck && pnpm lint && pnpm lint:deps && pnpm lint:tokens && pnpm lint:determinism && pnpm test && pnpm build && pnpm lint:boundary && pnpm lint:typography"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",

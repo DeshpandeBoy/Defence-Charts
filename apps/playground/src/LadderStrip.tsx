@@ -64,6 +64,17 @@ export function LadderStrip({ current }: { readonly current: SizeClass }) {
         ladder is not a sequence of things being taken away, which is why a plan states
         every field at every rung.
       </p>
+      <p className="note">
+        ⚠ <strong>Tile’s horizon cannot be reached by dragging this handle</strong>, and the
+        reason is worth knowing rather than working around. The playground derives cells from
+        pixels, so a 2-cell-wide box is at least 100 px tall, and Tile gives the plot half of
+        that — a floor of 50 px, twice the 24 px the substitution needs. The state is real
+        and asserted in <code>rungs/line.snapshot.test.ts</code>; it belongs to a{' '}
+        <em>grid</em> widget, whose columns and rows come from its layout footprint instead
+        of from its height. A 2×1 cell in a dense grid is 200×40 px, and nothing you can do
+        to a standalone box reproduces it. That independence is why{' '}
+        <code>SizeContext</code> carries both cells and raw pixels.
+      </p>
     </section>
   )
 }

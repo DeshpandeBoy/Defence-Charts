@@ -145,8 +145,8 @@ and it binds at **A4**, when `@gx/primitives` is written.
   **`ChartPlan` is fully specified in `40-chart-plan.md` §3–§4** — field list, per-field provenance
   tier, and the six line/area rungs hand-authored — so A2 transcribes a settled contract rather than
   inventing one under scaffolding pressure. `planChart()` takes **five** parameters:
-  `(type, ctx, shape, policy?, overrides?)`; `policy` carries thresholds *and* `fontMetrics`, applied
-  before resolution, and `overrides` is forced after it.
+  `(type, ctx, shape, policy?, overrides?)`; `policy` carries thresholds and an atomic
+  `typography` input, applied before resolution, and `overrides` is forced after it.
 - `resolveSizeClass()` — the six size families, anchored to the published plot-height boundaries
   (6 / 24 / 40 / 80 px), not to invented numbers.
 - `measureText()` from a **character-advance model** (font-size × per-character metrics table). ⚠ Now
@@ -167,6 +167,18 @@ and it binds at **A4**, when `@gx/primitives` is written.
   actually hit (SF, Segoe UI Variable, Roboto, DejaVu Sans) because the library must not ship the font.
   Where `measureText()` is inexact it must err **wide**.
 - No React anywhere. Enforced by a dependency-boundary lint rule, not by convention.
+
+### A2.1. Contract closure — ✅ complete 2026-08-23
+- The six fit-sensitive typography values and `FontMetrics` now travel as one atomic
+  `PlanPolicy.typography` object. `@gx/tokens` typography CSS is generated from that typed default,
+  and gate **G17** rejects a stale generated file byte-for-byte.
+- Until `tnum` and the real table are verified, both provisional metrics and generated CSS use
+  `normal`; the browser can no longer silently render wider tabular digits than the planner models.
+- Standalone charts use pure `sizeContextFromPixels()`, with an exported, overridable 100 px nominal
+  square cell. The default is **Tier C**, not a published finding. Grid-owned charts continue to use
+  their real columns and rows and never consult this value.
+- The real Roboto Flex table and fallback `safetyFactor` remain calibration work. A2.1 closes source
+  synchronization and standalone conversion; it does not relabel provisional numbers as measured.
 
 ### A3. `planChart()` for line/area only
 - Implement the ladder rungs from `10-responsive-ladder.md` for one type. **Per-rung complete specs,

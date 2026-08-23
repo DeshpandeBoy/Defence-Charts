@@ -502,7 +502,7 @@ type PlanPolicy = {
   readonly pointBudget:          number;   // 2000 — C
   readonly substitute:           boolean;  // §5.6 — consumer may pin off
   readonly minCellSize:          number;   // C
-  readonly fontMetrics:          FontMetrics;  // see 41-text-metrics.md
+  readonly typography:          FittingTypography; // six CSS inputs + FontMetrics, atomic
 };
 
 // APPLIED AFTER resolution. Forced values, deep-partial.
@@ -530,6 +530,40 @@ whenever a rung aggregates more aggressively than the threshold.
 `substitute: false` is policy, not an override — §5.6 says a consumer may pin substitution off, which
 changes how the resolver decides rather than what it decided. Expressing it as
 `overrides.marks.primary` would force one specific mark at every rung and break §1.1.
+
+### 5.1 `valueRegionMaxShare` — a policy field this document did not list
+
+**Added during A3, and it is a genuine addition rather than a transcription.** The vertical chain
+charges the value region first, and a value region is sized from a font — so at a short widget the
+narrative text can claim the entire box and leave a plot of zero height. Nothing in the corpus caps
+it, because nothing in the corpus derives a plot height at all (§1.3 fixes only the horizontal
+order). The cap is therefore Tier **C** — ours, unsourced — and it is named in `PlanPolicy` rather
+than buried as a constant precisely so that a consumer who disagrees can move it.
+
+It is a *share* and not a px figure so that it degrades sensibly at every rung instead of starving
+the small ones.
+
+### 5.2 Unions are atomic in `PlanOverrides`, with exactly one exception
+
+`DeepPartial<ChartPlan>` makes every discriminated union **atomic**: you may replace a `MarkSpec`,
+a `TickPlan`, a `FacetPlan` or a `LegendPlan` whole, and you may not half-override one. §1.1 is the
+reason — a partial union merged onto a resolved plan produces an object matching no member of it,
+structurally assignable to one, and it renders.
+
+**`axes.y2` is the exception, and the argument for it is narrower than it first appears.**
+`AxisPlan | null` is a union too, so the rule as first written forbade `{ y2: { visible: true } }`
+outright. But the reason unions are atomic does not reach it: a partial `LegendPlan` is ambiguous
+about *which variant* it completes, whereas a partial `AxisPlan | null` can only be completing the
+one object member — `null` is not a shape a key can belong to. So `null` is stripped before the
+union test, and whatever remains still faces it. A hypothetical `MarkSpec | null` would stay atomic
+and merely regain its `| null`.
+
+⚠ The first instinct was the opposite one: list `axes.y2` as atomic, on the grounds that merging a
+partial onto `null` yields an incomplete `AxisPlan`. That is true and does not lead where it looks
+like it leads — **replacing whole produces the same incomplete object.** Atomicity protects a field
+from a bad merge; it does not make a partial total. A declared base to merge onto does, which is what
+the implementation uses. Both directions are pinned by tests, because the fix is a *weakening* and a
+weakening with only one test beside it drifts wider.
 
 ---
 
@@ -794,8 +828,13 @@ out; revisit only if A5 shows flicker."*
 1. **`facet.columns`** (§6) — no published basis for how many small-multiple columns a given aspect
    should produce. Tier C, and it should be driven by `categories-max-legible` plus measured cell
    width rather than a constant.
-2. **`valueTypeScale: 'fit'`** depends on `41-text-metrics.md` landing. Until `FontMetrics` exists,
-   `'fit'` is unimplementable and KPI Micro cannot ship.
+2. ~~**`valueTypeScale: 'fit'`** depends on `41-text-metrics.md` landing. Until `FontMetrics` exists,
+   `'fit'` is unimplementable and KPI Micro cannot ship.~~ **Closed at A3, and the blocker turned out
+   to be an artefact of resolving `'fit'` too early.** It was posed as *"fit type to a box"*, which
+   does require measuring the value string — which the resolver never sees. Read instead as *"the
+   renderer picks the largest size that fits within this reserved band"*, it dissolves: the band is
+   decided from the box alone, the renderer fits within it, and the region provably cannot grow the
+   box (§1.3). Nothing was measured and nothing was invented; the question was mis-scoped.
 3. **Bar geometry** — §8 item 3: no published minimum bar width. Talbot, Setlur & Agrawala 2014 is
    the likely home; not retrieved. `marks.primary.kind: 'bar'` therefore carries no minimum-width
    field, rather than carrying an invented one.
@@ -803,3 +842,51 @@ out; revisit only if A5 shows flicker."*
    `measureText()`, but the *abbreviation strategy* (truncate, elide-middle, drop vowels, use a
    supplied short name) is unspecified and has no published ordering. Consumer-supplied short labels
    are almost certainly the right default; that is taste, and it should ship labelled C.
+
+*Items 5–10 were found by implementing A3. Each is a place the implementation had to choose
+something the corpus does not say, and each is labelled rather than smoothed over.*
+
+5. **What makes Stage's secondary axis optional.** §4.1 calls `axes.y2` an *"optional secondary
+   axis"* and §6 hand-authors it visible, but nothing published says what the option turns on — and
+   the thing that actually justifies one is **two series in different units**, which `DataShape`
+   cannot express. Tier **C**: the implementation ships it for multi-series shapes and omits it for
+   single-series, because two axes against one series is indefensible at any size. A consumer who
+   knows their units says `{ axes: { y2: null } }`; that is what overrides are for. The honest fix is
+   a `DataShape` that carries units, which is a wider change than A3 should make.
+
+6. **There is no height-driven y tick count, and inventing one would be worse than the gap.**
+   `tickCountForWidth()` is Talbot 2010 — A-lit. Nothing published gives the vertical equivalent, so
+   the implementation uses a constant `4`, which is `10-responsive-ladder.md` §4's range of 3–4 with
+   its top picked: Tier **B**. Writing `round(height / k)` to mirror the horizontal formula would
+   manufacture a Tier C number that reads exactly as authoritative as the A-lit one beside it, which
+   is the specific failure the tier system exists to prevent.
+
+7. **A Strip in an unusually short box.** §4 makes the encoding substitution conditional **only at
+   Tile**, so a Strip whose plot falls under 24 px keeps its line. Heer 2009's finding applies to any
+   plot of that height, not to a size class, so the rule is probably too narrow — but §4 does not say
+   so, and generalising it silently would change three rungs on an inference. Tier **C** question;
+   the implementation follows §4 as written. Resolving it needs either a re-read of Heer 2009's
+   design or a decision recorded as ours.
+
+8. **Canvas's label degradation departs from §6's literal text, and the departure is arithmetic.**
+   §6:640 gives Canvas no degradation; the implementation abbreviates to 4 characters. Nothing in §6
+   changed — the earlier `'none'` was computed against a placeholder metrics table with zero
+   per-character coverage. With the real table, Canvas's plot is 451.64 px across 5 tick slots: a
+   90.3 px slot, less 1.5 em of mandated spacing, leaves a **73.83 px** budget, and a worst-case
+   5-character label measures **77.12 px** at rank D. A 3.29 px overrun. §6's hand-authored value was
+   written without a measurement available; this is what measuring it produced, and it is the only
+   field in the six rungs that moved.
+
+9. **`split` assumes a break opportunity exists.** The published degrade order is
+   `abbreviate → split → rotate → axis-transpose`, but `DataShape` cannot say whether a label
+   contains a space, and adding a `splittable` flag would be a field the resolver has no honest way
+   to populate. A label with no break opportunity renders on one line and the renderer falls through
+   to the next step. Correct behaviour, undocumented in the corpus, recorded here.
+
+10. **`maxChars` is a floor on what fits, not a prediction of it.** Labels are measured as
+    `'M'.repeat(n)` — the widest common Latin glyph — because `DataShape` carries a length and no
+    strings. Real axis labels (`"Jan 1"`, `"2024"`) are mostly digits and narrow lowercase, so a
+    chart whose labels are ordinary words abbreviates earlier than it strictly must. That is the
+    direction `41-text-metrics.md` §6.1 mandates and the recoverable one. Fixing it needs the label
+    text itself, and **a resolver that takes label text takes the data** — the plan-as-data split in
+    §2 depends on it not doing so. So this is a gap that should probably stay open.
