@@ -1,0 +1,69 @@
+---
+title: Installation
+description: Choose the smallest GX package route that owns the behavior you need.
+---
+
+## Current repository setup
+
+GX is not published yet. Inside this monorepo, applications consume packages through pnpm
+workspace links:
+
+```json title="package.json"
+{
+  "dependencies": {
+    "@gx/core": "workspace:*",
+    "@gx/primitives": "workspace:*",
+    "@gx/react": "workspace:*",
+    "@gx/tokens": "workspace:*"
+  }
+}
+```
+
+Run the pinned package manager from the repository root:
+
+```bash
+pnpm install
+pnpm --filter @gx/docs dev
+```
+
+## After npm publishing
+
+The intended public commands are already determined, but the `@gx` scope is still a placeholder:
+
+```bash
+# Pure decisions and geometry
+pnpm add @gx/core
+
+# Known-size, server-safe rendering
+pnpm add @gx/core @gx/primitives @gx/tokens react
+
+# Automatically measured responsive rendering
+pnpm add @gx/core @gx/primitives @gx/react @gx/tokens react react-dom
+```
+
+Do not put these commands into production automation until the scope decision is closed and the
+packages are public.
+
+## Required styles
+
+The component entry points do not pull CSS into your bundle. Import the layers explicitly so your
+application controls cascade order:
+
+```ts
+import '@gx/tokens/theme.css'
+import '@gx/primitives/chart.css'
+import '@gx/react/auto-chart.css'
+```
+
+`chart.css` is needed for both `Chart` and `AutoChart`. `auto-chart.css` is needed only for the
+client measurement wrapper.
+
+## Runtime requirements
+
+- React 19.
+- ESM-aware bundler.
+- Node 22, 24, or 26 and newer for repository tooling. Node 25 is unsupported.
+- A real height for every `AutoChart` container.
+
+Next.js is a consumer convention and test fixture, not a GX dependency. Nothing under
+`packages/` imports from `next`.

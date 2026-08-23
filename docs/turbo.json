@@ -1,0 +1,62 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      /*
+       * ⚠ The same override `apps/rsc-fixture/turbo.json` exists for, and for the same reason:
+       * the root `build` task is shaped for a package that emits `dist/` from `src/`, and this
+       * site does neither. A package `turbo.json` *replaces* a task definition rather than
+       * merging into it, so `dependsOn` is restated here — dropping it would let the docs build
+       * start before `@gx/core` had one.
+       *
+       * ⚠ The `outputs` miss is the half that fails silently, and this site has been carrying it:
+       * with the root's `dist/**` and no `.next/**`, turbo records a **cache hit for a build
+       * whose artefact it never saved**. The next `next start` then serves nothing, and the
+       * failure surfaces somewhere unrelated to the cause. `!.next/cache/**` keeps webpack's
+       * incremental cache out of the tarball; it is scratch space, not output.
+       *
+       * ⚠ `content/**` is an input and it is the one most easily forgotten. The MDX under
+       * `content/docs/` *is* the site; without it here, editing a page would leave turbo
+       * convinced the build was unaffected and replay a stale one. Same for `.source/**` as an
+       * output — fumadocs-mdx generates it from `content/`, so a cache hit that restored
+       * `.next/` without it would restore half a build.
+       */
+      "inputs": [
+        "src/**",
+        "content/**",
+        "next.config.mjs",
+        "postcss.config.mjs",
+        "proxy.ts",
+        "next-env.d.ts",
+        "package.json",
+        "tsconfig.json"
+      ],
+      "outputs": [".next/**", "!.next/cache/**", ".source/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      /*
+       * ⚠ The root's `src/**` matches source here, but its `../../tsconfig.base.json` does not:
+       * `docs/tsconfig.json` deliberately does **not** extend the base config (README.md, §2).
+       * Leaving the root's input list in place would make every edit to the base config
+       * invalidate a typecheck that cannot read it, and — worse — would omit `content/**`,
+       * which `next typegen` walks to type the routes.
+       *
+       * ⚠ There is deliberately no `dependsOn: ["build"]`. The script runs `next typegen`
+       * itself, so it produces the `.next/types` that `tsconfig.json` includes rather than
+       * waiting on a full build for them.
+       */
+      "inputs": [
+        "src/**",
+        "content/**",
+        "next.config.mjs",
+        "next-env.d.ts",
+        "package.json",
+        "tsconfig.json"
+      ],
+      "outputs": []
+    }
+  }
+}

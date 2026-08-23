@@ -1,0 +1,38 @@
+---
+title: Series and DataPoint
+description: The canonical, serializable actual-value contract shared by every GX layer.
+---
+
+```ts
+export type DataPoint = {
+  readonly x: number | Date
+  readonly y: number | null
+}
+
+export type Series = {
+  readonly id: string
+  readonly label?: string
+  readonly points: readonly DataPoint[]
+}
+```
+
+## Rules
+
+**Stable `id`:** identifies a series across plans and future transitions. Do not derive it from the
+array index when the series can reorder.
+
+**Optional `label`:** human-readable text for legends, direct labels, and tables.
+
+**`x`:** numeric or temporal. A series should not mix the two domains.
+
+**`y: null`:** a gap, not zero. The line breaks because no reading exists. Use `0` only when the
+measured value is actually zero.
+
+## describeShape
+
+```ts
+const shape = describeShape(data)
+```
+
+The helper derives series count, point count, temporal-domain presence, negatives, and maximum label
+length. It does not put actual values into `planChart`.

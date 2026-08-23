@@ -1,0 +1,46 @@
+---
+title: Containment
+description: The chart may adapt inside its box, but it must never decide the box it measures.
+---
+
+## The rule
+
+**A measured element must be sized by its container, never by the chart it contains.**
+
+`AutoChart` observes its wrapper. If that wrapper's height comes from the chart, the chart height
+sets the box, the box changes the plan, and the plan changes the chart height. Browsers eventually
+report a `ResizeObserver` loop instead of resolving that contradiction.
+
+## Good containers
+
+```css
+/* Explicit slot */
+.chart-slot {
+  block-size: 20rem;
+}
+
+/* Grid-owned slot */
+.dashboard-cell {
+  min-block-size: 12rem;
+  contain: size;
+}
+
+.chart-slot .gx-auto-chart,
+.dashboard-cell .gx-auto-chart {
+  block-size: 100%;
+}
+```
+
+A fixed size, grid track, flex allocation, or aspect-ratio can all own the height. `contain: size` is
+the strongest guarantee once the parent already has a size.
+
+## Dangerous containers
+
+- An auto-height wrapper whose only child is `AutoChart`.
+- A chart readout, title, or caption placed as a normal-flow sibling inside the measured element.
+- `overflow: auto`, because chart overhang can create a scrollbar that changes the observed content
+  box.
+- Code that changes outer width or height in response to `ChartPlan`.
+
+The built-in wrapper uses `overflow: hidden` to close the scrollbar path. Your application still
+owns the height.

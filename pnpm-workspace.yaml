@@ -1,6 +1,7 @@
 packages:
   - 'packages/*'
   - 'apps/*'
+  - 'docs'
 
 # Keep the store hard-linked and the tree strict: a package that uses a dependency
 # it never declared must fail here, not in a consumer's build. `unbundle: true`

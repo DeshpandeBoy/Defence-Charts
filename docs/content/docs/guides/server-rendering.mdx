@@ -1,0 +1,42 @@
+---
+title: Server rendering
+description: Render a known-size chart as server HTML with no GX client JavaScript.
+---
+
+Use the hook-free route when the chart's box is known from a report layout, email preview, export, or
+fixed page slot.
+
+```tsx title="RevenueFigure.tsx"
+import type { Series } from '@gx/core'
+import { describeShape, planChart, sizeContextFromPixels } from '@gx/core'
+import { Chart } from '@gx/primitives'
+import '@gx/tokens/theme.css'
+import '@gx/primitives/chart.css'
+
+export function RevenueFigure({ data }: { data: readonly Series[] }) {
+  const ctx = sizeContextFromPixels(640, 320)
+  const plan = planChart('line', ctx, describeShape(data))
+
+  return (
+    <Chart
+      plan={plan}
+      data={data}
+      ctx={ctx}
+      title="Monthly revenue"
+      description="Actual and forecast revenue by month."
+    />
+  )
+}
+```
+
+Do not add `"use client"` to this component. `@gx/primitives` has no client directive and its build
+is checked for that boundary.
+
+## What zero client JavaScript means
+
+The returned SVG and optional HTML table are already in server output. CSS custom properties can
+still restyle presentation after render. Interaction and automatic measurement require
+`@gx/react`, so they are a separate, explicit cost.
+
+`Chart` must receive the same `ctx` and policy used to create `plan`; recomputing a pixel-only
+context can disagree with a grid-owned cell footprint.

@@ -1,0 +1,44 @@
+{
+  "name": "@gx/docs",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Not shipped. The documentation site — where the ladder is explained beside a chart that climbs it.",
+  "scripts": {
+    "build": "next build --webpack",
+    "dev": "next dev",
+    "start": "next start",
+    "typecheck": "next typegen && tsc --noEmit",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@fontsource-variable/roboto-flex": "^5.2.8",
+    "@fortawesome/fontawesome-svg-core": "^7.0.1",
+    "@fortawesome/free-solid-svg-icons": "^7.0.1",
+    "@fortawesome/react-fontawesome": "^3.0.2",
+    "@gx/core": "workspace:*",
+    "@gx/primitives": "workspace:*",
+    "@gx/react": "workspace:*",
+    "@gx/tokens": "workspace:*",
+    "cnfast": "^0.1.0",
+    "fumadocs-core": "16.15.1",
+    "fumadocs-mdx": "15.3.1",
+    "fumadocs-ui": "npm:@fumadocs/base-ui@16.15.1",
+    "next": "16.3.2",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/mdx": "^2.0.14",
+    "@types/node": "^24.10.1",
+    "@types/react": "^19.2.0",
+    "@types/react-dom": "^19.2.0",
+    "postcss": "^8.5.26",
+    "tailwindcss": "^4.3.3",
+    "typescript": "6.0.3",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "16.3.2"
+  }
+}

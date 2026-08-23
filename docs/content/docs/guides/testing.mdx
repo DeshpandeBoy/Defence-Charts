@@ -1,0 +1,36 @@
+---
+title: Testing
+description: Drive resize deterministically and assert chart meaning instead of brittle markup order.
+---
+
+`@gx/testing` provides deterministic observation and semantic markup helpers.
+
+## ResizeObserver
+
+```ts
+import { FakeResizeObserver } from '@gx/testing'
+
+const observer = new FakeResizeObserver(callback)
+observer.observe(element)
+observer.emit(element, 320, 180)
+```
+
+The fake is injected; tests do not patch a global observer and do not depend on browser timing.
+
+## Markup helpers
+
+The package exports `parseChart`, `expectLine`, `expectAxisTicks`, `expectPoints`, `expectScale`, and
+`expectElementSet`. They parse a markup string with jsdom while each test remains in the Node
+environment.
+
+## What to assert
+
+- The plan changes at the intended family boundary.
+- A missing value breaks a line instead of falling to zero.
+- `resolveFrame().plot` exactly matches `resolvePlotBox()`.
+- Repeated rendering produces character-identical path data.
+- Server rendering returns SVG without a DOM global.
+- The element set contains no token-controlled SVG `<line>` geometry.
+
+Avoid snapshots that only prove object key order or generated IDs. Prefer assertions that name the
+meaning a user would lose if the behavior regressed.

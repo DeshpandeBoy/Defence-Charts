@@ -1,0 +1,35 @@
+---
+title: AutoChart
+description: The client boundary that measures a box, resolves a plan, and renders Chart.
+---
+
+```tsx
+import { AutoChart } from '@gx/react'
+```
+
+`AutoChart` carries the package's `"use client"` boundary. It observes one wrapper, derives
+`SizeContext` and `DataShape`, calls `planChart`, and passes the result to `Chart`.
+
+## Props
+
+| Prop | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `type` | `ChartType` | Yes | Currently `line` and `area` are implemented |
+| `data` | `readonly Series[]` | Yes | Canonical values |
+| `title` | `string` | Yes | Accessible chart name |
+| `description` | `string` | No | Longer accessible description |
+| `policy` | `Partial<PlanPolicy>` | No | Pre-resolution thresholds and fitting policy |
+| `overrides` | `PlanOverrides` | No | Forced values applied after resolution |
+| `nominalCellSize` | `number` | No | Standalone pixel-to-cell conversion; default is 100 |
+| `initialSize` | `{ width; height }` | No | Declared server-rendered first size |
+| `className` | `string` | No | Wrapper class |
+| `id` | `string` | No | Stable generated SVG IDs, useful in snapshots |
+
+## First render
+
+Without `initialSize`, server output contains the wrapper and no guessed chart. With `initialSize`,
+the server emits a real first chart. After hydration, the observer supplies the real dimensions.
+
+## Container contract
+
+Give `.gx-auto-chart` a real block size. See [Containment](/docs/concepts/containment).

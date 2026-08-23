@@ -1,0 +1,38 @@
+---
+title: Chart
+description: Hook-free rendering for a plan, canonical values, and the same SizeContext.
+---
+
+```tsx
+import { Chart } from '@gx/primitives'
+```
+
+`Chart` is state-free, effect-free, and ref-free. It can render in a React Server Component with no
+GX client bundle.
+
+## Props
+
+| Prop | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `plan` | `ChartPlan` | Yes | The complete render contract |
+| `data` | `readonly Series[]` | Yes | Values used to resolve scales and coordinates |
+| `ctx` | `SizeContext` | Yes | The exact object that produced the plan |
+| `title` | `string` | Yes | Accessible name |
+| `description` | `string` | No | Accessible description |
+| `policy` | `Partial<PlanPolicy>` | No | Must match the plan's policy |
+| `id` | `string` | No | Stable ID prefix |
+| `className` | `string` | No | Figure class |
+
+## Render tree
+
+```text
+figure.gx-chart
+|- svg[role="graphics-document"]
+|  |- title / desc
+|  |- grid, marks, axes, labels, value display
+|- figcaption
+   |- HTML data table when the plan includes it
+```
+
+The root SVG never uses `role="img"`; that role would make its descendants presentational. Ticks
+and gridlines use CSS-settable rectangles instead of SVG `<line>` coordinates.

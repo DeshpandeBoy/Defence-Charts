@@ -1,0 +1,44 @@
+---
+title: Theming
+description: Presentation uses CSS custom properties; plan-changing typography and thresholds do not.
+---
+
+Import the default Emission-Line Rail theme:
+
+```ts
+import '@gx/tokens/theme.css'
+```
+
+Then scope ordinary presentation changes to one figure or dashboard region:
+
+```css
+.finance-widget {
+  --gx-series-1: #b4e4fd;
+  --gx-line-width: 2px;
+  --gx-point-radius: 3px;
+  --gx-grid-alpha: 0.16;
+}
+```
+
+## Current token surface
+
+The A1-A5 skeleton includes the six emission-line series colors, charcoal ramp, ground and ink,
+grid and axis chrome, line/point/area marks, square corners, no-op Rail elevation, typography, and
+base spacing.
+
+The full 183-token tree and neutral escape-hatch theme belong to milestone B1. The docs do not
+pretend those controls are already public.
+
+## The split that matters
+
+If changing a value can alter a fit-or-collide decision, it cannot be CSS-only. Font family, font
+size, font weight, font feature settings, font stretch, and letter spacing are typed planning input;
+their CSS custom properties are generated from the same values.
+
+Colors, stroke widths, opacity, dash, point radius, and ordinary spacing can change in CSS without a
+re-render because they do not change the plan.
+
+## Light theme
+
+Use `data-gx-theme="rail-light"` on the root or `.gx-theme-rail-light` on a subtree. It uses the same
+six physical wavelengths re-solved against a light ground.

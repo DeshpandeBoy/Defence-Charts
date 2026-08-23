@@ -1,0 +1,88 @@
+---
+title: Your first responsive chart
+description: Fetch application data, map it to canonical Series, and let AutoChart own measurement.
+---
+
+## 1. Map your API rows
+
+GX never fetches, caches, or understands your endpoint fields. Your application translates them
+into the serializable `Series` contract.
+
+```tsx title="RevenueChart.tsx"
+'use client'
+
+import type { Series } from '@gx/core'
+import { AutoChart } from '@gx/react'
+import '@gx/tokens/theme.css'
+import '@gx/primitives/chart.css'
+import '@gx/react/auto-chart.css'
+
+type RevenueRow = {
+  period: string
+  total_revenue: number
+  predicted_revenue: number
+}
+
+export function RevenueChart({ rows }: { rows: readonly RevenueRow[] }) {
+  const data: readonly Series[] = [
+    {
+      id: 'actual',
+      label: 'Actual',
+      points: rows.map((row) => ({
+        x: new Date(`${row.period}-01T00:00:00Z`),
+        y: row.total_revenue,
+      })),
+    },
+    {
+      id: 'forecast',
+      label: 'Forecast',
+      points: rows.map((row) => ({
+        x: new Date(`${row.period}-01T00:00:00Z`),
+        y: row.predicted_revenue,
+      })),
+    },
+  ]
+
+  return (
+    <div className="revenue-chart">
+      <AutoChart
+        type="line"
+        data={data}
+        title="Monthly revenue"
+        description="Actual and forecast revenue by month."
+        initialSize={{ width: 640, height: 320 }}
+      />
+    </div>
+  )
+}
+```
+
+## 2. Size the wrapper
+
+The wrapper must receive its height from layout, not from the chart it contains.
+
+```css title="revenue-chart.css"
+.revenue-chart {
+  inline-size: 100%;
+  block-size: 20rem;
+  contain: size;
+}
+
+.revenue-chart .gx-auto-chart {
+  block-size: 100%;
+}
+```
+
+`initialSize` gives server rendering a declared first plan. It does not replace measurement; after
+hydration, `ResizeObserver` reports the real box.
+
+## What each side owns
+
+**Your application:** loading, errors, empty states, API field names, row-to-series mapping, and the
+container's size.
+
+**GX:** size observation, `SizeContext`, `DataShape`, `ChartPlan`, scales, coordinates, SVG, labels,
+and the optional data table.
+
+Next, read the [containment rule](/docs/concepts/containment) before putting this inside a flex or
+grid layout.

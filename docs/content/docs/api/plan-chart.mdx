@@ -1,0 +1,38 @@
+---
+title: planChart
+description: Pure size and data-shape resolution into a complete serializable ChartPlan.
+---
+
+```ts
+function planChart(
+  type: ChartType,
+  ctx: SizeContext,
+  shape: DataShape,
+  policy?: Partial<PlanPolicy>,
+  overrides?: PlanOverrides,
+): ChartPlan
+```
+
+## Resolution order
+
+1. Resolve policy from defaults plus `policy`.
+2. Choose a size family from cells, pixels, and aspect.
+3. Run the complete rung for `line` or `area`.
+4. Apply label fitting and plot-height consequences.
+5. Apply forced `overrides` last.
+
+## Supported types
+
+`line` and `area` are implemented. Other members remain in `ChartType` because the public roadmap is
+known, but calling them throws with the milestone that owns the renderer. There is no silent
+fallback.
+
+## Core invariants
+
+- Every plan field is present; absence is represented by `null`, `none`, or `absent`.
+- No plan field owns outer width, height, or margin.
+- Plans contain no functions, `Date`, `Map`, `Set`, or `undefined`.
+- `valueLegibility !== 'values'` implies no visible y-axis.
+- Concealed content is removed from the render tree.
+
+Use [`describeShape`](/docs/api/series) to derive the third argument from canonical data.

@@ -1,0 +1,57 @@
+---
+title: A chart should change what it says, not only how small it gets
+description: GX plans a different, honest chart for the space a widget actually has.
+---
+
+GX is a presentational React chart library built around a **responsive information ladder**.
+When a widget gets smaller, GX can remove an unreadable axis, replace a line with a horizon
+encoding, move a legend, or state one value directly. It does not merely squeeze the same chart.
+
+<Callout type="warn" title="Private workspace today">
+  The implementation through milestone A5 exists, but the packages are still private and
+  `@gx/*` is a placeholder scope. Examples on this site compile inside this monorepo. Public npm
+  installation waits for the project name and scope decision.
+</Callout>
+
+<ResizeLab />
+
+## The whole system in one path
+
+| Owner | Receives | Produces |
+| --- | --- | --- |
+| Your application | API rows, query results, local state | Canonical `Series[]` |
+| `@gx/core` | Size, data shape, policy, overrides | Serializable `ChartPlan` |
+| `@gx/primitives` | Plan, canonical values, same size context | Accessible SVG and data table |
+| `@gx/react` | A container with a real size | Measurement, planning, then `<Chart>` |
+
+The planner never sees actual values. `describeShape(data)` derives the counts and traits it
+needs; `resolveFrame(plan, data, ctx)` is where values become scales and coordinates.
+
+## Pick your route
+
+<Cards>
+  <Card title="Build your first responsive chart" href="/docs/getting-started/first-chart">
+    Use `AutoChart` when a client component should observe its own container.
+  </Card>
+  <Card title="Render on the server" href="/docs/guides/server-rendering">
+    Use `planChart` and hook-free `Chart` for a known box and zero GX client JavaScript.
+  </Card>
+  <Card title="Understand the ladder" href="/docs/concepts/responsive-ladder">
+    Read every size family as a complete information contract.
+  </Card>
+</Cards>
+
+## What exists now
+
+| Milestone | Status | Result |
+| --- | --- | --- |
+| A1-A3 | Implemented | Monorepo, token gates, data contract, pure line/area planning |
+| A4 | Implemented | Hook-free `<Chart>`, frame geometry, accessible SVG, semantic test helpers |
+| A5 | Implemented | `<AutoChart>`, `useElementSize`, containment checks, browser resize proof |
+| B | Planned | Full token tree, threshold configuration, visual-control breadth |
+| C | Planned | Twelve-column dashboard grid and widget chrome |
+| D | Planned | Bar, donut, KPI, scatter, heatmap, funnel, progress, sparkline |
+| E | In progress | Documentation, naming, publishing, release automation |
+
+Continue with [installation](/docs/getting-started/installation), then build
+[your first chart](/docs/getting-started/first-chart).

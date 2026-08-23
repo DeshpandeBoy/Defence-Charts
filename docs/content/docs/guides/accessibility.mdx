@@ -1,0 +1,33 @@
+---
+title: Accessibility
+description: Structural chart semantics, redundant series encoding, and honest content removal.
+---
+
+## Required names
+
+Both `Chart` and `AutoChart` require `title`. Add `description` when the title alone cannot explain
+the comparison or domain.
+
+## Graphics semantics
+
+The SVG uses `role="graphics-document"`, not `role="img"`. `role="img"` makes descendants
+presentational and erases their structure from the accessibility tree.
+
+## Data table
+
+When the plan includes a table, GX renders a real HTML `<table>` inside the figure's `<figcaption>`,
+outside the SVG namespace. The table is part of the responsive ladder, not a bolted-on duplicate.
+
+## Redundant identity
+
+The final system uses hue, dash, and point shape together. Hue carries at most six series; series
+seven and beyond must reuse hue and rely more strongly on form. The current A1-A5 theme has the six
+verified series hues; milestone B completes the full form-token surface.
+
+## Honest absence
+
+If a rung cannot support a y-axis, label, or legend, the element is not rendered. Hidden content
+still consumes accessibility attention and implies information that is not available visually.
+
+Automated checks are necessary but insufficient. Inspect the browser accessibility tree and confirm
+the SVG's title, description, and descendants are present.

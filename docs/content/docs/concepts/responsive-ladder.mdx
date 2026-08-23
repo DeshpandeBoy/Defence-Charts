@@ -1,0 +1,45 @@
+---
+title: The responsive ladder
+description: Six complete information contracts, selected from grid footprint, pixels, and aspect.
+---
+
+The ladder answers one question: **what information can this box honestly carry?** A size family is
+not a CSS breakpoint and not a styling preset. Each family is a complete `ChartPlan`.
+
+## Six size families
+
+| Family | Information budget | Typical line/area behavior |
+| --- | --- | --- |
+| Micro | One direct reading | Value display; plot may be absent |
+| Tile | Value plus direction | Compact trend or substituted horizon encoding |
+| Strip | Shape without value-estimation promise | Minimal x context; no readable y scale |
+| Panel | Readable values | Axes and useful ticks enter |
+| Canvas | Full scaffolding | Multiple series, labels, richer interaction plan |
+| Stage | Comparison and annotation | External content and dense references can enter |
+
+## Published plot-height anchors
+
+The resolver applies measured plot height, not total widget height:
+
+| Plot height | Consequence | Provenance |
+| --- | --- | --- |
+| 6 px | Floor for a two-band horizon encoding | Heer 2009 |
+| 24 px | Below this, change encoding instead of squeezing a line | Heer 2009 |
+| 40 px | Below this, value-estimation error rises significantly | Heer and Bostock 2010 |
+| 80 px | Additional plot height buys little accuracy; spend room on content | Heer and Bostock 2010 |
+
+The vertical chain that subtracts value, axis, legend, and table bands is project-owned Tier B. The
+published studies do not specify how a dashboard widget should allocate chrome.
+
+## Complete plans, not additive levels
+
+Going from Tile to Panel does not mean "Tile plus an axis." Small sizes can contain direct summary
+content that disappears at larger sizes. Every rung therefore spells every field and never inherits
+from a neighboring rung.
+
+## Conceal means gone
+
+When a plan drops an axis, label, legend, or table, the renderer removes it. It is not hidden with
+opacity and does not remain as accessibility-tree noise.
+
+Inspect the exact output fields in the [`planChart` reference](/docs/api/plan-chart).

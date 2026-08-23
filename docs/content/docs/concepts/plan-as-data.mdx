@@ -1,0 +1,39 @@
+---
+title: Plan as data
+description: GX separates deciding what to draw from drawing it.
+---
+
+`planChart()` is pure. Given the same chart type, `SizeContext`, `DataShape`, policy, and overrides,
+it returns the same plain `ChartPlan`.
+
+```ts
+import { describeShape, planChart, sizeContextFromPixels } from '@gx/core'
+
+const ctx = sizeContextFromPixels(640, 320)
+const shape = describeShape(data)
+const plan = planChart('line', ctx, shape)
+
+JSON.parse(JSON.stringify(plan)) // unchanged
+```
+
+## Why values stay out
+
+The planner needs traits such as series count, point count, temporal x values, negative values, and
+label length. It does not need the revenue number at March 2025. `describeShape(data)` extracts the
+traits without changing `planChart`'s value-blind signature.
+
+Actual values enter in `resolveFrame(plan, data, ctx)`, where d3 scales and paths are built.
+
+## Why functions stay out
+
+Accessor functions cannot cross a React Server Component boundary as props. Canonical `Series[]`
+can. The same data contract can also generate the figure's HTML data table and provide stable series
+IDs for future transitions.
+
+## Two valid render routes
+
+1. A known box: compute `ctx` and `plan`, then render hook-free `<Chart>`.
+2. An unknown client box: `<AutoChart>` measures, computes both objects, then renders `<Chart>`.
+
+Both routes use the same planner and frame resolver. The client component owns measurement, not a
+second set of chart decisions.
