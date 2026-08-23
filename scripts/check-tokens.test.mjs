@@ -120,3 +120,69 @@ describe('the traps', () => {
     expect(inspectCss(source, COMPONENT_PATH)).toEqual([])
   })
 })
+
+describe('durations, which this gate could not see until A6', () => {
+  /**
+   * ⚠ **The gap this closes was live in the repo, not hypothetical.** `chart.css` carried
+   * `transition: opacity 120ms ease-out` from A4 onward, under a docblock promising that every
+   * colour and every length in the file went through a token. Both halves of that promise were
+   * kept; a duration is neither, so the one hardcoded value in the package sat in the file the
+   * gate exists to protect and passed every run. A6 adds four motion tokens and would have
+   * multiplied it.
+   */
+  it('rejects a raw duration in component CSS', () => {
+    const violations = inspectCss(
+      '.gx-line { transition: opacity 120ms ease-out; }',
+      COMPONENT_PATH,
+    )
+    expect(violations.map((v) => `${v.rule}:${v.detail}`)).toEqual(['raw-duration:120ms'])
+  })
+
+  it('rejects seconds as readily as milliseconds', () => {
+    const violations = inspectCss('.gx-line { transition-delay: 0.5s; }', COMPONENT_PATH)
+    expect(violations.map((v) => v.detail)).toEqual(['0.5s'])
+  })
+
+  it('passes a duration that arrives through a token', () => {
+    const violations = inspectCss(
+      '.gx-line { transition: d var(--gx-motion-duration) var(--gx-motion-easing); }',
+      COMPONENT_PATH,
+    )
+    expect(violations).toEqual([])
+  })
+
+  /**
+   * ⚠ The zero exemption, in both directions. `transition-delay: 0` is invalid CSS — the
+   * grammar requires the unit on a time where it forbids one on a length — so `0ms` is
+   * syntax rather than a chosen value, and rejecting it would force a token whose entire
+   * content is "nothing". The test that matters is the second one: the exemption must be
+   * numeric, or `0.5s` walks through a rule written for `0s`.
+   */
+  it('exempts a zero duration and nothing that merely starts with zero', () => {
+    expect(inspectCss('.a { transition-delay: 0ms; }', COMPONENT_PATH)).toEqual([])
+    expect(inspectCss('.a { transition-delay: 0.0s; }', COMPONENT_PATH)).toEqual([])
+    expect(inspectCss('.a { transition-delay: 0.05s; }', COMPONENT_PATH)).toHaveLength(1)
+    expect(inspectCss('.a { transition-delay: 01ms; }', COMPONENT_PATH)).toHaveLength(1)
+  })
+
+  /**
+   * The positional rule holds for durations exactly as it does for colours: a token
+   * *definition* in the tokens package is where a real number is supposed to live, and a
+   * *property* in the same file is not.
+   */
+  it('keeps the allowlist positional', () => {
+    expect(
+      inspectCss(':root { --gx-motion-recompose-duration: 1000ms; }', THEME_PATH),
+    ).toEqual([])
+    expect(inspectCss('.a { transition: opacity 300ms linear; }', THEME_PATH)).toHaveLength(1)
+  })
+
+  /** `calc(var(--gx-motion-duration) / 2)` must not read its divisor as a duration. */
+  it('does not mistake a bare number in calc() for a time', () => {
+    const violations = inspectCss(
+      '.a { transition-delay: calc(var(--gx-motion-duration) / 2); }',
+      COMPONENT_PATH,
+    )
+    expect(violations).toEqual([])
+  })
+})

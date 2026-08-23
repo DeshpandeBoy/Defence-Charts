@@ -128,6 +128,28 @@ export function Chart({
       className={classes('gx-chart', className)}
       data-size-class={plan.sizeClass}
       data-chart-type={plan.type}
+      /*
+       * ⚠ **The only consumer `plan.motion` has, and the only one it should have.** Added
+       * at A6; before it, the field was resolved on every plan and read by nothing.
+       *
+       * These are bindings, not behaviour. `chart.css` maps `data-motion-duration` to a
+       * duration token and `data-motion-stages` to a stage delay, and the transitions
+       * themselves live behind `@media (prefers-reduced-motion: no-preference)`. That
+       * split is `40-chart-plan.md` §4's, and it is why there is no `motion.enabled` to
+       * echo here: the server cannot read the preference, so anything derived from it
+       * would differ between the server render and the client's and mismatch on hydration.
+       * The plan carries structure; CSS carries the decision to move.
+       *
+       * ⚠ `objectConstancy` is deliberately NOT echoed. It is `false` at every line rung
+       * and correctly so — `10-responsive-ladder.md` §7 scopes it to `aggregate`, where
+       * slices must visibly converge into "Other", which no line chart does. Emitting it
+       * would invite a stylesheet to treat it as "do elements keep identity", which is a
+       * different property, is unconditionally true since A6, and is asserted by
+       * `identity.test.tsx` rather than advertised by an attribute.
+       */
+      data-motion-duration={plan.motion.durationClass}
+      data-motion-stages={plan.motion.stages}
+      data-persist-gridlines={plan.motion.persistGridlines ? '' : undefined}
     >
       <svg
         className="gx-chart__svg"

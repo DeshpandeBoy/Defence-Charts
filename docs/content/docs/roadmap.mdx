@@ -14,6 +14,15 @@ helpers, public API and tree-shaking gates.
 **A5:** `AutoChart`, `useElementSize`, animation-frame batching, server `initialSize`, and fixed-point
 containment checks in fake and real browsers.
 
+**A6:** two-stage transitions across rung changes — axis and gridlines first, marks second — driven
+entirely by CSS. No tween library and no animation hook, so `Chart` stays a server component that
+ships no client JavaScript. Gridlines and ticks are keyed by domain value rather than pixel position,
+which is what lets them keep their identity through a tick-count change instead of being replaced;
+a replaced element cannot animate at all. Motion is opt-in at the platform level: the rules live
+inside `@media (prefers-reduced-motion: no-preference)`, so an environment that expresses no
+preference gets a still chart, and the still chart is the baseline rather than a degraded version of
+the animated one.
+
 ## Next
 
 | Milestone | Scope |

@@ -128,6 +128,56 @@
                                        and would invalidate the metrics table */
     --gx-label-line-spacing: 1.2em;
 
+    /*
+     * --- Motion. Added at A6.
+     *
+     * ⚠ **There is no `--gx-motion-enabled`, and its absence is the same decision as
+     * `MotionPlan`'s missing `enabled` field.** `40-chart-plan.md` §4: the server cannot
+     * read `prefers-reduced-motion`, so a token derived from it would differ between the
+     * server render and the client one. The plan carries the structural facts; the media
+     * query in `@gx/primitives`' chart.css decides whether anything runs. Polarity there is
+     * `no-preference`, so the still chart is the baseline and motion is the addition.
+     *
+     * ⚠ The two durations are the ladder's `~300–1000 ms` made specific, and they are the
+     * one pair here with real provenance. 1000 ms is **A-lit and A-impl at once** — Heer &
+     * Robertson 2007 measured it and Adobe Spectrum ships
+     * `DRAW_IN_ANIMATION_DURATION_MS = 1000` — and 300 ms is the fast end the same section
+     * assigns to rescale-only changes, which are minimal-movement by definition.
+     * `10-responsive-ladder.md` §7.
+     *
+     * ⚠ `--gx-motion-duration` is the ACTIVE one and is re-bound per figure from
+     * `data-motion-duration`, which `<Chart>` echoes from `plan.motion.durationClass`. The
+     * default below is the fast end: a chart that somehow renders without the attribute
+     * moves less, rather than more, than it should.
+     *
+     * UNVERIFIED: the easing and the stage delay. `10-responsive-ladder.md` §7 specifies
+     * *that* a change is staged — axis and ticks first, marks second, never more than two —
+     * and specifies no timing for the overlap. Half the duration puts stage 2 in motion
+     * while stage 1 is still settling, so the two read as one gesture with an order rather
+     * than as two animations queued; a full-duration delay serialises them and doubles the
+     * envelope. B1 owns both alongside the other six conventional defaults.
+     *
+     * ⚠ **The stage delay is derived per class HERE, and must never be written as
+     * `calc(var(--gx-motion-duration) / 2)`.** It was, and it was wrong in a way nothing
+     * caught: a custom property is substituted where it is *declared*, and the result is
+     * what inherits. Declared on `:root`, `calc(var(--gx-motion-duration) / 2)` resolves
+     * against the `:root` value — the rescale 300ms — and the token that inherits down to
+     * every figure is the already-computed `calc(300ms / 2)`. `chart.css` then rebinds
+     * `--gx-motion-duration: 1000ms` on the recompose figure and the delay does not follow,
+     * because there is no longer a `var()` left in it to re-resolve. Measured in Chromium:
+     * a recompose chart reported `--gx-motion-stage-delay: calc(300ms / 2)` and staged its
+     * marks 150ms behind a 1000ms chrome move, instead of 500ms behind. Naming both halves
+     * up front means each `calc()` resolves against a literal, so neither depends on which
+     * element it is read from. **G19 asserts the resulting gap.**
+     */
+    --gx-motion-rescale-duration: 300ms;
+    --gx-motion-recompose-duration: 1000ms;
+    --gx-motion-rescale-stage-delay: calc(var(--gx-motion-rescale-duration) / 2);
+    --gx-motion-recompose-stage-delay: calc(var(--gx-motion-recompose-duration) / 2);
+    --gx-motion-duration: var(--gx-motion-rescale-duration);
+    --gx-motion-stage-delay: var(--gx-motion-rescale-stage-delay);
+    --gx-motion-easing: ease-out;
+
     /* --- Spacing. A calc() multiplier is not a length literal — 43-theming.md §6.2. --- */
     --gx-gap: 4px;
     --gx-plot-padding: calc(var(--gx-gap) * 2);

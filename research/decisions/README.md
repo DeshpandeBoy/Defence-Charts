@@ -31,6 +31,7 @@ forced it.
 | 013 | [The zero-JS claim, narrowed](013-zero-js-claim-narrowed.md) | this folder | ✅ **applied** |
 | 014 | [Highcharts styled mode — correcting "colours only"](014-highcharts-styled-mode-correction.md) | this folder | ✅ **applied** |
 | 015 | [The token gate parses CSS; it does not grep it](015-token-gate-is-a-parser.md) | this folder | ✅ **applied** |
+| 016 | [What SVG geometry actually transitions, and what has to crossfade instead](016-what-svg-geometry-actually-transitions.md) | this folder | ✅ **measured** |
 
 **012–014 were applied on 2026-08-23**, in a separate, explicit act after they were written — which
 is the point of the two-step. Each record's Status line now names the files it landed in, and each

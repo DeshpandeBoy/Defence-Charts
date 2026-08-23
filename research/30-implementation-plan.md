@@ -234,13 +234,20 @@ At the end of A3 the core thesis is testable with zero UI. That is the point.
     ⚠ Not searched in the HTML — App Router serialises the rendered tree into inline
     `self.__next_f.push(…)` scripts, so the chart's class names legitimately appear there as *data*
     on a correct page, and a gate that fires on success gets deleted rather than fixed.
-  - ⚠ **Landed at A5 as `scripts/check-rsc.mjs` + `apps/rsc-fixture`, and it is not green.** Its
-    first run found that `packages/primitives/src/Chart.tsx` calls `useId()` and `useMemo()`, which
-    React Server Components do not support. The A4 zero-client-JS proof was a node test calling
-    `renderToStaticMarkup()` — that is **SSR**, where hooks work — so it passed this milestone
-    without ever exercising the path it was named after. Resolution is open; until it closes, treat
-    decision 7's *"`<Chart>` is hook-free"* as the intent it still is and not as a description of the
-    shipped component.
+  - ⚠ **Landed at A5 as `scripts/check-rsc.mjs` + `apps/rsc-fixture`; green, and in CI.** Observed
+    2026-08-24: 77 marks in a `role="graphics-document"` `<svg>`, and 0 of 6 chart markers in 553 KB
+    of client JavaScript across 9 chunks.
+
+    ⚠ **What this bullet said until A6, and why the correction is kept rather than overwritten.** It
+    read *"it is not green"*, on the grounds that `Chart.tsx` calls `useId()` and `useMemo()` and
+    *"React Server Components do not support"* them. **That premise is false.** React 19's
+    `react-server` build exports `useId`, `useMemo` and `useCallback`; what it stubs out is
+    `useState`, `useEffect` and `useRef`. The surrounding observation was sound and still stands —
+    the A4 zero-client-JS proof was a node test calling `renderToStaticMarkup()`, which is **SSR**,
+    where every hook works, so it passed A4 without exercising the path it was named after. Chasing
+    the wrong premise is what produced assertion 1b, the strongest thing in the gate: the two
+    renderers stamp different infixes into `useId()`, so the winning renderer's initial is in an
+    attribute of the shipped HTML. `maps/04-ci-gate-map.md` has the argument.
 
 ### A5. `@gx/react` — `<AutoChart>`
 - `useElementSize()` — `ResizeObserver`, `contentBoxSize`, rAF-batched.
@@ -281,23 +288,54 @@ At the end of A3 the core thesis is testable with zero UI. That is the point.
     border boxes, waiting three frames with no input, and reading them again. See
     `maps/04-ci-gate-map.md` for the numbers and the two caveats on them, and that script's header
     for the full argument.
-  - ⚠ **Not in `verify` and not in CI yet** — it needs a browser binary, and that provisioning was
-    parked until the shared browser job G4 brings. Runs by hand as `pnpm lint:containment`; a CI job
-    is being wired now.
+  - ⚠ **In CI as of A6, still not in `verify`.** It is a step in the `browser` job alongside G4 and
+    G19, which is where the browser download is paid for once. It stays out of `verify` on purpose:
+    that is what a fresh clone runs before it has decided to care about this repo, and it should not
+    open with a ~150 MB download.
 
-### A6. Transitions ⚠ (new — was missing entirely)
+### A6. Transitions ⚠ (new — was missing entirely) — **landed 2026-08-24**
 - Animate rung changes rather than cutting. ~300 ms for rescale-only, up to ~1000 ms when marks move.
   The 1000 ms upper bound is **A-lit and A-impl at once**: Heer & Robertson 2007 measured it, and
   Adobe Spectrum ships `DRAW_IN_ANIMATION_DURATION_MS = 1000`. Independent agreement to the
-  millisecond — cite both.
-- Two-stage at most: axis/ticks first, marks second.
+  millisecond — cite both. ✅ `--gx-motion-rescale-duration: 300ms` and
+  `--gx-motion-recompose-duration: 1000ms` in `@gx/tokens`, bound per figure from
+  `data-motion-duration`, which `<Chart>` echoes from `plan.motion.durationClass`.
+- Two-stage at most: axis/ticks first, marks second. ✅ Stage 2 carries
+  `--gx-motion-stage-delay`; `data-motion-stages="1"` sets it to `0ms` below Panel, where there is no
+  axis to move first.
 - Persist gridlines through a tick-count change — they are the landmarks that make it legible.
-- Honour `prefers-reduced-motion`: cut, and skip staging.
+  ✅ And it turned out to be a **keying** problem, not a stylesheet one — see below.
+- Honour `prefers-reduced-motion`: cut, and skip staging. ✅ Discharged *by construction* rather than
+  by a second rule: the query is `@media (prefers-reduced-motion: no-preference)`, so under the
+  preference the rules do not exist. There is nothing to cut and no stage to skip.
 - **This is the primary hysteresis mechanism**, not a deadband. Measure whether flicker is still
   observable afterwards; only then consider a deadband, expressed as a fraction of the boundary
-  width, never as an absolute px value.
+  width, never as an absolute px value. ⚠ **Still owed.** Nothing here measured flicker; A6 shipped
+  the mechanism, not the evidence that it suffices.
 
-**→ Milestone A demo: one resizable box, one line chart, visible semantic adaptation.**
+⚠ **The load-bearing finding is that none of this was primarily about CSS.** Decision
+[016](decisions/016-what-svg-geometry-actually-transitions.md) drove Chromium and measured that a
+**replaced element never transitions** — a freshly-mounted node has no previous value to interpolate
+from. `<Grid>` and `<Axis>` keyed their children by `tick.offset`, a *pixel* position, so every
+gridline was a new element on every frame of a drag and every rule in the motion block was inert.
+Re-keying by `tick.value` is the whole fix; `packages/primitives/src/identity.test.tsx` asserts DOM
+node identity across a resize, and reverting either key turns three of its four tests red.
+
+That in turn forced a fix in `@gx/core`: keying by value requires values to be **unique**, and d3's
+`scale.ticks()` repeats one when the domain span is tiny against its magnitude — **60 of 770** swept
+combinations do (seven magnitudes `1e3`…`1e15` × ten spans `1e-9`…`1e7` × counts 2–12; the
+parameters are in `frame.test.ts`, because an earlier draft quoted a count no one could re-derive).
+`computeTicks()` now de-duplicates. ⚠ A related *legibility* bug is recorded and deliberately not
+fixed: the two distinct doubles still format to the same label (`10M`, `10M`, 262 px
+apart). That is `format.ts`'s to own, not A6's.
+
+**Also shipped:** gate **G19** (`pnpm lint:motion`), the only gate that can observe a transition at
+all; a `raw-duration` rule in the token gate, which was structurally blind to `ms`/`s` and had let an
+untokenised `120ms` sit in `chart.css` since A4; and no tween library and no hook — the whole animation
+is CSS, because a JS animation loop would end decision 7's zero-client-JS claim.
+
+**→ Milestone A demo: one resizable box, one line chart, visible semantic adaptation.** ✅ Reachable
+now — `pnpm dev`, drag the box.
 
 ---
 

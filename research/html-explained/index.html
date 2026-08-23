@@ -1,0 +1,2803 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="A simple, interactive explanation of the responsive chart and dashboard grid project."
+    />
+    <title>GX project, explained simply</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wdth,wght@8..144,75..125,300..800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        --ground: #141618;
+        --ground-deep: #0c0d0f;
+        --surface: #202224;
+        --surface-raised: #292b2d;
+        --line: #36383a;
+        --line-strong: #67696c;
+        --text: #e2e5e8;
+        --text-muted: #a2a5a8;
+        --signal-1: #b4e4fd;
+        --signal-2: #fdcaa6;
+        --signal-3: #28d824;
+        --signal-4: #bda4fb;
+        --signal-5: #1c9d96;
+        --signal-6: #fa2017;
+        --success: #73d08b;
+        --warning: #f0c36a;
+        --focus: #ffffff;
+        --max-width: 76rem;
+        --rail-width: 0.25rem;
+        --hairline: 0.0625rem;
+        --space-1: 0.25rem;
+        --space-2: 0.5rem;
+        --space-3: 0.75rem;
+        --space-4: 1rem;
+        --space-5: 1.5rem;
+        --space-6: 2rem;
+        --space-7: 3rem;
+        --space-8: 5rem;
+        --font: 'Roboto Flex', 'Helvetica Neue', sans-serif;
+      }
+
+      [data-theme='light'] {
+        color-scheme: light;
+        --ground: #f4f3ef;
+        --ground-deep: #e6e5df;
+        --surface: #ffffff;
+        --surface-raised: #ecebe6;
+        --line: #c8c7c1;
+        --line-strong: #777873;
+        --text: #17191a;
+        --text-muted: #555854;
+        --signal-1: #084962;
+        --signal-2: #784009;
+        --signal-3: #137e10;
+        --signal-4: #801bef;
+        --signal-5: #0d625d;
+        --signal-6: #710805;
+        --success: #176b32;
+        --warning: #765000;
+        --focus: #000000;
+      }
+
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        background: var(--ground);
+        color: var(--text);
+        font-family: var(--font);
+        font-optical-sizing: auto;
+        line-height: 1.55;
+      }
+
+      ::selection {
+        background: var(--signal-1);
+        color: var(--ground-deep);
+      }
+
+      a {
+        color: inherit;
+        text-decoration-color: var(--signal-1);
+        text-underline-offset: 0.25em;
+      }
+
+      button,
+      input {
+        font: inherit;
+      }
+
+      button:focus-visible,
+      a:focus-visible,
+      input:focus-visible {
+        outline: 0.125rem solid var(--focus);
+        outline-offset: 0.25rem;
+      }
+
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        border-bottom: var(--hairline) solid var(--line);
+        background: color-mix(in srgb, var(--ground) 94%, transparent);
+        backdrop-filter: blur(0.75rem);
+      }
+
+      .header-inner {
+        width: min(calc(100% - 2rem), var(--max-width));
+        min-height: 4rem;
+        margin-inline: auto;
+        display: flex;
+        align-items: center;
+        gap: var(--space-5);
+      }
+
+      .wordmark {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-3);
+        color: var(--text);
+        text-decoration: none;
+        font-weight: 760;
+      }
+
+      .wordmark-rail {
+        width: 1.25rem;
+        height: 1.5rem;
+        border-left: var(--rail-width) solid var(--signal-1);
+        position: relative;
+      }
+
+      .wordmark-rail::before,
+      .wordmark-rail::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        width: 1rem;
+        height: 0.125rem;
+        background: var(--signal-2);
+      }
+
+      .wordmark-rail::before {
+        top: 0.25rem;
+      }
+
+      .wordmark-rail::after {
+        bottom: 0.25rem;
+        width: 0.65rem;
+        background: var(--signal-3);
+      }
+
+      .site-nav {
+        display: flex;
+        align-items: center;
+        gap: var(--space-5);
+        margin-left: auto;
+        font-size: 0.875rem;
+      }
+
+      .site-nav a {
+        color: var(--text-muted);
+        text-decoration: none;
+      }
+
+      .site-nav a:hover,
+      .site-nav a[aria-current='page'] {
+        color: var(--text);
+      }
+
+      .icon-button {
+        width: 2.5rem;
+        height: 2.5rem;
+        border: var(--hairline) solid var(--line-strong);
+        border-radius: 0;
+        background: transparent;
+        color: var(--text);
+        cursor: pointer;
+      }
+
+      .icon-button:hover {
+        border-color: var(--signal-1);
+        color: var(--signal-1);
+      }
+
+      main {
+        overflow: hidden;
+      }
+
+      .section {
+        border-bottom: var(--hairline) solid var(--line);
+      }
+
+      .section-inner {
+        width: min(calc(100% - 2rem), var(--max-width));
+        margin-inline: auto;
+        padding-block: var(--space-8);
+      }
+
+      .intro {
+        min-height: calc(100svh - 4rem);
+        display: grid;
+        align-items: center;
+      }
+
+      .intro-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 0.9fr) minmax(22rem, 1.1fr);
+        gap: clamp(2.5rem, 7vw, 7rem);
+        align-items: center;
+      }
+
+      .status-line,
+      .section-label {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        color: var(--text-muted);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .status-dot {
+        width: 0.5rem;
+        height: 0.5rem;
+        background: var(--success);
+      }
+
+      h1,
+      h2,
+      h3,
+      p {
+        margin-top: 0;
+      }
+
+      h1 {
+        max-width: 12ch;
+        margin-bottom: var(--space-5);
+        font-size: clamp(3rem, 7vw, 6rem);
+        font-weight: 720;
+        letter-spacing: -0.035em;
+        line-height: 0.94;
+      }
+
+      h2 {
+        max-width: 20ch;
+        margin-bottom: var(--space-4);
+        font-size: clamp(2rem, 5vw, 4rem);
+        font-weight: 680;
+        letter-spacing: -0.025em;
+        line-height: 1;
+      }
+
+      h3 {
+        margin-bottom: var(--space-2);
+        font-size: 1.15rem;
+      }
+
+      .lede {
+        max-width: 56ch;
+        color: var(--text-muted);
+        font-size: clamp(1.05rem, 2vw, 1.3rem);
+      }
+
+      .plain-answer {
+        margin-top: var(--space-6);
+        padding: var(--space-5) 0 var(--space-5) var(--space-5);
+        border-left: var(--rail-width) solid var(--signal-1);
+        border-top: var(--hairline) solid var(--line);
+        border-bottom: var(--hairline) solid var(--line);
+        font-size: 1.05rem;
+      }
+
+      .plain-answer strong {
+        color: var(--signal-1);
+      }
+
+      .system-plate {
+        min-height: 32rem;
+        border: var(--hairline) solid var(--line-strong);
+        background: var(--ground-deep);
+        position: relative;
+        display: grid;
+        place-items: center;
+        padding: var(--space-6);
+      }
+
+      .system-plate::before {
+        content: '';
+        position: absolute;
+        inset-block: 0;
+        left: 18%;
+        width: var(--rail-width);
+        background: var(--signal-1);
+      }
+
+      .flow-stack {
+        width: min(100%, 30rem);
+        display: grid;
+        gap: 0;
+        position: relative;
+      }
+
+      .flow-node {
+        min-height: 4.75rem;
+        display: grid;
+        grid-template-columns: 3rem 1fr;
+        align-items: center;
+        border-top: var(--hairline) solid var(--line);
+        background: var(--ground-deep);
+      }
+
+      .flow-node:last-child {
+        border-bottom: var(--hairline) solid var(--line);
+      }
+
+      .flow-icon {
+        color: var(--text-muted);
+        text-align: center;
+      }
+
+      .flow-node strong,
+      .flow-node span {
+        display: block;
+      }
+
+      .flow-node span {
+        color: var(--text-muted);
+        font-size: 0.83rem;
+      }
+
+      .flow-node[data-accent='1'] strong { color: var(--signal-1); }
+      .flow-node[data-accent='2'] strong { color: var(--signal-2); }
+      .flow-node[data-accent='3'] strong { color: var(--signal-3); }
+      .flow-node[data-accent='4'] strong { color: var(--signal-4); }
+
+      .section-heading {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(18rem, 0.75fr);
+        gap: var(--space-7);
+        margin-bottom: var(--space-7);
+        align-items: end;
+      }
+
+      .section-heading p {
+        max-width: 54ch;
+        margin-bottom: 0;
+        color: var(--text-muted);
+      }
+
+      .ladder-controls {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        border: var(--hairline) solid var(--line-strong);
+      }
+
+      .rung-button {
+        min-height: 3.25rem;
+        border: 0;
+        border-right: var(--hairline) solid var(--line-strong);
+        border-radius: 0;
+        background: transparent;
+        color: var(--text-muted);
+        cursor: pointer;
+      }
+
+      .rung-button:last-child {
+        border-right: 0;
+      }
+
+      .rung-button:hover {
+        color: var(--text);
+        background: var(--surface);
+      }
+
+      .rung-button[aria-selected='true'] {
+        background: var(--text);
+        color: var(--ground-deep);
+        font-weight: 750;
+      }
+
+      .ladder-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.45fr) minmax(18rem, 0.55fr);
+        gap: var(--space-6);
+        margin-top: var(--space-5);
+        align-items: stretch;
+      }
+
+      .demo-stage {
+        min-height: 31rem;
+        display: grid;
+        place-items: center;
+        overflow: auto;
+        border: var(--hairline) solid var(--line);
+        background: var(--ground-deep);
+        padding: var(--space-6);
+      }
+
+      .chart-widget {
+        --widget-width: 35rem;
+        --widget-height: 18rem;
+        width: min(100%, var(--widget-width));
+        height: var(--widget-height);
+        min-width: 12rem;
+        border: var(--hairline) solid var(--line-strong);
+        position: relative;
+        overflow: hidden;
+        background: var(--ground);
+        transition:
+          width 500ms cubic-bezier(0.16, 1, 0.3, 1),
+          height 500ms cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .chart-head {
+        height: 4.25rem;
+        display: flex;
+        justify-content: space-between;
+        gap: var(--space-4);
+        padding: var(--space-4);
+        border-bottom: var(--hairline) solid var(--line);
+      }
+
+      .chart-head strong,
+      .chart-head span {
+        display: block;
+      }
+
+      .chart-head span {
+        color: var(--text-muted);
+        font-size: 0.72rem;
+      }
+
+      .chart-value {
+        font-size: 1.35rem;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+
+      .chart-value b {
+        color: var(--signal-3);
+        font-size: 0.72rem;
+      }
+
+      .chart-svg {
+        width: 100%;
+        height: calc(100% - 4.25rem);
+        display: block;
+      }
+
+      .chart-grid {
+        stroke: var(--line);
+        stroke-width: 1;
+      }
+
+      .chart-axis {
+        stroke: var(--line-strong);
+        stroke-width: 1;
+      }
+
+      .chart-series {
+        fill: none;
+        stroke: var(--signal-1);
+        stroke-width: 3;
+        vector-effect: non-scaling-stroke;
+      }
+
+      .chart-area {
+        fill: color-mix(in srgb, var(--signal-1) 13%, transparent);
+      }
+
+      .chart-point {
+        fill: var(--ground);
+        stroke: var(--signal-1);
+        stroke-width: 2;
+        vector-effect: non-scaling-stroke;
+      }
+
+      .chart-annotation {
+        fill: var(--signal-2);
+        font: 700 12px var(--font);
+      }
+
+      .chart-label {
+        fill: var(--text-muted);
+        font: 500 11px var(--font);
+      }
+
+      .chart-legend-swatch {
+        fill: var(--signal-1);
+      }
+
+      [hidden] {
+        display: none !important;
+      }
+
+      .is-hidden {
+        display: none !important;
+      }
+
+      .demo-explanation {
+        border-top: var(--rail-width) solid var(--signal-2);
+        border-bottom: var(--hairline) solid var(--line);
+        padding-block: var(--space-5);
+      }
+
+      .rung-name {
+        margin-bottom: var(--space-2);
+        color: var(--signal-2);
+        font-size: 1.75rem;
+        font-weight: 720;
+      }
+
+      .rung-size {
+        color: var(--text-muted);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .decision-list {
+        margin: var(--space-5) 0 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .decision-list li {
+        display: grid;
+        grid-template-columns: 1.25rem 1fr;
+        gap: var(--space-2);
+        padding-block: var(--space-2);
+        border-top: var(--hairline) solid var(--line);
+        color: var(--text-muted);
+      }
+
+      .decision-list i {
+        margin-top: 0.3rem;
+        color: var(--signal-3);
+      }
+
+      .package-list {
+        border-top: var(--hairline) solid var(--line-strong);
+      }
+
+      .package-item {
+        border-bottom: var(--hairline) solid var(--line-strong);
+      }
+
+      .package-toggle {
+        width: 100%;
+        display: grid;
+        grid-template-columns: minmax(11rem, 0.75fr) minmax(0, 1.4fr) auto 2rem;
+        gap: var(--space-4);
+        align-items: center;
+        padding: var(--space-5) 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
+        color: var(--text);
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .package-toggle:hover .package-name {
+        color: var(--signal-1);
+      }
+
+      .package-name {
+        font-size: 1.1rem;
+        font-weight: 720;
+      }
+
+      .package-role {
+        color: var(--text-muted);
+      }
+
+      .package-state {
+        border: var(--hairline) solid currentColor;
+        padding: 0.2rem 0.45rem;
+        color: var(--warning);
+        font-size: 0.72rem;
+        font-weight: 750;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .package-state[data-state='ready'] { color: var(--success); }
+      .package-state[data-state='next'] { color: var(--text-muted); }
+
+      .package-detail {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(14rem, 0.55fr);
+        gap: var(--space-6);
+        padding: 0 3rem var(--space-6) 0;
+      }
+
+      .package-detail p {
+        max-width: 66ch;
+        color: var(--text-muted);
+      }
+
+      .package-facts {
+        margin: 0;
+      }
+
+      .package-facts div {
+        display: grid;
+        grid-template-columns: 5rem 1fr;
+        gap: var(--space-3);
+        padding-block: var(--space-2);
+        border-top: var(--hairline) solid var(--line);
+      }
+
+      .package-facts dt {
+        color: var(--text-muted);
+      }
+
+      .package-facts dd {
+        margin: 0;
+      }
+
+      .ownership-map {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        border-block: var(--hairline) solid var(--line-strong);
+      }
+
+      .ownership-item {
+        min-width: 0;
+        padding: var(--space-4);
+        border-right: var(--hairline) solid var(--line);
+      }
+
+      .ownership-item:last-child { border-right: 0; }
+
+      .ownership-item i,
+      .ownership-item strong,
+      .ownership-item span {
+        display: block;
+      }
+
+      .ownership-item i {
+        margin-bottom: var(--space-3);
+        color: var(--signal-1);
+      }
+
+      .ownership-item strong { font-size: 0.86rem; }
+
+      .ownership-item span {
+        margin-top: var(--space-2);
+        color: var(--text-muted);
+        font-size: 0.76rem;
+      }
+
+      .code-journey {
+        margin-top: var(--space-7);
+        border-top: var(--hairline) solid var(--line-strong);
+      }
+
+      .journey-step {
+        display: grid;
+        grid-template-columns: 4rem minmax(14rem, 0.55fr) minmax(0, 1.45fr);
+        border-bottom: var(--hairline) solid var(--line-strong);
+      }
+
+      .journey-number,
+      .journey-explanation,
+      .journey-code {
+        min-width: 0;
+        padding-block: var(--space-6);
+      }
+
+      .journey-number {
+        color: var(--signal-2);
+        font-size: 1.15rem;
+        font-variant-numeric: tabular-nums;
+        font-weight: 750;
+      }
+
+      .journey-explanation { padding-right: var(--space-6); }
+
+      .journey-explanation h3 {
+        margin: 0;
+        font-size: 1.1rem;
+      }
+
+      .journey-explanation p {
+        margin-top: var(--space-3);
+        color: var(--text-muted);
+      }
+
+      .journey-owner {
+        display: inline-block;
+        margin-top: var(--space-4);
+        color: var(--signal-1);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.76rem;
+      }
+
+      .implementation-state {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        margin-top: var(--space-3);
+        padding: 0.2rem 0.45rem;
+        border: var(--hairline) solid currentColor;
+        color: var(--success);
+        font-size: 0.68rem;
+        font-weight: 750;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .implementation-state[data-state='partial'] { color: var(--warning); }
+      .implementation-state[data-state='planned'] { color: var(--text-muted); }
+
+      .journey-code {
+        padding-left: var(--space-6);
+        border-left: var(--hairline) solid var(--line);
+      }
+
+      .journey-code-label {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--space-4);
+        margin-bottom: var(--space-3);
+        color: var(--text-muted);
+        font-size: 0.72rem;
+      }
+
+      .journey-code-label code {
+        color: var(--signal-1);
+        overflow-wrap: anywhere;
+      }
+
+      .journey-code .code-block { margin-top: 0; }
+
+      .plain-translation {
+        margin: var(--space-4) 0 0;
+        padding-top: var(--space-3);
+        border-top: var(--hairline) solid var(--line);
+        color: var(--text-muted);
+        font-size: 0.84rem;
+      }
+
+      .plain-translation strong { color: var(--text); }
+
+      .repo-map {
+        display: grid;
+        grid-template-columns: minmax(16rem, 0.65fr) minmax(0, 1.35fr);
+        border-top: var(--hairline) solid var(--line-strong);
+        border-bottom: var(--hairline) solid var(--line-strong);
+      }
+
+      .repo-tree {
+        margin: 0;
+        padding: var(--space-6);
+        border-right: var(--hairline) solid var(--line-strong);
+        background: var(--ground-deep);
+        color: var(--signal-1);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.84rem;
+        line-height: 1.75;
+        overflow-x: auto;
+      }
+
+      .repo-explanation {
+        padding: var(--space-6);
+      }
+
+      .repo-explanation > p {
+        max-width: 62ch;
+        color: var(--text-muted);
+      }
+
+      .repo-roles {
+        margin: var(--space-5) 0 0;
+      }
+
+      .repo-roles div {
+        display: grid;
+        grid-template-columns: 7rem 1fr;
+        gap: var(--space-4);
+        padding-block: var(--space-3);
+        border-top: var(--hairline) solid var(--line);
+      }
+
+      .repo-roles dt {
+        color: var(--signal-2);
+        font-weight: 700;
+      }
+
+      .repo-roles dd {
+        margin: 0;
+        color: var(--text-muted);
+      }
+
+      .runtime-flow {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+        align-items: stretch;
+        margin-top: var(--space-7);
+        border-top: var(--hairline) solid var(--line-strong);
+        border-bottom: var(--hairline) solid var(--line-strong);
+      }
+
+      .runtime-node {
+        min-height: 8.5rem;
+        min-width: 0;
+        padding: var(--space-5);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .runtime-node i {
+        color: var(--signal-3);
+      }
+
+      .runtime-node strong,
+      .runtime-node span {
+        display: block;
+      }
+
+      .runtime-node span {
+        margin-top: var(--space-2);
+        color: var(--text-muted);
+        font-size: 0.85rem;
+      }
+
+      .runtime-arrow {
+        width: 2rem;
+        display: grid;
+        place-items: center;
+        color: var(--line-strong);
+      }
+
+      .build-consume {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-top: var(--space-7);
+        border: var(--hairline) solid var(--line-strong);
+      }
+
+      .build-consume-column {
+        min-width: 0;
+        padding: var(--space-6);
+      }
+
+      .build-consume-column + .build-consume-column {
+        border-left: var(--hairline) solid var(--line-strong);
+      }
+
+      .column-title {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        margin-bottom: var(--space-5);
+      }
+
+      .column-title i {
+        color: var(--signal-4);
+      }
+
+      .column-title h3 {
+        margin: 0;
+        font-size: 1.35rem;
+      }
+
+      .plain-steps {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        counter-reset: plain-step;
+      }
+
+      .plain-steps li {
+        counter-increment: plain-step;
+        display: grid;
+        grid-template-columns: 2rem 1fr;
+        gap: var(--space-3);
+        padding-block: var(--space-3);
+        border-top: var(--hairline) solid var(--line);
+        color: var(--text-muted);
+      }
+
+      .plain-steps li::before {
+        content: counter(plain-step);
+        color: var(--signal-2);
+        font-variant-numeric: tabular-nums;
+        font-weight: 750;
+      }
+
+      .code-block {
+        max-width: 100%;
+        margin: var(--space-5) 0 0;
+        padding: var(--space-4);
+        border-left: var(--rail-width) solid var(--signal-1);
+        background: var(--ground-deep);
+        color: var(--text);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.78rem;
+        line-height: 1.7;
+        overflow-x: auto;
+        white-space: pre;
+      }
+
+      .generated-folders {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-top: var(--space-5);
+        border-top: var(--hairline) solid var(--line);
+      }
+
+      .generated-folder {
+        padding: var(--space-4);
+        border-right: var(--hairline) solid var(--line);
+      }
+
+      .generated-folder:last-child {
+        border-right: 0;
+      }
+
+      .generated-folder strong,
+      .generated-folder span {
+        display: block;
+      }
+
+      .generated-folder strong {
+        color: var(--signal-1);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.85rem;
+      }
+
+      .generated-folder span {
+        margin-top: var(--space-2);
+        color: var(--text-muted);
+        font-size: 0.8rem;
+      }
+
+      .consumer-options {
+        margin-top: var(--space-5);
+        border-top: var(--hairline) solid var(--line);
+      }
+
+      .consumer-option {
+        display: grid;
+        grid-template-columns: minmax(8rem, 0.8fr) minmax(0, 1.2fr);
+        gap: var(--space-4);
+        padding-block: var(--space-3);
+        border-bottom: var(--hairline) solid var(--line);
+      }
+
+      .consumer-option strong {
+        color: var(--text);
+      }
+
+      .consumer-option code {
+        color: var(--signal-1);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.78rem;
+        overflow-wrap: anywhere;
+      }
+
+      .not-published {
+        margin-top: var(--space-5);
+        padding: var(--space-4) 0 var(--space-4) var(--space-4);
+        border-left: var(--rail-width) solid var(--warning);
+        color: var(--text-muted);
+      }
+
+      .not-published strong {
+        color: var(--warning);
+      }
+
+      .npm-guide {
+        margin-top: var(--space-8);
+        scroll-margin-top: 5rem;
+      }
+
+      .npm-guide-header {
+        display: grid;
+        grid-template-columns: minmax(0, 0.75fr) minmax(18rem, 1.25fr);
+        gap: var(--space-7);
+        align-items: end;
+        padding-bottom: var(--space-5);
+        border-bottom: var(--hairline) solid var(--line-strong);
+      }
+
+      .npm-guide-header h3 {
+        margin: 0;
+        font-size: clamp(1.75rem, 4vw, 3rem);
+      }
+
+      .npm-guide-header p {
+        margin: 0;
+        color: var(--text-muted);
+      }
+
+      .planned-api-note {
+        display: grid;
+        grid-template-columns: 1.5rem minmax(0, 1fr);
+        gap: var(--space-3);
+        margin-top: var(--space-5);
+        padding-block: var(--space-4);
+        border-block: var(--hairline) solid var(--warning);
+        color: var(--text-muted);
+      }
+
+      .planned-api-note i {
+        margin-top: 0.2rem;
+        color: var(--warning);
+      }
+
+      .planned-api-note strong { color: var(--warning); }
+
+      .package-picker {
+        margin-top: var(--space-7);
+        border-top: var(--hairline) solid var(--line-strong);
+      }
+
+      .package-choice {
+        display: grid;
+        grid-template-columns: 2rem minmax(10rem, 0.65fr) minmax(15rem, 1fr) minmax(0, 1.35fr);
+        gap: var(--space-4);
+        align-items: center;
+        padding-block: var(--space-4);
+        border-bottom: var(--hairline) solid var(--line);
+      }
+
+      .package-choice > i { color: var(--signal-3); }
+
+      .package-choice strong,
+      .package-choice span,
+      .package-choice code {
+        min-width: 0;
+      }
+
+      .package-choice strong {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+        align-items: center;
+      }
+
+      .route-status {
+        padding: 0.12rem 0.35rem;
+        border: var(--hairline) solid currentColor;
+        color: var(--success);
+        font-size: 0.62rem;
+        font-weight: 750;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .route-status[data-state='target'] { color: var(--text-muted); }
+
+      .package-choice span {
+        color: var(--text-muted);
+        font-size: 0.86rem;
+      }
+
+      .package-choice code {
+        color: var(--signal-1);
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 0.76rem;
+        overflow-wrap: anywhere;
+      }
+
+      .consumer-pipeline {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        margin-top: var(--space-8);
+        border-block: var(--hairline) solid var(--line-strong);
+      }
+
+      .pipeline-step {
+        position: relative;
+        min-width: 0;
+        min-height: 11rem;
+        padding: var(--space-4);
+        border-right: var(--hairline) solid var(--line);
+      }
+
+      .pipeline-step:last-child { border-right: 0; }
+
+      .pipeline-step:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        top: 2rem;
+        right: -0.28rem;
+        z-index: 1;
+        width: 0.5rem;
+        height: 0.5rem;
+        border-top: var(--hairline) solid var(--signal-2);
+        border-right: var(--hairline) solid var(--signal-2);
+        background: var(--ground);
+        transform: rotate(45deg);
+      }
+
+      .pipeline-owner {
+        display: block;
+        margin-bottom: var(--space-5);
+        color: var(--signal-2);
+        font-size: 0.68rem;
+        font-weight: 750;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      .pipeline-step i,
+      .pipeline-step strong,
+      .pipeline-step span {
+        display: block;
+      }
+
+      .pipeline-step i {
+        margin-bottom: var(--space-3);
+        color: var(--signal-1);
+      }
+
+      .pipeline-step strong { font-size: 0.86rem; }
+
+      .pipeline-step span {
+        margin-top: var(--space-2);
+        color: var(--text-muted);
+        font-size: 0.75rem;
+      }
+
+      .usage-examples { margin-top: var(--space-8); }
+
+      .usage-examples > h4 {
+        margin: 0 0 var(--space-4);
+        font-size: 1.35rem;
+      }
+
+      .usage-tabs {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        border-block: var(--hairline) solid var(--line-strong);
+      }
+
+      .usage-tab {
+        min-height: 3.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: var(--space-2);
+        padding: var(--space-3);
+        border: 0;
+        border-right: var(--hairline) solid var(--line-strong);
+        border-radius: 0;
+        background: transparent;
+        color: var(--text-muted);
+        cursor: pointer;
+      }
+
+      .usage-tab:last-child { border-right: 0; }
+
+      .usage-tab:hover { color: var(--text); }
+
+      .usage-tab[aria-selected='true'] {
+        color: var(--text);
+        box-shadow: inset 0 calc(-1 * var(--rail-width)) 0 var(--signal-1);
+      }
+
+      .usage-panel { padding-top: var(--space-6); }
+
+      .usage-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(16rem, 0.65fr);
+        gap: var(--space-7);
+      }
+
+      .usage-copy h5 {
+        margin: 0;
+        font-size: 1.2rem;
+      }
+
+      .usage-copy > p {
+        max-width: 68ch;
+        color: var(--text-muted);
+      }
+
+      .usage-copy .code-block { margin-top: var(--space-4); }
+
+      .responsibility-list {
+        margin: 0;
+        border-top: var(--hairline) solid var(--line-strong);
+      }
+
+      .responsibility-list div {
+        padding-block: var(--space-4);
+        border-bottom: var(--hairline) solid var(--line);
+      }
+
+      .responsibility-list dt {
+        color: var(--signal-2);
+        font-weight: 750;
+      }
+
+      .responsibility-list dd {
+        margin: var(--space-2) 0 0;
+        color: var(--text-muted);
+        font-size: 0.84rem;
+      }
+
+      .browser-receipt {
+        margin-top: var(--space-5);
+        padding-top: var(--space-4);
+        border-top: var(--hairline) solid var(--line-strong);
+      }
+
+      .browser-receipt strong { color: var(--success); }
+
+      .browser-receipt p {
+        margin: var(--space-2) 0 0;
+        color: var(--text-muted);
+        font-size: 0.84rem;
+      }
+
+      .progress-ledger {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        margin-bottom: var(--space-7);
+        border-block: var(--hairline) solid var(--line-strong);
+      }
+
+      .progress-column {
+        min-width: 0;
+        padding: var(--space-6) var(--space-6) var(--space-6) 0;
+      }
+
+      .progress-column + .progress-column {
+        padding-right: 0;
+        padding-left: var(--space-6);
+        border-left: var(--hairline) solid var(--line-strong);
+      }
+
+      .progress-column h3 {
+        margin: 0 0 var(--space-4);
+        font-size: 1.15rem;
+      }
+
+      .progress-column[data-progress='done'] h3 { color: var(--success); }
+      .progress-column[data-progress='next'] h3 { color: var(--signal-2); }
+
+      .progress-list {
+        display: grid;
+        gap: var(--space-3);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .progress-list li {
+        display: grid;
+        grid-template-columns: 1.25rem minmax(0, 1fr);
+        gap: var(--space-3);
+        color: var(--text-muted);
+      }
+
+      .progress-list i {
+        margin-top: 0.25rem;
+        color: inherit;
+      }
+
+      .progress-list strong {
+        color: var(--text);
+      }
+
+      .timeline {
+        display: grid;
+        grid-template-columns: 8rem minmax(0, 1fr);
+        border-top: var(--hairline) solid var(--line-strong);
+      }
+
+      .milestone {
+        display: contents;
+      }
+
+      .milestone-code,
+      .milestone-body {
+        padding-block: var(--space-5);
+        border-bottom: var(--hairline) solid var(--line-strong);
+      }
+
+      .milestone-code {
+        color: var(--text-muted);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .milestone-code i {
+        width: 1.25rem;
+      }
+
+      .milestone[data-status='done'] .milestone-code { color: var(--success); }
+      .milestone[data-status='active'] .milestone-code { color: var(--signal-2); }
+
+      .milestone-body {
+        display: grid;
+        grid-template-columns: minmax(12rem, 0.5fr) minmax(0, 1fr);
+        gap: var(--space-5);
+      }
+
+      .milestone-body strong {
+        font-size: 1.05rem;
+      }
+
+      .milestone-body span {
+        color: var(--text-muted);
+      }
+
+      .guardrail-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0 var(--space-7);
+        border-top: var(--hairline) solid var(--line-strong);
+      }
+
+      .guardrail {
+        display: grid;
+        grid-template-columns: 2.5rem 1fr;
+        gap: var(--space-3);
+        padding-block: var(--space-5);
+        border-bottom: var(--hairline) solid var(--line);
+      }
+
+      .guardrail i {
+        color: var(--signal-4);
+        margin-top: 0.3rem;
+      }
+
+      .guardrail p {
+        margin: 0;
+        color: var(--text-muted);
+      }
+
+      .reading-list {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        border: var(--hairline) solid var(--line-strong);
+      }
+
+      .reading-link {
+        min-height: 8rem;
+        padding: var(--space-5);
+        border-right: var(--hairline) solid var(--line-strong);
+        color: var(--text);
+        text-decoration: none;
+      }
+
+      .reading-link:last-child {
+        border-right: 0;
+      }
+
+      .reading-link:hover {
+        background: var(--surface);
+      }
+
+      .reading-link i {
+        color: var(--signal-1);
+        margin-bottom: var(--space-4);
+      }
+
+      .reading-link strong,
+      .reading-link span {
+        display: block;
+      }
+
+      .reading-link span {
+        margin-top: var(--space-2);
+        color: var(--text-muted);
+        font-size: 0.88rem;
+      }
+
+      footer {
+        width: min(calc(100% - 2rem), var(--max-width));
+        margin-inline: auto;
+        padding-block: var(--space-6);
+        color: var(--text-muted);
+        font-size: 0.82rem;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        .chart-widget { transition: none; }
+      }
+
+      @media (max-width: 58rem) {
+        .site-nav { display: none; }
+        .intro { min-height: auto; }
+        .intro-grid,
+        .section-heading,
+        .ladder-layout,
+        .package-detail,
+        .repo-map,
+        .build-consume {
+          grid-template-columns: 1fr;
+        }
+        .intro-grid { gap: var(--space-7); }
+        .system-plate { min-height: 25rem; }
+        .section-heading { align-items: start; }
+        .ladder-controls { grid-template-columns: repeat(3, 1fr); }
+        .rung-button:nth-child(3) { border-right: 0; }
+        .rung-button:nth-child(-n + 3) { border-bottom: var(--hairline) solid var(--line-strong); }
+        .demo-stage { min-height: 26rem; padding: var(--space-4); }
+        .package-toggle {
+          grid-template-columns: 1fr auto 2rem;
+          gap: var(--space-3);
+        }
+        .package-role { grid-column: 1 / -1; grid-row: 2; }
+        .package-detail { padding-right: 0; }
+        .ownership-map { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .ownership-item:nth-child(4) { border-right: 0; }
+        .ownership-item:nth-child(-n + 4) { border-bottom: var(--hairline) solid var(--line); }
+        .journey-step { grid-template-columns: 3rem minmax(12rem, 0.65fr) minmax(0, 1.35fr); }
+        .repo-tree {
+          border-right: 0;
+          border-bottom: var(--hairline) solid var(--line-strong);
+        }
+        .runtime-flow {
+          grid-template-columns: 1fr;
+        }
+        .runtime-node {
+          min-height: auto;
+          border-bottom: var(--hairline) solid var(--line);
+        }
+        .runtime-arrow {
+          width: auto;
+          height: 2rem;
+        }
+        .runtime-arrow i { transform: rotate(90deg); }
+        .build-consume-column + .build-consume-column {
+          border-left: 0;
+          border-top: var(--hairline) solid var(--line-strong);
+        }
+        .npm-guide-header,
+        .usage-layout { grid-template-columns: 1fr; }
+        .consumer-pipeline { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+        .pipeline-step:nth-child(4) { border-right: 0; }
+        .pipeline-step:nth-child(-n + 4) { border-bottom: var(--hairline) solid var(--line); }
+        .pipeline-step:nth-child(4)::after { display: none; }
+        .reading-list { grid-template-columns: 1fr; }
+        .reading-link {
+          min-height: auto;
+          border-right: 0;
+          border-bottom: var(--hairline) solid var(--line-strong);
+        }
+        .reading-link:last-child { border-bottom: 0; }
+      }
+
+      @media (max-width: 36rem) {
+        .section-inner { padding-block: var(--space-7); }
+        .header-inner { min-height: 3.5rem; }
+        h1 { font-size: clamp(2.65rem, 15vw, 4.25rem); }
+        .ladder-controls { grid-template-columns: repeat(2, 1fr); }
+        .rung-button:nth-child(3) { border-right: var(--hairline) solid var(--line-strong); }
+        .rung-button:nth-child(2n) { border-right: 0; }
+        .rung-button:nth-child(-n + 4) { border-bottom: var(--hairline) solid var(--line-strong); }
+        .demo-stage { min-height: 22rem; }
+        .chart-widget { min-width: 10rem; }
+        .chart-head { padding: var(--space-3); }
+        .package-toggle { grid-template-columns: 1fr 2rem; }
+        .package-state { grid-column: 1; grid-row: 3; justify-self: start; }
+        .package-role { grid-column: 1 / -1; }
+        .ownership-map { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .ownership-item,
+        .ownership-item:nth-child(4) { border-right: var(--hairline) solid var(--line); }
+        .ownership-item:nth-child(2n) { border-right: 0; }
+        .ownership-item:nth-child(-n + 6) { border-bottom: var(--hairline) solid var(--line); }
+        .journey-step { grid-template-columns: 2.5rem minmax(0, 1fr); }
+        .journey-explanation { padding-right: 0; }
+        .journey-code {
+          grid-column: 2;
+          padding: 0 0 var(--space-6);
+          border-left: 0;
+        }
+        .journey-code-label { display: grid; gap: var(--space-1); }
+        .journey-code .code-block {
+          white-space: pre-wrap;
+          overflow-wrap: anywhere;
+        }
+        .timeline { grid-template-columns: 4.5rem minmax(0, 1fr); }
+        .milestone-body { grid-template-columns: 1fr; gap: var(--space-2); }
+        .guardrail-grid { grid-template-columns: 1fr; }
+        .generated-folders { grid-template-columns: 1fr; }
+        .generated-folder {
+          border-right: 0;
+          border-bottom: var(--hairline) solid var(--line);
+        }
+        .consumer-option { grid-template-columns: 1fr; gap: var(--space-1); }
+        .package-choice {
+          grid-template-columns: 1.5rem minmax(0, 1fr);
+          align-items: start;
+        }
+        .package-choice span,
+        .package-choice code { grid-column: 2; }
+        .consumer-pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .pipeline-step,
+        .pipeline-step:nth-child(4) { border-right: var(--hairline) solid var(--line); }
+        .pipeline-step:nth-child(2n) { border-right: 0; }
+        .pipeline-step:nth-child(-n + 6) { border-bottom: var(--hairline) solid var(--line); }
+        .pipeline-step:nth-child(4)::after { display: block; }
+        .pipeline-step:nth-child(2n)::after { display: none; }
+        .usage-tabs { grid-template-columns: 1fr; }
+        .usage-tab {
+          justify-content: flex-start;
+          border-right: 0;
+          border-bottom: var(--hairline) solid var(--line);
+        }
+        .usage-tab:last-child { border-bottom: 0; }
+        .usage-copy .code-block {
+          white-space: pre-wrap;
+          overflow-wrap: anywhere;
+        }
+        .progress-ledger { grid-template-columns: 1fr; }
+        .progress-column { padding-right: 0; }
+        .progress-column + .progress-column {
+          padding-left: 0;
+          border-top: var(--hairline) solid var(--line-strong);
+          border-left: 0;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!--
+      THESIS: Explain one idea: the box reports size, core decides content, and SVG draws the plan.
+      OWN-WORLD: Emission-Line Rail, graphite surfaces, measured hairlines, signal-only spectral colour.
+      STORY: Understand the product, try the ladder, inspect package roles, then see current and next work.
+      FIRST VIEWPORT: Plain-language promise beside the full grid-to-SVG flow; no marketing detour.
+      FORM: Read-mode technical field guide, code-led, seed key GX-EXPLAINER-2026.
+      FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
+    -->
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="wordmark" href="#top" aria-label="GX project explainer home">
+          <span class="wordmark-rail" aria-hidden="true"></span>
+          <span>GX / Project map</span>
+        </a>
+        <nav class="site-nav" aria-label="Explainer sections">
+          <a href="#idea">Core idea</a>
+          <a href="#packages">Packages</a>
+          <a href="#code-journey">Code path</a>
+          <a href="#npm-usage">NPM usage</a>
+          <a href="#roadmap">Build order</a>
+          <a href="#rules">Rules</a>
+        </nav>
+        <button class="icon-button" id="theme-toggle" type="button" aria-label="Switch to light theme" title="Switch theme">
+          <i class="fa-solid fa-sun" aria-hidden="true"></i>
+        </button>
+      </div>
+    </header>
+
+    <main id="top">
+      <section class="section intro" aria-labelledby="page-title">
+        <div class="section-inner intro-grid">
+          <div>
+            <p class="status-line"><span class="status-dot" aria-hidden="true"></span>A1 through A3 complete. A4 SVG rendering is next.</p>
+            <h1 id="page-title">Responsive chart + dashboard grid library</h1>
+            <p class="lede">
+              We are building charts that change what information they show when their box changes size.
+              A small chart becomes simpler and more honest, not merely smaller and harder to read.
+            </p>
+            <p class="plain-answer">
+              <strong>In one sentence:</strong> the grid gives a chart a box, the core decides what fits,
+              and a pure SVG layer draws that decision.
+            </p>
+          </div>
+
+          <div class="system-plate" aria-label="Project flow from grid to SVG">
+            <div class="flow-stack">
+              <div class="flow-node" data-accent="1">
+                <i class="flow-icon fa-solid fa-border-all" aria-hidden="true"></i>
+                <div><strong>Grid gives a box</strong><span>12 columns, width, height, rows and columns</span></div>
+              </div>
+              <div class="flow-node" data-accent="2">
+                <i class="flow-icon fa-solid fa-ruler-combined" aria-hidden="true"></i>
+                <div><strong>React measures it</strong><span>ResizeObserver reports the current size</span></div>
+              </div>
+              <div class="flow-node" data-accent="3">
+                <i class="flow-icon fa-solid fa-brain" aria-hidden="true"></i>
+                <div><strong>Core makes a plan</strong><span>planChart() returns plain, serialisable data</span></div>
+              </div>
+              <div class="flow-node" data-accent="4">
+                <i class="flow-icon fa-solid fa-chart-line" aria-hidden="true"></i>
+                <div><strong>Primitives draw SVG</strong><span>Hook-free, server-safe, styled by tokens</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="idea" aria-labelledby="idea-title">
+        <div class="section-inner">
+          <div class="section-heading">
+            <div>
+              <p class="section-label">The responsive ladder</p>
+              <h2 id="idea-title">Try the core idea</h2>
+            </div>
+            <p>
+              Select a size. Watch information enter or leave the chart. This is the product thesis:
+              content changes by size family, while the underlying data remains the same.
+            </p>
+          </div>
+
+          <div class="ladder-controls" role="tablist" aria-label="Chart size family">
+            <button class="rung-button" type="button" role="tab" data-rung="micro" aria-selected="false">Micro</button>
+            <button class="rung-button" type="button" role="tab" data-rung="tile" aria-selected="false">Tile</button>
+            <button class="rung-button" type="button" role="tab" data-rung="strip" aria-selected="false">Strip</button>
+            <button class="rung-button" type="button" role="tab" data-rung="panel" aria-selected="true">Panel</button>
+            <button class="rung-button" type="button" role="tab" data-rung="canvas" aria-selected="false">Canvas</button>
+            <button class="rung-button" type="button" role="tab" data-rung="stage" aria-selected="false">Stage</button>
+          </div>
+
+          <div class="ladder-layout">
+            <div class="demo-stage">
+              <figure class="chart-widget" id="chart-widget" aria-labelledby="chart-title">
+                <figcaption class="chart-head">
+                  <div>
+                    <strong id="chart-title">Weekly revenue</strong>
+                    <span id="chart-summary">Readable values and axes</span>
+                  </div>
+                  <div class="chart-value" data-show="micro tile">42.8K <b>+12%</b></div>
+                </figcaption>
+                <svg class="chart-svg" viewBox="0 0 760 300" role="img" aria-label="Illustrative weekly revenue line chart">
+                  <g data-show="panel canvas stage">
+                    <path class="chart-grid" d="M70 55H720 M70 120H720 M70 185H720 M70 250H720" />
+                    <path class="chart-axis" d="M70 35V250H720" />
+                    <text class="chart-label" x="26" y="59">50K</text>
+                    <text class="chart-label" x="26" y="124">40K</text>
+                    <text class="chart-label" x="26" y="189">30K</text>
+                    <text class="chart-label" x="26" y="254">20K</text>
+                  </g>
+                  <path
+                    class="chart-area"
+                    data-show="tile strip panel canvas stage"
+                    d="M70 226 L160 190 L250 207 L340 142 L430 158 L520 96 L610 120 L700 62 L700 250 L70 250 Z"
+                  />
+                  <path
+                    class="chart-series"
+                    data-show="tile strip panel canvas stage"
+                    d="M70 226 L160 190 L250 207 L340 142 L430 158 L520 96 L610 120 L700 62"
+                  />
+                  <g data-show="strip panel canvas stage">
+                    <text class="chart-label" x="68" y="280">Mon</text>
+                    <text class="chart-label" x="679" y="280">Sun</text>
+                  </g>
+                  <g data-show="canvas stage">
+                    <circle class="chart-point" cx="70" cy="226" r="5" />
+                    <circle class="chart-point" cx="340" cy="142" r="5" />
+                    <circle class="chart-point" cx="520" cy="96" r="5" />
+                    <circle class="chart-point" cx="700" cy="62" r="5" />
+                    <rect class="chart-legend-swatch" x="570" y="18" width="16" height="3" />
+                    <text class="chart-label" x="596" y="23">Revenue</text>
+                  </g>
+                  <g data-show="stage">
+                    <path class="chart-axis" d="M520 84V48H638" />
+                    <text class="chart-annotation" x="646" y="51">Campaign lift</text>
+                    <text class="chart-annotation" x="650" y="68">+18.4%</text>
+                  </g>
+                  <g data-show="micro">
+                    <text class="chart-annotation" x="70" y="135">UP 12% THIS WEEK</text>
+                    <text class="chart-label" x="70" y="168">The plot is removed. The value is the honest chart.</text>
+                  </g>
+                </svg>
+              </figure>
+            </div>
+
+            <aside class="demo-explanation" aria-live="polite">
+              <p class="rung-name" id="rung-name">Panel</p>
+              <p class="rung-size" id="rung-size">3x3 to 6x4 cells</p>
+              <p id="rung-description">A readable chart with axes, ticks and gridlines.</p>
+              <ul class="decision-list" id="decision-list"></ul>
+            </aside>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="packages" aria-labelledby="packages-title">
+        <div class="section-inner">
+          <div class="section-heading">
+            <div>
+              <p class="section-label">Six packages, one direction</p>
+              <h2 id="packages-title">What each component does</h2>
+            </div>
+            <p>
+              Each package has one job. Dependencies move from data and tokens toward interaction,
+              never back toward the browser. Expand a row for the simple explanation.
+            </p>
+          </div>
+
+          <div class="package-list">
+            <article class="package-item">
+              <button class="package-toggle" type="button" aria-expanded="true" aria-controls="tokens-detail">
+                <span class="package-name">@gx/tokens</span>
+                <span class="package-role">The visual vocabulary</span>
+                <span class="package-state" data-state="ready">A2.1 foundation ready</span>
+                <i class="fa-solid fa-minus" aria-hidden="true"></i>
+              </button>
+              <div class="package-detail" id="tokens-detail">
+                <p>
+                  Tokens name colours, type sizes, gaps, strokes and theme choices. The Rail theme, typed
+                  token skeleton and generated fitting-typography CSS exist now. Roboto Flex character
+                  advances are generated from a pinned font and kept in sync with the CSS. The complete
+                  token tree, neutral theme and data ramps come later in B1.
+                </p>
+                <dl class="package-facts">
+                  <div><dt>Input</dt><dd>Design decisions</dd></div>
+                  <div><dt>Output</dt><dd>CSS variables + TS names</dd></div>
+                  <div><dt>Rule</dt><dd>No package dependencies</dd></div>
+                </dl>
+              </div>
+            </article>
+
+            <article class="package-item">
+              <button class="package-toggle" type="button" aria-expanded="false" aria-controls="core-detail">
+                <span class="package-name">@gx/core</span>
+                <span class="package-role">The brain that decides what fits</span>
+                <span class="package-state" data-state="ready">A3 complete</span>
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
+              </button>
+              <div class="package-detail" id="core-detail" hidden>
+                <p>
+                  Core receives size and a description of the data. <code>planChart()</code> now returns a
+                  complete, serialisable plan for line and area charts at all six size families. Plot-box
+                  layout, label degradation, policy, forced overrides, generated font metrics, stability and
+                  honesty invariants are implemented and tested without React or the DOM.
+                </p>
+                <dl class="package-facts">
+                  <div><dt>Input</dt><dd>SizeContext + DataShape</dd></div>
+                  <div><dt>Output</dt><dd>Serializable ChartPlan</dd></div>
+                  <div><dt>Rule</dt><dd>No React and no DOM</dd></div>
+                </dl>
+              </div>
+            </article>
+
+            <article class="package-item">
+              <button class="package-toggle" type="button" aria-expanded="false" aria-controls="primitives-detail">
+                <span class="package-name">@gx/primitives</span>
+                <span class="package-role">The hook-free SVG renderer</span>
+                <span class="package-state" data-state="next">A4 next</span>
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
+              </button>
+              <div class="package-detail" id="primitives-detail" hidden>
+                <p>
+                  Primitives will turn the completed ChartPlan into accessible SVG: Chart, Axis, Grid,
+                  LinePath, AreaPath, points and labels. The RSC-safe package boundary exists, but the
+                  components, semantic test matchers, element snapshots and Next.js server fixture are the
+                  active A4 work.
+                </p>
+                <dl class="package-facts">
+                  <div><dt>Input</dt><dd>ChartPlan + chart data</dd></div>
+                  <div><dt>Output</dt><dd>Accessible SVG</dd></div>
+                  <div><dt>Rule</dt><dd>No state, effects or refs</dd></div>
+                </dl>
+              </div>
+            </article>
+
+            <article class="package-item">
+              <button class="package-toggle" type="button" aria-expanded="false" aria-controls="react-detail">
+                <span class="package-name">@gx/react</span>
+                <span class="package-role">The optional client behaviour</span>
+                <span class="package-state" data-state="next">Boundary only</span>
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
+              </button>
+              <div class="package-detail" id="react-detail" hidden>
+                <p>
+                  This is the only chart layer that measures the browser and adds tooltips, crosshairs,
+                  brushing and clickable legends. AutoChart will connect ResizeObserver to planChart() and
+                  then hand the result to primitives. Static server charts do not need this package.
+                </p>
+                <dl class="package-facts">
+                  <div><dt>Input</dt><dd>A real element size</dd></div>
+                  <div><dt>Output</dt><dd>Auto-updating ChartPlan</dd></div>
+                  <div><dt>Rule</dt><dd>Owns the client boundary</dd></div>
+                </dl>
+              </div>
+            </article>
+
+            <article class="package-item">
+              <button class="package-toggle" type="button" aria-expanded="false" aria-controls="grid-detail">
+                <span class="package-name">@gx/grid</span>
+                <span class="package-role">The 12-column dashboard shell</span>
+                <span class="package-state" data-state="next">Boundary only</span>
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
+              </button>
+              <div class="package-detail" id="grid-detail" hidden>
+                <p>
+                  Grid controls where widgets sit, how they drag and resize, and their minimum useful size.
+                  It reports each box to the chart but never decides what the chart shows. That separation
+                  lets the same adaptive chart work inside or outside a dashboard.
+                </p>
+                <dl class="package-facts">
+                  <div><dt>Input</dt><dd>Widget layout</dd></div>
+                  <div><dt>Output</dt><dd>12-column boxes</dd></div>
+                  <div><dt>Rule</dt><dd>Size only, never content</dd></div>
+                </dl>
+              </div>
+            </article>
+
+            <article class="package-item">
+              <button class="package-toggle" type="button" aria-expanded="false" aria-controls="testing-detail">
+                <span class="package-name">@gx/testing</span>
+                <span class="package-role">Deterministic proof for consumers and us</span>
+                <span class="package-state" data-state="ready">Resize fake ready</span>
+                <i class="fa-solid fa-plus" aria-hidden="true"></i>
+              </button>
+              <div class="package-detail" id="testing-detail" hidden>
+                <p>
+                  Testing owns a controllable, emit-driven FakeResizeObserver. Tests choose exactly when a
+                  resize happens, so chart behaviour is repeatable instead of waiting for browser timing.
+                  Determinism, UTC and frame-timer checks already run; semantic SVG matchers arrive with A4.
+                </p>
+                <dl class="package-facts">
+                  <div><dt>Input</dt><dd>Chosen test dimensions</dd></div>
+                  <div><dt>Output</dt><dd>Repeatable resize events</dd></div>
+                  <div><dt>Rule</dt><dd>Inject fakes, do not leak globals</dd></div>
+                </dl>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="code-journey" aria-labelledby="code-journey-title">
+        <div class="section-inner">
+          <div class="section-heading">
+            <div>
+              <p class="section-label">One chart, from input to screen</p>
+              <h2 id="code-journey-title">What every component does, in plain English and code</h2>
+            </div>
+            <p>
+              Think of this as a small production line. Each part receives one thing, does one job and
+              hands a different thing forward. No part is allowed to take over another part's job.
+            </p>
+          </div>
+
+          <div class="ownership-map" aria-label="Who owns each responsibility">
+            <div class="ownership-item"><i class="fa-solid fa-database" aria-hidden="true"></i><strong>Your app</strong><span>Owns the real data</span></div>
+            <div class="ownership-item"><i class="fa-solid fa-border-all" aria-hidden="true"></i><strong>@gx/grid</strong><span>Owns the box</span></div>
+            <div class="ownership-item"><i class="fa-solid fa-ruler-combined" aria-hidden="true"></i><strong>@gx/react</strong><span>Measures the box</span></div>
+            <div class="ownership-item"><i class="fa-solid fa-brain" aria-hidden="true"></i><strong>@gx/core</strong><span>Chooses what fits</span></div>
+            <div class="ownership-item"><i class="fa-solid fa-pen-ruler" aria-hidden="true"></i><strong>@gx/primitives</strong><span>Draws the plan</span></div>
+            <div class="ownership-item"><i class="fa-solid fa-palette" aria-hidden="true"></i><strong>@gx/tokens</strong><span>Controls appearance</span></div>
+            <div class="ownership-item"><i class="fa-solid fa-vial-circle-check" aria-hidden="true"></i><strong>@gx/testing</strong><span>Proves behavior</span></div>
+          </div>
+
+          <div class="code-journey">
+            <article class="journey-step">
+              <div class="journey-number">01</div>
+              <div class="journey-explanation">
+                <h3>Your application keeps the real values</h3>
+                <p>
+                  GX is not a database. Your application fetches revenue, users or temperatures. Core only
+                  receives a small description of that data so planning stays fast and server-safe.
+                </p>
+                <span class="journey-owner">Your app + @gx/core</span><br>
+                <span class="implementation-state"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>Implemented now</span>
+              </div>
+              <div class="journey-code">
+                <div class="journey-code-label"><span>Describe the shape, not every value</span><code>packages/core/src/context.ts</code></div>
+                <pre class="code-block"><code>const shape = {
+  series: 2,
+  categories: 12,
+  points: 120,
+  hasNegative: false,
+  labelMaxChars: 9,
+  temporal: true
+}</code></pre>
+                <p class="plain-translation"><strong>Translation:</strong> “I have two lines, twelve labels and 120 points.” Core does not need the actual numbers to decide whether axes and legends fit.</p>
+              </div>
+            </article>
+
+            <article class="journey-step">
+              <div class="journey-number">02</div>
+              <div class="journey-explanation">
+                <h3>The available box becomes size information</h3>
+                <p>
+                  A dashboard grid supplies real columns and rows. A standalone chart converts measured
+                  pixels into virtual cells. Both routes produce a <code>SizeContext</code>: a small object
+                  that tells the planner how much room it has.
+                </p>
+                <span class="journey-owner">@gx/core · measurement prototype in playground</span><br>
+                <span class="implementation-state" data-state="partial"><i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i>Core ready; AutoChart pending</span>
+              </div>
+              <div class="journey-code">
+                <div class="journey-code-label"><span>Convert a 360 x 220 box</span><code>packages/core/src/context.ts</code></div>
+                <pre class="code-block"><code>const ctx = sizeContextFromPixels(360, 220)
+
+// Result:
+// 3 columns x 2 rows
+// landscape
+// sizeClass: 'strip'</code></pre>
+                <p class="plain-translation"><strong>Translation:</strong> “This chart is short and medium-width, so it has enough room to show a shape but not enough room to promise precise values.”</p>
+              </div>
+            </article>
+
+            <article class="journey-step">
+              <div class="journey-number">03</div>
+              <div class="journey-explanation">
+                <h3>Core chooses one complete plan</h3>
+                <p>
+                  <code>planChart()</code> combines chart type, box, data shape and policy. It selects one
+                  rung, then applies any explicit consumer overrides after the decision.
+                </p>
+                <span class="journey-owner">@gx/core</span><br>
+                <span class="implementation-state"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>Implemented for line + area</span>
+              </div>
+              <div class="journey-code">
+                <div class="journey-code-label"><span>The public call and its three internal moves</span><code>packages/core/src/plan-chart.ts</code></div>
+                <pre class="code-block"><code>const plan = planChart('line', ctx, shape)
+
+// Inside planChart():
+const policy = resolvePolicy(inputPolicy)
+const rung = LINE_RUNGS[ctx.sizeClass]
+return applyOverrides(rung({ type, ctx, shape, policy }), overrides)</code></pre>
+                <p class="plain-translation"><strong>Translation:</strong> “Use the Strip recipe, make a full decision, then honor any values the developer deliberately forced.”</p>
+              </div>
+            </article>
+
+            <article class="journey-step">
+              <div class="journey-number">04</div>
+              <div class="journey-explanation">
+                <h3>The ChartPlan is a written instruction sheet</h3>
+                <p>
+                  The result contains no SVG and no browser objects. It is plain data that is easy to save
+                  or send, saying what exists, what is absent and how honest the chart can be at this size.
+                </p>
+                <span class="journey-owner">@gx/core</span><br>
+                <span class="implementation-state"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>Implemented now</span>
+              </div>
+              <div class="journey-code">
+                <div class="journey-code-label"><span>Simplified Strip output</span><code>ChartPlan JSON</code></div>
+                <pre class="code-block"><code>{
+  "sizeClass": "strip",
+  "valueLegibility": "shape-only",
+  "axes": { "x": { "visible": true }, "y": { "visible": false } },
+  "marks": { "primary": { "kind": "line", "area": false } },
+  "interaction": { "trigger": "tap" }
+}</code></pre>
+                <p class="plain-translation"><strong>Translation:</strong> “Draw the trend, show only endpoint context, remove the y-axis, and never pretend this small chart supports exact value reading.”</p>
+              </div>
+            </article>
+
+            <article class="journey-step">
+              <div class="journey-number">05</div>
+              <div class="journey-explanation">
+                <h3>Primitives will turn instructions into SVG</h3>
+                <p>
+                  This layer will read the plan and draw only what the plan names. It will not resize,
+                  re-plan, fetch data or hold interaction state. That means a server can draw a static chart
+                  before sending it to the browser.
+                </p>
+                <span class="journey-owner">@gx/primitives</span><br>
+                <span class="implementation-state" data-state="planned"><i class="fa-regular fa-circle" aria-hidden="true"></i>Planned next · A4</span>
+              </div>
+              <div class="journey-code">
+                <div class="journey-code-label"><span>Target API, not implemented yet</span><code>packages/primitives</code></div>
+                <pre class="code-block"><code>&lt;Chart plan={plan} data={revenueData} /&gt;
+
+// The plan says y.visible is false,
+// so no y-axis element is rendered at all.</code></pre>
+                <p class="plain-translation"><strong>Translation:</strong> “The architect has finished the drawing; A4 builds the construction crew.”</p>
+              </div>
+            </article>
+
+            <article class="journey-step">
+              <div class="journey-number">06</div>
+              <div class="journey-explanation">
+                <h3>Tokens style the SVG without changing its meaning</h3>
+                <p>
+                  CSS variables choose color, type, stroke and spacing. Fit-sensitive typography is generated
+                  from the same typed source as core's font metrics, so browser text and planner math agree.
+                </p>
+                <span class="journey-owner">@gx/tokens</span><br>
+                <span class="implementation-state" data-state="partial"><i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i>Foundation ready; full tree B1</span>
+              </div>
+              <div class="journey-code">
+                <div class="journey-code-label"><span>Appearance stays in CSS</span><code>packages/tokens/src/themes</code></div>
+                <pre class="code-block"><code>:where(:root) {
+  --gx-axis-color: currentColor;
+  --gx-label-font-size: 11px;
+  --gx-label-font-weight: 400;
+}
+
+.gx-axis { stroke: var(--gx-axis-color); }</code></pre>
+                <p class="plain-translation"><strong>Translation:</strong> “Tokens may repaint the axis, but they cannot decide that an absent axis should suddenly exist.”</p>
+              </div>
+            </article>
+
+            <article class="journey-step">
+              <div class="journey-number">07</div>
+              <div class="journey-explanation">
+                <h3>React will repeat the process when the box changes</h3>
+                <p>
+                  AutoChart will observe the element, rebuild SizeContext, ask core for a new plan and hand it
+                  to primitives. React coordinates the loop; it does not contain the chart rules.
+                </p>
+                <span class="journey-owner">@gx/react</span><br>
+                <span class="implementation-state" data-state="planned"><i class="fa-regular fa-circle" aria-hidden="true"></i>Planned · A5</span>
+              </div>
+              <div class="journey-code">
+                <div class="journey-code-label"><span>Target flow; local prototype exists in playground</span><code>packages/react</code></div>
+                <pre class="code-block"><code>ResizeObserver reports 360 x 220
+            ↓
+sizeContextFromPixels(360, 220)
+            ↓
+planChart('line', ctx, shape)
+            ↓
+&lt;Chart plan={plan} data={data} /&gt;</code></pre>
+                <p class="plain-translation"><strong>Translation:</strong> “When the user drags the corner, run the same pure decision again with the new room.”</p>
+              </div>
+            </article>
+
+            <article class="journey-step">
+              <div class="journey-number">08</div>
+              <div class="journey-explanation">
+                <h3>The grid owns placement, never chart content</h3>
+                <p>
+                  The future dashboard shell will drag and resize twelve-column boxes. It reports each box's
+                  geometry, but it never decides whether the chart needs a legend, axis or horizon mark.
+                </p>
+                <span class="journey-owner">@gx/grid</span><br>
+                <span class="implementation-state" data-state="planned"><i class="fa-regular fa-circle" aria-hidden="true"></i>Boundary ready; shell planned · C</span>
+              </div>
+              <div class="journey-code">
+                <div class="journey-code-label"><span>What exists today</span><code>packages/grid/src/index.ts</code></div>
+                <pre class="code-block"><code>'use client'
+
+export const GRID_COLUMNS = 12</code></pre>
+                <p class="plain-translation"><strong>Translation:</strong> “The landlord decides the room size; the chart decides what furniture fits inside.”</p>
+              </div>
+            </article>
+
+            <article class="journey-step">
+              <div class="journey-number">09</div>
+              <div class="journey-explanation">
+                <h3>Tests drive sizes instead of waiting for a browser</h3>
+                <p>
+                  The fake ResizeObserver emits exact dimensions on command. Core tests sweep boundaries in
+                  both directions and assert that the same input always returns the same plan.
+                </p>
+                <span class="journey-owner">@gx/testing + core test suites</span><br>
+                <span class="implementation-state"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>Implemented now</span>
+              </div>
+              <div class="journey-code">
+                <div class="journey-code-label"><span>Deterministic resize</span><code>packages/testing/src/index.ts</code></div>
+                <pre class="code-block"><code>const observer = new FakeResizeObserver(entries =&gt; {
+  measured = entries[0].contentRect
+})
+
+observer.emit(360, 220)
+expect(measured).toEqual({ width: 360, height: 220 })</code></pre>
+                <p class="plain-translation"><strong>Translation:</strong> “The test says exactly when resizing happens, so timing cannot make the result randomly pass or fail.”</p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="consumption" aria-labelledby="consumption-title">
+        <div class="section-inner">
+          <div class="section-heading">
+            <div>
+              <p class="section-label">Repository to application</p>
+              <h2 id="consumption-title">How we build it and how users use it</h2>
+            </div>
+            <p>
+              This repository is a factory for several small npm libraries. We work with all packages
+              together here; a future user installs only the layer their application needs.
+            </p>
+          </div>
+
+          <div class="repo-map">
+            <pre class="repo-tree" aria-label="Repository folder structure">Defence/
+├── packages/
+│   ├── tokens/
+│   ├── core/
+│   ├── primitives/
+│   ├── react/
+│   ├── grid/
+│   └── testing/
+├── apps/
+├── research/
+└── scripts/</pre>
+            <div class="repo-explanation">
+              <h3>One repository, several installable products</h3>
+              <p>
+                The packages live together so we can change and test them as one system. pnpm links them
+                locally through <code>workspace:*</code>; after publishing, npm resolves those links as
+                normal package versions.
+              </p>
+              <dl class="repo-roles">
+                <div><dt>packages/</dt><dd>The code consumers eventually install.</dd></div>
+                <div><dt>apps/</dt><dd>Our playgrounds. They consume the packages like a real application but are not part of the library.</dd></div>
+                <div><dt>research/</dt><dd>The reasoning behind thresholds, architecture and visual rules.</dd></div>
+                <div><dt>scripts/</dt><dd>Checks that prevent invalid dependencies, tokens and build boundaries.</dd></div>
+              </dl>
+            </div>
+          </div>
+
+          <div class="npm-guide" id="npm-usage">
+            <div class="npm-guide-header">
+              <h3>After npm install: what you actually write</h3>
+              <p>
+                GX does not own your database or call your API. Your application fetches data in any
+                shape, maps it into GX's common series shape, and then you choose a
+                static chart, an automatically resizing chart, or a full dashboard.
+              </p>
+            </div>
+
+            <div class="planned-api-note">
+              <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
+              <div>
+                <strong>Mixed current and target API:</strong> canonical <code>Series</code>,
+                <code>describeShape()</code>, <code>planChart()</code> and frame geometry exist now.
+                <code>Chart</code>, <code>AutoChart</code> and the grid components are the A4/A5/C target.
+                Every package is still private, and <code>@gx</code> remains a placeholder.
+              </div>
+            </div>
+
+            <div class="package-picker" aria-label="Which GX packages to install">
+              <div class="package-choice">
+                <i class="fa-solid fa-brain" aria-hidden="true"></i>
+                <strong>I only need decisions <small class="route-status">Core exists</small></strong>
+                <span>Inspect what a chart should show without rendering React.</span>
+                <code>pnpm add @gx/core</code>
+              </div>
+              <div class="package-choice">
+                <i class="fa-solid fa-file-code" aria-hidden="true"></i>
+                <strong>I need a static chart <small class="route-status" data-state="target">A4 target</small></strong>
+                <span>Server-render SVG for a report, email preview or fixed page slot.</span>
+                <code>pnpm add @gx/core @gx/primitives @gx/tokens</code>
+              </div>
+              <div class="package-choice">
+                <i class="fa-solid fa-arrows-left-right-to-line" aria-hidden="true"></i>
+                <strong>I need responsive charts <small class="route-status" data-state="target">A5 target</small></strong>
+                <span>AutoChart measures its box and re-plans when that box changes.</span>
+                <code>pnpm add @gx/core @gx/react @gx/tokens</code>
+              </div>
+              <div class="package-choice">
+                <i class="fa-solid fa-table-cells-large" aria-hidden="true"></i>
+                <strong>I need a dashboard <small class="route-status" data-state="target">Phase C target</small></strong>
+                <span>Add draggable twelve-column placement around responsive charts.</span>
+                <code>pnpm add @gx/core @gx/react @gx/grid @gx/tokens</code>
+              </div>
+            </div>
+
+            <p class="plain-translation">
+              <strong>Why several package names?</strong> npm automatically installs internal dependencies,
+              but your application should directly declare every package it imports. Someone using only
+              <code>AutoChart</code> does not pay for the dashboard grid.
+            </p>
+
+            <div class="consumer-pipeline" aria-label="Flow from API data to visible SVG">
+              <div class="pipeline-step">
+                <span class="pipeline-owner">You</span>
+                <i class="fa-solid fa-box-open" aria-hidden="true"></i>
+                <strong>Install</strong>
+                <span>Choose only the layers your application imports.</span>
+              </div>
+              <div class="pipeline-step">
+                <span class="pipeline-owner">Your app</span>
+                <i class="fa-solid fa-cloud-arrow-down" aria-hidden="true"></i>
+                <strong>Fetch</strong>
+                <span>REST, GraphQL, SQL result, file or in-memory values.</span>
+              </div>
+              <div class="pipeline-step">
+                <span class="pipeline-owner">Adapter</span>
+                <i class="fa-solid fa-arrow-right-arrow-left" aria-hidden="true"></i>
+                <strong>Translate</strong>
+                <span>Map API field names once in ordinary application code.</span>
+              </div>
+              <div class="pipeline-step">
+                <span class="pipeline-owner">Shared data</span>
+                <i class="fa-solid fa-list" aria-hidden="true"></i>
+                <strong>Canonical series</strong>
+                <span>Stable IDs and plain x/y values every GX layer understands.</span>
+              </div>
+              <div class="pipeline-step">
+                <span class="pipeline-owner">Core helper</span>
+                <i class="fa-solid fa-shapes" aria-hidden="true"></i>
+                <strong>Describe</strong>
+                <span>describeShape counts series, labels and points.</span>
+              </div>
+              <div class="pipeline-step">
+                <span class="pipeline-owner">Core</span>
+                <i class="fa-solid fa-brain" aria-hidden="true"></i>
+                <strong>Plan</strong>
+                <span>planChart decides what fits in the available box.</span>
+              </div>
+              <div class="pipeline-step">
+                <span class="pipeline-owner">Primitives</span>
+                <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+                <strong>Draw</strong>
+                <span>Chart combines plan, actual values and dimensions into SVG.</span>
+              </div>
+            </div>
+
+            <div class="usage-examples">
+              <h4>Choose how the chart will live in your application</h4>
+              <div class="usage-tabs" role="tablist" aria-label="GX usage routes">
+                <button class="usage-tab" id="static-tab" type="button" role="tab" aria-selected="true" aria-controls="static-panel" tabindex="0" data-usage="static">
+                  <i class="fa-solid fa-server" aria-hidden="true"></i>
+                  Static server chart
+                </button>
+                <button class="usage-tab" id="responsive-tab" type="button" role="tab" aria-selected="false" aria-controls="responsive-panel" tabindex="-1" data-usage="responsive">
+                  <i class="fa-solid fa-maximize" aria-hidden="true"></i>
+                  Responsive chart
+                </button>
+                <button class="usage-tab" id="dashboard-tab" type="button" role="tab" aria-selected="false" aria-controls="dashboard-panel" tabindex="-1" data-usage="dashboard">
+                  <i class="fa-solid fa-table-cells-large" aria-hidden="true"></i>
+                  Dashboard widget
+                </button>
+              </div>
+
+              <div class="usage-panel" id="static-panel" role="tabpanel" aria-labelledby="static-tab" data-usage-panel="static">
+                <div class="usage-layout">
+                  <div class="usage-copy">
+                    <h5>Route 1: fetch and draw on the server</h5>
+                    <p>
+                      Use this when the chart's dimensions are known. Your mapping code translates the
+                      API names; <code>planChart()</code> sees only counts; <code>Chart</code> receives the
+                      real values and produces SVG before the browser loads the page.
+                    </p>
+                    <pre class="code-block"><code>// app/revenue/page.tsx — proposed API
+import '@gx/tokens/theme.css'
+import {
+  describeShape,
+  planChart,
+  sizeContextFromPixels,
+  type Series,
+} from '@gx/core'
+import { Chart } from '@gx/primitives'
+
+type RevenueRow = {
+  period: string
+  total_revenue: number
+  predicted_revenue: number
+}
+
+export default async function RevenuePage() {
+  const response = await fetch('https://api.example.com/revenue')
+  if (!response.ok) throw new Error('Revenue data could not be loaded')
+
+  const payload: { results: RevenueRow[] } = await response.json()
+  const x = (row: RevenueRow) =&gt; new Date(`${row.period}-01T00:00:00Z`)
+  const data: Series[] = [
+    {
+      id: 'actual',
+      label: 'Actual',
+      points: payload.results.map(row =&gt; ({ x: x(row), y: row.total_revenue })),
+    },
+    {
+      id: 'forecast',
+      label: 'Forecast',
+      points: payload.results.map(row =&gt; ({ x: x(row), y: row.predicted_revenue })),
+    },
+  ]
+
+  const dimensions = sizeContextFromPixels(600, 300)
+  const plan = planChart('line', dimensions, describeShape(data))
+
+  return &lt;Chart plan={plan} data={data} dimensions={dimensions}
+    ariaLabel="Monthly revenue" /&gt;
+}</code></pre>
+                  </div>
+                  <div>
+                    <dl class="responsibility-list">
+                      <div><dt>Your application</dt><dd>Owns the URL, authentication, caching, loading failure and raw response.</dd></div>
+                      <div><dt>Your mapping</dt><dd>Renames API fields once and returns plain canonical Series objects.</dd></div>
+                      <div><dt>Core</dt><dd>Uses dimensions and DataShape to select one complete ChartPlan.</dd></div>
+                      <div><dt>Frame geometry</dt><dd>resolveFrame uses actual values for domains, scales and path coordinates.</dd></div>
+                      <div><dt>Primitives</dt><dd>Will turn that frame into accessible SVG and the data table.</dd></div>
+                    </dl>
+                    <div class="browser-receipt">
+                      <strong><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Browser receives SVG + CSS</strong>
+                      <p>The target is zero GX client JavaScript. Gate G4 will prove this in a real Next.js fixture before A4 closes.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="usage-panel" id="responsive-panel" role="tabpanel" aria-labelledby="responsive-tab" data-usage-panel="responsive" hidden>
+                <div class="usage-layout">
+                  <div class="usage-copy">
+                    <h5>Route 2: let AutoChart measure and re-plan</h5>
+                    <p>
+                      Fetch and normalize exactly as above. Pass canonical data into a client component.
+                      AutoChart owns only measurement and re-planning; it still does not fetch, cache or
+                      understand your API's field names.
+                    </p>
+                    <pre class="code-block"><code>// RevenueChart.tsx — proposed API
+'use client'
+
+import '@gx/tokens/theme.css'
+import { AutoChart } from '@gx/react'
+import type { Series } from '@gx/core'
+
+export function RevenueChart({ data }: { data: readonly Series[] }) {
+  return (
+    &lt;div style={{ width: '100%', height: 320 }}&gt;
+      &lt;AutoChart type="line" data={data}
+        ariaLabel="Monthly revenue" /&gt;
+    &lt;/div&gt;
+  )
+}
+
+// Your server, query library or state store supplies `data`.
+// Loading, error and empty states stay in your application.</code></pre>
+                  </div>
+                  <div>
+                    <dl class="responsibility-list">
+                      <div><dt>Your application</dt><dd>Fetches and normalizes data, then gives the chart a stable-height box.</dd></div>
+                      <div><dt>AutoChart</dt><dd>Observes the box, builds SizeContext and derives DataShape.</dd></div>
+                      <div><dt>Core</dt><dd>Returns a new plan whenever the available room changes.</dd></div>
+                      <div><dt>Primitives</dt><dd>Draws the same hook-free Chart used by the static route.</dd></div>
+                    </dl>
+                    <div class="browser-receipt">
+                      <strong><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Browser receives the client layer</strong>
+                      <p>The user pays for resize and interaction code, but not for the dashboard grid.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="usage-panel" id="dashboard-panel" role="tabpanel" aria-labelledby="dashboard-tab" data-usage-panel="dashboard" hidden>
+                <div class="usage-layout">
+                  <div class="usage-copy">
+                    <h5>Route 3: put the same AutoChart inside a draggable grid</h5>
+                    <p>
+                      Grid controls position and cell dimensions. AutoChart receives the resulting room and
+                      asks core what can fit. Moving a widget never changes who owns the data.
+                    </p>
+                    <pre class="code-block"><code>// Dashboard.tsx — proposed API
+'use client'
+
+import '@gx/tokens/theme.css'
+import { DashboardGrid, GridItem } from '@gx/grid'
+import { AutoChart } from '@gx/react'
+
+&lt;DashboardGrid columns={12} layout={savedLayout}&gt;
+  &lt;GridItem id="revenue" minWidth={2} minHeight={1}&gt;
+    &lt;AutoChart type="line" data={revenueData}
+      ariaLabel="Monthly revenue" /&gt;
+  &lt;/GridItem&gt;
+&lt;/DashboardGrid&gt;</code></pre>
+                  </div>
+                  <div>
+                    <dl class="responsibility-list">
+                      <div><dt>Your application</dt><dd>Owns chart data and saves the user's dashboard layout.</dd></div>
+                      <div><dt>Grid</dt><dd>Owns drag, resize, collision, keyboard movement and the twelve columns.</dd></div>
+                      <div><dt>AutoChart</dt><dd>Responds to the new box without knowing why its size changed.</dd></div>
+                      <div><dt>Core</dt><dd>May replace axes, labels or marks when the widget crosses a rung.</dd></div>
+                    </dl>
+                    <div class="browser-receipt">
+                      <strong><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Browser also receives grid code</strong>
+                      <p>The grid remains a separate package, so chart-only applications never download it.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="runtime-flow" aria-label="Runtime flow from widget box to visible chart">
+            <div class="runtime-node">
+              <i class="fa-solid fa-border-all" aria-hidden="true"></i>
+              <div><strong>Grid</strong><span>How much room is available?</span></div>
+            </div>
+            <div class="runtime-arrow"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></div>
+            <div class="runtime-node">
+              <i class="fa-solid fa-brain" aria-hidden="true"></i>
+              <div><strong>Core</strong><span>What can fit honestly?</span></div>
+            </div>
+            <div class="runtime-arrow"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></div>
+            <div class="runtime-node">
+              <i class="fa-solid fa-file-code" aria-hidden="true"></i>
+              <div><strong>ChartPlan</strong><span>Plain data describing the decision</span></div>
+            </div>
+            <div class="runtime-arrow"><i class="fa-solid fa-arrow-right" aria-hidden="true"></i></div>
+            <div class="runtime-node">
+              <i class="fa-solid fa-chart-line" aria-hidden="true"></i>
+              <div><strong>SVG</strong><span>Primitives draw; tokens style</span></div>
+            </div>
+          </div>
+
+          <div class="build-consume">
+            <div class="build-consume-column">
+              <div class="column-title">
+                <i class="fa-solid fa-hammer" aria-hidden="true"></i>
+                <h3>Our side: develop and build</h3>
+              </div>
+              <ol class="plain-steps">
+                <li>We edit TypeScript and CSS inside each package's <strong>src/</strong> folder.</li>
+                <li>pnpm gives every package only the dependencies declared in its own package.json.</li>
+                <li>Turbo runs package tasks in dependency order and reuses unchanged results.</li>
+                <li>tsdown converts source into JavaScript, TypeScript declarations and source maps in <strong>dist/</strong>.</li>
+                <li>The verify command checks types, lint, dependencies, tokens, tests, builds and client boundaries.</li>
+              </ol>
+              <pre class="code-block"><code>src/index.ts
+     │  tsdown
+     ▼
+dist/index.js       application runs this
+dist/index.d.ts     editor reads this
+dist/index.js.map   debugger maps back to src</code></pre>
+              <div class="generated-folders" aria-label="Generated folder meanings">
+                <div class="generated-folder"><strong>node_modules/</strong><span>pnpm dependency links</span></div>
+                <div class="generated-folder"><strong>dist/</strong><span>publishable build output</span></div>
+                <div class="generated-folder"><strong>.turbo/</strong><span>task cache and logs</span></div>
+              </div>
+            </div>
+
+            <div class="build-consume-column">
+              <div class="column-title">
+                <i class="fa-solid fa-box-open" aria-hidden="true"></i>
+                <h3>User side: install and render</h3>
+              </div>
+              <ol class="plain-steps">
+                <li>The developer installs only the highest-level package they need and the theme.</li>
+                <li>Their application supplies already-shaped data; this library never fetches or stores it.</li>
+                <li>For interactive charts, AutoChart measures the box and asks core for a ChartPlan.</li>
+                <li>For static server charts, the developer can call core and primitives without the client layer.</li>
+                <li>The browser receives SVG plus CSS; it never receives our research, tests or Turbo cache.</li>
+              </ol>
+              <div class="consumer-options">
+                <div class="consumer-option"><strong>Planning only</strong><code>@gx/core</code></div>
+                <div class="consumer-option"><strong>Static server chart</strong><code>@gx/core + @gx/primitives + @gx/tokens</code></div>
+                <div class="consumer-option"><strong>Interactive chart</strong><code>@gx/react + @gx/tokens</code></div>
+                <div class="consumer-option"><strong>Full dashboard</strong><code>@gx/grid + @gx/tokens</code></div>
+              </div>
+              <pre class="code-block"><code>import '@gx/tokens/theme.css'
+import { AutoChart } from '@gx/react'
+
+&lt;AutoChart type="line" data={revenueData} /&gt;</code></pre>
+              <p class="not-published">
+                <strong>Current status:</strong> this usage is the planned public API, not an available npm
+                install yet. Packages are still private, version 0.0.0, and <code>@gx</code> is a placeholder
+                until the project name and npm scope are decided.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="roadmap" aria-labelledby="roadmap-title">
+        <div class="section-inner">
+          <div class="section-heading">
+            <div>
+              <p class="section-label">Build the proof before breadth</p>
+              <h2 id="roadmap-title">What we did and what comes next</h2>
+            </div>
+            <p>
+              The decision engine now proves the six-rung idea without a UI. The next goal is to draw that
+              plan as accessible SVG, then connect it to real browser resizing before adding more chart types.
+            </p>
+          </div>
+
+          <div class="progress-ledger" aria-label="Current implementation summary">
+            <section class="progress-column" data-progress="done" aria-labelledby="built-title">
+              <h3 id="built-title">Built and verified</h3>
+              <ul class="progress-list">
+                <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Repository foundation:</strong> six package boundaries, strict builds, deterministic tests and CI gates.</span></li>
+                <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Core contracts:</strong> ChartPlan, sizing, layout, policy, atomic typography and measured Roboto Flex advances.</span></li>
+                <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Line and area planning:</strong> Micro through Stage, including label degradation, overrides and plot-height decisions.</span></li>
+                <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Automated proof:</strong> 282 tests across 13 files, plus dependency, token, determinism, client-boundary and generated-file gates.</span></li>
+                <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Resize lab:</strong> a real measured box shows its current SizeContext and resolved ChartPlan live.</span></li>
+              </ul>
+            </section>
+
+            <section class="progress-column" data-progress="next" aria-labelledby="remaining-title">
+              <h3 id="remaining-title">Still to implement</h3>
+              <ul class="progress-list">
+                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>A4:</strong> hook-free accessible SVG primitives, semantic matchers and the zero-client-JS RSC fixture.</span></li>
+                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>A5:</strong> AutoChart, ResizeObserver batching, SSR initial sizing and browser containment tests.</span></li>
+                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>A6:</strong> transitions and the first end-to-end resize demonstration without loops or flicker.</span></li>
+                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>B through D:</strong> full tokens and themes, more chart types, dashboard grid and widget chrome.</span></li>
+                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>E:</strong> documentation, browser matrix, package audits and npm publication.</span></li>
+              </ul>
+            </section>
+          </div>
+
+          <div class="timeline" aria-label="Project implementation roadmap">
+            <div class="milestone" data-status="done">
+              <div class="milestone-code"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>A1</div>
+              <div class="milestone-body"><strong>Repository foundation</strong><span>pnpm, Turborepo, TypeScript 6.0.3, tsdown, six packages, token gate, dependency walls and deterministic tests.</span></div>
+            </div>
+            <div class="milestone" data-status="done">
+              <div class="milestone-code"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>A2–2.1</div>
+              <div class="milestone-body"><strong>Core contracts and typography</strong><span>ChartPlan, generated Roboto Flex metrics and CSS, standalone pixel-to-cell sizing, DOM-free text measurement and tick helpers are present and tested.</span></div>
+            </div>
+            <div class="milestone" data-status="done">
+              <div class="milestone-code"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>A3</div>
+              <div class="milestone-body"><strong>planChart() for line and area</strong><span>All six complete rungs, layout helpers, override semantics, snapshots, stability sweeps and honesty invariants are implemented.</span></div>
+            </div>
+            <div class="milestone" data-status="active">
+              <div class="milestone-code"><i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i>A4</div>
+              <div class="milestone-body"><strong>SVG primitives</strong><span>Next: render ChartPlan as accessible, hook-free, class-styled SVG and prove the server-only path.</span></div>
+            </div>
+            <div class="milestone">
+              <div class="milestone-code"><i class="fa-regular fa-circle" aria-hidden="true"></i>A5</div>
+              <div class="milestone-body"><strong>AutoChart measurement</strong><span>ResizeObserver measures the box; React recomputes the plan and adds optional interaction.</span></div>
+            </div>
+            <div class="milestone">
+              <div class="milestone-code"><i class="fa-regular fa-circle" aria-hidden="true"></i>A6</div>
+              <div class="milestone-body"><strong>Transitions and grid demo</strong><span>Drag one line chart through every rung without loops, flicker or dishonest labels.</span></div>
+            </div>
+            <div class="milestone">
+              <div class="milestone-code"><i class="fa-regular fa-circle" aria-hidden="true"></i>B</div>
+              <div class="milestone-body"><strong>Visual control and comparison proof</strong><span>Complete the token tree and themes, then add the chart families needed to prove we exceed fixed-size chart libraries.</span></div>
+            </div>
+            <div class="milestone">
+              <div class="milestone-code"><i class="fa-regular fa-circle" aria-hidden="true"></i>C-D</div>
+              <div class="milestone-body"><strong>Dashboard grid and chart breadth</strong><span>Build the draggable 12-column shell, widget chrome and the remaining chart families.</span></div>
+            </div>
+            <div class="milestone">
+              <div class="milestone-code"><i class="fa-regular fa-circle" aria-hidden="true"></i>E</div>
+              <div class="milestone-body"><strong>Documentation and release</strong><span>Finish the docs site and responsive-semantics guide, run package and browser audits, and publish.</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="rules" aria-labelledby="rules-title">
+        <div class="section-inner">
+          <div class="section-heading">
+            <div>
+              <p class="section-label">Why the boundaries matter</p>
+              <h2 id="rules-title">The rules protecting the idea</h2>
+            </div>
+            <p>
+              These are not style preferences. Each rule prevents a known failure: hydration mismatch,
+              unreadable charts, fake test results, broken themes or resize loops.
+            </p>
+          </div>
+
+          <div class="guardrail-grid">
+            <div class="guardrail">
+              <i class="fa-solid fa-server" aria-hidden="true"></i>
+              <div><h3>Core has no DOM</h3><p>The same plan must be computable in Node, a worker or the browser. Text fitting uses metrics, not element measurement.</p></div>
+            </div>
+            <div class="guardrail">
+              <i class="fa-solid fa-code-branch" aria-hidden="true"></i>
+              <div><h3>The plan is plain data</h3><p>No functions, dates or hidden state. A ChartPlan can be serialized, snapshotted, cached and inspected.</p></div>
+            </div>
+            <div class="guardrail">
+              <i class="fa-solid fa-eye" aria-hidden="true"></i>
+              <div><h3>Small charts stay honest</h3><p>Below the readable-value threshold, the y-axis is removed. Concealed content leaves the DOM completely.</p></div>
+            </div>
+            <div class="guardrail">
+              <i class="fa-solid fa-palette" aria-hidden="true"></i>
+              <div><h3>CSS changes appearance only</h3><p>Colours and strokes can change per widget. Anything that changes what fits must enter the typed plan input.</p></div>
+            </div>
+            <div class="guardrail">
+              <i class="fa-solid fa-arrows-left-right-to-line" aria-hidden="true"></i>
+              <div><h3>The box never follows content</h3><p>The grid decides outer size; the plan only changes descendants. This structurally prevents ResizeObserver loops.</p></div>
+            </div>
+            <div class="guardrail">
+              <i class="fa-solid fa-vial-circle-check" aria-hidden="true"></i>
+              <div><h3>Gates fail on purpose</h3><p>The repo tests that invalid tokens and boundaries are rejected, not only that valid code passes.</p></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="read-title">
+        <div class="section-inner">
+          <div class="section-heading">
+            <div>
+              <p class="section-label">Source of truth</p>
+              <h2 id="read-title">Read deeper when needed</h2>
+            </div>
+            <p>This page is the simple map. These three documents hold the precise product, architecture and implementation decisions.</p>
+          </div>
+          <div class="reading-list">
+            <a class="reading-link" href="../../PRODUCT.md">
+              <i class="fa-solid fa-compass" aria-hidden="true"></i>
+              <strong>PRODUCT.md</strong>
+              <span>Who it is for, what it promises and what is deliberately out of scope.</span>
+            </a>
+            <a class="reading-link" href="../20-architecture.md">
+              <i class="fa-solid fa-sitemap" aria-hidden="true"></i>
+              <strong>20-architecture.md</strong>
+              <span>The package graph, contracts, server/client split and technical constraints.</span>
+            </a>
+            <a class="reading-link" href="../30-implementation-plan.md">
+              <i class="fa-solid fa-list-check" aria-hidden="true"></i>
+              <strong>30-implementation-plan.md</strong>
+              <span>The milestone order, acceptance criteria, CI gates and remaining work.</span>
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Built as a zero-build reference page inside <strong>research/html-explained/</strong>. The project name and npm scope are still intentionally undecided; <strong>@gx/*</strong> is a placeholder.
+    </footer>
+
+    <script>
+      const rungData = {
+        micro: {
+          name: 'Micro',
+          size: '1x1 cell',
+          description: 'One number and a summary phrase. No plot and no scale.',
+          summary: 'One honest number',
+          width: '14rem',
+          height: '10rem',
+          decisions: ['Remove both axes', 'Remove the plotted line', 'State the latest value directly'],
+        },
+        tile: {
+          name: 'Tile',
+          size: '2x1 to 2x2 cells',
+          description: 'A value, its change and a compact trend shape.',
+          summary: 'Value, delta and trend',
+          width: '21rem',
+          height: '13rem',
+          decisions: ['Keep a compact trend mark', 'Keep axes absent', 'Prefer tap over tiny hover targets'],
+        },
+        strip: {
+          name: 'Strip',
+          size: '3x1 to 4x2 cells',
+          description: 'The trend shape is readable, but exact values are not promised.',
+          summary: 'Shape only, no value promise',
+          width: '31rem',
+          height: '13rem',
+          decisions: ['Show first and last x labels', 'Keep the y-axis absent below 40px plot height', 'Use a fixed tooltip position'],
+        },
+        panel: {
+          name: 'Panel',
+          size: '3x3 to 6x4 cells',
+          description: 'A readable chart with axes, ticks and gridlines.',
+          summary: 'Readable values and axes',
+          width: '35rem',
+          height: '18rem',
+          decisions: ['Add the y-axis and readable ticks', 'Add gridlines as landmarks', 'Allow value estimation'],
+        },
+        canvas: {
+          name: 'Canvas',
+          size: '6x5 to 8x6 cells',
+          description: 'Full scaffolding, multiple series and explicit labels.',
+          summary: 'Full scaffolding and legend',
+          width: '43rem',
+          height: '22rem',
+          decisions: ['Externalise the legend', 'Add point labels or direct series labels', 'Enable fluid tooltip and crosshair'],
+        },
+        stage: {
+          name: 'Stage',
+          size: '9x6 to 12x8+ cells',
+          description: 'Extra room buys annotation and comparison, not a needlessly taller plot.',
+          summary: 'Annotation and comparison',
+          width: '50rem',
+          height: '25rem',
+          decisions: ['Add callouts and threshold context', 'Use small multiples for many series', 'Keep the full accessible data table'],
+        },
+      }
+
+      const rungNames = Object.keys(rungData)
+      const chartWidget = document.querySelector('#chart-widget')
+      const rungName = document.querySelector('#rung-name')
+      const rungSize = document.querySelector('#rung-size')
+      const rungDescription = document.querySelector('#rung-description')
+      const decisionList = document.querySelector('#decision-list')
+      const chartSummary = document.querySelector('#chart-summary')
+
+      function setRung(nextRung) {
+        const details = rungData[nextRung]
+        document.querySelectorAll('.rung-button').forEach((button) => {
+          button.setAttribute('aria-selected', String(button.dataset.rung === nextRung))
+        })
+
+        document.querySelectorAll('[data-show]').forEach((element) => {
+          const shouldShow = element.dataset.show.split(' ').includes(nextRung)
+          element.classList.toggle('is-hidden', !shouldShow)
+          element.setAttribute('aria-hidden', String(!shouldShow))
+        })
+
+        chartWidget.style.setProperty('--widget-width', details.width)
+        chartWidget.style.setProperty('--widget-height', details.height)
+        chartWidget.dataset.rung = nextRung
+        rungName.textContent = details.name
+        rungSize.textContent = details.size
+        rungDescription.textContent = details.description
+        chartSummary.textContent = details.summary
+        decisionList.replaceChildren(
+          ...details.decisions.map((decision) => {
+            const item = document.createElement('li')
+            const icon = document.createElement('i')
+            const text = document.createElement('span')
+            icon.className = 'fa-solid fa-check'
+            icon.setAttribute('aria-hidden', 'true')
+            text.textContent = decision
+            item.append(icon, text)
+            return item
+          }),
+        )
+      }
+
+      document.querySelectorAll('.rung-button').forEach((button) => {
+        button.addEventListener('click', () => setRung(button.dataset.rung))
+        button.addEventListener('keydown', (event) => {
+          if (!['ArrowLeft', 'ArrowRight'].includes(event.key)) return
+          event.preventDefault()
+          const currentIndex = rungNames.indexOf(button.dataset.rung)
+          const offset = event.key === 'ArrowRight' ? 1 : -1
+          const nextIndex = (currentIndex + offset + rungNames.length) % rungNames.length
+          const nextButton = document.querySelector(`[data-rung="${rungNames[nextIndex]}"]`)
+          nextButton.focus()
+          setRung(rungNames[nextIndex])
+        })
+      })
+
+      document.querySelectorAll('.package-toggle').forEach((button) => {
+        button.addEventListener('click', () => {
+          const expanded = button.getAttribute('aria-expanded') === 'true'
+          const detail = document.querySelector(`#${button.getAttribute('aria-controls')}`)
+          button.setAttribute('aria-expanded', String(!expanded))
+          detail.hidden = expanded
+          button.querySelector('i').className = `fa-solid fa-${expanded ? 'plus' : 'minus'}`
+        })
+      })
+
+      const usageTabs = [...document.querySelectorAll('.usage-tab')]
+
+      function setUsage(nextUsage, focus = false) {
+        usageTabs.forEach((tab) => {
+          const selected = tab.dataset.usage === nextUsage
+          tab.setAttribute('aria-selected', String(selected))
+          tab.tabIndex = selected ? 0 : -1
+          if (selected && focus) tab.focus()
+        })
+
+        document.querySelectorAll('[data-usage-panel]').forEach((panel) => {
+          panel.hidden = panel.dataset.usagePanel !== nextUsage
+        })
+      }
+
+      usageTabs.forEach((tab, index) => {
+        tab.addEventListener('click', () => setUsage(tab.dataset.usage))
+        tab.addEventListener('keydown', (event) => {
+          if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+          event.preventDefault()
+
+          let nextIndex = index
+          if (event.key === 'ArrowLeft') nextIndex = (index - 1 + usageTabs.length) % usageTabs.length
+          if (event.key === 'ArrowRight') nextIndex = (index + 1) % usageTabs.length
+          if (event.key === 'Home') nextIndex = 0
+          if (event.key === 'End') nextIndex = usageTabs.length - 1
+          setUsage(usageTabs[nextIndex].dataset.usage, true)
+        })
+      })
+
+      const themeToggle = document.querySelector('#theme-toggle')
+      themeToggle.addEventListener('click', () => {
+        const isLight = document.documentElement.dataset.theme === 'light'
+        document.documentElement.dataset.theme = isLight ? 'dark' : 'light'
+        themeToggle.setAttribute('aria-label', `Switch to ${isLight ? 'light' : 'dark'} theme`)
+        themeToggle.querySelector('i').className = `fa-solid fa-${isLight ? 'sun' : 'moon'}`
+      })
+
+      const navLinks = [...document.querySelectorAll('.site-nav a')]
+      const observedSections = navLinks
+        .map((link) => document.querySelector(link.getAttribute('href')))
+        .filter(Boolean)
+      const sectionObserver = new IntersectionObserver(
+        (entries) => {
+          const visible = entries.find((entry) => entry.isIntersecting)
+          if (!visible) return
+          navLinks.forEach((link) => {
+            const active = link.getAttribute('href') === `#${visible.target.id}`
+            if (active) link.setAttribute('aria-current', 'page')
+            else link.removeAttribute('aria-current')
+          })
+        },
+        { rootMargin: '-20% 0px -70% 0px' },
+      )
+      observedSections.forEach((section) => sectionObserver.observe(section))
+
+      setRung('panel')
+    </script>
+  </body>
+</html>

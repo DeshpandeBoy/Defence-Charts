@@ -175,7 +175,7 @@ import { fileURLToPath } from 'node:url'
 
 const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
 
-const ORIGIN = process.env.GX_PLAYGROUND_ORIGIN ?? 'http://localhost:5173/'
+export const ORIGIN = process.env.GX_PLAYGROUND_ORIGIN ?? 'http://localhost:5173/'
 
 /**
  * ⚠ Wide and tall on purpose. `.widget` is `max-width: 100%` inside `.lab__stage`, so the
@@ -451,9 +451,13 @@ async function answers(origin, timeoutMs = 2000) {
  * whose source tree is whatever it was when it started. Killing the process **group** is
  * the difference between a gate you can run twice and one you can run once.
  *
+ * ⚠ Exported since A6 so that `check-motion.mjs` (gate **G19**) shares it rather than
+ * growing a second one. Two gates spawning two vites on one port is a race whose loser
+ * reports a failure about the *other* gate's tree; one policy, one spawn, one kill.
+ *
  * @returns {Promise<{ stop: () => void, spawned: boolean }>}
  */
-async function ensureDevServer() {
+export async function ensureDevServer() {
   if (await answers(ORIGIN)) return { stop: () => {}, spawned: false }
 
   const child = spawn(

@@ -54,11 +54,47 @@ const TOKEN_PREFIX = '--gx-'
  */
 const LENGTH_UNITS = ['px', 'rem', 'em', 'pt', 'pc', 'in', 'cm', 'mm', 'q', 'ex', 'ch']
 
+/**
+ * ⚠ **Time units, added at A6 — and until then this gate could not see a duration at all.**
+ *
+ * `chart.css` carried `transition: opacity 120ms ease-out` from A4, in a file whose own
+ * docblock promises that *"every colour and every length below is a `var(--gx-*)`"*. It was
+ * true and it was insufficient: a duration is neither, so the one hardcoded value in the
+ * package sat in the file the gate exists to protect and passed every run. A6 adds four
+ * motion tokens, which multiplies the opportunity by four.
+ *
+ * Written `ms|s` rather than `s|ms` for directness. Both work — the engine backtracks out of
+ * the short branch on `120ms` — so this is a preference and not a fix; do not "correct" it in
+ * either direction expecting a behaviour change.
+ */
+const TIME_UNITS = ['ms', 's']
+
 /** `12px`, `1.5rem`, `.5em` — but never the `2` in `calc(var(--gx-gap) * 2)`. */
 const LENGTH_RE = new RegExp(
   String.raw`(?<![\w.#-])\d*\.?\d+(${LENGTH_UNITS.join('|')})\b`,
   'gi',
 )
+
+/** `120ms`, `0.5s`, `2s` — and never the `2` in `calc(var(--gx-motion-duration) / 2)`. */
+const TIME_RE = new RegExp(
+  String.raw`(?<![\w.#-])\d*\.?\d+(${TIME_UNITS.join('|')})\b`,
+  'gi',
+)
+
+/**
+ * ⚠ **Zero is exempt, and the reason is grammatical rather than a concession.**
+ *
+ * `43-theming.md` §6.2's standing rule is that unitless `0` is not a literal — `margin: 0`
+ * needs no token because zero is the absence of a length, not a choice of one. CSS extends
+ * that to lengths and refuses it to times: `transition-delay: 0` is invalid, `0ms` is
+ * required. The unit there is syntax the grammar demands, not a value anyone picked, so
+ * rejecting it would force `--gx-motion-stage-delay-none: 0ms` into the token tree — a token
+ * whose entire content is "nothing", existing to satisfy a parser.
+ *
+ * Tested numerically rather than by string, so `0.5s` and `0.0001s` are still violations and
+ * `00ms` and `0.0s` are still exempt.
+ */
+const ZERO_TIME_RE = /^0*\.?0*$/
 
 const HEX_RE = /(?<![\w-])#[\da-f]{3,8}(?![\w-])/gi
 
@@ -105,7 +141,7 @@ const NAMED_COLORS = new Set([
 ])
 
 /**
- * @typedef {'raw-color' | 'raw-length' | 'gradient'} RuleId
+ * @typedef {'raw-color' | 'raw-length' | 'raw-duration' | 'gradient'} RuleId
  * @typedef {{ file: string, line: number, rule: RuleId, prop: string, detail: string }} Violation
  */
 
@@ -188,6 +224,11 @@ export function inspectCss(source, file) {
     }
     for (const match of value.matchAll(LENGTH_RE)) {
       violations.push({ file, line, rule: 'raw-length', prop: decl.prop, detail: match[0] })
+    }
+    for (const match of value.matchAll(TIME_RE)) {
+      const unit = match[1] ?? ''
+      if (ZERO_TIME_RE.test(match[0].slice(0, match[0].length - unit.length))) continue
+      violations.push({ file, line, rule: 'raw-duration', prop: decl.prop, detail: match[0] })
     }
   })
 

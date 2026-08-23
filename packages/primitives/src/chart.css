@@ -232,21 +232,154 @@
    * ⚠ **Opt-in polarity.** The query is `no-preference`, not `reduce`. Written the other
    * way round the animation is the default and the media query is the exemption, so
    * every environment that reports nothing — an older engine, a headless browser, a
-   * misconfigured OS — animates. Written this way, silence means stillness.
+   * misconfigured OS — animates. Written this way, silence means stillness. That also
+   * discharges `10-responsive-ladder.md` §7's *"respect prefers-reduced-motion: cut
+   * instead, and skip staging"* by construction rather than by a second rule: with the
+   * preference set, none of this exists, so there is nothing to cut and no stage to skip.
    *
    * ⚠ The final rendered state must be pixel-identical with and without this block, and
-   * it is: opacity ends at 1 either way. Nothing here changes a position, a size, or a
-   * colour at rest. research/20-architecture.md §7.4.
+   * it is: every property below is a `transition`, which changes only how a value is
+   * reached. Nothing here sets a position, a size, or a colour. `20-architecture.md` §7.4.
    *
-   * Real transitions between plans — MotionPlan's two-stage rescale/recompose — are A6.
-   * This is the affordance, not the animation.
+   * ⚠ **Every property named here was measured, not assumed.**
+   * `research/decisions/016-what-svg-geometry-actually-transitions.md` drove Chromium and
+   * sampled mid-flight computed values: `d`, `x`, `y`, `width`, `height`, `cx`, `cy`, `r`
+   * and `<g>` `transform` all interpolate. Two things do NOT, and both shape what follows:
+   *
+   *   1. **`d` snaps when the command count changes.** Equal counts interpolate; unequal
+   *      counts jump with no intermediate frame. That is precisely the `rescale` /
+   *      `recompose` seam `MotionPlan` already drew from Heer & Robertson, which is why
+   *      `.gx-line` and `.gx-area` carry `opacity` alongside `d`: a rescale tweens the
+   *      path, a recompose crossfades it, and neither needs to know which it is. The
+   *      alternative — padding both command lists to a common length — is JS in the render
+   *      path, and decision 7 does not have room for it.
+   *   2. **A replaced element never transitions**, whatever is declared here. A brand-new
+   *      node has no previous value to interpolate from. That is why `<Grid>` and `<Axis>`
+   *      are keyed by `tick.value` and `identity.test.tsx` asserts DOM node identity across
+   *      a resize; without those keys every rule below is inert and silently so.
+   *
+   * ⚠ **No tween library, and no hook.** This block is the whole of A6's animation. That
+   * is not frugality — decision 7's zero-client-JS claim is what makes `<Chart>` an RSC,
+   * and a JS animation loop would end it.
    */
+
+  /*
+   * The duration class arrives as data and is bound here, once. `<Chart>` echoes
+   * `plan.motion.durationClass` onto the figure; nothing downstream inspects the plan.
+   *
+   * ⚠ Outside the media query on purpose. These are variable bindings, not animations —
+   * they set no property and start no transition, and keeping them out means the reduced
+   * -motion path and the animated path resolve the same custom properties. A theme reading
+   * `--gx-motion-duration` gets an answer either way.
+   */
+  /*
+   * ⚠ **The delay is rebound alongside the duration, and it has to be.** Writing only the
+   * duration here and leaving `--gx-motion-stage-delay: calc(var(--gx-motion-duration) / 2)`
+   * on `:root` reads as though the delay tracks whatever the duration currently is. It does
+   * not: custom properties are substituted where they are declared, so the root delay
+   * resolves against the root duration and inherits down already computed. The recompose
+   * figure got a 150ms delay against a 1000ms move — staged, but by a sixth of the gesture
+   * rather than half. See the note in `@gx/tokens`' theme.css for the measurement.
+   */
+  .gx-chart[data-motion-duration='rescale'] {
+    --gx-motion-duration: var(--gx-motion-rescale-duration);
+    --gx-motion-stage-delay: var(--gx-motion-rescale-stage-delay);
+  }
+
+  .gx-chart[data-motion-duration='recompose'] {
+    --gx-motion-duration: var(--gx-motion-recompose-duration);
+    --gx-motion-stage-delay: var(--gx-motion-recompose-stage-delay);
+  }
+
+  /*
+   * ⚠ `stages: 1` means *no delay*, not *no second stage*. The marks still animate; they
+   * simply start with the chrome instead of after it. `40-chart-plan.md` §6 gives Micro,
+   * Tile and Strip `stages: 1` because below Panel there is no axis to move first — a
+   * sparkline that delayed its own line behind an axis it does not draw would just be
+   * slow.
+   */
+  .gx-chart[data-motion-stages='1'] {
+    --gx-motion-stage-delay: 0ms;
+  }
+
   @media (prefers-reduced-motion: no-preference) {
+    /*
+     * Stage 1 — the frame of reference. Axis, ticks and gridlines move first, so the marks
+     * that follow are read against a scale that has already arrived.
+     *
+     * ⚠ The plot origin moves too. `<Grid>` and `<Axis>` are translated to it, so their
+     * own `transform` is in the list; without it the group jumps to the new origin while
+     * its children slide within it, which reads worse than not animating at all.
+     */
+    .gx-grid,
+    .gx-axis,
+    .gx-axis__tick {
+      transition: transform var(--gx-motion-duration) var(--gx-motion-easing);
+    }
+
+    .gx-grid__line,
+    .gx-grid__zero,
+    .gx-axis__rule,
+    .gx-axis__tick-mark {
+      transition:
+        x var(--gx-motion-duration) var(--gx-motion-easing),
+        y var(--gx-motion-duration) var(--gx-motion-easing),
+        width var(--gx-motion-duration) var(--gx-motion-easing),
+        height var(--gx-motion-duration) var(--gx-motion-easing),
+        opacity var(--gx-motion-duration) var(--gx-motion-easing);
+    }
+
+    /*
+     * ⚠ Tick labels fade rather than slide, and they are the one place `persistGridlines`
+     * is visible as a difference. A gridline that survives a densify keeps its rect and
+     * slides; its label's *text* changes, and text content is not an animatable property.
+     * Fading the label while the line slides is what makes the landmark read as the same
+     * landmark relabelled, rather than as a new one.
+     */
+    .gx-axis__tick-label {
+      transition:
+        x var(--gx-motion-duration) var(--gx-motion-easing),
+        y var(--gx-motion-duration) var(--gx-motion-easing),
+        opacity var(--gx-motion-duration) var(--gx-motion-easing);
+    }
+
+    /*
+     * Stage 2 — the marks, delayed behind the chrome by `--gx-motion-stage-delay`, which
+     * `[data-motion-stages='1']` zeroes above.
+     *
+     * ⚠ `d` first in the list and `opacity` last, and the order is not cosmetic: it is the
+     * two halves of finding 1 above, declared together so that a rescale and a recompose
+     * are the same rule. The path interpolates when it can and crossfades when it cannot.
+     */
     .gx-line,
     .gx-area,
-    .gx-band,
+    .gx-band {
+      transition:
+        d var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
+        opacity var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay);
+    }
+
     .gx-point {
-      transition: opacity 120ms ease-out;
+      transition:
+        cx var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
+        cy var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
+        r var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
+        opacity var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay);
+    }
+
+    /*
+     * Direct labels and the value display ride stage 2 with the marks they annotate. A
+     * label that arrived with the axis would name a position its line had not reached yet.
+     */
+    .gx-label,
+    .gx-value-label,
+    .gx-value,
+    .gx-value__delta,
+    .gx-value__overflow {
+      transition:
+        x var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
+        y var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
+        opacity var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay);
     }
   }
 

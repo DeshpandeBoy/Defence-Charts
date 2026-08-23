@@ -404,7 +404,32 @@ function computeTicks(
 
   const count = Number.isFinite(plan.count) ? Math.max(0, Math.floor(plan.count)) : 0
   if (count === 0) return []
-  return Object.freeze(scale.ticks(count).map(toTick))
+
+  // ⚠ **`scale.ticks()` can return the same value twice, and it is not a d3 bug.** Swept
+  // 2026-08-24 over seven magnitudes (`1e3`…`1e15`, a hundredfold apart), ten spans
+  // (`1e-9`…`1e7`) and counts 2–12: **60 of those 770 combinations return duplicates**, all
+  // in one regime — a span tiny relative to the magnitude, where float64 has no room left
+  // between steps. `[1e9, 1e9 + 1e-6]` at 50 ticks returns 49 ticks carrying 7 distinct
+  // values, with a run of nine consecutive `1000000000`s among them.
+  // `padDegenerate()` does not catch it, because it only fires when `lo === hi` exactly and
+  // here they genuinely differ.
+  //
+  // Two ticks with one value are the same tick: same `label(v)`, same `scale.at(v)`, so the
+  // same glyph and the same `<rect>` drawn twice at the same pixel. Dropping the repeat is
+  // correct on its own — it is invisible output either way — and it is what makes `value`
+  // safe as a React key, which A6 needs: `<Grid>` and `<Axis>` key by it so a gridline that
+  // survives a densify keeps its identity and slides instead of being replaced. A duplicate
+  // key would put React's reconciler in exactly the state the keys exist to avoid.
+  // See `research/decisions/016-what-svg-geometry-actually-transitions.md`.
+  const seen = new Set<number | string>()
+  const ticks: ComputedTick[] = []
+  for (const value of scale.ticks(count)) {
+    const tick = toTick(value)
+    if (seen.has(tick.value)) continue
+    seen.add(tick.value)
+    ticks.push(tick)
+  }
+  return Object.freeze(ticks)
 }
 
 // --- The value display -------------------------------------------------------------------

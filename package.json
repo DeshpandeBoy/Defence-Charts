@@ -30,6 +30,8 @@
     "lint:boundary": "node scripts/check-boundary.mjs",
     "lint:containment": "node scripts/check-containment.mjs",
     "lint:rsc": "node scripts/check-rsc.mjs",
+    "lint:motion": "node scripts/check-motion.mjs",
+    "probe:motion": "node scripts/probe-motion.mjs",
     "lint:typography": "node scripts/generate-typography-css.mjs",
     "generate:typography": "pnpm --filter @gx/core build && node scripts/generate-typography-css.mjs --write",
     "test": "vitest run",

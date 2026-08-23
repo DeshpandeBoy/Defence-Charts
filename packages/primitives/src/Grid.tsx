@@ -12,6 +12,28 @@
  * documented in `frame.ts`; the mismatch is real and the fix is to do the subtraction exactly
  * once, here, with this comment next to it. `frame.ts` names the failure mode directly:
  * *"every mark position depend[ing] on remembering to add the origin exactly once."*
+ *
+ * ## ⚠ Keyed by `tick.value`, never by `tick.offset`
+ *
+ * `offset` is a **pixel** position, so it changes on every resize. Keyed by it, React sees a
+ * different key for the same gridline on every frame of a drag, unmounts it, and mounts a
+ * replacement — and **a freshly mounted element has no previous value, so it cannot
+ * transition**. That is measured, not assumed: the replaced-element case in
+ * `research/decisions/016-what-svg-geometry-actually-transitions.md` produced no interpolated
+ * frame at all, against seven geometry properties that all interpolate cleanly when the *same*
+ * element is updated.
+ *
+ * So this is not a performance tidy-up. It is the precondition for
+ * `MotionPlan.persistGridlines`, already `true` from the Panel rung up, and for
+ * `research/10-responsive-ladder.md` §7's requirement: *"persist gridlines through a
+ * densify/sparsify change — they are the landmarks that make an axis change comprehensible.
+ * Do not remove and redraw."* Keyed by value, a gridline that survives a densify keeps its
+ * identity and slides; one that genuinely leaves is a leave rather than part of a churn.
+ *
+ * ⚠ **No index suffix, and adding one back would reintroduce the bug.** An index changes when
+ * the tick *count* changes, which is exactly the densify case this exists to survive.
+ * Uniqueness comes from `computeTicks()` in `@gx/core`, which de-duplicates by value — d3's
+ * `scale.ticks()` can repeat a value when the domain span is tiny relative to its magnitude.
  */
 
 import { CHROME_METRICS, type ComputedTick, type Rect } from '@gx/core'
@@ -36,22 +58,22 @@ export function Grid({ plot, xTicks = [], yTicks = [], zeroLine = null, classNam
 
   return (
     <g className={classes('gx-grid', className)} transform={translate(plot.x, plot.y)}>
-      {yTicks.map((tick, i) => (
+      {yTicks.map((tick) => (
         <rect
           className="gx-grid__line"
           data-axis="y"
-          key={`y-${tick.offset}-${i}`}
+          key={`y-${tick.value}`}
           x={0}
           y={roundCoord(tick.offset)}
           width={width}
           height={axisRuleWidth}
         />
       ))}
-      {xTicks.map((tick, i) => (
+      {xTicks.map((tick) => (
         <rect
           className="gx-grid__line"
           data-axis="x"
-          key={`x-${tick.offset}-${i}`}
+          key={`x-${tick.value}`}
           x={roundCoord(tick.offset)}
           y={0}
           width={axisRuleWidth}

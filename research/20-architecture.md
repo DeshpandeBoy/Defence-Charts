@@ -639,15 +639,53 @@ and dizziness."*
 Technique C39 specifies a polarity worth getting right:
 
 ```css
-/* opt IN to motion rather than opting out */
+/* opt IN to motion rather than opting out. Shipped shape, A6 — @gx/primitives chart.css. */
 @media (prefers-reduced-motion: no-preference) {
-  .series { transition: d var(--gx-motion-duration) ease; }
+  .gx-grid,
+  .gx-axis,
+  .gx-axis__tick {
+    transition: transform var(--gx-motion-duration) var(--gx-motion-easing);
+  }
+
+  .gx-line,
+  .gx-area,
+  .gx-band {
+    transition:
+      d var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
+      opacity var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay);
+  }
 }
 ```
 
 Using `no-preference` rather than `reduce` makes **the safe path the default** — an unsupporting
 browser, or a user whose OS preference is unset, gets no animation rather than unwanted animation.
 For a library that cannot know its consumer's context, that is the correct default.
+
+⚠ **Amended at A6. This block used to read `.series { transition: d var(--gx-motion-duration)
+ease; }`, and it described something that could not happen in our tree.** Three corrections, one
+of them substantive.
+
+The two small ones first. `.series` is not a class `@gx/primitives` emits — the marks are
+`.gx-line`, `.gx-area`, `.gx-band` — so the snippet named nothing. And `ease` beside a tokenised
+duration is the half-tokenised value §6.1 of `43-theming.md` rejects; it is
+`var(--gx-motion-easing)`. The stage delay is new rather than a correction: `10-responsive-ladder.md`
+§7 requires the change to arrive in two stages, chrome then marks, and the original sketch had one.
+
+**The substantive one: declaring the transition is not sufficient, and this section wrote as
+though it were.** `research/decisions/016-what-svg-geometry-actually-transitions.md` drove
+Chromium and sampled mid-flight computed values. Every geometry property this chart animates
+interpolates when the *same* element is updated — `d`, `x`, `y`, `width`, `height`, `cx`, `cy`,
+`r` and `<g>` `transform`, measured against an `opacity` control. **A replaced element produced no
+interpolated frame at all**, whatever the stylesheet declared. `<Grid>` and `<Axis>` keyed their
+children by `tick.offset`, which is a *pixel* position, so every resize changed every key, React
+swapped every node, and the rule above would have been inert and silently so. The fix was upstream, in the keys: both key by `tick.value`
+now, and `computeTicks()` de-duplicates by value so the collision the offset key defended against
+cannot reach the render. **The precondition for the CSS is the identity, not the CSS.**
+
+The same measurement explains why `opacity` rides beside `d` rather than being a separate concern:
+`d` interpolates only when the command *count* matches, and snaps otherwise. That is the
+`rescale` / `recompose` seam `MotionPlan` already carries — the path tweens when it can and
+crossfades when it cannot, and the rule does not need to know which.
 
 **Prefer the CSS query over the JS API.** `window.matchMedia` is `undefined` in jsdom, so a
 reduced-motion branch cannot even execute in the default unit environment without a stub — and a
@@ -660,6 +698,14 @@ the preference as a prop so the pure path stays pure.
 reduced motion**. Reduced motion must remove the transition, never change the result — that is the
 common bug, where the "reduced" path skips a layout step rather than skipping the tween. One
 Playwright test per chart type, both contexts, same baseline.
+
+Half of that is now a gate. **G19** (`scripts/check-motion.mjs`) resizes a real chart in Chromium,
+samples every animation frame, and asserts that under `reducedMotion: 'reduce'` no gridline and no
+path takes any value other than its two endpoints — and that the resting geometry is identical in
+both contexts. What it does *not* do is compare pixels, or run per chart type: it reads geometry
+from two elements on the line chart. The screenshot baseline this paragraph asks for is still
+owed, and the polarity claim above is what G19 makes true — with the preference set the media
+query never matches, so there is no transition to remove.
 
 ---
 

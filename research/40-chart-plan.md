@@ -476,6 +476,28 @@ class, whether constancy is required); **CSS** decides whether the transition ru
 preference is expressed, never *removed* from an explicit one, so the still chart is the baseline
 artefact and the plan is valid unanimated.
 
+### 4.9.1 What A6 actually consumed, and one field it did not
+
+`packages/primitives/src/Chart.tsx` is `motion`'s **first and only consumer**. It echoes three of the
+four fields onto the `<figure>` as `data-motion-duration`, `data-motion-stages` and
+`data-persist-gridlines`, and `chart.css` binds durations and the stage delay off them. Everything
+above survived contact unchanged, including the absent `enabled` field, which turned out to carry its
+weight twice: gate **G19** asserts that `prefers-reduced-motion: reduce` produces no interpolated
+frame *and* that the resting state is byte-identical either way, which is only a coherent pair of
+assertions because the plan does not encode the preference.
+
+⚠ **`objectConstancy` is NOT echoed, and reading it as "elements keep their identity across a resize"
+is a mistake A6 nearly made.** It means what §4's donut section and §7 say it means: *slices visibly
+converging into "Other"* during an `aggregate` step. It is correctly `false` at every line rung, and
+flipping it to `true` to "enable" transition identity would have been a semantic change dressed as a
+wiring fix.
+
+Identity across a resize is a **keying** property, not a plan field, and it is not optional: decision
+[016](decisions/016-what-svg-geometry-actually-transitions.md) measured that a replaced element never
+transitions at all. `<Grid>` and `<Axis>` key by `tick.value` for that reason, and
+`packages/primitives/src/identity.test.tsx` is what holds it. `persistGridlines` is the plan's
+*statement of intent*; the keys are what make it true.
+
 ---
 
 ## 5. `PlanPolicy` and `PlanOverrides`

@@ -90,13 +90,22 @@ export function Axis({
       {children
         ? children(ticks)
         : ticks.map((tick, i) => (
-            // ⚠ Keyed by offset *and* index. Offset alone collides whenever two ticks land on
-            // the same pixel, which a degenerate domain does routinely; index alone breaks
-            // object constancy under `MotionPlan.objectConstancy` at A6, when ticks are added
-            // and removed at the ends rather than replaced.
+            // ⚠ **Keyed by value.** This read `${tick.offset}-${i}` until A6, and the old
+            // reasoning was sound but aimed one step short: offset alone does collide when two
+            // ticks land on the same pixel, and index alone does break object constancy. The
+            // index suffix fixed the collision and *kept* the deeper problem — `offset` is a
+            // pixel position, so every tick was replaced on every frame of a drag, and a
+            // replaced element cannot transition at all. Measured in
+            // `research/decisions/016-what-svg-geometry-actually-transitions.md`: seven
+            // geometry properties interpolate when the same element is updated, and none do
+            // when it is swapped.
+            //
+            // `value` is stable across a resize by construction — it is the domain value, not
+            // a rendering of it — and `computeTicks()` in `@gx/core` de-duplicates by it, so
+            // the pixel collision the old key defended against cannot reach here.
             <g
               className="gx-axis__tick"
-              key={`${tick.offset}-${i}`}
+              key={String(tick.value)}
               data-value={String(tick.value)}
               transform={
                 horizontal ? translate(tick.offset, 0) : translate(0, tick.offset)

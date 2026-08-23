@@ -113,15 +113,15 @@ jobs:
         if: '!cancelled()'
         run: pnpm lint:typography
 
-  # ⚠ **One job, two gates, one browser download — and that is the whole reason it exists.**
-  # G4 (RSC with JS disabled) and G11 (containment) are the only two gates in the register
-  # that need a real Chromium. `scripts/check-containment.mjs` carried the deferral in its
-  # header until this job existed to discharge it, on the grounds that *wiring one browser
+  # ⚠ **One job, three gates, one browser download — and that is the whole reason it exists.**
+  # G4 (RSC with JS disabled), G11 (containment) and G19 (motion) are the only gates in the
+  # register that need a real Chromium. `scripts/check-containment.mjs` carried the deferral in
+  # its header until this job existed to discharge it, on the grounds that *wiring one browser
   # download into CI twice, for two gates, is the kind of duplication that gets half-removed
-  # later*. If a third browser gate arrives (G13, the screenshot gate at milestone D), it
-  # belongs here as another step, not in another job.
+  # later*. G19 arrived at A6 and took the prediction at its word: it is a step here, not a
+  # second job. If a fourth arrives (G13, the screenshot gate at milestone D), so is that.
   #
-  # ⚠ These two gates are **not** in `pnpm verify`, deliberately, and this job is the reason
+  # ⚠ These gates are **not** in `pnpm verify`, deliberately, and this job is the reason
   # that is now safe rather than merely convenient. `verify` is what a fresh clone runs before
   # it has decided to care about this repo, and it should not open with a ~150 MB download.
   # Keeping them out of `verify` and in CI means the browser cost falls on the runner, which
@@ -216,11 +216,13 @@ jobs:
       # its `exports` map points at `src/`. A build step here would be two minutes spent
       # producing `dist/` that nothing in this job reads.
       #
-      # ⚠ Same reasoning for the servers: each gate starts and stops its own. G11 takes 5173,
-      # G4 takes 3210, so the two steps cannot collide, and `verify` runs on a different
-      # runner entirely. `ensureDevServer()` in `scripts/check-containment.mjs` kills the
-      # process **group** rather than the pid it holds, which is what makes a second gate in
-      # the same job safe after the first one has finished with its port.
+      # ⚠ Same reasoning for the servers: each gate starts and stops its own. G4 takes 3210;
+      # G11 and G19 **both** take 5173, because G19 imports `ensureDevServer()` and `ORIGIN`
+      # from `check-containment.mjs` rather than standing up a second server. Sharing is safe
+      # only because these are sequential steps: two gates spawning two vites on one port is a
+      # race whose loser reports a startup failure about the other gate's tree. Do not
+      # parallelise them. `ensureDevServer()` kills the process **group** rather than the pid
+      # it holds, which is what makes the second gate safe after the first has finished.
 
       # ⚠ Same `if: '!cancelled()'` discipline as `verify`, and it matters more here, not
       # less: these are the two most expensive gates in the repo to reach. Learning that G11
@@ -233,3 +235,11 @@ jobs:
       - name: Gate G11 — containment (no plan field alters the measured box)
         if: '!cancelled()'
         run: pnpm lint:containment
+
+      # ⚠ The only gate in the repo that can observe A6 at all. A transition is not a property
+      # of markup — it is an engine interpolating between two computed values over time — so
+      # jsdom cannot see one, and the entire node suite stays green with `chart.css`'s motion
+      # block deleted. `scripts/check-motion.mjs` says the same thing at more length.
+      - name: Gate G19 — motion (the transitions run, stage, and stop when asked to)
+        if: '!cancelled()'
+        run: pnpm lint:motion

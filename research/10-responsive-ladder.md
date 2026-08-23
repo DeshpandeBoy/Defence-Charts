@@ -452,6 +452,37 @@ deadband may not be needed at all.
 *(Flagged honestly: the research marks this inference as a design argument, not a citation. No paper
 retrieved makes the claim.)*
 
+### 7.1 Shipped at A6 — what held, and what this section did not say
+
+Every bullet above landed as written; `30-implementation-plan.md` A6 has the field-by-field
+accounting and `40-chart-plan.md` §4.9.1 has the plan side. Three things are worth adding here,
+because they are properties of *this* section rather than of the implementation.
+
+⚠ **"Respect `prefers-reduced-motion`: cut instead, and skip staging" describes two behaviours, and
+the shipped version has neither — deliberately.** Written as stated it implies a second code path: a
+cut rule, and a stage-skipping rule, both active under the preference. `packages/primitives/src/chart.css`
+instead puts *all* motion inside `@media (prefers-reduced-motion: no-preference)`, so under the
+preference the rules do not exist. There is nothing to cut and no stage to skip. The requirement is
+discharged by construction, which is the version with no second path to keep in sync — and no way for
+the reduced-motion rendering to drift from the still baseline, because it *is* the still baseline.
+
+⚠ **"Persist gridlines … do not remove and redraw" reads as a stylesheet instruction and is not one.**
+It is a **keying** requirement, and it was not being met: `<Grid>` and `<Axis>` keyed by
+`tick.offset`, a pixel position, so every gridline was destroyed and recreated on every frame of a
+drag. Decision [016](decisions/016-what-svg-geometry-actually-transitions.md) measured that a replaced
+element never transitions at all — so before the keys were fixed, every motion rule in the sheet was
+inert, and would have stayed inert however carefully the CSS was written.
+
+⚠ **The staging has no timing, and still does not.** This section specifies *that* a change is staged
+and never specifies the overlap. A6 chose half the duration, tokenised it as
+`--gx-motion-stage-delay`, and marked it UNVERIFIED with B1 as the owner. Gate **G19** asserts the
+delay it finds is the delay the stylesheet declares, and that it scales with the duration class — it
+does **not** assert the fraction, on purpose, because this section never fixed one.
+
+⚠ **Item 1 of §8 below is untouched by A6.** The hysteresis claim above — that animation converts
+flicker into smear and a deadband may be unnecessary — is still the design argument it was flagged as.
+The mechanism now exists; nobody has measured whether flicker is still observable.
+
 ---
 
 ## 8. What is still open

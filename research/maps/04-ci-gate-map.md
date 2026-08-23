@@ -37,6 +37,8 @@ flowchart LR
         G14["element-set snapshot<br/>no tokened &lt;line&gt;"]
         G15["happy-dom absent from<br/>manifests and lockfile"]
         G16["env directive in the header,<br/>not in the prose"]
+        G17["generated typography CSS<br/>matches its typed input"]
+        G19["motion: transitions run,<br/>stage, and stop when asked"]
     end
 
     G1 --> D8
@@ -57,15 +59,25 @@ flowchart LR
     G14 --> DT
     G15 --> D8
     G16 --> D8
+    G17 --> DT
+    G19 --> DL
+    G19 --> D7
 
     classDef dd fill:#2f1b3d,stroke:#c084fc,color:#f6ecff
     classDef gg fill:#0b3d4a,stroke:#22d3ee,color:#e6fbff
     class D5,D7,D8,DT,DL,DA dd
-    class G1,G2,G3,G4,G5,G6,G7,G8,G9,G10,G11,G12,G13,G14,G15,G16 gg
+    class G1,G2,G3,G4,G5,G6,G7,G8,G9,G10,G11,G12,G13,G14,G15,G16,G17,G19 gg
 ```
 
 Two decisions carry three gates each. That is not redundancy — each gate catches the failure at a
 different moment: lint at author time, build assertion at package time, fixture at run time.
+
+⚠ **G18 is deliberately absent from the diagram.** `../60-commercial-model.md` §7 *proposes* it — no
+network APIs in any published package — and nothing implements it. Drawing a proposed gate among gates
+that run is how a plan becomes a claim. It has a row in the register below, marked as the
+proposal it is, because the number is taken and the next gate to be written must not reuse it: that is
+exactly why the motion gate is **G19** and not G18
+([016](../decisions/016-what-svg-geometry-actually-transitions.md)).
 
 ---
 
@@ -76,19 +88,22 @@ different moment: lint at author time, build assertion at package time, fixture 
 | G1 | dependency-cruiser: `@gx/core` may not import `react`; only `@gx/react`/`@gx/grid` may be client | **A1** | 8 | Someone reaches for a hook in the resolver |
 | G2 | Lint ban on `getBBox`, `getComputedTextLength`, `getTotalLength`, `getBoundingClientRect` inside `@gx/core` | **A1** | 7, 8 | The resolver starts measuring instead of modelling |
 | G3 | Grep **built output** for surviving `"use client"` | **A1** (config), **A4** (regression) | 7 | Rolldown bundles a non-entry module and strips the directive |
-| G4 | Next.js 16 App Router page rendering `<Chart plan={…}>` in a **server component**, asserting **both**: (1) with `javaScriptEnabled: false` the SVG, a real `<path>` and the accessible title are in the DOM; (2) the **built client JS** contains no chart code | **A4** → landing at **A5**. ⚠ **Pending — see below. Not green.** | 7 | The RSC path silently degrades to SSR + hydration — which assertion 1 alone *cannot see* |
+| G4 | Next.js 16 App Router page rendering `<Chart plan={…}>` in a **server component**, asserting **both**: (1) with `javaScriptEnabled: false` the SVG, a real `<path>` and the accessible title are in the DOM; (2) the **built client JS** contains no chart code | **A4** → landed at **A5**; green, and in CI's `browser` job | 7 | The RSC path silently degrades to SSR + hydration — which assertion 1 alone *cannot see* |
 | G5 | Bundle each exported symbol alone; assert the component set equals a known set; print `symmetricDifference` | **A4** | 5, packaging | "Import one chart, ship one chart" stops being true |
 | G6 | `ts-morph` walk from `src/index.ts` collecting `missingExports` + `forbiddenExports` | **A4** | 5 | A public prop's type is unnameable by consumers |
 | G7 | Token lint — raw colour literals (hex, `rgb()`, `hsl()`, `oklch()`, `lab()`, `hwb()`, `color()`, named), raw length literals, gradients — **planted in both directions: a violation asserted to fail *and* a valid theme file asserted to pass clean** | **A1** (written), **B1** (full tree) | theming | Either someone hardcodes, or the gate itself has broken |
 | G8 | Every threshold carries a provenance tier | **B3** | theming | A tuned number acquires the authority of a researched one |
 | G9 | Plan snapshots: `(type, size, shape) → plan`, per rung | **A3** | ladder | A rung's semantics change without anyone deciding to change them |
 | G10 | Sweep width **up then down** across every boundary; assert the plan is a pure function of size | **A3** | ladder | Hysteresis creeps in — the direction you approached from starts to matter |
-| G11 | Drag across every rung boundary; **four** assertions — no loop error; the measured box never moves unprompted; no scrollbar gutter; nothing the plan sizes overflows | **A5**. Written; observed passing **by hand** via `pnpm lint:containment`, not yet in CI | ladder, containment | Any of the four — and the loop error is the *least* likely of them to fire |
+| G11 | Drag across every rung boundary; **four** assertions — no loop error; the measured box never moves unprompted; no scrollbar gutter; nothing the plan sizes overflows | **A5**. Green, and in CI's `browser` job. ⚠ Assertion 3 is **inert** on macOS — see below | ladder, containment | Any of the four — and the loop error is the *least* likely of them to fire |
 | G12 | `valueLegibility !== 'values'` → `!axes.y.visible` | **A3** | a11y, ladder | The chart claims readable values while showing an axis it cannot support |
 | G13 | One screenshot per chart type per rung, pinned Docker, chromium-only, `reducedMotion: 'reduce'` | **D** | ladder | Geometry regresses in a way no assertion names |
 | G14 | Element-set snapshot per chart type; no `<line>` may carry `x1`/`y1`/`x2`/`y2` from a `var(--gx-*)` | **A4** | theming | A geometry token ships, is documented, and does nothing ([012](../decisions/012-no-line-element-for-tokened-geometry.md)) |
 | G15 | happy-dom absent from every manifest **and** from the lockfile | **A1** | 7, 8, determinism | A transitive dependency reintroduces the shim that answers `getBBox()` with `0` |
 | G16 | The Vitest environment directive appears only in a test file's first three lines | **A1** | determinism | A test acquires a DOM from a sentence about DOMs |
+| G17 | The committed fitting-typography CSS is regenerated and compared byte-for-byte against its typed plan input | **A4** | theming | The generated stylesheet and the plan it is generated from drift apart |
+| G18 | *Proposed, unimplemented* — no network APIs in any published package | — (`../60-commercial-model.md` §7) | trust | "This library never phones home" becomes a claim nobody checks |
+| G19 | Drive the real playground in Chromium across a rung change and sample every frame: chrome interpolates, marks interpolate **and lag it by the delay the stylesheet declares**, `prefers-reduced-motion: reduce` suppresses all of it, and the resting state is identical either way | **A6** | 7, ladder | Motion silently stops — a re-key, a collapsed delay, or an inverted media query, none of which any node test can see |
 | — | `publint --strict` + `attw`, with the §5.5 CSS-subpath exclusions | **E3** | packaging | The published artefact is broken in a way the repo never is |
 
 **G14 exists because G7 structurally cannot cover it.** G7 checks that a `var()` was used; it has no
@@ -139,26 +154,28 @@ out of the resolver. Without it, someone reintroduces hysteresis as a "small" fi
 
 ---
 
-## The two newest gates, and what is actually known about each
+## The three browser gates, and what is actually known about each
 
 `../43-theming.md` §6.3 is the standard this section is held to: *"A gate never observed to fail is not
-a gate — it is a job that exits 0."* The obvious twin is what governs the G4 entry below — **a map
-that reports a gate passing before anyone has run it is the same disease with better manners.** So
-these two are written apart from the register, because what is *known* about them differs sharply and
-the register's one-line rows cannot carry that difference.
+a gate — it is a job that exits 0."* The obvious twin is what governed the G4 entry below while it was
+pending — **a map that reports a gate passing before anyone has run it is the same disease with better
+manners.** So these three are written apart from the register, because what is *known* about each
+differs sharply and the register's one-line rows cannot carry that difference.
 
-### G11 — written, passing by hand, and not clean
+They are also the three that need a real Chromium, which is why they share one CI job and stay out of
+`pnpm verify`. The reasoning is in `.github/workflows/ci.yml`, not repeated here.
 
-`scripts/check-containment.mjs` exists and runs today as **`pnpm lint:containment`**. It is
-deliberately outside `pnpm verify` and outside `.github/workflows/ci.yml`: it needs a browser binary,
-and that provisioning was parked until the shared browser job G4 brings with it. A CI job for it is
-being wired now, so this paragraph is the one most likely to date first.
+### G11 — green, in CI, and still not clean
+
+`scripts/check-containment.mjs` runs as **`pnpm lint:containment`** and is a step in the `browser` job.
+It is deliberately outside `pnpm verify`: it needs a browser binary, and a fresh clone should not open
+with a ~150 MB download.
 
 The recorded sweep covers **178 sizes across 13 rung changes** and reports **0 `ResizeObserver` loop
 errors** and **0 px unattributed overflow**.
 
 ⚠ **"0 px unattributed" is not "0 px", and the difference is a real shortfall, not a rounding
-artefact.** The same run reports a peak **21 px block-axis overflow** on `.gx-auto-chart`, *attributed*
+artefact.** Re-observed on 2026-08-24 at A6, unchanged. The same run reports a peak **21 px block-axis overflow** on `.gx-auto-chart`, *attributed*
 to `.gx-chart__caption` and therefore exempt: **the `<figcaption>` data table does not fit the box it
 is in.** The exemption exists so the gate can be green about the thing it gates — geometry the *plan*
 sizes — while still printing the number nobody has fixed. Read a passing G11 run as *"the plan contains
@@ -185,11 +202,19 @@ printed `0 loop errors`. **Assertion 2 is what caught it.** The full argument �
 reads `.gx-auto-chart` rather than `.widget`, after a period in which it was silently grading the wrong
 box — is in that script's header, and it is worth reading before trusting any number above.
 
-### G4 — landing, and this map has not seen it pass
+### G4 — green, and this map has now seen it pass
 
-⚠ **Nothing in this subsection is an observation of success, and the row above must not be read as
-green.** `scripts/check-rsc.mjs` and its Next.js 16 fixture at `apps/rsc-fixture` landed at A5. The
-gate's *design* is settled and is what the register row describes. Its *status* is **pending**.
+`scripts/check-rsc.mjs` and its Next.js 16 fixture at `apps/rsc-fixture` landed at A5 and this gate is
+a step in the `browser` job. Observed on 2026-08-24: **77 marks in a `role="graphics-document"` `<svg>`
+at size class stage, stamped `_S_1_-title` by React's server renderer, and 0 of 6 chart markers found
+in 553 KB of client JavaScript across 9 chunks.**
+
+⚠ **The paragraph this replaced said the opposite, and it is worth knowing what it said.** It read
+*"Nothing in this subsection is an observation of success, and the row above must not be read as
+green"* — written while the gate existed but had never been run here. That is the discipline this
+section exists for, and the reason to record the transition rather than quietly overwrite it: the
+sentence was correct when written and would have been a lie a week later. The rest of this subsection
+is the gate's *design*, which has not changed.
 
 **Why it takes two assertions and not one.** The row this replaced asserted only that the SVG is in the
 HTML with JS disabled — and that assertion cannot detect the failure the row names. Turn JavaScript
@@ -234,6 +259,50 @@ fixture passes no `id` prop (`<Chart>` reads `id ?? useId()`, so supplying one d
 value). It is a React internal with no public promise behind it, so the gate fails both on seeing `R_`
 **and** on recognising neither infix — a discriminator that quietly stopped discriminating would be
 this repository's own named failure species, committed by the gate built to catch it.
+
+### G19 — green, and observed failing three ways on purpose
+
+`scripts/check-motion.mjs` runs as **`pnpm lint:motion`** and is the third step in the `browser` job.
+Observed on 2026-08-24, resizing 900×520 → 560×380: **chrome left at 26 ms, marks at 526 ms — a 500 ms
+gap against 500 ms declared, 0.50 of the recompose duration, over 108 sampled frames**, with 108 frames
+under `reducedMotion: 'reduce'` and not one of them between the endpoints.
+
+⚠ **It is the only gate that can see A6 at all.** A transition is not a property of markup — it is an
+engine interpolating between two computed values over time — and jsdom has neither interpolation nor a
+clock. `identity.test.tsx` proves the DOM nodes survive a resize (A6's *precondition*) and
+`Chart.test.tsx` proves the plan's motion facts reach the figure (A6's *wiring*); the entire motion
+block of `chart.css` could be deleted and all 605 node tests would stay green.
+
+⚠ **It drives the playground, not a fixture.** A gate that builds its own
+`<rect class="gx-grid__line">` asserts that a stylesheet animates a string the gate itself wrote, and
+stays green through a rename, a restructure, or a `<Grid>` that stops emitting gridlines. So: the real
+dev server, the real `<AutoChart>`, the real stylesheet, resized the way a user resizes it.
+
+**Three regressions were planted and all three were caught** — the §6.3 standard, discharged rather
+than asserted:
+
+| Planted | Reported |
+|---|---|
+| `<Grid>` re-keyed by `tick.offset` | *"the gridline snapped: no sampled frame sat between the start and final `y`"* |
+| `@media (prefers-reduced-motion: no-preference)` → `@media all` | *"reduce still animated gridY (saw 478.258px at 27ms)"* |
+| `--gx-motion-stage-delay` derived once on `:root` | *"the delay is 150ms against a 1000ms recompose duration — under 0.25 of it"* |
+
+⚠ **The third of those is the reason this gate has two staging assertions instead of one, and the
+first version would have missed it.** The obvious check is *observed gap ≈ declared delay*, and it
+catches the stylesheet failing to reach the DOM. It cannot catch the delay being declared *wrongly*,
+because observed and declared then collapse together and agree: the planted version reported *"a 150ms
+gap against 150ms declared"* and exited 0 — consistent, and wrong by a factor of three. So the delay is
+also checked as a **fraction of the duration in effect**, with a lower bound rather than the `/ 2` the
+tokens use, because `theme.css` marks that fraction UNVERIFIED and hands it to B1.
+
+⚠ **Two bugs in the implementation were found by this gate before it ever ran green,** and both were in
+A6's own work rather than in the harness. The stage delay was written
+`calc(var(--gx-motion-duration) / 2)` on `:root`; a custom property is substituted where it is
+*declared*, so it resolved against the root (rescale) duration and inherited down already computed,
+giving every recompose figure a 150 ms delay behind a 1000 ms move. And the gate's own settle-at-start
+was 600 ms against a 1150 ms envelope, so the first sampled frames of each run were the *previous*
+transition still in flight — which the gate reported as *"the marks left before the chrome"*, an
+inverted-staging failure about a transition that had not started.
 
 ---
 

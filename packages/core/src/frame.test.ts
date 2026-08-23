@@ -160,6 +160,87 @@ describe('ticks', () => {
   })
 
   /**
+   * ⚠ **d3 `ticks()` does not promise distinct values, and A6 turned that into a visible bug.**
+   *
+   * Keying gridlines by `tick.value` — which is what gives a gridline a previous position to
+   * transition *from*, `decisions/016` — assumes the values are unique. They are not. Swept
+   * over seven magnitudes (`1e3`…`1e15`, a hundredfold apart) × ten spans (`1e-9`…`1e7`) ×
+   * counts 2–12, **60 of those 770 combinations return duplicates**, all of them in the same
+   * regime: a span small enough that d3's tick step underflows the float spacing available at
+   * that magnitude, so consecutive ticks round to the same double. `[1e7, 1e7 + 1e-9]` at
+   * count 3 asks for three and gets five, of which two are distinct.
+   *
+   * ⚠ The parameters above are stated because an earlier draft of this docblock reported a
+   * different count from a sweep whose magnitudes and spans were never written down, and
+   * `frame.ts` reported a third. Neither could be re-derived. A frozen ratio with no
+   * reproduction is a number, not evidence — 60/770 is re-runnable from the line above.
+   *
+   * ⚠ `padDegenerate()` does not catch this and should not be widened to. It fires on
+   * `lo === hi` exactly, which is a different fault — a domain with no extent at all. Here the
+   * extent is real, merely unrepresentable at this magnitude.
+   *
+   * ⚠ Fixed in `computeTicks()` rather than in the key, and the reason is that a duplicate
+   * value is not merely a key collision: identical value ⇒ identical label ⇒ identical offset
+   * ⇒ identical `<rect>`. React would warn about the key, and the honest description of what
+   * it is warning about is that we asked it to paint the same gridline twice. Deduping at the
+   * source removes the waste and the collision in one move; deduping in the key would have
+   * kept the waste and hidden it.
+   */
+  it('never emits the same tick value twice, however tight the domain', () => {
+    // Chosen from the sweep: the smallest case that reproduces. Not a synthetic edge — this is
+    // "a metric hovering around ten million with nanosecond-scale jitter", which is an ordinary
+    // shape for a counter read twice in quick succession.
+    const base = 1e7
+    const tight: Series[] = [
+      { id: 'a', points: [
+        { x: new Date(Date.UTC(2024, 0, 1)), y: base },
+        { x: new Date(Date.UTC(2024, 0, 2)), y: base + 1e-9 },
+      ] },
+    ]
+
+    const frame = resolveFrame(planChart('line', PANEL, SHAPE), tight, PANEL)
+
+    const values = frame.yTicks.map((t) => t.value)
+    expect(values.length).toBeGreaterThan(0)
+    expect(new Set(values).size).toBe(values.length)
+
+    // The dedupe keeps the scale's own order rather than re-sorting: it drops repeats in
+    // place. y offsets descend because the y range is inverted, so the check is monotone,
+    // not ascending.
+    const offsets = frame.yTicks.map((t) => t.offset)
+    for (let i = 1; i < offsets.length; i += 1) {
+      expect(offsets[i]).toBeLessThan(offsets[i - 1] as number)
+    }
+  })
+
+  /**
+   * ⚠ **What deduping by value does NOT fix, recorded rather than left to be rediscovered.**
+   *
+   * The two survivors above are `10000000` and `10000000.000000002`. They are distinct
+   * doubles, so they are distinct keys and the identity fix is sound. They also both format
+   * to **`"10M"`**, and at Panel they land 262px apart — top and bottom of the plot. The axis
+   * reads `10M` at both ends, which looks like a rendering fault and is not one.
+   *
+   * This is a *legibility* bug, not an *identity* bug, and it is deliberately not fixed here:
+   * the repair belongs to `format.ts`, which would have to notice that its chosen precision
+   * cannot separate the domain and escalate — either to more significant figures or to an
+   * offset axis (`10M + 0ns`, `+2ns`), which is a design question and not a formatting one.
+   * A6 needed the keys to be unique and they are. Left as an assertion so the day someone
+   * fixes it, this test tells them what else to update.
+   */
+  it('still collapses those two into one label — a known gap in format.ts, not in the keys', () => {
+    const base = 1e7
+    const tight: Series[] = [
+      { id: 'a', points: [
+        { x: new Date(Date.UTC(2024, 0, 1)), y: base },
+        { x: new Date(Date.UTC(2024, 0, 2)), y: base + 1e-9 },
+      ] },
+    ]
+    const frame = resolveFrame(planChart('line', PANEL, SHAPE), tight, PANEL)
+    expect(frame.yTicks.map((t) => t.label)).toEqual(['10M', '10M'])
+  })
+
+  /**
    * ⚠ **A single data point gives `[v, v]`, which d3 maps entirely to the range's start.** A
    * flat line would render along the top edge and a one-point series at the left edge — both
    * look like layout bugs and neither is. `padDegenerate()` is the repair; this is its test.

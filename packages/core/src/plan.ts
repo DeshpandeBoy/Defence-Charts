@@ -433,7 +433,31 @@ export type MotionPlan = {
  * non-self-describing. The two are bound by assertion rather than by construction.
  */
 export type ChartPlan = {
-  readonly type: ChartType
+  /**
+   * ⚠ **Wider than `ChartType` on purpose, and the two lists are not meant to agree.**
+   * `planChart()`'s own `type` parameter stays the closed union: it resolves what it has a
+   * rung set for and **throws** for everything else, naming the milestone. That throw is
+   * deliberate — see `./plan-chart.ts`. A `ChartPlan`, though, is *data*, and the plan is
+   * the extension point: `<Chart>` dispatches on `marks.primary.kind`, never on this
+   * field, so a plan carrying `type: 'sankey'` renders exactly as well as its marks allow.
+   *
+   * *Two types, two jobs:* `planChart` accepts what it can **resolve**; `ChartPlan`
+   * carries what anyone can **produce**. Closed here too, a third-party or paid planner
+   * could not emit a valid plan without editing `@gx/core` — there would be no seam at
+   * all. `research/60-commercial-model.md` §3 costs that out: two lines today, a major
+   * version once B2 fills in the other eight types and first publish makes `ChartType` a
+   * G6-guarded public surface. Worth doing even if no paid tier is ever built, because it
+   * is also what lets a consumer write a bespoke chart type without forking.
+   *
+   * ⚠ `(string & {})` rather than a plain `string`, and the intersection is load-bearing:
+   * `ChartType | string` reduces to `string` and takes the ten literals out of editor
+   * autocomplete, which is most of what the union was for.
+   *
+   * ⚠ **A label, not a dispatch key.** It reaches the DOM as `data-chart-type` and is read
+   * by themes, snapshots and tests. Anything that switches on it is a renderer that cannot
+   * draw a type it has not heard of — the registry §3 rejects, wearing a `switch`.
+   */
+  readonly type: ChartType | (string & {})
   readonly sizeClass: SizeClass
   readonly valueLegibility: ValueLegibility
   readonly orientation: 'vertical' | 'horizontal'

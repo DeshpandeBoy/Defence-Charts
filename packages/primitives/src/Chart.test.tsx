@@ -376,3 +376,47 @@ describe('degenerate input', () => {
     expect(html).not.toContain('d=""')
   })
 })
+
+describe('the motion plan reaches the DOM', () => {
+  /**
+   * ⚠ **Until A6 this was the only field in `ChartPlan` that nothing read.** The resolver
+   * computed `motion` on every plan, the snapshots asserted it, and no renderer consumed it —
+   * so the durations and the staging were, in the literal sense, decoration. These attributes
+   * are the whole of the wiring: `chart.css` maps them to a duration token and a stage delay,
+   * and the transitions themselves sit behind the reduced-motion query, which no test in a
+   * node environment can evaluate. What *can* be asserted here is that the bindings the CSS
+   * selects on are actually emitted, which is the half that silently breaks.
+   */
+  it('echoes durationClass and stages onto the figure', () => {
+    const html = render(900, 520)
+    expect(html).toContain('data-motion-duration="recompose"')
+    expect(html).toContain('data-motion-stages="2"')
+  })
+
+  it('marks stages=1 at the rungs with no axis to move first', () => {
+    // Micro/Tile/Strip draw no axis, so staging the marks behind one would only be slow.
+    const html = render(200, 90)
+    expect(html).toContain('data-motion-stages="1"')
+  })
+
+  /**
+   * ⚠ A valueless attribute, so a stylesheet can select `[data-persist-gridlines]` without
+   * also matching the rungs that set it to the *string* `"false"` — which is what emitting
+   * the boolean directly would produce, and which is truthy to a CSS attribute selector.
+   */
+  it('emits persist-gridlines as presence, never as the string false', () => {
+    expect(render(900, 520)).toContain('data-persist-gridlines=""')
+    expect(render(200, 90)).not.toContain('data-persist-gridlines')
+  })
+
+  /**
+   * The negative half of the same wiring — `40-chart-plan.md` §4. A field derived from
+   * `prefers-reduced-motion` cannot exist on the server, so nothing resembling one may appear
+   * in server markup; the query in `chart.css` is the only thing entitled to that decision.
+   */
+  it('emits nothing that could encode a reduced-motion decision', () => {
+    const html = render(900, 520)
+    expect(html).not.toContain('data-motion-enabled')
+    expect(html).not.toContain('prefers-reduced-motion')
+  })
+})

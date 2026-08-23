@@ -17,10 +17,13 @@ Working research for the new project in `Defence/`. Everything here is input to 
 | `41-text-metrics.md` | `FontMetrics` as a plan-input token, `measureText()`, and the reference typeface. |
 | `42-typography.md` | The reconciled A–E type scale and its `--gx-*` mapping. |
 | `43-theming.md` | Default + neutral themes, composition review, token lint-gate allowlist. |
+| `50-viewer-evidence.md` | **The viewer's half of the evidence base.** What we know about how they read a chart and how they interact with one, what tier each claim sits at, and the A1 instrument that closes the rest. |
 | `../DESIGN.md` | The visual world ("The Emission-Line Rail"). Palette derivation, type ranks, layout and elevation rules. |
 | `../UX.md` | **Who it is for and what hurts.** The user problems, the use cases, and how the product is handed over so it is understood. The half `01-plain-english.md` deliberately leaves out. |
+| `60-commercial-model.md` | **If there is ever a Pro or Enterprise tier.** Why runtime API keys are the wrong mechanism here, where enforcement actually works, and the one architectural seam that has a deadline at A4. Analysis, not a decision. |
 | `maps/` | **Five flow maps** — package graph, runtime flow, milestone DAG, token flow, CI gates. Derived from the files above; they hold no values of their own. Read these when you need *"if I change X, what else moves?"* |
 | `decisions/` | **Decision register.** Decisions 1–11 are indexed from `00-decisions.md`, not copied; 012 onward get their own file with evidence and amendment lists. |
+| `html-explained/` | **The whole project, for someone who does not read this folder.** A single self-contained `index.html` — open it in a browser, no build step. It is a *rendering* of the files above, not a source: nothing is decided here, and when it disagrees with a file above, the file above wins. |
 | `raw/01-basedash-chart-types.md` | Per-chart-type spec scraped from Basedash docs. |
 | `raw/02-basedash-grid-model.md` | Basedash dashboard grid, filters, embedding. |
 | `raw/03-landscape-charting.md` | React charting library landscape + build-vs-adopt call. |

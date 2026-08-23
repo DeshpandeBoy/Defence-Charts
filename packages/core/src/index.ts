@@ -13,13 +13,16 @@
  *      them would pass tests forever. Text width comes from a character-advance model
  *      instead (`./text.ts`, `research/41-text-metrics.md`).
  *
- * ⚠ **A3 scope.** The `ChartPlan` contract, `PlanPolicy`, `measureText()`, size
- * classification and `planChart()` itself are here — but only for `'line'` and `'area'`.
- * Every other `ChartType` throws with the milestone that adds it. A silent fallback plan
- * would be the same failure species as happy-dom's `0`.
+ * ⚠ **Still only `'line'` and `'area'`, as of A6.** The `ChartPlan` contract, `PlanPolicy`,
+ * `measureText()`, size classification and `planChart()` itself are all here, but every
+ * other `ChartType` throws with the milestone that adds it — B2 for most of them. A silent
+ * fallback plan would be the same failure species as happy-dom's `0`.
  *
- * ⚠ **No renderer.** `@gx/primitives` and `@gx/react` are still empty; A4 fills them. A
- * plan is testable with zero UI, which is the whole point of A3.
+ * ⚠ `ChartPlan['type']` is `ChartType | (string & {})`, which is **wider than the ten
+ * literals on purpose**: a consumer may plan a type this package has no rung set for, and
+ * `planChart()` is the thing that refuses it, with a message naming the milestone. The
+ * `& {}` is what keeps the ten in editor completion instead of collapsing to `string`.
+ * `plan.ts` carries the full argument.
  *
  * This file is a barrel and nothing else. Everything it names is defined in a sibling
  * module, so there is exactly one place to read for any given contract.

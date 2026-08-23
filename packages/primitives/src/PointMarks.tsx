@@ -49,6 +49,18 @@ export function PointMarks({ points, extrema, mode, budget, className }: PointMa
         return (
           <circle
             className={classes('gx-point', className)}
+            // ⚠ **`i` indexes `points`, not `visible`, and that is what makes it a stable key
+            // — leave it alone.** A6 re-keyed `<Grid>` and `<Axis>` away from index-like keys
+            // because theirs were derived from *pixel* positions and churned on every resize.
+            // This one is not the same shape. `points` is `SeriesFrame.points`, which carries
+            // every defined point regardless of `mode` (see the module docblock), so its
+            // indices are data positions and no resize can move them.
+            //
+            // It also survives the case that matters most: switching `mode` from `'extrema'`
+            // to `'all'` re-derives `visible` from 3 entries to n, and the three circles that
+            // were already on screen keep keys 2, 7, 9 rather than becoming 0, 1, 2. That is
+            // `MotionPlan.objectConstancy` holding through a rung change for free. Keying by
+            // the position within `visible` would break exactly that.
             key={i}
             data-index={i}
             cx={roundCoord(p.x)}
