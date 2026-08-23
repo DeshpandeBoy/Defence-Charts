@@ -58,7 +58,9 @@ A readiness review on 2026-08-23 found Milestone A1 genuinely unblocked but thre
 
 The next concrete step is Milestone A1 (a single line chart, in a draggable box, proving the core idea end-to-end before any breadth).
 
-A from-scratch, standalone public open-source npm project — not derived from or dependent on any other codebase. The primary evidence/reference product studied throughout research is Basedash (demo video + frame-by-frame analysis in `research/00-source-analysis.md` and `research/assets/`) — treated as a studied reference and a source of anti-patterns to avoid (e.g. its single 480px breakpoint), not as a product to imitate wholesale, and not a dependency of any kind.
+A from-scratch, standalone public open-source npm project, **MIT licensed** — not derived from or dependent on any other codebase. The primary evidence/reference product studied throughout research is Basedash (demo video + frame-by-frame analysis in `research/00-source-analysis.md` and `research/assets/`) — treated as a studied reference and a source of anti-patterns to avoid (e.g. its single 480px breakpoint), not as a product to imitate wholesale, and not a dependency of any kind.
+
+⚠ **MIT was decided on 2026-08-23, having been assumed rather than stated for the whole research phase** — `research/raw/03-landscape-charting.md` evaluates the entire charting field *"for an MIT, presentational-only… library"*, which is the brief the build-vs-adopt call was made against. It ships in `package.json` and a root `LICENSE` from the first commit. The copyright holder line is blocked on the project name, which is the same unblock.
 
 ## Capabilities and Constraints
 

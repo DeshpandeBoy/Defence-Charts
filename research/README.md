@@ -100,9 +100,14 @@ than to each other, the linter is chosen (**ESLint 9, flat config**, which is wh
 the SVG presentation-attribute question A1 was asked to decide is decided: **primitives carry no
 visual attributes and take everything from classes.**
 
-⚠ **One caveat, found by auditing the claim rather than repeating it.** The token lint gate is
-described everywhere as *ported*, and the source — `check-css-module-tokens.mjs`, named at
-`raw/04:353` — cannot express the rule `43-theming.md` §6.1 specifies. It collects `*.module.css`
-only (the allowlisted theme files are plain `.css`) and it has no declaration-level parsing, so the
-positional half of the allowlist is **new code, not a copy**. Nothing is unspecified; the estimate
-was just wrong. Delta table in `30-implementation-plan.md` A1.
+⚠ **One caveat, found by auditing the claim rather than repeating it — and then by running it.** The
+token lint gate is described everywhere as *ported*, and the source — `check-css-module-tokens.mjs`,
+named at `raw/04:353` — was executed against the rule `43-theming.md` §6 specifies. It is wrong in
+**both** directions: six rejections against a theme file of which two were correct, and every modern
+colour function (`oklch()`, `lab()`, `hwb()`, `color()`) plus every named colour passes untouched —
+which matters because `DESIGN.md` derives the whole palette in OKLCH. **Decision: build it on PostCSS,
+and widen the rule set past `hex/rgb/hsl` + `px`.** Nothing was unspecified; the estimate was wrong.
+See [`decisions/015-token-gate-is-a-parser.md`](decisions/015-token-gate-is-a-parser.md).
+
+✅ **Licence: MIT**, decided 2026-08-23 — the assumption `raw/03` was already evaluating the field
+against, now written down. Copyright holder is blocked on the project name.

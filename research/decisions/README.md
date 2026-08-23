@@ -30,8 +30,9 @@ forced it.
 | 012 | [No `<line>` element for anything a token must control](012-no-line-element-for-tokened-geometry.md) | this folder | ✅ **applied** |
 | 013 | [The zero-JS claim, narrowed](013-zero-js-claim-narrowed.md) | this folder | ✅ **applied** |
 | 014 | [Highcharts styled mode — correcting "colours only"](014-highcharts-styled-mode-correction.md) | this folder | ✅ **applied** |
+| 015 | [The token gate parses CSS; it does not grep it](015-token-gate-is-a-parser.md) | this folder | ✅ **applied** |
 
-**All three were applied on 2026-08-23**, in a separate, explicit act after they were written — which
+**012–014 were applied on 2026-08-23**, in a separate, explicit act after they were written — which
 is the point of the two-step. Each record's Status line now names the files it landed in, and each
 *Amendments required* table remains as the checklist it was verified against.
 
@@ -50,7 +51,7 @@ finding was ever wrong, which is the thing worth remembering.
 
 ## Why these three exist at all
 
-They came out of one verification pass, and they are related in a way worth stating: **two competitive
+**012–014** came out of one verification pass, and they are related in a way worth stating: **two competitive
 claims were checked, both came back weaker than written, and chasing the reason for one of them
 surfaced a platform constraint that matters more than either.**
 
@@ -75,6 +76,16 @@ flowchart TD
 
 012 is the one with a deadline. 013 and 014 change what we *say*; 012 changes what we *emit*, and
 discovering it at B1 — with thirty tokens mysteriously inert — costs a rewrite of the render tree.
+
+**015 came from the same habit applied to our own work rather than to competitors.** A1 was declared
+unblocked; the claim was audited instead of repeated, and the audit found the token lint gate described
+as a *port* of a script nobody had opened. Opening it — then **running** it — showed it rejects valid CSS
+four times in six and passes `oklch()`, which is the notation `DESIGN.md` derives the entire palette in.
+
+Worth noticing what the three earlier records have in common with it: **012, 013 and 015 are all the
+same species — a thing that looks like it works and quietly doesn't.** A geometry token that parses and
+does nothing. A positioning claim that reads as verified and was not tested. A gate that exits 0 because
+it never opened the files it exists for. The register is mostly a list of those.
 
 ---
 

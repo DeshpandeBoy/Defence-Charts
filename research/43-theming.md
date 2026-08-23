@@ -207,7 +207,7 @@ the `#ddd × 0.2` bug in a new costume.
 
 ## 6. The token lint-gate allowlist — the A1 deliverable
 
-The gate is specified consistently in three places and its scope is unambiguous:
+The gate is specified consistently in three places:
 
 > Rejects raw hex/rgb/hsl colours, raw `px` values, and gradients; requires `var(--...)`.
 > — `20-architecture.md:223`, `:307`, `30-implementation-plan.md:28`
@@ -215,6 +215,16 @@ The gate is specified consistently in three places and its scope is unambiguous:
 and `20-architecture.md:53` states the invariant as *"No package emits a raw hex, rgb, hsl, or `px`
 literal in CSS."* ⚠ **No allowlist is specified anywhere.** As written the gate fails on the tokens
 package itself on the day it is required to ship.
+
+⚠ **This section previously said that scope was "unambiguous". It was retired on 2026-08-23 after the
+rule was executed rather than read.** It is unambiguous and *incomplete in both directions*: it rejects
+things it should permit, and permits an entire class it should reject —
+`oklch()`, `lab()`, `hwb()`, `color()` and every named colour pass it today, which matters because
+`DESIGN.md` derives its palette in exactly that space. Three documents restating one rule read as
+consensus; they are one source cited three times. See
+[`decisions/015-token-gate-is-a-parser.md`](decisions/015-token-gate-is-a-parser.md) for the probe
+results. §6.1's positional rule below is unaffected and correct; what changed is the literal classes it
+ranges over (§6.1a) and how it is implemented (§6.1b).
 
 ### 6.1 The rule
 
@@ -242,17 +252,54 @@ The positional half is what makes this a real gate rather than a hole. A file-on
 any stylesheet that happens to live in the tokens package author arbitrary raw CSS, and the tokens
 package is precisely where someone would put a component style "just for now".
 
-⚠ **The implementing script does not do this yet, and cannot without new code.** `20-architecture.md`
-describes a *ported* gate; `raw/04:353` names the source as `check-css-module-tokens.mjs`. That script
-runs three global regexes (`raw-color`, `raw-pixel`, `gradient`) over whole-file text and has **no
-notion of a declaration**, so `--gx-series-1: #b4e4fd;` and `color: #b4e4fd;` are indistinguishable to
-it. It also collects `*.module.css` **only**, and the allowlisted theme files are plain `.css` — so
-ported unchanged the gate never opens them and passes trivially, which is §6.3's failure exactly.
+### 6.1a What counts as a literal — widened 2026-08-23
 
-The source does contain the right shape in one place: `rawFontViolations()` matches
-`(?:^|[;{])\s*(font|font-family)\s*:\s*([^;}]+)` to obtain declaration-level context. Generalising that
-into the primary pass is what turns the file-glob allowlist into the positional one specified above.
-Budget it as new code at A1, not as a copy — full delta table in `30-implementation-plan.md` A1.
+The rule above says *"a raw colour or length literal"*. The corpus's three statements spell that out as
+`hex/rgb/hsl` and `px`, and probing found that spelling lets an entire class through untouched.
+
+| Class | Rejected outside an allowlisted position |
+|---|---|
+| **Colour** | `#hex` · `rgb()`/`rgba()` · `hsl()`/`hsla()` · **`oklch()` · `oklab()` · `lab()` · `lch()` · `hwb()` · `color()`** · **named colours** |
+| **Length** | `px` · **`rem` `em` `pt` `pc` `in` `cm` `mm` `q` `ex` `ch`** — unitless `0` legal, viewport and container units legal |
+| **Gradient** | `linear-` / `radial-` / `conic-` and repeating variants — **no allowlist anywhere** (§3.1) |
+
+Two notes on why each widening is not scope creep:
+
+- **The modern colour functions are the important half.** `DESIGN.md` derives every series hue through
+  OKLCH, so `oklch()` is the notation this design system most invites and the one the stated rule was
+  blindest to. A gate that catches `#b4e4fd` but waves through `oklch(0.87 0.07 220)` is not enforcing
+  the discipline, it is enforcing a notation preference.
+- **`rem`/`em`/`pt` are the same rule, not a new one.** The intent behind "raw `px`" is *raw length*;
+  `px` is simply the one that gets typed most. `2rem` hardcoded in a component stylesheet is the same
+  breach in different units.
+
+⚠ **`currentColor`, `transparent`, `inherit` and the CSS-wide keywords stay permitted** — §6.2 already
+says so, and `currentColor` is *mandated* for chrome by §3.1. A named-colour list that swallows them
+converts a mandate into a violation, which is the one way this widening could do harm.
+
+### 6.1b The gate parses CSS; it does not grep it
+
+⚠ **The gate is described everywhere as a *port*, and the source cannot express §6.1's rule.**
+`raw/04:353` names it: `check-css-module-tokens.mjs`. That script runs three global regexes over
+whole-file text with **no notion of a declaration**, and collects `*.module.css` only — while the
+allowlisted theme files are plain `.css`, so ported unchanged it never opens them and passes trivially,
+which is §6.3's failure exactly.
+
+Executed against theme-shaped CSS it produced **six rejections of which two were correct**. Two of the
+four false positives are the positional gap; the other two — a `#ffffffBB` inside a base64 data URI and
+a `#ff0000` inside a `content` string — are regexes failing to parse CSS, and neither has anything to
+do with the allowlist.
+
+**Decided: build it on PostCSS.** `walkDecls()` hands back `prop` and `value` separately and custom
+properties arrive as ordinary declarations whose `prop` begins `--`, so the positional half of §6.1
+stops being a rule to implement and becomes `decl.prop.startsWith('--gx-')`. Strings and URLs come back
+as distinct token types, so both parse-level false positives vanish without a special case.
+
+⚠ **PostCSS is a new dependency, not one already present** — `@tsdown/css` uses **lightningcss** as its
+engine and only *loads* a PostCSS config. Taken anyway: `postcss` is three small pure-JS packages where
+`lightningcss` is a per-platform native binary, and the gate is a standalone CI check that should not be
+coupled to the bundler's engine. Budget it as new code at A1 — full evidence and rule set in
+[`decisions/015-token-gate-is-a-parser.md`](decisions/015-token-gate-is-a-parser.md).
 
 ### 6.2 Edge cases that must be decided now, not argued about in review
 
@@ -280,12 +327,20 @@ Budget it as new code at A1, not as a copy — full delta table in `30-implement
 
 ### 6.3 The gate must be seen to fail
 
-CI asserts **both** directions:
+CI asserts **both** directions, and both are planted:
 
-1. The gate **passes** on `@gx/tokens` via the allowlist.
+1. The gate **passes** on `@gx/tokens` via the allowlist — asserted against a fixture theme file
+   containing a token definition, a `calc()` multiplier, a unitless `0`, a `currentColor`, and a data
+   URI. Every one of those is a case the regex implementation got wrong.
 2. The gate **fails** on a deliberately planted raw hex in a non-allowlisted package.
 
 A gate never observed to fail is not a gate — it is a job that exits 0.
+
+⚠ **And the allow direction is not the ceremonial one.** It is tempting to treat (1) as a formality and
+(2) as the real test. The probe in §6.1b found four false positives against two true ones: this gate's
+observed failure mode is rejecting valid CSS, not missing invalid CSS. A gate that cries wolf four times
+in six gets switched off by the first contributor it blocks, which fails just as completely as exiting 0
+and takes longer to notice.
 
 ---
 
@@ -325,5 +380,10 @@ drawn in §1 and §3, and it is the test to apply to any future divergence.
 4. **Cascade layers** (§2) — Tier C, no surveyed precedent.
 5. **The elevation reading** (§3.2) — an interpretation of `DESIGN.md:190`, flagged as such. Worth a
    sentence in `DESIGN.md` either way so the next reader does not have to re-derive it.
-6. **SVG presentation attributes** (§6.2) — a real hole in the gate as currently specified. Needs an
-   A1 decision, and the recommendation here is that primitives carry no visual attributes at all.
+6. ✅ **SVG presentation attributes** (§6.2) — was a real hole in the gate as specified. **Closed at
+   A1:** primitives carry no visual attributes at all. The residue is the *platform* half — geometry
+   that CSS cannot set on `<line>` — which is [`decisions/012`](decisions/012-no-line-element-for-tokened-geometry.md)
+   and gate **G14** at A4, not a theming open question.
+7. **The named-colour list's shape** (§6.1a) — the full CSS colour keyword set, or a short deny-list of
+   the five or six that actually get typed. The full set is more correct and risks colliding with future
+   keywords; the short list is honest about what it catches. B1, with the token tree.

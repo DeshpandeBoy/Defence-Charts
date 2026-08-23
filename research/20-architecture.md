@@ -52,7 +52,7 @@ size + dataShape + overrides ──▶ planChart() ──▶ ChartPlan ──▶
 | `@gx/primitives` may not import `react-dom`, may not use state/effects/refs | Keeps the RSC path real. Allowed hooks: `useMemo`, `useCallback`, `useId` only — verified present in React 19's `react-server` build. |
 | ⚠ `@gx/primitives` elements carry **no visual presentation attributes** — everything comes from classes | `<line stroke="#ddd" />` is CSS-shaped but is not CSS, so a CSS-only gate cannot see it and the token gate has a hole exactly where the theming pitch lives. Taking every visual property from a class is also what makes per-widget CSS theming work at all. Decided at A1 (`30-implementation-plan.md` A1). Note this closes the *authored* hole only; the rule above closes the *platform* one. |
 | Only `@gx/react` and `@gx/grid` carry `"use client"` | One boundary, declared once, in the two packages that genuinely need it. `react-grid-layout@2.2.4` ships none of its own, so `@gx/grid` must supply it. |
-| No package emits a raw hex, rgb, hsl, or `px` literal in CSS | Enforced by the ported token lint gate, with one narrow allowlist: the theme source files of `@gx/tokens`, and only in custom-property declaration values (`43-theming.md` §6.1). CI asserts the gate both passes there and *fails* on a planted hex elsewhere. |
+| No package emits a raw colour or length literal in CSS | Colour means `#hex`, `rgb()`, `hsl()`, **`oklch()`, `oklab()`, `lab()`, `lch()`, `hwb()`, `color()` and named colours**; length means `px` and **every other absolute or font-relative unit** (`43-theming.md` §6.1a — widened after the stated `hex/rgb/hsl` + `px` rule was executed and found to pass `oklch()`, the notation `DESIGN.md` derives the whole palette in). Enforced by a **PostCSS-based** token lint gate — not the ported regex script, which cannot express the positional rule ([decision 015](decisions/015-token-gate-is-a-parser.md)) — with one narrow allowlist: the theme source files of `@gx/tokens`, and only in custom-property declaration values (`43-theming.md` §6.1). CI asserts the gate both passes there and *fails* on a planted hex elsewhere. |
 
 **Why a `@gx/charts-*` package per chart type is *not* in this graph:** it was in the original
 sketch, but per-type packages fragment the plan resolver, which needs a single switch over chart
@@ -252,7 +252,7 @@ Other settled points:
 - **Pin TypeScript 6.0.3, not the 7.0.2 latest.** TanStack Table, TanStack Query and Base UI all pin
   6.0.3, and tsdown itself warns that TS 7 support is experimental.
 - `"sideEffects": ["*.css"]` on any package shipping CSS; `false` elsewhere.
-- Token lint gate (rejects raw hex/rgb/hsl colours, raw `px` values, and gradients; requires `var(--...)`) written on day one. Allowlist and both-directions CI assertion: `43-theming.md` §6.
+- Token lint gate (rejects raw colour literals — hex, `rgb()`, `hsl()`, `oklch()`, `lab()`, `hwb()`, `color()`, named colours — raw length literals, and gradients; requires `var(--...)`) written on day one. **PostCSS-based, new code rather than a port** ([decision 015](decisions/015-token-gate-is-a-parser.md)). Rule set, allowlist and both-directions CI assertion: `43-theming.md` §6.
 - Corroboration that this is a real stack and not a bet: TanStack Table 9 and TanStack Query 5 both
   build on tsdown@0.22.14 today; Mantine is on Rolldown 1.1.4.
 - **`react-grid-layout@2.2.4` emits no `"use client"` anywhere in its published output** — confirming
@@ -336,11 +336,15 @@ exists to remove.
    succeeds *and* grep the output for the directive.
 4. **Tree-shaking assertion** (§6e) — converts "import one chart, ship one chart" into a gate.
 5. **Public-API surface test** (§6e) — the `ts-morph` walk for missing/forbidden exported types.
-6. **Token lint gate** — rejects raw hex/rgb/hsl colours, raw `px` values, and gradients; requires
-   `var(--...)`. Allowlisted only in `packages/tokens/src/themes/**/*.css`, and only in
-   custom-property declaration values (`43-theming.md` §6.1). ⚠ Run in **both** directions: a gate
-   never observed to fail is a job that exits 0. ⚠ It is CSS-only, so an SVG presentation attribute
-   in TSX (`<line stroke="#ddd" />`) slips through — see §6.2 there for the A1 decision that closes it.
+6. **Token lint gate** — rejects raw colour literals (hex, `rgb()`, `hsl()`, `oklch()`, `lab()`,
+   `hwb()`, `color()`, named colours), raw length literals (`px`, `rem`, `em`, `pt`, …), and
+   gradients; requires `var(--...)`. Allowlisted only in `packages/tokens/src/themes/**/*.css`, and
+   only in custom-property declaration values (`43-theming.md` §6.1). **PostCSS-based, not the ported
+   regex script** ([decision 015](decisions/015-token-gate-is-a-parser.md)). ⚠ Run in **both**
+   directions: a gate never observed to fail is a job that exits 0 — and the *allow* direction is where
+   this one was measured to break, at four false positives in six rejections. ⚠ It is CSS-only, so an
+   SVG presentation attribute in TSX (`<line stroke="#ddd" />`) slips through — see §6.2 there for the
+   A1 decision that closes it.
 7. **`@gx/core` imports nothing from React** — a one-line dependency-cruiser rule protecting the
    single most valuable property in the architecture.
 

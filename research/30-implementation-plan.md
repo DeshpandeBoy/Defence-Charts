@@ -45,24 +45,35 @@ That is why it comes first.
   workspace are plain array entries rather than a cascade, and G2 applies to exactly one package.
   ESLint owns the TS/TSX rules **only** — it does not own the token gate; see below.
 
-⚠ **The token gate is a Node script, not stylelint.** `20-architecture.md` calls it *"the ported token
-lint gate"* and `raw/04:353` names the source: `check-css-module-tokens.mjs`, ~137 lines, three global
-regexes (`raw-color`, `raw-pixel`, `gradient`) plus a declaration-aware `raw-font` pass. **Porting it
-is not a copy.** Read it before estimating A1 — three concrete deltas, each of which would otherwise
-ship a gate that exits 0:
+⚠ **The token gate is a Node script, not stylelint — and it is not a port.** `20-architecture.md` calls
+it *"the ported token lint gate"* and `raw/04:353` names the source: `check-css-module-tokens.mjs`,
+~137 lines, three global regexes over whole-file text. It was executed against the rule `43-theming.md`
+§6 specifies rather than reasoned about, and it is wrong in **both** directions. Full evidence in
+[`decisions/015-token-gate-is-a-parser.md`](decisions/015-token-gate-is-a-parser.md); the two results
+that change A1's estimate:
 
-| # | What the source does | What `43-theming.md` §6 requires |
-|---|---|---|
-| 1 | Collects `*.module.css` only (`entry.name.endsWith('.module.css')`) | The allowlisted files are `packages/tokens/src/themes/**/*.css` — **plain `.css`, not modules.** Ported unchanged, the gate never opens the one file set the allowlist exists for, and passes trivially |
-| 2 | Three regexes over whole-file text; no notion of a declaration | §6.1 is **positional** — a literal is legal *only* as the value of a `--gx-*` custom-property declaration. `--gx-series-1: #b4e4fd;` ✅ and `color: #b4e4fd;` ❌ are textually identical to a global regex |
-| 3 | `raw-font` hardcodes `var(--font-family)`, `--fa-font-`, `--fa-style-family` | Retarget to `--gx-*`. Mechanical, but it is Font Awesome / Qyrus-specific and will silently pass nothing useful if left |
+| | |
+|---|---|
+| **Rejects valid CSS** | Six rejections against a theme file, **two of them correct**. Two false positives are the positional gap (`--gx-series-1: #b4e4fd` is a token definition, not a violation); the other two are a `#ffffffBB` inside a base64 data URI and a `#ff0000` inside a `content` string — regexes failing to parse CSS, nothing to do with the allowlist |
+| **Passes invalid CSS** | `oklch()`, `oklab()`, `lab()`, `lch()`, `hwb()`, `color()` and every named colour sail through. ⚠ `DESIGN.md` derives the entire palette in OKLCH, so the notation the gate is blindest to is the one this design system most invites |
 
-Delta 2 is the real work and it is **net-new code, not a port** — but the source already shows the
-shape: `rawFontViolations()` matches `(?:^|[;{])\s*(font|font-family)\s*:\s*([^;}]+)` to get
-declaration-level context. Generalise that into the primary pass and the positional rule falls out.
-⚠ Note delta 1 and delta 2 compound: fix the glob without fixing positionality and the tokens package
-fails on **every line**, since `raw-pixel` fires on `--gx-label-font-size: 11px` and `raw-color` on
-every theme hex.
+**Build it on PostCSS.** Verified by execution: `walkDecls()` returns `prop` and `value` as separate
+fields and custom properties arrive as ordinary declarations whose `prop` begins `--`, so §6.1's
+positional rule reduces to `decl.prop.startsWith('--gx-')` and both parse-level false positives vanish
+without a special case. ⚠ **It is a new dependency** — `@tsdown/css@0.22.14` depends on `lightningcss`
+and `postcss-load-config`, so the build's CSS engine is lightningcss and PostCSS is only an optional
+plugin pipeline. Taken anyway: `postcss` is three small pure-JS packages against a per-platform native
+binary, and the gate is a standalone CI check that should not be coupled to the bundler's engine.
+
+Estimate accordingly: **a PostCSS plugin implementing a positional allowlist over the widened rule set
+of `43-theming.md` §6.1a**, not a 137-line copy. Nothing here was unspecified — the estimate was wrong,
+which is the harder failure to notice. The one thing worth lifting from the source is its shape:
+`rawFontViolations()` already reaches for declaration-level context, which is the tell that the global
+regexes were the wrong tool in the original too.
+
+⚠ **The widened rule set has one trap.** `currentColor`, `transparent` and the CSS-wide keywords must
+stay permitted — `currentColor` is *mandated* for chrome by `43-theming.md` §3.1. A named-colour list
+that swallows them turns a mandate into a violation.
 
 - ⚠ **Determinism preconditions belong in A1's config, before the first test** — they are specified in
   `20-architecture.md` §6a and `maps/04-ci-gate-map.md`, but were not previously sited at a milestone:
@@ -70,7 +81,6 @@ every theme hex.
   fake **only** `requestAnimationFrame`/`cancelAnimationFrame`, because the wider Vitest 4 timer
   surface interferes with React scheduling; `restoreMocks` + `unstubGlobals`, both of which the
   injected-`ResizeObserver` pattern depends on; and **happy-dom banned**, jsdom permitted.
-- CI: typecheck, lint (ESLint 9), token gate (both directions), test. Nothing else yet.
 
 ⚠ **The class-only rule is one of two, not one.** It fixes *authored* presentation. It does **not**
 fix the platform: `x1`/`y1`/`x2`/`y2` on `<line>` are not CSS-settable in any browser, so a class
@@ -79,13 +89,22 @@ that looks like it works and quietly doesn't — but only the first is an A1 con
 element-choice rule in [`decisions/012-no-line-element-for-tokened-geometry.md`](decisions/012-no-line-element-for-tokened-geometry.md),
 and it binds at **A4**, when `@gx/primitives` is written.
 
-- CI: typecheck, lint (ESLint 9), token gate (both directions), test. Nothing else yet.
+- CI: typecheck, lint (ESLint 9), token gate, test. Nothing else yet. ⚠ **The gate is planted in both
+  directions** (`43-theming.md` §6.3) — a raw hex in a non-allowlisted package asserted to fail, *and* a
+  fixture theme file asserted to pass clean. The second is not ceremony: the measured failure mode is
+  four false positives in six rejections, so the fixture carries the cases that broke it — a token
+  definition, a `calc()` multiplier, a unitless `0`, a `currentColor`, and a data URI.
 - Decide the name and claim the npm scope. **Blocking for publish, not for code.**
-- ⚠ **Pick the licence.** Never stated anywhere in the corpus — `PRODUCT.md` says "open-source" and
-  `raw/03` evaluates the field *"for an MIT, presentational-only… library"*, so MIT is assumed and has
-  never been decided. Same class as the name: publish-blocking, not code-blocking, but it belongs in
-  `package.json` from the first commit rather than being retrofitted across seven of them. `publint`
-  flags a missing `license` field at E3 regardless.
+- ✅ **Licence: MIT.** Decided 2026-08-23 rather than left implicit. It was never stated in the corpus,
+  but it was assumed throughout — `raw/03` evaluates the entire charting field *"for an MIT,
+  presentational-only… library"*, which is the brief the build-vs-adopt call was made against, and
+  `PRODUCT.md` says "open-source" without qualification. MIT is what the research already assumed, and
+  nothing in the design needs more. Goes in `package.json` and a root `LICENSE` from the **first**
+  commit rather than being retrofitted across seven; `publint` flags a missing `license` field at E3
+  regardless. ⚠ The copyright holder line is blocked on the project name — same unblock, one edit.
+  Apache-2.0 is the only alternative worth a second thought (explicit patent grant); it is heavier than
+  a presentational chart library needs, and choosing it later is a relicence, so it is named here and
+  declined rather than left open.
 
 ### A2. `@gx/core` types
 - `SizeContext`, `DataShape`, `ChartPlan`, `ChartType`, `PlanOverrides`, `PlanPolicy`, `FontMetrics`.

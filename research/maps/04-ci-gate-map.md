@@ -75,7 +75,7 @@ different moment: lint at author time, build assertion at package time, fixture 
 | G4 | Next.js App Router page rendering `<Chart plan={…}>` in a **server component with JS disabled**, asserting the SVG is in the HTML | **A4** | 7 | The RSC path silently degrades to SSR + hydration |
 | G5 | Bundle each exported symbol alone; assert the component set equals a known set; print `symmetricDifference` | **A4** | 5, packaging | "Import one chart, ship one chart" stops being true |
 | G6 | `ts-morph` walk from `src/index.ts` collecting `missingExports` + `forbiddenExports` | **A4** | 5 | A public prop's type is unnameable by consumers |
-| G7 | Token lint — raw hex / `rgb()` / `hsl()` / `px` / gradients — **and a planted violation asserted to fail** | **A1** (written), **B1** (full tree) | theming | Either someone hardcodes, or the gate itself has broken |
+| G7 | Token lint — raw colour literals (hex, `rgb()`, `hsl()`, `oklch()`, `lab()`, `hwb()`, `color()`, named), raw length literals, gradients — **planted in both directions: a violation asserted to fail *and* a valid theme file asserted to pass clean** | **A1** (written), **B1** (full tree) | theming | Either someone hardcodes, or the gate itself has broken |
 | G8 | Every threshold carries a provenance tier | **B3** | theming | A tuned number acquires the authority of a researched one |
 | G9 | Plan snapshots: `(type, size, shape) → plan`, per rung | **A3** | ladder | A rung's semantics change without anyone deciding to change them |
 | G10 | Sweep width **up then down** across every boundary; assert the plan is a pure function of size | **A3** | ladder | Hysteresis creeps in — the direction you approached from starts to matter |
@@ -91,6 +91,14 @@ parses, passes G7, builds, emits no warning, and has no effect — `x1`/`y1`/`x2
 CSS-settable in any browser. Same species as the happy-dom `0` this project already caught: a thing
 that looks like it works and quietly doesn't. Cheap at A4, near-impossible to retrofit once the tokens
 are published as working.
+
+**G7's *allow* direction is the one that actually fires.** The reflex is to plant a violation, watch it
+fail, and treat the passing side as ceremony. Measured against theme-shaped CSS, the regex script this
+gate was assumed to be a port of returned **six rejections of which two were correct** — its failure mode
+is rejecting valid CSS, not missing invalid CSS. So the allow side is planted too, with the cases that
+broke it: a token definition, a `calc()` multiplier, a unitless `0`, a `currentColor`, and a base64 data
+URI. A gate that cries wolf gets switched off, which fails as completely as exiting 0 and is quieter
+about it ([015](../decisions/015-token-gate-is-a-parser.md)).
 
 **G10 is the one most likely to be dropped as redundant.** It is not. G9 asserts each rung is correct;
 G10 asserts the *path between* rungs is memoryless — which is the whole reason `prevClass` was settled
