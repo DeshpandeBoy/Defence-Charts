@@ -4,6 +4,37 @@
 
 ---
 
+## ⚠ Empirical RSC / zero-JS results — added 2026-08-23
+
+Not from documentation. Four libraries were installed locally, rendered, and the output inspected.
+Recorded here so the next reader does not re-derive them. Full context and the wording they imply:
+[`../decisions/013-zero-js-claim-narrowed.md`](../decisions/013-zero-js-claim-narrowed.md).
+
+| Library | Renders server-side? | Works inside an RSC? | Evidence |
+|---|---|---|---|
+| **visx** | Yes — with `typeof document === "undefined"` | **Yes** | Next 15 static export built; full geometry in the HTML; **124 B** page JS; zero visx/d3 bytes in any client chunk. `@visx/shape@3.5.0`'s `LinePath` is `React.createElement("path", …)` around d3-shape math — zero hooks, no `"use client"` |
+| **Vega** | Yes — no DOM at all | n/a (not React) | `view.toSVG()` in bare Node → 7,459 B, real geometry, `<text>` labels. **Inert** — presentation baked into attributes, so unrestylable after render |
+| **Observable Plot** | Yes — but **needs a DOM** | **No** — returns a DOM node | Bare Node: `TypeError: … reading 'documentElement'`. With jsdom: 2,126 B, `<path d="M40,130L126.667,80.5L213.333,106.167L300,20"` |
+| **Nivo** | Yes (React SSR) | **No — fails at import** | `TypeError: x.createContext is not a function` during "Collecting page data" |
+
+**The nivo result was controlled.** An identical page file with *only* `'use client'` added builds
+successfully — same React 19, same nivo 0.87. The failure is the server-component boundary, not a
+version incompatibility. Cost of the working version: **89.6 kB** page JS / 192 kB first load, nivo in
+client chunk `462-f186577f89077c20.js`.
+
+⚠ Methodological note, because it changes what the nivo number is worth: the install needed
+`--legacy-peer-deps` (nivo 0.87's peer range is `>= 16.14.0 < 19.0.0`, the app is React 19). The first
+attempt produced `Module not found: Can't resolve '@nivo/line'` — an install failure, not a result.
+That run was discarded rather than reported.
+
+**Consequence: server-side SVG is table stakes, and "none of the eleven can render server-side with
+zero JS" is retired as false.** What is rare is RSC-native without a wrapper (visx only, of these
+four); what is rarer still is zero-JS *and still restylable* (none of them).
+
+**Re-run these four before any public launch.** Under an hour, and the field moves.
+
+---
+
 ## 2026 React charting landscape — evaluation for an MIT, presentational-only, granular-control chart library
 
 All npm/GitHub figures pulled 2026-08-22. Gzip figures from bundlephobia API (standalone package incl. its deps). Type/prop details read directly from published `.d.ts` in the tarballs (`npm pack`), not from docs.

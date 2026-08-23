@@ -18,6 +18,8 @@ Working research for the new project in `Defence/`. Everything here is input to 
 | `42-typography.md` | The reconciled A–E type scale and its `--gx-*` mapping. |
 | `43-theming.md` | Default + neutral themes, composition review, token lint-gate allowlist. |
 | `../DESIGN.md` | The visual world ("The Emission-Line Rail"). Palette derivation, type ranks, layout and elevation rules. |
+| `maps/` | **Five flow maps** — package graph, runtime flow, milestone DAG, token flow, CI gates. Derived from the files above; they hold no values of their own. Read these when you need *"if I change X, what else moves?"* |
+| `decisions/` | **Decision register.** Decisions 1–11 are indexed from `00-decisions.md`, not copied; 012 onward get their own file with evidence and amendment lists. |
 | `raw/01-basedash-chart-types.md` | Per-chart-type spec scraped from Basedash docs. |
 | `raw/02-basedash-grid-model.md` | Basedash dashboard grid, filters, embedding. |
 | `raw/03-landscape-charting.md` | React charting library landscape + build-vs-adopt call. |
@@ -59,6 +61,25 @@ older files:
   semibold to `GRAD` — because `wght` changes glyph advances and would invalidate the metrics table.
 - **`prevClass` is settled out of the resolver**, not deferred.
 
+**Three decisions were written up after a verification pass on 2026-08-23 and are now ✅ applied.**
+They live in `decisions/`: **012** — never emit `<line>` for tokened geometry, because `x1`/`y1`/`x2`/`y2`
+are not CSS-settable in any browser; **013** — the zero-JS claim narrowed after testing visx, Vega,
+Observable Plot and nivo empirically; **014** — Highcharts styled mode exposes far more than colour.
+
+Two of those changed what the product *says*, not just what it builds, and are worth knowing before
+reading `01-plain-english.md` or `PRODUCT.md`:
+
+- **The ladder is now the headline, not the theming.** CSS theming is the *weakest* of the three
+  claims — Highcharts already does most of it, and 012 restricts geometry-via-CSS to an element
+  subset. The ladder is untouched by any of this and is the only claim with no credible prior art.
+- **"None of the eleven can render server-side with zero JS" is retired as false.** visx renders
+  inside an RSC today at 124 B of page JS. The wording that survives: *the first planned,
+  size-adaptive chart library that renders with zero JS and stays themeable after render.* Decision 7's
+  own row — *"zero of the 11 ship a `"use client"` directive"* — was verified true and is untouched.
+
+**One new CI gate came out of this: G14**, an element-set snapshot at A4, because the token lint gate
+structurally cannot tell that a `var()` landed on a property that does not exist.
+
 **Open — and it is now a short list:**
 
 1. **Project name and npm scope.** Blocking for publish, not for code. Everything is `@gx/*`
@@ -73,5 +94,7 @@ older files:
 5. **The six neutral-theme hex values** and the five composition pairs with no structural guarantee
    (`43-theming.md` §4–§5). Derivable at B1; deliberately not guessed.
 
-**Next:** Milestone A1. Nothing blocks it — and the A2–A4 pointers it hands off to now resolve to
-real specifications rather than to each other.
+**Next:** Milestone A1. Nothing blocks it — the A2–A4 pointers it hands off to now resolve to real
+specifications rather than to each other, the linter is chosen (**ESLint 9, flat config**, which is
+what gate G2 needs), and the SVG presentation-attribute question A1 was asked to decide is decided:
+**primitives carry no visual attributes and take everything from classes.**

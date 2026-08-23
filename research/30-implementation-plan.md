@@ -34,11 +34,25 @@ That is why it comes first.
     on the tokens package on the day it is mandated.
   - **A planted raw hex in a non-allowlisted package**, asserted to fail CI. A gate never observed to
     fail is not a gate.
-  - ⚠ **A decision on SVG presentation attributes.** `<line stroke="#ddd" />` in `@gx/primitives` is
-    not CSS and stylelint will not see it. Recommendation: primitives carry no visual attributes at
-    all and take everything from classes — the same discipline that makes per-widget CSS theming work.
-    Decide it here; a gate with a known hole is worse than a documented absence.
-- CI: typecheck, lint, token gate (both directions), test. Nothing else yet.
+  - ✅ **SVG presentation attributes — decided.** `<line stroke="#ddd" />` in `@gx/primitives` is not
+    CSS and stylelint will not see it. **Primitives carry no visual attributes at all and take
+    everything from classes** — the same discipline that makes per-widget CSS theming work, and it
+    restores the gate's coverage rather than documenting a hole.
+- **Linter: ESLint 9, flat config (`eslint.config.js`).** Named here because `pnpm lint` was a CI job
+  with no tool behind it. It is specifically what gate **G2** needs — the ban on `getBBox`,
+  `getComputedTextLength`, `getTotalLength` and `getBoundingClientRect` inside `@gx/core`
+  (`maps/04-ci-gate-map.md`). Flat config over `.eslintrc` because per-package overrides in a
+  workspace are plain array entries rather than a cascade, and G2 applies to exactly one package.
+  Stylelint remains separate — it owns the token gate; ESLint owns the TS/TSX rules.
+
+⚠ **The class-only rule is one of two, not one.** It fixes *authored* presentation. It does **not**
+fix the platform: `x1`/`y1`/`x2`/`y2` on `<line>` are not CSS-settable in any browser, so a class
+carrying `y2: var(--gx-tick-length)` also does nothing. Both failures have the same shape — a token
+that looks like it works and quietly doesn't — but only the first is an A1 concern. The second is the
+element-choice rule in [`decisions/012-no-line-element-for-tokened-geometry.md`](decisions/012-no-line-element-for-tokened-geometry.md),
+and it binds at **A4**, when `@gx/primitives` is written.
+
+- CI: typecheck, lint (ESLint 9), token gate (both directions), test. Nothing else yet.
 - Decide the name and claim the npm scope. **Blocking for publish, not for code.**
 
 ### A2. `@gx/core` types
@@ -101,9 +115,19 @@ At the end of A3 the core thesis is testable with zero UI. That is the point.
 - Build the **`expect*` semantic assertion helpers** alongside — `expectLine`, `expectAxisTicks`,
   `expectBars`, `expectScale`. Recharts runs 315 spec files on this pattern; write ours before the
   charts multiply, not after.
+- ⚠ **Never emit `<line>` for geometry a token controls** — `x1`/`y1`/`x2`/`y2` are not CSS-settable
+  in any browser, and none is planned. `<rect>` for ticks and gridlines (`width` = stroke thickness,
+  `height` = tick length, both plain CSS lengths), `<path>` where a path already exists. This is baked
+  into `Axis` and `Grid` **here**, at A4, because discovering it at B1 means rewriting the render tree
+  with thirty tokens already documented as working. Full evidence and the two alternative
+  substitutions: [`decisions/012-no-line-element-for-tokened-geometry.md`](decisions/012-no-line-element-for-tokened-geometry.md).
+  - The token lint gate **cannot** catch this in either direction — it checks that a `var()` was used,
+    not that the property it lands on exists. Add gate **G14**: an element-set snapshot per chart type,
+    so a `<line>` appearing where a `<rect>` was is a reviewable diff rather than a silent regression.
 - **RSC fixture app** in CI: a Next.js 16 App Router page rendering `<Chart plan={...}>` in a server
   component with JS disabled, asserting the SVG is in the HTML. This is the test that protects
-  decision 7 from being silently broken by a bundler upgrade.
+  decision 7 from being silently broken by a bundler upgrade. **Next.js appears here as a fixture
+  only** — nothing under `packages/` may import from `next/`.
 
 ### A5. `@gx/react` — `<AutoChart>`
 - `useElementSize()` — `ResizeObserver`, `contentBoxSize`, rAF-batched.

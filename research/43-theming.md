@@ -251,12 +251,20 @@ package is precisely where someone would put a component style "just for now".
 - **`currentColor`**, `transparent`, `inherit` are keywords, not literals. Permitted everywhere —
   and `currentColor` is *mandated* for chrome (§3.1).
 - **Media-query values** (`@media (prefers-color-scheme: light)`) are not declarations. Out of scope.
-- ⚠ **SVG presentation attributes authored in TSX are not CSS and stylelint will not see them.** A
-  `<line stroke="#ddd" />` in `@gx/primitives` passes a CSS-only gate cleanly. Either the gate gains a
-  companion rule over `.tsx` attribute values, or primitives are required to carry no visual
-  attributes at all and take everything from classes. **The latter is better** — it is the same
-  discipline that makes per-widget CSS theming work — but it needs stating in A1, because a gate with
-  a known hole is worse than a documented absence.
+- ✅ **SVG presentation attributes authored in TSX are not CSS and stylelint will not see them** — a
+  `<line stroke="#ddd" />` in `@gx/primitives` passes a CSS-only gate cleanly. **Decided at A1:
+  primitives carry no visual attributes at all and take everything from classes.** Same discipline
+  that makes per-widget CSS theming work, and it closes the hole rather than documenting it
+  (`30-implementation-plan.md` A1, `20-architecture.md` §2).
+- ⚠ **And a token can pass this gate and still do nothing.** The gate checks that a `var()` was used.
+  It cannot check that the property the `var()` lands on exists. `x1`/`y1`/`x2`/`y2` on `<line>` are
+  not CSS-settable in **any** browser, so a geometry token targeting them ships, is documented, is
+  counted, and has no effect. This is out of reach of *any* CSS lint rule and needs gate **G14** — an
+  element-set snapshot at A4. Two consequences for this document:
+  - **Every geometry token's row must name the element it targets**, so the substitution is visible at
+    specification time rather than discovered at render time.
+  - **`<rect>` for ticks and gridlines, `<path>` where a path already exists.** See
+    [`decisions/012-no-line-element-for-tokened-geometry.md`](decisions/012-no-line-element-for-tokened-geometry.md).
 
 ### 6.3 The gate must be seen to fail
 

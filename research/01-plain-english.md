@@ -154,9 +154,23 @@ You already know how big the chart will be. A PDF, an email, a report, a fixed s
 The user sees a finished chart in the first frame. No loading state, no layout shift, no JavaScript
 downloaded, no JavaScript executed. Works with JS disabled entirely.
 
-We checked: **none of the eleven charting libraries we surveyed can do this.** Every one of them makes
-you write your own client boundary. This is a genuine first for the field, and it exists only because
-of the recipe split in §2.
+⚠ **We checked this properly, and the honest version is narrower than the one we first wrote.**
+*"None of the eleven charting libraries we surveyed can do this"* is **false** — on 2026-08-23 we
+installed four and rendered them (`decisions/013`). Rendering SVG on a server is table stakes. What is
+actually rare:
+
+- **visx already works inside a React Server Component today** — hook-free, no `"use client"`, 124 B of
+  page JS, zero visx or d3 bytes in any client chunk. It is the honest near-miss, and saying so out
+  loud costs nothing and buys credibility for the claims that hold.
+- **nivo fails at import** in an RSC (`TypeError: x.createContext is not a function`); wrapped in
+  `'use client'` it works and costs 89.6 kB of page JS.
+- **Observable Plot returns a DOM node**, so it structurally cannot run in an RSC at all.
+- **Vega renders in bare Node with no DOM** — genuinely zero-JS, and completely **inert**, because it
+  bakes presentation into attributes. Nothing about it can be changed from a stylesheet afterwards.
+
+What is true and worth saying: every one of the eleven makes you write your own client boundary, and
+none of them combines zero-JS render with *staying themeable after render*. That second half is the
+part that is ours, and it exists only because of the recipe split in §2.
 
 ### Route B — the adaptive one, the actual product
 
@@ -263,11 +277,24 @@ Ordinary CSS custom properties.
 .revenue-widget { --gx-line-width: 3px; --gx-grid-opacity: 0.35; }
 ```
 
-That second line is the thing no other library can do. We checked all ten major ones: none exposes
-chart *geometry* through CSS variables. Highcharts comes closest and it is colours only. Carbon ships
-exactly two, both font families. Everyone else makes you pass a JavaScript options object — which
-means you cannot restyle one widget on a dashboard from a stylesheet, and you cannot theme charts from
-a design system's existing CSS layer.
+That second line is the thing we lead with — but ⚠ **more carefully than we first wrote it**
+(`decisions/014`). Highcharts' styled mode is *not* colours only: it exposes stroke width, dash style,
+gridline width, tick colour and width, and typography, ships `--highcharts-color-{n}` custom
+properties you can extend, and follows `prefers-color-scheme`. Two things still hold, and they are the
+ones to say:
+
+1. **One namespace covering every knob**, rather than a colour-indexed subset with the rest reached
+   through classes.
+2. **Per-widget scope on a shared dashboard** — restyling one widget from a stylesheet, without a
+   re-render and without prop drilling.
+
+Carbon ships exactly two chart custom properties, both font families. Everyone else makes you pass a
+JavaScript options object.
+
+And there is a line even we cannot cross, which is worth knowing before promising otherwise: tick
+*length* is `y2` on an SVG `<line>`, and `x1`/`y1`/`x2`/`y2` are not settable from CSS in any browser.
+We get past it only by never drawing ticks as `<line>` in the first place (`decisions/012`) — a real
+advantage, but a narrow one we had to design for, not something Highcharts missed.
 
 Because these are plain CSS, changing one costs nothing. The browser repaints. React never finds out.
 

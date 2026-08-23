@@ -1903,7 +1903,7 @@ primary source (option tree, repo source, or official docs), not from secondary 
 | Domain line style | ● colour + width | ● stroke/width/opacity | ● full `lineStyle` + arrowhead symbols | ● colour/width/dash/dashOffset/opacity/**cap** | ◐ SVG props | ● stroke/strokeWidth | ● + `strokeDasharray` | ● + `strokeOpacity`/`linecap` | ◐ colour token only | ● `domainWidth: 2` |
 | Crosshair style | ● colour/dash/width/snap/z + full label object | ? | ◐ `axisPointer` (defaults unverified) | ◐ rule mark + selection | ◐ `Tooltip.cursor` | ● stroke/width/opacity/**dash `6 6`** + `crosshairType` | ◐ ? | **○** no tooltip/crosshair at all | ◐ `$tooltip-line-border` token | ? |
 | Geometry that changes with chart size | ◐ `responsive.rules` patches arbitrary options | ○ | ○ | ○ | ○ | ◐ `labelSkip*` only | ○ | ◐ `tickSpacing` only | ● `radiusRange`, `fontSizeRange`, donut `numberFontSize` as functions of chart box | ● explicit S/M/L tiers as reactive signals |
-| Theming via **CSS custom properties** | ◐ colours only, as `var()` defaults | ○ | ○ | ○ | ○ | ○ (JS theme object prop) | ○ | ○ | ◐ exactly two (`--cds-charts-font-family`, `-condensed`) | ○ |
+| Theming via **CSS custom properties** | ⚠ ◐ *~~colours only~~ — **wrong**, see `../decisions/014`: also stroke width, dash, gridline width, tick colour + width, typography, and extensible `--highcharts-color-{n}`* | ○ | ○ | ○ | ○ | ○ (JS theme object prop) | ○ | ○ | ◐ exactly two (`--cds-charts-font-family`, `-condensed`) | ○ |
 
 **Unverified cells, stated explicitly** (do not read `?` as "missing"): amCharts `strokeDasharray`,
 `AxisTick.length`, label halo, bar corner radius, legend gap and crosshair — none appear on the axes
@@ -1916,6 +1916,15 @@ resolves to `null` in the tree with the effective horizontal value undocumented 
 ### 7.2 Honest read
 
 **Where we would genuinely exceed the field.**
+
+⚠ **Corrected 2026-08-23 — read `../decisions/014-highcharts-styled-mode-correction.md` before
+citing point 1 below.** The "colours only" reading of Highcharts styled mode is wrong. Highcharts
+exposes stroke width, dash style, gridline width, tick colour and width, and typography, and ships
+extensible `--highcharts-color-{n}` custom properties. The paragraph is left as written because it is
+the record of what this survey found; the claim it supports has been narrowed to *one namespace
+covering every knob* + *per-widget scope*, and the `tickLength` observation below is right for the
+wrong reason — that is a **platform** limit (`x1`/`y1`/`x2`/`y2` are not CSS-settable in any browser),
+not a Highcharts one. See `../decisions/012-no-line-element-for-tokened-geometry.md`.
 
 1. **Delivery mechanism.** No library in the survey exposes chart *geometry* through CSS custom
    properties. Highcharts is the closest and it is **colours only** — `gridLineColor` defaults to

@@ -58,12 +58,26 @@ the pitch, and we should adopt its wording rather than a bolder one:
 
 **Three of those four clauses are novel. The knob count is not.** What the comparison actually found:
 
-- **Delivery is the real differentiator, not knob count.** No library exposes chart *geometry*
-  through CSS custom properties. Highcharts comes closest and is **colours only**; Carbon ships
-  exactly two chart custom properties, both font families. Everyone else is a JS options object, a
-  JS theme prop, or per-element props. So nobody can retheme one widget on a dashboard from a
-  stylesheet, or theme from a design system's existing CSS layer, or do it without re-rendering.
-- **The size ladder genuinely does not exist.** Only Carbon and Spectrum do anything with size, and
+- **Delivery is the real differentiator, not knob count** — but narrowly, and the narrow version is
+  the checkable one. ⚠ **Corrected 2026-08-23** (`decisions/014`): Highcharts styled mode is **not**
+  "colours only." It exposes stroke width, dash style, gridline width, tick colour and width, and
+  typography, ships `--highcharts-color-{n}` as extensible custom properties, and reacts to
+  `prefers-color-scheme` in v11+. What survives the correction: **one namespace covering every knob**
+  rather than a colour-indexed subset with the rest class-based, and **per-widget scope on a shared
+  dashboard**. Carbon still ships exactly two chart custom properties, both font families; everyone
+  else is a JS options object, a JS theme prop, or per-element props.
+  - **And the boundary Highcharts stops at is the platform, not a Highcharts weakness.** Tick length
+    is `y2` on a `<line>`, and `x1`/`y1`/`x2`/`y2` are not CSS-settable in any browser. We cross that
+    line only by an early rendering choice (`decisions/012`) — a real advantage, but a narrow, earned
+    one, not evidence that a two-decade commercial library overlooked something.
+- ⚠ **The zero-JS claim, corrected 2026-08-23** (`decisions/013`). *"Zero of the 11 audited ship a
+  `"use client"` directive"* is verified and stands. *"None of the eleven can render server-side with
+  zero JS"* is **false** — four libraries were installed and rendered: visx works inside an RSC at
+  124 B page JS; Vega renders in bare Node but is inert; Observable Plot needs a DOM; nivo fails at
+  import. Server-side SVG is table stakes. The wording that survives: **the first planned,
+  size-adaptive chart library that renders with zero JS and stays themeable after render.**
+- **The size ladder genuinely does not exist**, and after the two corrections above it is the
+  **strongest** of the three claims, not the third. Only Carbon and Spectrum do anything with size, and
   **both only rescale.** Neither reveals, conceals, relabels, aggregates, substitutes or transposes.
   The three conceal rules found anywhere in ten libraries — Nivo's `labelSkipWidth`, Highcharts'
   `marker.enabledThreshold`, Spectrum's donut `MIN_ANGLE` — are each a single hard-coded special case.

@@ -15,7 +15,12 @@ Greenfield monorepo, no code written yet (research-only phase). Settled by `rese
 - Chart math/drawing: raw `d3-scale@4`, `d3-shape@3`, `d3-array@3`, `d3-format`, `d3-time-format` — no visx, Recharts, or ECharts.
 - Grid engine: adopts `react-grid-layout@2`'s framework-agnostic `./core` subpath (pinned away from `2.2.0`, a known layout bug).
 - Theming: CSS custom properties (`--gx-*` placeholder prefix) + matching TypeScript token types. No runtime style provider, no Tailwind dependency. Two themes ship — "The Emission-Line Rail" as the default and a neutral escape hatch resetting to field-convention defaults — selected by class or stylesheet import, never by a JS prop.
-- Conventions: Next.js 16, React 19, TypeScript, CSS Modules with design tokens, Storybook, Playwright, Vitest, Changesets releases.
+- Conventions: React 19, TypeScript, CSS Modules with design tokens, Storybook, Playwright, Vitest, Changesets releases.
+- ⚠ **Next.js 16 is a consumer convention and a test fixture, not a dependency.** The library is
+  framework-agnostic React. Next appears in exactly three places: the RSC fixture app CI renders at
+  A4/A5, the Fumadocs docs site at D, and the environment consumers are assumed to be in. Nothing
+  under `packages/` may import from `next/` — if `@gx/react` ever did, decision 7 (RSC-safe render,
+  zero JS) would be a Next.js feature rather than a property of the library.
 - Test stack: bare Node for the core "ladder" logic, an injected `FakeResizeObserver` (not jsdom/happy-dom's), Vitest browser mode via `@vitest/browser-playwright` for the tier needing a real browser. **happy-dom is banned**; jsdom is permitted.
 - Token discipline: lint gate rejects raw hex/rgb/hsl colours, raw `px` values, and gradients; requires `var(--...)`. Runs from day one, with a narrow allowlist for the tokens package itself — the one place literal values must live (`research/43-theming.md`).
 
@@ -31,13 +36,15 @@ A chart + grid widget library where a chart changes **what information it shows*
 
 ## Positioning
 
-The combination of three things, none of which coexist elsewhere in the charting field (per `research/00-decisions.md` and `raw/06`):
+The combination of three things, none of which coexist elsewhere in the charting field (per `research/00-decisions.md` and `raw/06`). **Ordered by how well each survives scrutiny — the ladder leads, and that is a deliberate inversion of earlier positioning advice** (`research/decisions/013`, `014`):
 
-1. **Plan-as-data architecture** — a pure `planChart()` function (size + data-shape description + preferences → a plain serialisable `ChartPlan` object) is fully decoupled from a hook-free `<Chart>` renderer. This is what lets a chart render on the server with **zero JavaScript**, something none of the 11 charting libraries surveyed can do.
-2. **Chart geometry themeable via plain CSS custom properties**, per widget, with no re-render. Highcharts exposes colours only; Carbon exposes two (fonts only); everyone else requires a JS options object.
-3. **A genuine responsive information ladder** — six size families (Micro/Tile/Strip/Panel/Canvas/Stage) where a chart reveals, conceals, relabels, aggregates, or substitutes content based on published human-perception research, not just rescaling. Only Carbon and Spectrum do anything with size today, and both only rescale.
+1. **A genuine responsive information ladder** — six size families (Micro/Tile/Strip/Panel/Canvas/Stage) where a chart reveals, conceals, relabels, aggregates, or substitutes content based on published human-perception research, not just rescaling. Only Carbon and Spectrum do anything with size today, and both only rescale. **This is the one claim with no credible prior art in a shipping library.**
+2. **Plan-as-data architecture** — a pure `planChart()` function (size + data-shape description + preferences → a plain serialisable `ChartPlan` object) is fully decoupled from a hook-free `<Chart>` renderer. This is what lets a chart render on the server with **zero JavaScript** *and stay themeable after render*. Both halves are needed: Vega's `toSVG()` is zero-JS but bakes presentation into attributes, so it is inert; nivo fails at import inside an RSC; Observable Plot returns a DOM node and structurally cannot. **visx is the honest near-miss** — hook-free, no `"use client"`, and it renders in an RSC today at 124 B of page JS — but it has no planner and no size-awareness.
+3. **Chart geometry themeable via plain CSS custom properties**, per widget, with no re-render. ⚠ **The weakest of the three, and it must be stated narrowly.** Highcharts styled mode already exposes stroke width, dash, gridline width, tick colour and width, and typography, and ships `--highcharts-color-{n}`. What holds against it: one namespace covering every knob rather than a colour-indexed subset, and per-widget scope on a shared dashboard. What also constrains it: `x1`/`y1`/`x2`/`y2` on `<line>` are not CSS-settable in any browser, so geometry-via-CSS is real but only on a restricted element set (`research/decisions/012`).
 
-Explicitly **not** the differentiator: raw knob count (Highcharts has more) or axis-API richness (Vega-Lite's is better and should be partly copied).
+⚠ **Zero of the 11 libraries audited ship a `"use client"` directive** — that statement is verified and defensible. The stronger version, *"none of the eleven can render server-side with zero JS"*, was tested empirically on 2026-08-23 and is **false**; do not use it. The wording that survives: *the first planned, size-adaptive chart library that renders with zero JS and stays themeable after render.* Re-run those four tests before any public launch — the field moves and the result has a shelf life.
+
+Explicitly **not** the differentiator: raw knob count (Highcharts has more), axis-API richness (Vega-Lite's is better and should be partly copied), or server-side SVG on its own (table stakes).
 
 ## Operating Context
 
