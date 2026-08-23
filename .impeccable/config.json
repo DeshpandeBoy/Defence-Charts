@@ -1,0 +1,14 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "roboto",
+        "createdAt": "2026-08-23T08:59:03.853Z",
+        "reason": "research/41-text-metrics.md §4 decides Roboto Flex over Inter on sourced technical grounds: Inter's opsz axis bottoms out at 14 and the entire type scale sits at 10-13px, where font-optical-sizing:auto would clamp and do nothing. The FontMetrics table is generated from this exact face, so the family is a correctness constraint, not a style choice. Value is 'Roboto Flex', a different family from Roboto."
+      }
+    ]
+  }
+}
