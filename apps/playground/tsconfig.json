@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // ⚠ The DOM is *allowed* here and banned in `@gx/core`, and the asymmetry is the point.
+    // The playground exists to show what the resolver decided; measuring the container is
+    // the app's job, and keeping that job outside `@gx/core` is exactly what gate G2
+    // protects. If this file's `lib` ever has to be copied into a package tsconfig, that is
+    // a signal the resolver has grown a dependency it should not have.
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["vite/client"],
+    "jsx": "react-jsx"
+  },
+  "include": ["src/**/*", "vite.config.ts"]
+}

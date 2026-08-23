@@ -6,13 +6,24 @@
   "tasks": {
     "build": {
       "dependsOn": ["^build"],
-      "inputs": ["src/**", "tsdown.config.ts", "package.json", "tsconfig.json"],
+      "inputs": [
+        "src/**",
+        "tsdown.config.ts",
+        "package.json",
+        "tsconfig.json",
+        "vite.config.ts",
+        "index.html"
+      ],
       "outputs": ["dist/**"]
     },
     "typecheck": {
       "dependsOn": ["^build"],
       "inputs": ["src/**", "tsconfig.json", "../../tsconfig.base.json"],
       "outputs": []
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true
     }
   }
 }

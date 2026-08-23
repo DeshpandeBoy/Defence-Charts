@@ -127,6 +127,18 @@ export default tseslint.config(
     languageOptions: { globals: globals.browser },
   },
 
+  /**
+   * ⚠ `apps/` is in scope because the root `lint` script runs `eslint .` — not because
+   * the playground is product surface. It is a development tool and it is *allowed* to do
+   * the things the library may not: measure the DOM, hold state, touch `window`. That is
+   * the point of it. Gate **G2** is scoped to `packages/core` precisely so this asymmetry
+   * is legible rather than accidental.
+   */
+  {
+    files: ['apps/**/*.{ts,tsx}'],
+    languageOptions: { globals: globals.browser },
+  },
+
   {
     files: ['**/*.test.ts', '**/*.test.tsx', 'scripts/**/*.test.mjs'],
     languageOptions: { globals: globals.node },
