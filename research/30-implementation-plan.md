@@ -132,7 +132,10 @@ and it binds at **A4**, when `@gx/primitives` is written.
   `PRODUCT.md` says "open-source" without qualification. MIT is what the research already assumed, and
   nothing in the design needs more. Goes in `package.json` and a root `LICENSE` from the **first**
   commit rather than being retrofitted across seven; `publint` flags a missing `license` field at E3
-  regardless. ⚠ The copyright holder line is blocked on the project name — same unblock, one edit.
+  regardless. ✅ **Copyright holder: Dhanya Rao**, decided 2026-08-23. It had been recorded as
+  "blocked on the project name", which was wrong — a copyright holder is a person or an entity, and
+  the project's name has no bearing on who owns the work. Naming the wrong dependency is how a
+  one-line edit sits open for four commits.
   Apache-2.0 is the only alternative worth a second thought (explicit patent grant); it is heavier than
   a presentational chart library needs, and choosing it later is a relicence, so it is named here and
   declined rather than left open.
