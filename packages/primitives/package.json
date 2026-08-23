@@ -1,0 +1,23 @@
+{
+  "name": "@gx/primitives",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Hook-free SVG marks and axes. RSC-safe. <Chart plan={...}> lives here.",
+  "sideEffects": ["*.css"],
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@gx/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  }
+}

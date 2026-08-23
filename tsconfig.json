@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node"],
+    // The gate scripts are plain JS with JSDoc types (they must run on the `engines.node`
+    // floor with no build step). `checkJs` is what makes those annotations load-bearing
+    // rather than decorative.
+    "allowJs": true,
+    "checkJs": true
+  },
+  "include": ["scripts/**/*.mjs", "*.config.ts", "*.config.js"]
+}

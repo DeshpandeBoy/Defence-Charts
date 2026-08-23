@@ -1,0 +1,35 @@
+/**
+ * FIXTURE — the **allow** direction, inside the allowlist.
+ *
+ * Every declaration here must produce zero violations when inspected at a path under
+ * `packages/tokens/src/themes/`. The same bytes inspected at any other path must fail —
+ * `scripts/check-tokens.test.mjs` asserts both, because an allowlist that never changes
+ * the answer is decoration.
+ *
+ * ⚠ Not scanned by the CLI: it lives outside `packages/`, so `pnpm lint:tokens` cannot
+ * trip over the deliberate literals below.
+ */
+
+:where(:root) {
+  /* A token definition. The regex implementation flagged this — it is the entire point
+     of the allowlist, and it got it backwards. */
+  --gx-series-1: #b4e4fd;
+
+  /* A token definition carrying a length. Flagged by the regex implementation too. */
+  --gx-label-font-size: 11px;
+
+  /* A calc() multiplier. The bare `2` is not a length and must not be read as one. */
+  --gx-plot-padding: calc(var(--gx-gap) * 2);
+
+  /* Unitless zero. A length regex that fires on `0` makes the honest value unwritable. */
+  --gx-corner-radius: 0;
+
+  /* ⚠ MANDATED by 43-theming.md §3.1, not merely tolerated. Chrome colour derives from
+     currentColor so re-themed widgets stay coherent. A named-colour list that swallows
+     this converts a requirement into a violation. */
+  --gx-grid-color: currentColor;
+
+  /* CSS-wide and always-legal keywords. */
+  --gx-elevation-1: none;
+  --gx-line-join: inherit;
+}

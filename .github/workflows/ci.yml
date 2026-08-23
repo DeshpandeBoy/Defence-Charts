@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+# ⚠ A second push to the same branch cancels the first. Gates here are cheap; a queue of
+# stale runs is not, and a green tick on superseded code is worse than no tick.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # ⚠ Set at the job level as well as in `vitest.config.ts`, because the gates that are
+  # not Vitest — the token gate, the boundary gate — also format and compare text. A
+  # runner in any other zone would make those comparisons a function of the runner.
+  # `packages/testing/src/determinism.test.ts` asserts the offset is actually zero rather
+  # than trusting this line.
+  TZ: UTC
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        # Version comes from `packageManager` in package.json — declared in one place.
+
+      - uses: actions/setup-node@v5
+        with:
+          # ⚠ 24, not 22 or latest. `dependency-cruiser@18` declares `^22||^24||>=26`, so
+          # Node 20 (EOL April 2026) and Node 25 (odd-numbered, skipped) both fail gate
+          # G1 at startup with a version error rather than a dependency error. See
+          # `devEngines.runtime` in package.json.
+          node-version: 24
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # ⚠ Each gate is its own step, not one `pnpm verify`. When CI goes red the name of
+      # the failing step should already be the diagnosis; a single opaque step makes every
+      # failure look the same and costs a log-dive to tell G1 from G7.
+      #
+      # ⚠ `if: '!cancelled()'` on every gate: a G2 failure must not hide a G7 failure.
+      # Fixing gates one round-trip at a time is how a five-minute fix becomes an hour.
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint (ESLint 9 — includes gate G2, DOM-measurement ban in @gx/core)
+        if: '!cancelled()'
+        run: pnpm lint
+
+      - name: Gate G1 — @gx/core imports no React
+        if: '!cancelled()'
+        run: pnpm lint:deps
+
+      - name: Gate G7 — token lint (raw colours, lengths, gradients)
+        if: '!cancelled()'
+        run: pnpm lint:tokens
+
+      - name: Gates G15/G16 — happy-dom ban, test environment directives
+        if: '!cancelled()'
+        run: pnpm lint:determinism
+
+      - name: Test
+        if: '!cancelled()'
+        run: pnpm test
+
+      - name: Build
+        if: '!cancelled()'
+        run: pnpm build
+
+      # ⚠ AFTER the build, and it cannot move earlier: G3 reads `dist/`, not `src/`. The
+      # directive survives in source under every configuration and in output under
+      # exactly one (`unbundle: true`) — checking the source would pass forever.
+      - name: Gate G3 — "use client" survives the build, and only where it should
+        if: '!cancelled()'
+        run: pnpm lint:boundary

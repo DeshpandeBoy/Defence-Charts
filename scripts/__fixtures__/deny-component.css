@@ -1,0 +1,34 @@
+/**
+ * FIXTURE — the **deny** direction.
+ *
+ * Every declaration below must be rejected. Six of the nine are literal classes the
+ * three seed documents did not name and the regex implementation passed clean; decision
+ * 015 widened the rule set to cover them, and DESIGN.md derives the whole palette in
+ * OKLCH, so `oklch()` passing was not a hypothetical hole.
+ */
+
+.hardcoded {
+  /* The classes the seed documents did name. */
+  color: #ff0000;
+  background: rgba(20, 22, 24, 0.8);
+  border-color: hsl(200 50% 40%);
+  font-size: 13px;
+}
+
+.widened {
+  /* ⚠ Every one of these passed the regex implementation. */
+  color: oklch(0.72 0.11 220);
+  background: lab(54% 81 70);
+  outline-color: hwb(200 30% 20%);
+  fill: color(display-p3 0.7 0.2 0.1);
+  stroke: red;
+  margin-top: 2rem;
+  letter-spacing: 0.5em;
+}
+
+.banned-shape {
+  /* ⚠ Gradients have NO allowlist in any position, including on a token definition in
+     the tokens package. The ban is semantic — a gradient encodes a value that varies
+     where no value varies — so it does not relax. 43-theming.md §3.1. */
+  background: linear-gradient(to bottom, var(--gx-ground), var(--gx-surface));
+}

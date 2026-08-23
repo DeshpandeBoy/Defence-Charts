@@ -1,0 +1,131 @@
+/*
+ * @gx/tokens — The Emission-Line Rail, the default theme.
+ *
+ * ⚠ SCOPE: this is the A1 skeleton. Every value here is specified in DESIGN.md or
+ * research/42-typography.md §4 — none is invented. The token tree is completed at
+ * **B1**, which owns the 43 referenced-but-unspecified names, the six UNVERIFIED
+ * defaults, and the sequential/diverging ramps.
+ *
+ * ⚠ The NEUTRAL theme is deliberately absent. Its six hex values are derivable, not
+ * guessable (43-theming.md §4), and shipping a guess is exactly what that section
+ * refuses to do. It arrives at B1 with the simulations that justify it.
+ *
+ * This file is the one place in the repo where raw colour and length literals are
+ * legal, and only as custom-property values — see 43-theming.md §6.1 and the gate in
+ * scripts/check-tokens.mjs. `color: #b4e4fd` would be rejected here too.
+ */
+
+@layer gx.tokens, gx.theme, gx.overrides;
+
+@layer gx.tokens {
+  /*
+   * `:where(:root)` has specificity 0,0,0 so ANY selector beats it — a theme class, a
+   * consumer's own override, an inline style. A plain `:root` would tie with
+   * `.gx-theme-rail-light` (both 0,1,0) and leave the winner to source order, which
+   * breaks the moment a bundler reorders imports. 43-theming.md §2.
+   */
+  :where(:root) {
+    /* --- Ground: charcoal continuum. DESIGN.md:48 --- */
+    --gx-ground: #141618;
+
+    /* --- Series: named emission lines, wavelength → CIE 1931 XYZ → linear sRGB → OKLCH.
+           DESIGN.md:52-57. Contrast against ground in the trailing comment. --- */
+    --gx-series-1: #b4e4fd; /* H-beta   486.1nm · 230.5° · 13.35 */
+    --gx-series-2: #fdcaa6; /* Na I D₂  589.0nm ·  57.2° · 12.24 */
+    --gx-series-3: #28d824; /* Mg b₂    517.3nm · 142.5° ·  9.45 */
+    --gx-series-4: #bda4fb; /* H-delta  410.2nm · 296.3° ·  8.52 */
+    --gx-series-5: #1c9d96; /* He I     492.2nm · 188.9° ·  5.45 */
+    --gx-series-6: #fa2017; /* Fe I     615.0nm ·  29.2° ·  4.56 */
+
+    /* --- Charcoal ramp: hue 248.1°, chroma 0.0051 — a faintly cool grey, not a true
+           neutral. DESIGN.md:99. --- */
+    --gx-charcoal-100: #0c0d0f;
+    --gx-charcoal-200: #202224;
+    --gx-charcoal-300: #36383a;
+    --gx-charcoal-400: #4e5052;
+    --gx-charcoal-500: #67696c;
+    --gx-charcoal-600: #848689;
+    --gx-charcoal-700: #a2a5a8;
+    --gx-charcoal-800: #c2c4c7;
+    --gx-charcoal-900: #e2e5e8;
+
+    /*
+     * --- Chrome: derived from currentColor at low opacity, so it tracks whatever theme
+     * is active. DESIGN.md:101. This is why gridlines are safe in BOTH themes by
+     * construction while the other five composition pairs are not — 43-theming.md §5.
+     * The alpha keeps its A-lit provenance (Talbot); the colour is ours.
+     */
+    --gx-grid-color: currentColor;
+    --gx-grid-alpha: 0.2;
+    --gx-axis-color: currentColor;
+
+    /* --- Square Corner Rule, DESIGN.md:196. Unitless 0 is not a length literal, so it
+           needs no gate exemption. --- */
+    --gx-corner-radius: 0;
+
+    /*
+     * --- Elevation exists in name only and resolves to nothing. DESIGN.md:190.
+     * The names must stay alive: a token that exists in one theme only cannot be
+     * swapped by a class, which is the whole mechanism. 43-theming.md §3.2.
+     */
+    --gx-elevation-raised: none;
+    --gx-elevation-overlay: none;
+
+    /* --- Typography. research/42-typography.md §4; ranks A through E. --- */
+    --gx-font-family: 'Roboto Flex', 'Roboto Flex Fallback', system-ui, sans-serif;
+    --gx-font-optical-sizing: auto;
+    --gx-numeric-variant: tabular-nums;
+
+    --gx-title-font-size: 13px; /* A  */
+    --gx-title-font-weight: 700;
+    --gx-subtitle-font-size: 12px; /* A− */
+    --gx-subtitle-font-weight: 400;
+    --gx-axis-title-font-size: 12px; /* B  — demoted from A-impl 11px, §2 */
+    --gx-axis-title-font-weight: 700;
+    --gx-legend-label-font-size: 11px; /* C  */
+    --gx-legend-label-font-weight: 500;
+    --gx-label-font-size: 11px; /* D  */
+    --gx-label-font-weight: 400;
+    --gx-label-font-size-min: 10px;
+    --gx-label-landmark-grade: 150; /* GRAD, never wght — wght changes glyph advances
+                                       and would invalidate the metrics table */
+    --gx-value-label-font-size: 10px; /* E  */
+    --gx-value-label-font-weight: 700;
+    --gx-annotation-font-size: 10px;
+    --gx-annotation-font-weight: 400;
+
+    --gx-crosshair-label-font-size: 11px;
+    --gx-label-line-spacing: 1.2em;
+
+    /* --- Spacing. A calc() multiplier is not a length literal — 43-theming.md §6.2. --- */
+    --gx-gap: 4px;
+    --gx-plot-padding: calc(var(--gx-gap) * 2);
+  }
+
+  /* prefers-color-scheme picks the ground; a class picks the world. Four combinations,
+     not two — 43-theming.md §2. Same six wavelengths, re-solved for a light ground. */
+  @media (prefers-color-scheme: light) {
+    :where(:root) {
+      --gx-ground: #f4f3ef; /* DESIGN.md:63 */
+      --gx-series-1: #084962; /* H-beta   ·  8.84 */
+      --gx-series-2: #784009; /* Na I D₂  ·  7.46 */
+      --gx-series-3: #137e10; /* Mg b₂    ·  4.71 */
+      --gx-series-4: #801bef; /* H-delta  ·  5.70 */
+      --gx-series-5: #0d625d; /* He I     ·  6.47 */
+      --gx-series-6: #710805; /* Fe I     · 10.88 */
+    }
+  }
+
+  /* Pinning the light world explicitly, for a consumer who does not want to follow the
+     OS. Bare class, so it beats the :where() default regardless of source order. */
+  :where(:root)[data-gx-theme='rail-light'],
+  .gx-theme-rail-light {
+    --gx-ground: #f4f3ef;
+    --gx-series-1: #084962;
+    --gx-series-2: #784009;
+    --gx-series-3: #137e10;
+    --gx-series-4: #801bef;
+    --gx-series-5: #0d625d;
+    --gx-series-6: #710805;
+  }
+}

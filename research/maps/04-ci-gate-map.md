@@ -35,6 +35,8 @@ flowchart LR
         G12["valueLegibility honesty"]
         G13["visual: one shot per type per rung"]
         G14["element-set snapshot<br/>no tokened &lt;line&gt;"]
+        G15["happy-dom absent from<br/>manifests and lockfile"]
+        G16["env directive in the header,<br/>not in the prose"]
     end
 
     G1 --> D8
@@ -53,11 +55,13 @@ flowchart LR
     G12 --> DL
     G13 --> DL
     G14 --> DT
+    G15 --> D8
+    G16 --> D8
 
     classDef dd fill:#2f1b3d,stroke:#c084fc,color:#f6ecff
     classDef gg fill:#0b3d4a,stroke:#22d3ee,color:#e6fbff
     class D5,D7,D8,DT,DL,DA dd
-    class G1,G2,G3,G4,G5,G6,G7,G8,G9,G10,G11,G12,G13,G14 gg
+    class G1,G2,G3,G4,G5,G6,G7,G8,G9,G10,G11,G12,G13,G14,G15,G16 gg
 ```
 
 Two decisions carry three gates each. That is not redundancy — each gate catches the failure at a
@@ -83,6 +87,8 @@ different moment: lint at author time, build assertion at package time, fixture 
 | G12 | `valueLegibility !== 'values'` → `!axes.y.visible` | **A3** | a11y, ladder | The chart claims readable values while showing an axis it cannot support |
 | G13 | One screenshot per chart type per rung, pinned Docker, chromium-only, `reducedMotion: 'reduce'` | **D** | ladder | Geometry regresses in a way no assertion names |
 | G14 | Element-set snapshot per chart type; no `<line>` may carry `x1`/`y1`/`x2`/`y2` from a `var(--gx-*)` | **A4** | theming | A geometry token ships, is documented, and does nothing ([012](../decisions/012-no-line-element-for-tokened-geometry.md)) |
+| G15 | happy-dom absent from every manifest **and** from the lockfile | **A1** | 7, 8, determinism | A transitive dependency reintroduces the shim that answers `getBBox()` with `0` |
+| G16 | The Vitest environment directive appears only in a test file's first three lines | **A1** | determinism | A test acquires a DOM from a sentence about DOMs |
 | — | `publint --strict` + `attw`, with the §5.5 CSS-subpath exclusions | **E3** | packaging | The published artefact is broken in a way the repo never is |
 
 **G14 exists because G7 structurally cannot cover it.** G7 checks that a `var()` was used; it has no
@@ -99,6 +105,33 @@ is rejecting valid CSS, not missing invalid CSS. So the allow side is planted to
 broke it: a token definition, a `calc()` multiplier, a unitless `0`, a `currentColor`, and a base64 data
 URI. A gate that cries wolf gets switched off, which fails as completely as exiting 0 and is quieter
 about it ([015](../decisions/015-token-gate-is-a-parser.md)).
+
+**G16 was not designed; it was discovered failing.** The determinism test asserting `@gx/core` runs
+without a DOM went red on its first execution: `globalThis.document` was defined despite
+`environment: 'node'`. The cause was a **prose comment** in the test file that mentioned the Vitest
+environment directive while explaining when to use it. Vitest matches that directive with a regex over
+the whole file, comments included — so the sentence describing the escape hatch *was* the escape hatch.
+Measured: 776 ms of jsdom setup versus 0 ms, from one `//` line. Nothing in the output names the
+environment, only its duration.
+
+This repo is unusually exposed to that. Its test files quote config keys and token names back at the
+reader as documentation, so the failure has a specific shape: a `@gx/core` test *discussing* the
+DOM-measurement ban acquires a DOM, and G2's own test begins evaluating in the environment it exists to
+prohibit. G16 is therefore stricter than Vitest — the directive is an instruction in the header and
+prose everywhere else — because Vitest's own rule cannot tell the two apart.
+
+Same species as G14 and as the happy-dom `0`, arriving through a third door: **a thing that looks like
+it works and quietly doesn't.** Worth noting that the same pattern bit twice in one sitting — writing
+G16's own source, a literal `*/` inside the phrase "a `/** … */` header" closed its JSDoc block early
+and the file stopped parsing. Text quoted as documentation being read as syntax is not a rare accident
+in this corpus; it is a standing hazard of documenting mechanisms in the language they operate on.
+
+**G15 is the ban with no lint rule.** happy-dom and jsdom are interchangeable everywhere except the four
+APIs this library forbids itself, where jsdom throws and happy-dom returns `0` — the difference between
+a failing test with a stack trace and a chart laid out as though every label were empty. Nothing in
+source names the shim, so the check is a dependency-graph fact: absent from every manifest *and* from
+the lockfile, because a transitive pull is enough for Vitest to resolve `environment: 'happy-dom'` by
+name.
 
 **G10 is the one most likely to be dropped as redundant.** It is not. G9 asserts each rung is correct;
 G10 asserts the *path between* rungs is memoryless — which is the whole reason `prevClass` was settled

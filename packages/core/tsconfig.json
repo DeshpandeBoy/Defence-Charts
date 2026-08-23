@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // ⚠ Gate G2 at the type level. `lib` is inherited as `["ES2022"]` — no DOM — and
+    // `types: []` stops TypeScript auto-including every `@types/*` package it finds by
+    // walking up to the workspace root.
+    //
+    // Both halves matter. Without them, `el.getBBox()` and `process.cwd()` typecheck
+    // cleanly inside `@gx/core`, and the ESLint rule becomes the only thing standing
+    // between the resolver and a call that cannot work on a server. A rule you can
+    // silence with one inline comment is not the same as a type that does not exist.
+    "types": []
+  },
+  "include": ["src/**/*"]
+}

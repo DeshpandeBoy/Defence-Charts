@@ -82,6 +82,37 @@ that swallows them turns a mandate into a violation.
   surface interferes with React scheduling; `restoreMocks` + `unstubGlobals`, both of which the
   injected-`ResizeObserver` pattern depends on; and **happy-dom banned**, jsdom permitted.
 
+  ✅ **Built and executed.** Three findings from doing it, none of which the spec anticipated:
+
+  1. **A prose comment switched the test environment.** The assertion that `@gx/core` runs without a
+     DOM failed on first run — `globalThis.document` was defined despite `environment: 'node'`. The
+     cause was a sentence in the test file mentioning the Vitest environment directive while explaining
+     when to use it. Vitest matches that directive with a regex over the whole file, comments included.
+     Measured at 776 ms of jsdom setup versus 0 ms. Now gate **G16**, which is deliberately stricter
+     than Vitest: the directive is an instruction in the header and prose everywhere else.
+  2. **`toFake` is inert in the node environment.** Node ships no global `requestAnimationFrame`, and
+     fake timers replace globals rather than inventing them. The setting is still correct — it governs
+     the DOM tests where frames exist — but frame control could only be proven under jsdom, so the
+     assertion moved to a file that has one. Configuring it and never exercising it would have left the
+     A6 transition work resting on an untested premise.
+  3. **The happy-dom argument is now executed, not asserted.** A test calls `getBBox()` and
+     `getComputedTextLength()` under jsdom and requires them to *throw*. That is the entire basis of the
+     ban — jsdom throws, happy-dom returns `0` — and it had only ever been written down. Gate **G15**
+     backs it as a dependency-graph fact, checking manifests *and* the lockfile, since a transitive pull
+     is enough for Vitest to resolve the shim by name.
+
+- ⚠ **Node 22 is the floor, and dev tooling sets it, not the library.** `dependency-cruiser@18` — the
+  only current major — declares `^22||^24||>=26`. That excludes Node 20 (EOL April 2026) and Node 25
+  (odd-numbered, skipped), so gate **G1** fails at *startup* with a version error rather than a
+  dependency error on both. Resolved by raising `engines.node` to `>=22`, recording the narrower tooling
+  range in `devEngines.runtime` with `onFail: "warn"`, and pinning CI to **Node 24**. Shipping a
+  consumer floor at an already-EOL runtime was a defect independent of the tooling, so the two agree now
+  rather than needing to be reconciled later.
+
+  ⚠ **Consequence for local development:** on Node 25 `pnpm lint:deps` refuses to run at all. `pnpm
+  verify` cannot complete on such a machine. Use Node 22 or 24 — `npx node@24` is enough to reach a
+  supported runtime without a global install.
+
 ⚠ **The class-only rule is one of two, not one.** It fixes *authored* presentation. It does **not**
 fix the platform: `x1`/`y1`/`x2`/`y2` on `<line>` are not CSS-settable in any browser, so a class
 carrying `y2: var(--gx-tick-length)` also does nothing. Both failures have the same shape — a token

@@ -1,0 +1,44 @@
+{
+  "name": "gx-monorepo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Responsive, size-adaptive chart + dashboard-grid widget library. Research and design in research/.",
+  "engines": {
+    "node": ">=22"
+  },
+  "devEngines": {
+    "runtime": {
+      "name": "node",
+      "version": "^22 || ^24 || >=26",
+      "onFail": "warn"
+    }
+  },
+  "packageManager": "pnpm@10.34.5",
+  "scripts": {
+    "build": "turbo run build",
+    "typecheck": "turbo run typecheck",
+    "lint": "eslint .",
+    "lint:deps": "depcruise packages --config .dependency-cruiser.cjs",
+    "lint:tokens": "node scripts/check-tokens.mjs",
+    "lint:determinism": "node scripts/check-determinism.mjs",
+    "lint:boundary": "node scripts/check-boundary.mjs",
+    "test": "vitest run",
+    "verify": "pnpm typecheck && pnpm lint && pnpm lint:deps && pnpm lint:tokens && pnpm lint:determinism && pnpm test && pnpm build && pnpm lint:boundary"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.0",
+    "@types/node": "^24.10.1",
+    "dependency-cruiser": "^18.2.0",
+    "eslint": "^9.39.5",
+    "globals": "^17.11.0",
+    "jsdom": "^30.0.1",
+    "postcss": "^8.5.26",
+    "tsdown": "^0.22.14",
+    "turbo": "^2.10.11",
+    "typescript": "6.0.3",
+    "typescript-eslint": "^8.67.0",
+    "vitest": "^4.1.11"
+  }
+}

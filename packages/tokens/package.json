@@ -1,0 +1,18 @@
+{
+  "name": "@gx/tokens",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "CSS custom properties and their generated TypeScript types. Depends on nothing.",
+  "sideEffects": ["*.css"],
+  "exports": {
+    ".": "./src/index.ts",
+    "./theme.css": "./src/themes/theme.css"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit"
+  }
+}

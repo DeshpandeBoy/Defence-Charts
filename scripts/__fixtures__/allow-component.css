@@ -1,0 +1,45 @@
+/**
+ * FIXTURE — the **allow** direction, OUTSIDE the allowlist.
+ *
+ * This is the direction that actually fires. Everything here is legal component CSS in a
+ * package with no allowlist at all, and the regex implementation rejected two of them.
+ * Those two failures were not allowlist bugs; they were a regex reading text it had no
+ * business reading, and no amount of tuning fixes that from outside a parser.
+ */
+
+.plot {
+  /* Ordinary token usage — the shape every component style should have. */
+  color: var(--gx-ink);
+  padding: var(--gx-plot-padding);
+  border-radius: var(--gx-corner-radius);
+}
+
+.grid-line {
+  /* Legal outside the allowlist as well. */
+  stroke: currentColor;
+  opacity: var(--gx-grid-opacity);
+}
+
+.marker {
+  /* ⚠ `#ffffffBB` here is base64 payload, not a colour. The regex implementation flagged
+     it. A parser sees a url() token and stops. */
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxuAA#ffffffBBCg==");
+}
+
+.tooltip::after {
+  /* ⚠ `#ff0000` here is text a user reads, not a colour. Flagged by the regex
+     implementation for the same reason. */
+  content: "#ff0000";
+}
+
+.derived {
+  /* color-mix() derives from tokens rather than replacing them, so it stays legal —
+     `color-mix(` must not match the `color(` rule. */
+  background: color-mix(in oklch, var(--gx-series-1), var(--gx-ground) 40%);
+}
+
+.spacing {
+  /* Unitless zero and a calc() multiplier are legal everywhere, not just in themes. */
+  margin: 0;
+  gap: calc(var(--gx-gap) * 2);
+}

@@ -1,0 +1,9 @@
+packages:
+  - 'packages/*'
+
+# Keep the store hard-linked and the tree strict: a package that uses a dependency
+# it never declared must fail here, not in a consumer's build. `unbundle: true`
+# (30-implementation-plan.md A1) makes an undeclared peer silently inline
+# `react/jsx-runtime` into the output, so strictness is load-bearing, not tidiness.
+hoistPattern: []
+publicHoistPattern: []

@@ -1,0 +1,25 @@
+{
+  "name": "@gx/testing",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Dev-facing. Plan snapshot helpers, FakeResizeObserver with an emit() driver, a11y matchers.",
+  "sideEffects": false,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsdown",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@gx/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "jsdom": "^30.0.1",
+    "vitest": "^4.1.11"
+  }
+}
