@@ -10,6 +10,14 @@ packages:
 hoistPattern: []
 publicHoistPattern: []
 
+# eslint-config-next imports Next's compiled Babel parser at runtime without declaring
+# `next`. Under this workspace's strict no-hoist layout, that undeclared edge correctly
+# fails instead of leaking through a flat node_modules tree.
+packageExtensions:
+  'eslint-config-next@*':
+    dependencies:
+      next: '*'
+
 # ⚠ esbuild's postinstall stays OFF — declared, not merely defaulted. The script exists for
 # the legacy download path; esbuild 0.28 resolves its binary from the `@esbuild/<platform>`
 # optional dependency, which pnpm installs normally. Verified rather than assumed:
