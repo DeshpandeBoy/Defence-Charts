@@ -19,21 +19,60 @@
  * "no loop error" against it would pass on a chart that loops in every browser — this
  * project's recurring failure species, wearing the test framework's own clothes.
  *
- * ⚠ **NOT in `verify`, and NOT in `.github/workflows/ci.yml`, deliberately.** It needs a
- * browser binary in CI, and that provisioning is deferred to the shared browser job that
- * gate **G4** (`04-ci-gate-map.md:79`, the RSC-with-JS-disabled fixture) will bring with it
- * at A4/A5. Wiring one browser download into CI twice, for two gates, is the kind of
- * duplication that gets half-removed later. Until that job exists this runs as
- * `pnpm lint:containment`, by hand, and the deferral is recorded here rather than left as
- * an absence somebody has to reconstruct.
+ * ⚠ **In CI now, still NOT in `verify`, and the two halves of that are decided separately.**
+ * This file used to record a deferral: the browser provisioning was to arrive with gate
+ * **G4** (`04-ci-gate-map.md:79`, the RSC-with-JS-disabled fixture), because *wiring one
+ * browser download into CI twice, for two gates, is the kind of duplication that gets
+ * half-removed later*. That job now exists — `.github/workflows/ci.yml`'s `browser` job
+ * downloads Chromium once and runs G4 and G11 against it — so the deferral is discharged and
+ * this paragraph describes what happens rather than what was promised. What has **not**
+ * changed is the absence from `verify`: `verify` is the command a fresh clone runs before it
+ * has decided to care, and it should not open with a ~150 MB browser download. Locally this
+ * is still `pnpm lint:containment`, by hand; CI simply no longer depends on someone
+ * remembering to type it.
  *
- * ⚠ **Playwright is resolved leniently and a miss is a SKIP, not a failure.** Playwright is
- * not a dependency of this repo and must not become one to land this file: installed inside
- * the workspace, npm walks up into the pnpm workspace root and fails ERESOLVE. So the
- * import is tried three ways — `GX_PLAYWRIGHT_PATH`, the bare specifier, then a scratch
- * install outside the repo — and if none answers the gate prints why and exits 0. A gate
- * that hard-fails on a missing optional dependency takes `pnpm verify` down for everyone
- * who has not opted in, which is how a gate gets deleted rather than fixed.
+ * ## ⚠ A missing npm package and a missing browser are different failures
+ *
+ * Conflating them is how a gate stops running while still printing a line. `playwright` is a
+ * declared devDependency of the root `package.json` now, so the bare specifier resolves and
+ * normally wins — but `import('playwright')` succeeding says **nothing** about whether
+ * Chromium is on disk. `playwright install chromium` is a separate step and nothing takes it
+ * for us. That was measured rather than assumed: `playwright@1.62.1` ships **no lifecycle
+ * scripts at all** — its `package.json` has no `scripts` field, and the postinstall that
+ * older releases used to fetch browsers with is gone. So a clean `pnpm install
+ * --frozen-lockfile` leaves you holding the package with `~/.cache/ms-playwright` empty, and
+ * it does so without pnpm having to block anything; there is nothing to block. (Worth knowing
+ * because the neighbouring `ignoredBuiltDependencies` entry in `pnpm-workspace.yaml` invites
+ * the guess that a blocked postinstall is the cause here. It is not.) The consequence is what
+ * matters and it holds either way: **resolving the package is not evidence about the
+ * browser.** The two are therefore diagnosed apart:
+ *
+ *  - **The package does not resolve → hard failure, exit 1.** It is declared and pinned. A
+ *    miss means `pnpm install` has not run, or ran without dev dependencies — a checkout on
+ *    which `pnpm lint` and `pnpm test` fail for the same reason. Exiting 0 there answers
+ *    *"is containment intact?"* with *"I could not find eslint either."*
+ *  - **The package resolves but Chromium will not launch → SKIP, exit 0.** This is the one
+ *    genuine opt-out: someone cloned, installed, and declined the download. A gate that
+ *    hard-fails on a declined opt-in gets deleted rather than fixed. The remedy is printed
+ *    verbatim, as the command to type, and the two shapes of it are distinguished — a
+ *    missing binary wants `playwright install chromium`, a Linux box missing the shared
+ *    libraries Chromium links against wants `--with-deps`.
+ *
+ * ⚠ **`GX_REQUIRE_BROWSER=1` turns that SKIP into a failure, and the CI job sets it.** In CI
+ * a silent skip is a gate that is not running while looking exactly like a gate that passed —
+ * the same species as the assertion-1 finding below, where a green line was printed over a
+ * box growing without limit. Leniency is for the reader who is a developer; a runner has no
+ * opt-in to respect. It keys on an explicit variable rather than on `CI`, because `CI` is
+ * true in a contributor's fork, in a Docker shell, and in half the tools that set it by
+ * habit — the gate should hard-fail where someone decided it must, not wherever a variable
+ * happened to be exported.
+ *
+ * ⚠ **The browser is launched *before* the dev server, and that ordering is the diagnosis.**
+ * Spinning vite up for up to 60 seconds and only then discovering there is no Chromium wastes
+ * the minute and, worse, files the discovery under `fatal` inside a containment report, where
+ * three vacuity lines (*"no samples were taken at all"*, *"never reached: micro, tile, …"*)
+ * pile on top of it and teach the reader to distrust the gate instead of fixing their install.
+ * Launching first means the only thing that can reach that report is a real finding.
  *
  * ## ⚠ Two boxes since A5, and reading the wrong one made this gate lie
  *
@@ -190,40 +229,202 @@ const WAYPOINTS = [
 // --- Resolution --------------------------------------------------------------------
 
 /**
- * Find Playwright without depending on it.
+ * ⚠ Set by `.github/workflows/ci.yml`'s `browser` job, and by nobody else by default. It is
+ * the switch that makes a skip unreachable where a skip would be a lie. See the header.
+ */
+const REQUIRE_BROWSER = process.env.GX_REQUIRE_BROWSER === '1'
+
+/**
+ * Resolve `playwright`.
  *
- * @returns {Promise<{ chromium: unknown, from: string } | { chromium: null, tried: string[] }>}
+ * ⚠ **The scratch-install candidate is gone, and its absence is the point.** `/tmp/gx-drive`
+ * existed because playwright could not be installed *inside* this workspace — `npm` walked up
+ * into the pnpm root and failed ERESOLVE — so a copy outside the repo was the only way to run
+ * this gate at all. `pnpm add -Dw` does not have that problem, and the specifier below now
+ * resolves from `node_modules` at the version the lockfile pins. Leaving the scratch path in
+ * as a fallback would let a stale install at *some other* version quietly shadow the pinned
+ * one, which is a worse failure than the one it was working around: a browser gate is only
+ * evidence if you know which browser it drove.
+ *
+ * ⚠ **`GX_PLAYWRIGHT_PATH` is checked first and *strictly*.** An explicit override that
+ * misses does not fall through to the declared copy — it fails. An instruction that silently
+ * did nothing is this project's named failure species, and "the gate passed" is a poor way to
+ * find out your override has a typo in it.
+ *
+ * ⚠ **`ok` is a discriminant, and it is here for the caller's typechecker, not for style.**
+ * `scripts/check-rsc.mjs` imports this function so that both browser gates share one
+ * resolution policy instead of two that drift. Narrowing the old union on `chromium === null`
+ * never worked — the hit branch's `chromium` is `any`, which subsumes `null` — so every
+ * consumer read `tried` off a union that TypeScript said had no such property. A boolean
+ * literal narrows; `chromium` stays exactly where it was so nothing at the call site moves.
+ *
+ * @returns {Promise<{ ok: true, chromium: any, from: string }
+ *   | { ok: false, chromium: null, tried: string[], why: string, remedy: string }>}
  */
 export async function loadPlaywright() {
-  /** @type {string[]} */
-  const tried = []
-  const candidates = [
-    process.env.GX_PLAYWRIGHT_PATH,
-    'playwright',
-    '/tmp/gx-drive/node_modules/playwright/index.mjs',
-  ].filter((c) => typeof c === 'string' && c !== '')
+  const override = process.env.GX_PLAYWRIGHT_PATH
+  const explicit = typeof override === 'string' && override !== ''
+  const specifier = explicit ? override : 'playwright'
 
-  for (const specifier of candidates) {
-    tried.push(specifier)
-    try {
-      const mod = await import(specifier)
-      const chromium = mod.chromium ?? mod.default?.chromium
-      if (chromium !== undefined) return { chromium, from: specifier }
-    } catch {
-      // ⚠ Swallowed on purpose, and only here. Every candidate is *expected* to miss on
-      // some machine; the diagnosis a reader needs is the whole list, printed once, not
-      // three stack traces for three absences.
-      try {
-        const require = createRequire(`${REPO_ROOT}/`)
-        const mod = await import(require.resolve(specifier))
-        const chromium = mod.chromium ?? mod.default?.chromium
-        if (chromium !== undefined) return { chromium, from: specifier }
-      } catch {
-        continue
-      }
-    }
+  /** @type {string[]} */
+  const tried = [specifier]
+
+  try {
+    const mod = await import(specifier)
+    const chromium = mod.chromium ?? mod.default?.chromium
+    if (chromium !== undefined) return { ok: true, chromium, from: specifier }
+  } catch {
+    // ⚠ Swallowed on purpose, and only here. A bare specifier that misses from this file can
+    // still resolve from the repo root — `scripts/` is not a package and has no
+    // `node_modules` of its own — so a throw here is an expected step, not a diagnosis. What
+    // a reader needs is one sentence naming what is absent, not two stack traces about how.
   }
-  return { chromium: null, tried }
+
+  try {
+    const require = createRequire(`${REPO_ROOT}/`)
+    const fromRoot = require.resolve(specifier)
+    tried.push(fromRoot)
+    const mod = await import(fromRoot)
+    const chromium = mod.chromium ?? mod.default?.chromium
+    if (chromium !== undefined) return { ok: true, chromium, from: fromRoot }
+  } catch {
+    // Same reasoning; this is the last attempt, and the return below is the report.
+  }
+
+  return {
+    ok: false,
+    chromium: null,
+    tried,
+    why: explicit
+      ? `GX_PLAYWRIGHT_PATH is set to ${override}, and nothing there exports \`chromium\``
+      : '`playwright` is a pinned devDependency of this repo and did not resolve, which means' +
+        ' the install is missing or incomplete rather than that the browser is opted out of',
+    remedy: explicit ? 'unset GX_PLAYWRIGHT_PATH, or point it at a real playwright' : 'pnpm install',
+  }
+}
+
+/**
+ * Launch Chromium, and tell "you never downloaded a browser" apart from every other reason a
+ * browser might refuse to start.
+ *
+ * ⚠ **Matched on Playwright's own words, read out of a real failure rather than guessed.**
+ * With `PLAYWRIGHT_BROWSERS_PATH` pointed at an empty directory, `chromium.launch()` throws
+ * `browserType.launch: Executable doesn't exist at …` followed by its own boxed *"Please run
+ * the following command to download new browsers"* — measured here, on 1.62.1. On a Linux
+ * runner that has the binary but not the shared libraries it links against, the same call
+ * throws *"Host system is missing dependencies to run browsers"* instead. Different cause,
+ * different remedy (`--with-deps`), and the reason the workflow passes that flag rather than
+ * leaving it to be discovered as what reads like a bug in our own code.
+ *
+ * ⚠ **Only a *recognised* absence is lenient.** A sandbox refusal, a crash on start, a
+ * corrupt download — anything this function does not recognise is re-thrown with its message
+ * intact and becomes a failure. A skip is the one outcome that must never be reachable by
+ * accident, because it is the one that looks like success.
+ *
+ * ⚠ Note that headless `launch()` resolves the *headless shell* build, not the one
+ * `chromium.executablePath()` names — verified by pointing the browsers path at an empty
+ * directory and reading which file it complained about. That is why this asks the real
+ * `launch()` instead of stat-ing a path: a file-existence check would be testing a different
+ * binary than the sweep is about to drive.
+ *
+ * @param {any} chromium
+ * @returns {Promise<{ absence: null, browser: any }
+ *   | { absence: 'download' | 'system-libraries', browser: null, message: string }>}
+ */
+export async function launchChromium(chromium) {
+  try {
+    return { absence: null, browser: await chromium.launch() }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error)
+    if (/missing dependencies to run browsers|install-deps|loading shared librar/i.test(message)) {
+      return { absence: 'system-libraries', browser: null, message }
+    }
+    if (/executable doesn't exist|download new browsers|playwright install/i.test(message)) {
+      return { absence: 'download', browser: null, message }
+    }
+    throw error
+  }
+}
+
+/**
+ * Resolve playwright, launch Chromium, and — on either kind of absence — print the diagnosis
+ * and exit. Returns an open browser or does not return at all.
+ *
+ * ⚠ **This exists so the policy is shared, not just the resolver.** `scripts/check-rsc.mjs`
+ * (gate G4) imports from this file precisely so there are not two browser-acquisition
+ * policies drifting apart — but importing `loadPlaywright()` alone shares only the *easy*
+ * half. The half that matters is the one below: knowing that a resolved package and a
+ * downloaded browser are different things, that only the second is a legitimate opt-out, and
+ * that `GX_REQUIRE_BROWSER=1` revokes even that. A gate that imports the resolver and then
+ * hand-rolls the launch gets the opaque `browserType.launch:` error this function exists to
+ * translate, which is exactly the drift the shared import was meant to prevent.
+ *
+ * ⚠ It calls `process.exit()`, which is not a thing a library does — but every caller is a
+ * gate whose only jobs are to print a verdict and set an exit code, and duplicating twenty
+ * lines of exit-code policy across two of them is how the two verdicts start disagreeing.
+ *
+ * @param {string} gate Quoted verbatim at the head of every line printed, e.g.
+ *   `'containment gate (G11)'`. Whichever gate is speaking must be the first thing read.
+ * @returns {Promise<{ browser: any, from: string }>}
+ */
+export async function openChromium(gate) {
+  const resolved = await loadPlaywright()
+
+  // ⚠ A failure, not a skip, and the header argues why at length: playwright is pinned in the
+  // root `package.json`, so a miss here is a broken checkout rather than a declined download.
+  if (!resolved.ok) {
+    console.error(`${gate}: FAILED — playwright did not resolve.`)
+    console.error(`  why      ${resolved.why}`)
+    console.error(`  tried    ${resolved.tried.join(', ')}`)
+    console.error(`  remedy   ${resolved.remedy}`)
+    console.error(
+      '\nThis used to exit 0. It no longer does: playwright is a declared, pinned\n' +
+        'devDependency, and a checkout where it is absent is a checkout where `pnpm lint`\n' +
+        'and `pnpm test` fail for the same reason. Skipping here would answer a question\n' +
+        'about containment with a fact about the install. Declining the *browser* download\n' +
+        'is still an opt-out and is still a skip — see the docblock at the top of this file.',
+    )
+    process.exit(1)
+  }
+
+  const { chromium, from } = resolved
+  const launch = await launchChromium(chromium)
+
+  if (launch.absence !== null) {
+    const libs = launch.absence === 'system-libraries'
+    const say = REQUIRE_BROWSER ? console.error : console.log
+    say(
+      `${gate}: ${REQUIRE_BROWSER ? 'FAILED' : 'SKIPPED'} — playwright resolved from ` +
+        `${from}, but Chromium would not launch.`,
+    )
+    say(
+      `  cause    ${
+        libs
+          ? 'the browser is on disk but the system libraries it links against are not'
+          : 'the browser was never downloaded — the npm package and the browser binary are ' +
+            'two separate installs, and only the first is in the lockfile'
+      }`,
+    )
+    say(`  remedy   pnpm exec playwright install ${libs ? '--with-deps ' : ''}chromium`)
+    say(`  detail   ${launch.message.split('\n')[0]}`)
+
+    if (REQUIRE_BROWSER) {
+      say(
+        '\nGX_REQUIRE_BROWSER=1 is set, so this is a failure rather than a skip: in CI a\n' +
+          'silent skip is a gate that is not running while looking exactly like one that\n' +
+          'passed, which is the failure species this whole file exists to catch.',
+      )
+      process.exit(1)
+    }
+    say(
+      '\nExiting 0. A ~150 MB browser download is an opt-in, and a gate that hard-fails on a\n' +
+        'declined opt-in gets deleted rather than fixed. Set GX_REQUIRE_BROWSER=1 to make this\n' +
+        'a failure — `.github/workflows/ci.yml`\'s browser job does exactly that.',
+    )
+    process.exit(0)
+  }
+
+  return { browser: launch.browser, from }
 }
 
 // --- The dev server ------------------------------------------------------------------
@@ -503,20 +704,18 @@ const invokedDirectly =
   import.meta.url === new URL(`file://${process.argv[1]}`).href
 
 if (invokedDirectly) {
-  const resolved = await loadPlaywright()
+  // ⚠ Before `ensureDevServer()`, deliberately — see the header. Sixty seconds of vite
+  // followed by "there is no browser" buries the one line that matters under a containment
+  // report full of vacuity warnings about a sweep that never happened. `openChromium()` has
+  // already exited if there is no browser to be had, so everything below is a real run.
+  const { browser, from } = await openChromium('containment gate (G11)')
 
-  if (resolved.chromium === null) {
-    console.log('containment gate (G11): SKIPPED — playwright did not resolve.')
-    console.log(`  tried: ${resolved.tried.join(', ')}`)
-    console.log('  Set GX_PLAYWRIGHT_PATH, or install playwright outside this workspace')
-    console.log('  (inside it, npm walks up to the pnpm root and fails ERESOLVE).')
-    console.log('  CI wiring is deferred to the shared browser job with gate G4 — see the')
-    console.log('  docblock at the top of this file. Exiting 0 rather than breaking verify.')
-    process.exit(0)
-  }
-
-  const { chromium, from } = resolved
-  const server = await ensureDevServer()
+  // ⚠ The browser is already open, so a dev server that never answers must not leak it. This
+  // is the one throw between the launch and the try/finally below that owns the close.
+  const server = await ensureDevServer().catch(async (error) => {
+    await browser.close().catch(() => {})
+    throw error
+  })
 
   /** @type {string[]} */
   const loopErrors = []
@@ -535,10 +734,8 @@ if (invokedDirectly) {
    * real containment failure teaches the reader to distrust the gate rather than the code.
    */
   let abandoned = null
-  let browser = null
 
   try {
-    browser = await chromium.launch()
     const page = await browser.newPage({ viewport: VIEWPORT })
 
     // ⚠ Both channels. Chromium reports the loop error as an uncaught `ErrorEvent`, which
@@ -670,7 +867,7 @@ if (invokedDirectly) {
   } catch (error) {
     fatal = error instanceof Error ? error.message : String(error)
   } finally {
-    if (browser !== null) await browser.close().catch(() => {})
+    await browser.close().catch(() => {})
     server.stop()
   }
 

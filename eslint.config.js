@@ -49,6 +49,26 @@ export default tseslint.config(
       '**/dist/**',
       '**/node_modules/**',
       '**/.turbo/**',
+      // ⚠ Next's build output, and it is not merely large. `.next/types/validator.ts` is
+      // generated TypeScript that this config's own rules reject on sight — 3,657 errors
+      // from `no-explicit-any`, `ban-ts-comment` and `consistent-type-imports` in code
+      // nobody wrote and nobody can fix. Same failure mode as the vendored agent
+      // directories below: real errors buried under generated ones.
+      '**/.next/**',
+      // ⚠ Not build output — hand-written, and deliberately written to look like build
+      // output. `scripts/__fixtures__/rsc-*/` holds stand-in bundler chunks that G4's own
+      // tests scan: minified browser JavaScript reaching for `self` and `document`, with
+      // identifiers a minifier would have renamed. Every rule this config applies to real
+      // source is a rule those files exist to violate. Linting them would mean sanding off
+      // the properties that make them evidence.
+      'scripts/__fixtures__/**',
+      // ⚠ A workspace member that owns its own flat config (`docs/eslint.config.mjs`) and
+      // its own `lint` script. Linting it from here does not add coverage — it applies this
+      // library's house rules to a fumadocs scaffold nobody here wrote, and the first error
+      // it produces is a `consistent-type-imports` complaint about `NextRequest` in
+      // generated-shaped template code. `pnpm --filter docs lint` is the run that means
+      // something for that directory.
+      'docs/**',
       'research/**',
       '.agent/**',
       '.agents/**',

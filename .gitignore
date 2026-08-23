@@ -20,6 +20,11 @@
 
 # --- Node / build (nothing here yet; Milestone A1 will need it) ---
 node_modules/
+# pnpm's content-addressable store, when it lands inside the repo rather than in the
+# user-level cache — which is what happens whenever a `store-dir` is configured relatively
+# or a sandboxed run cannot reach `~/.pnpm-store`. It is many thousands of hard links to
+# package tarballs; nothing in it is authored here.
+.pnpm-store/
 dist/
 build/
 .turbo/

@@ -225,6 +225,22 @@ At the end of A3 the core thesis is testable with zero UI. That is the point.
   component with JS disabled, asserting the SVG is in the HTML. This is the test that protects
   decision 7 from being silently broken by a bundler upgrade. **Next.js appears here as a fixture
   only** — nothing under `packages/` may import from `next/`.
+  - ⚠ **"The SVG is in the HTML" is not on its own a test of anything, and gate G4 asserts two
+    things because of it.** With JavaScript disabled, a real RSC page and an SSR-plus-hydration page
+    *both* put the SVG in the served HTML — rendering markup the client later adopts is exactly what
+    SSR is for. So the assertion above is satisfied by precisely the degradation this bullet says it
+    guards against. The second assertion is what makes it a gate: **the built client JS payload must
+    contain no chart code**, searched in `.next/static/` for literals that survive minification.
+    ⚠ Not searched in the HTML — App Router serialises the rendered tree into inline
+    `self.__next_f.push(…)` scripts, so the chart's class names legitimately appear there as *data*
+    on a correct page, and a gate that fires on success gets deleted rather than fixed.
+  - ⚠ **Landed at A5 as `scripts/check-rsc.mjs` + `apps/rsc-fixture`, and it is not green.** Its
+    first run found that `packages/primitives/src/Chart.tsx` calls `useId()` and `useMemo()`, which
+    React Server Components do not support. The A4 zero-client-JS proof was a node test calling
+    `renderToStaticMarkup()` — that is **SSR**, where hooks work — so it passed this milestone
+    without ever exercising the path it was named after. Resolution is open; until it closes, treat
+    decision 7's *"`<Chart>` is hook-free"* as the intent it still is and not as a description of the
+    shipped component.
 
 ### A5. `@gx/react` — `<AutoChart>`
 - `useElementSize()` — `ResizeObserver`, `contentBoxSize`, rAF-batched.
@@ -234,11 +250,40 @@ At the end of A3 the core thesis is testable with zero UI. That is the point.
   registry option is stale (newest is 2025), and more importantly happy-dom's built-in is a no-op
   stub that *never fires* while still passing `typeof === 'function'` — so `<AutoChart>` would
   feature-detect it, take the adaptive path, never get a measurement, render its fallback forever,
-  and go green. Tests must **drive** resize via `emit(el, w, h)`, never wait for it.
+  and go green. Tests must **drive** resize via `emit(width, height)`, never wait for it.
+  - ⚠ **Signature corrected at A5.** This bullet read `emit(el, w, h)` through A4, following the
+    positional sketch in `raw/07` §6.2. The element is an **optional `target` field** in a third
+    options argument instead: one observer per widget is the depth-ordered pattern the spec is
+    designed around, so almost every call site observes exactly one element and would otherwise have
+    had to name it on every line. The common call is `emit(320, 180)`, and the multi-target case
+    stays sayable. `packages/testing/src/index.ts` is the signature of record.
+  - ⚠ **The fake must emit `contentBoxSize`, not just `contentRect`, and this is the same bug as
+    happy-dom's wearing our own colours.** The bullet above specifies `useElementSize` to read
+    `contentBoxSize` — so a fake carrying only `contentRect` drives every test in this milestone down
+    the *fallback* branch, which no real browser takes. That is full green over code nobody runs, and
+    it is worse than a missing test because it looks like coverage. It also hides a live defect:
+    `contentRect` reports the **transformed** box, so a chart inside a CSS `scale(0.5)` — a dashboard
+    zoom, a print preview — reports its apparent size and gets planned for a rung it does not occupy.
+    Emit both, derived from the same numbers so they cannot disagree, and keep the legacy shape
+    reachable on request (`emit(w, h, { legacy: true })`) so the fallback stays covered rather than
+    merely unreachable — Safari before 15.4 and every `contentRect`-only polyfill still run it.
 - ⚠ **Containment rule enforced here**: the measured box's size must be grid-determined, and the
   plan may only touch descendants. Ship the CI test that drags across every rung boundary and asserts
   the `ResizeObserver` loop error never fires. (This one needs a real browser — the fake cannot
   produce the loop error.)
+  - ⚠ **Shipped as gate G11, `scripts/check-containment.mjs`, and the sentence above turned out to be
+    the wrong assertion to build it on.** "Assert the loop error never fires" was the plan; planting
+    the containment rule's exact negation showed that Chromium emits *nothing at all* for a runaway
+    paced one growth per animation frame — the box grew `288 → 844 → … → 4514` px across six frames
+    and never stopped, with no console error and no `pageerror`. The loop error only fires when an
+    observation re-triggers itself within one delivery cycle. So the gate ships **four** assertions,
+    and the one this bullet named is the weakest: what actually catches a runaway is reading both
+    border boxes, waiting three frames with no input, and reading them again. See
+    `maps/04-ci-gate-map.md` for the numbers and the two caveats on them, and that script's header
+    for the full argument.
+  - ⚠ **Not in `verify` and not in CI yet** — it needs a browser binary, and that provisioning was
+    parked until the shared browser job G4 brings. Runs by hand as `pnpm lint:containment`; a CI job
+    is being wired now.
 
 ### A6. Transitions ⚠ (new — was missing entirely)
 - Animate rung changes rather than cutting. ~300 ms for rescale-only, up to ~1000 ms when marks move.
@@ -432,7 +477,7 @@ the site. The VRT baseline set (one screenshot per chart type per rung) *is* thi
 | We rewrite axis tick math badly | Milestone A4 | Accepted cost of decision 5, and known: visx's `AxisBottom` edge cases (`rangePadding`, `hideZero`, orientation sign) are the specific things to get right. |
 | ~~d3's ESM-only publish causes consumer pain~~ | — | ✅ **Dissolved.** We ship ESM-only ourselves (`20-architecture.md` §5), so d3's ESM-only publish is no longer an asymmetry we have to bridge. `victory-vendor` and `@visx/vendor` exist to solve a problem we opted out of having. |
 | Scope creep into data fetching | Continuously | Decision 2 is load-bearing. Presentational only. |
-| ⚠ A plan change alters the size of the box being measured | Anywhere, as an infinite `ResizeObserver` loop | The containment rule (`20-architecture.md` §3.3) plus the loop-error CI test in A5. A deadband cannot fix this class of bug — only structure can. |
+| ⚠ A plan change alters the size of the box being measured | Anywhere — and ⚠ **not reliably as a visible loop error.** A runaway paced one growth per animation frame delivers cleanly, and Chromium emits no console error and no `pageerror` at all | The containment rule (`20-architecture.md` §3.3) plus the loop-error CI test in A5. A deadband cannot fix this class of bug — only structure can. ⚠ **Amended at A5:** that CI test could not be built as named. Gate **G11** ships four assertions and the loop error is the weakest; what catches a runaway is reading both border boxes, idling three frames, and reading again. See A5 above and `maps/04-ci-gate-map.md`. |
 | ⚠ Tier A tokens are angular-size claims in pixel clothing | Print, kiosk, or high-DPI output | Heer 2009 publishes in mm, Talbot 2010 in labels-per-inch. Document the assumption now; add a density multiplier only if a real consumer needs it. |
 | ⚠ **A headless DOM reports that every label fits** | Any label-collision or tick-density test, silently green | happy-dom returns `0` from every SVG measurement API and never fires `ResizeObserver`. Mitigation is structural: `planChart()` may not call the DOM at all (A2), and resize is an injected input (A5). Ban happy-dom from this repo — jsdom's loud throw is the safer failure. |
 | ⚠ **Playwright component testing is being deleted** | If we adopt it now | `@playwright/experimental-ct-react` is removed in `main` and the 1.63 alpha; 1.62.1 is the last publish. Use Vitest browser mode + `@vitest/browser-playwright` instead, and treat `*.stories.tsx` as test fixtures — Playwright's own replacement converged on exactly that model. |

@@ -1,0 +1,33 @@
+{
+  // ⚠ `extends` is load-bearing beyond inheriting the strict flags. Next rewrites a
+  // tsconfig.json it considers its own — but `writeConfigurationDefaults` bails the moment it
+  // sees an `extends` or `references` key, so this file's comments and its explicit choices
+  // survive `next build`. Everything Next would otherwise inject is therefore spelled here by
+  // hand, which is the trade: no silent edits, at the cost of having to keep up.
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    // The DOM is allowed in an app and banned in `@gx/core`; see the playground's tsconfig
+    // for why that asymmetry is the point. Nothing in `app/` touches the DOM — this fixture
+    // has no client component at all — but `@gx/primitives` is compiled through this config
+    // and its own tsconfig declares the DOM lib.
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    // ⚠ `react-jsx`, not `preserve`. Next 16 lists this as a *required* value
+    // (`next/dist/lib/typescript/writeConfigurationDefaults`: "next.js uses the React
+    // automatic runtime"). `preserve` is the older advice and would be overwritten in a repo
+    // where Next was allowed to edit this file.
+    "jsx": "react-jsx",
+    // The editor half of `next build`'s type checking: route typing, server/client boundary
+    // diagnostics. Harmless to `tsc --noEmit`, which ignores language-service plugins.
+    "plugins": [{ "name": "next" }]
+  },
+  // ⚠ `next-env.d.ts` and `.next/types/**/*.ts` are both build *output*, and `.next/` is
+  // gitignored — so on a clean checkout this include list matches files that do not exist
+  // yet. That is survivable rather than broken, and it was checked rather than assumed:
+  // `next-env.d.ts` reaches `.next/types/routes.d.ts` through an import inside a declaration
+  // file, and `skipLibCheck` (from the base config) makes TypeScript skip it instead of
+  // reporting TS2307. Verified by moving `.next/` aside and re-running `tsc --noEmit`: exit
+  // 0, before any build. `typecheck` therefore stays independent of `build` in `turbo.json`.
+  // If `skipLibCheck` is ever turned off repo-wide, this is one of the places that breaks.
+  "include": ["next-env.d.ts", "next.config.ts", "app/**/*.ts", "app/**/*.tsx", ".next/types/**/*.ts"],
+  "exclude": ["node_modules", ".next"]
+}

@@ -76,14 +76,14 @@ different moment: lint at author time, build assertion at package time, fixture 
 | G1 | dependency-cruiser: `@gx/core` may not import `react`; only `@gx/react`/`@gx/grid` may be client | **A1** | 8 | Someone reaches for a hook in the resolver |
 | G2 | Lint ban on `getBBox`, `getComputedTextLength`, `getTotalLength`, `getBoundingClientRect` inside `@gx/core` | **A1** | 7, 8 | The resolver starts measuring instead of modelling |
 | G3 | Grep **built output** for surviving `"use client"` | **A1** (config), **A4** (regression) | 7 | Rolldown bundles a non-entry module and strips the directive |
-| G4 | Next.js App Router page rendering `<Chart plan={…}>` in a **server component with JS disabled**, asserting the SVG is in the HTML | **A4** | 7 | The RSC path silently degrades to SSR + hydration |
+| G4 | Next.js 16 App Router page rendering `<Chart plan={…}>` in a **server component**, asserting **both**: (1) with `javaScriptEnabled: false` the SVG, a real `<path>` and the accessible title are in the DOM; (2) the **built client JS** contains no chart code | **A4** → landing at **A5**. ⚠ **Pending — see below. Not green.** | 7 | The RSC path silently degrades to SSR + hydration — which assertion 1 alone *cannot see* |
 | G5 | Bundle each exported symbol alone; assert the component set equals a known set; print `symmetricDifference` | **A4** | 5, packaging | "Import one chart, ship one chart" stops being true |
 | G6 | `ts-morph` walk from `src/index.ts` collecting `missingExports` + `forbiddenExports` | **A4** | 5 | A public prop's type is unnameable by consumers |
 | G7 | Token lint — raw colour literals (hex, `rgb()`, `hsl()`, `oklch()`, `lab()`, `hwb()`, `color()`, named), raw length literals, gradients — **planted in both directions: a violation asserted to fail *and* a valid theme file asserted to pass clean** | **A1** (written), **B1** (full tree) | theming | Either someone hardcodes, or the gate itself has broken |
 | G8 | Every threshold carries a provenance tier | **B3** | theming | A tuned number acquires the authority of a researched one |
 | G9 | Plan snapshots: `(type, size, shape) → plan`, per rung | **A3** | ladder | A rung's semantics change without anyone deciding to change them |
 | G10 | Sweep width **up then down** across every boundary; assert the plan is a pure function of size | **A3** | ladder | Hysteresis creeps in — the direction you approached from starts to matter |
-| G11 | Drag across every rung boundary; assert no plan field alters the measured box | **A5** | ladder, containment | The infinite `ResizeObserver` loop |
+| G11 | Drag across every rung boundary; **four** assertions — no loop error; the measured box never moves unprompted; no scrollbar gutter; nothing the plan sizes overflows | **A5**. Written; observed passing **by hand** via `pnpm lint:containment`, not yet in CI | ladder, containment | Any of the four — and the loop error is the *least* likely of them to fire |
 | G12 | `valueLegibility !== 'values'` → `!axes.y.visible` | **A3** | a11y, ladder | The chart claims readable values while showing an axis it cannot support |
 | G13 | One screenshot per chart type per rung, pinned Docker, chromium-only, `reducedMotion: 'reduce'` | **D** | ladder | Geometry regresses in a way no assertion names |
 | G14 | Element-set snapshot per chart type; no `<line>` may carry `x1`/`y1`/`x2`/`y2` from a `var(--gx-*)` | **A4** | theming | A geometry token ships, is documented, and does nothing ([012](../decisions/012-no-line-element-for-tokened-geometry.md)) |
@@ -139,6 +139,136 @@ out of the resolver. Without it, someone reintroduces hysteresis as a "small" fi
 
 ---
 
+## The two newest gates, and what is actually known about each
+
+`../43-theming.md` §6.3 is the standard this section is held to: *"A gate never observed to fail is not
+a gate — it is a job that exits 0."* The obvious twin is what governs the G4 entry below — **a map
+that reports a gate passing before anyone has run it is the same disease with better manners.** So
+these two are written apart from the register, because what is *known* about them differs sharply and
+the register's one-line rows cannot carry that difference.
+
+### G11 — written, passing by hand, and not clean
+
+`scripts/check-containment.mjs` exists and runs today as **`pnpm lint:containment`**. It is
+deliberately outside `pnpm verify` and outside `.github/workflows/ci.yml`: it needs a browser binary,
+and that provisioning was parked until the shared browser job G4 brings with it. A CI job for it is
+being wired now, so this paragraph is the one most likely to date first.
+
+The recorded sweep covers **178 sizes across 13 rung changes** and reports **0 `ResizeObserver` loop
+errors** and **0 px unattributed overflow**.
+
+⚠ **"0 px unattributed" is not "0 px", and the difference is a real shortfall, not a rounding
+artefact.** The same run reports a peak **21 px block-axis overflow** on `.gx-auto-chart`, *attributed*
+to `.gx-chart__caption` and therefore exempt: **the `<figcaption>` data table does not fit the box it
+is in.** The exemption exists so the gate can be green about the thing it gates — geometry the *plan*
+sizes — while still printing the number nobody has fixed. Read a passing G11 run as *"the plan contains
+itself; the caption does not,"* and do not cite it as evidence of a clean containment story.
+
+⚠ **Assertion 3 has never actually executed anything.** The scrollbar-gutter check computes
+`offsetWidth - clientWidth - borderX`. macOS draws **overlay** scrollbars, which occupy zero layout
+space, so that expression is `0` on a developer machine whether or not a scrollbar is present. Every
+observation of this gate so far is a macOS observation, which means assertion 3 is currently *inert*
+rather than *passing*. CI will run it on Linux, where classic scrollbars take real width — so it may
+fire for the first time on a size that has already "passed" 178 times. That is not a prediction of
+failure; it is a statement that this assertion has produced no evidence yet and must not be counted as
+though it had.
+
+⚠ **Assertion 1 — the loop error — is the weakest of the four, and that was measured rather than
+assumed.** Planting the containment rule's exact negation (a content-determined box height, so the
+chart sizes the box that measures it) produced a box growing `288 → 844 → 1603 → 2279 → 3038 → 3776 →
+4514` px across six frames and never stopping, while Chromium emitted **no** console error, **no**
+`pageerror` and **no** loop warning at all. The loop error fires when an observation re-triggers itself
+*within one delivery cycle* past the depth limit; a runaway paced one growth per animation frame
+delivers cleanly every time and is, to the browser, just a page whose layout keeps changing. A gate
+built on assertion 1 alone would have watched the worst containment failure this project can have and
+printed `0 loop errors`. **Assertion 2 is what caught it.** The full argument — including why the gate
+reads `.gx-auto-chart` rather than `.widget`, after a period in which it was silently grading the wrong
+box — is in that script's header, and it is worth reading before trusting any number above.
+
+### G4 — landing, and this map has not seen it pass
+
+⚠ **Nothing in this subsection is an observation of success, and the row above must not be read as
+green.** `scripts/check-rsc.mjs` and its Next.js 16 fixture at `apps/rsc-fixture` landed at A5. The
+gate's *design* is settled and is what the register row describes. Its *status* is **pending**.
+
+**Why it takes two assertions and not one.** The row this replaced asserted only that the SVG is in the
+HTML with JS disabled — and that assertion cannot detect the failure the row names. Turn JavaScript
+off and load the page: if `<Chart>` is a genuine server component the SVG is in the HTML, and if
+`<Chart>` is a client component rendered on the server and hydrated in the browser the SVG is *also* in
+the HTML, because that is precisely what SSR is for. The two architectures G4 exists to tell apart
+produce byte-similar first paints. So assertion 1 is satisfied by exactly the degradation the gate was
+built to catch, and on its own it is a spelling test for `<svg>` printed in green.
+
+Assertion 2 is the architectural claim: **the client JavaScript the build produced contains no chart
+code** — searched for string literals that survive minification, in `.next/static/`, which is compiled
+client *code*. ⚠ Not in the HTML: App Router serialises the rendered tree into inline
+`self.__next_f.push(…)` scripts, so the chart's class names appear in the document as **data** on a
+page that is doing exactly the right thing. A gate grepping the HTML would fail a correct RSC page,
+and a gate that fires on success gets deleted rather than fixed. Conversely, assertion 1 is assertion
+2's **vacuity check** — a page rendering no chart at all trivially ships no chart code — which is why
+neither is meaningful without the other.
+
+⚠ **A prediction this gate made, and got wrong.** G4 was written expecting a red first run:
+`packages/primitives/src/Chart.tsx` calls `useId()` and `useMemo()`, and the gate's author believed
+React Server Components support neither. **That is false, and the record of the error is kept because
+of what disproving it produced.** React 19's `react-server` build exports `useId`, `useMemo` and
+`useCallback`; the hooks it replaces with a throwing stub are `useState`, `useEffect`, `useRef`,
+`useReducer` and `useLayoutEffect`. `Chart.tsx`'s own docblock and decision 7 both said so, correctly,
+and were doubted rather than read. The fixture builds, renders a 7.7 KB `<svg>`, and ships **zero**
+`@gx/*` bytes to the client. **Decision 7 stands as written.**
+
+What survives the correction is the reason G4 exists: A4's zero-client-JS proof was a node test
+calling `renderToStaticMarkup()` — a *different renderer* on a *different dispatcher*, where all of
+those hooks work — so it went green for a milestone without exercising the architecture it was named
+after. Same species as G14, G15 and G16: a thing that looks like it works and quietly doesn't. Here it
+was the **test** that was hollow, not the code, and only a real App Router build could tell which.
+
+⚠ **Assertion 1b, which came out of disproving the above, and is the strongest thing in this gate.**
+The two renderers stamp different infixes into `useId()`: the RSC Flight server composes
+`'_' + prefix + 'S_' + n.toString(32) + '_'` — **S for Server** — while `react-dom`'s SSR renderer uses
+`R_` in the same position. `<Chart>` feeds `useId()` into `aria-labelledby`, so **the winning
+renderer's initial is in an attribute of the shipped HTML**. That is a *positive* reading of which
+renderer ran, which is exactly what the paragraphs above say a first-paint assertion cannot give you —
+an `_R_` id is SSR-degradation caught in the act, no bundle scan required. It works only because the
+fixture passes no `id` prop (`<Chart>` reads `id ?? useId()`, so supplying one discards the generated
+value). It is a React internal with no public promise behind it, so the gate fails both on seeing `R_`
+**and** on recognising neither infix — a discriminator that quietly stopped discriminating would be
+this repository's own named failure species, committed by the gate built to catch it.
+
+---
+
+## ⚠ The gate scripts are the least-checked code in the repository
+
+Recorded because it is the reason two type errors sat in `scripts/` undetected, and because it makes
+every claim above weaker than it looks.
+
+`pnpm typecheck` is `turbo run typecheck`, which runs the **per-package** `tsconfig.json` files.
+`scripts/**` is covered by the **root** `tsconfig.json` — the one carrying `allowJs` + `checkJs`, which
+is what makes the JSDoc annotations in these plain-JS gates load-bearing rather than decorative — and
+that config is in no turbo pipeline and in no step of `pnpm verify`. So the whole-repo typecheck comes
+back green while the gate scripts are never checked at all.
+
+The command that actually reveals them:
+
+```bash
+pnpm exec tsc --noEmit -p tsconfig.json
+```
+
+Two `TS2538`s in `scripts/generate-typography-css.mjs` were found and fixed this way. Others remain
+in the two browser gates, most of them benign by construction — `document`, `getComputedStyle` and
+`requestAnimationFrame` appear in functions that are *serialised and evaluated inside Chromium*, so
+they are correctly absent from a `lib: ["ES2022"]` Node program and the error is the checker being
+right about the wrong file.
+
+⚠ **The inversion is the point, and it is not a small one.** These scripts are the things that enforce
+decisions 5, 7, 8 and the theming contract across the whole tree. They are the least-verified code in
+the repository, which means a gate can be subtly broken in exactly the way it exists to prevent and
+nothing will say so. Not fixed here: wiring the root config into `verify` surfaces a pile of unrelated
+in-flight errors and needs to happen as its own deliberate change, with the browser-only globals given
+a home rather than suppressed.
+
+---
+
 ## Determinism is a prerequisite, not a gate
 
 None of the above is trustworthy without these. They belong in A1's config, before the first test:
@@ -179,7 +309,7 @@ The tiers, ordered by how much they prove per unit of cost:
 |---|---|---|
 | `planChart()` + ladder | **Bare Node, no DOM at all** | Most of the suite. The ladder *is* this tier. |
 | `@gx/primitives` render-to-string | Node | Structure + token usage. Hook-free, so no client runtime. |
-| `@gx/react` | jsdom + **our** `FakeResizeObserver` | Rung transitions, driven by `emit(el, w, h)` |
+| `@gx/react` | jsdom + **our** `FakeResizeObserver` | Rung transitions, driven by `emit(w, h)` |
 | Real measurement + interaction | Vitest browser mode, Playwright provider | Smallest tier |
 | Visual | Pinned Docker, chromium-only | Bounded, deliberate set |
 
@@ -188,9 +318,28 @@ The inversion is the point: the most valuable tier is the one with no browser in
 available*, which is also why d3-shape (no DOM at all) leads every library surveyed on
 geometry-assertion density.
 
-**Resize is an input we control, not an event we wait for.** ~20 lines of `FakeResizeObserver` with an
+**Resize is an input we control, not an event we wait for.** ~50 lines of `FakeResizeObserver` with an
 `emit()` driver replaces the entire polyfill question; the registry offers nothing with a 2026 release
 anyway.
+
+⚠ **The signature settled at `emit(width, height, options?)`, not the positional `emit(el, w, h)`
+this map carried through A4.** The sketch in `../raw/07-arch-oss-packaging.md` §6.2 is right about the
+capability and wrong about the ergonomics: one observer per widget is the depth-ordered pattern the
+`ResizeObserver` spec is designed around (`../raw/05-theory-responsive-viz.md` §5.3), so *almost every*
+call site in this tier observes exactly one element and would have had to name it on every line. The
+element moved into an optional `target` field, which keeps the common call at `emit(320, 180)` and
+still leaves the multi-target case sayable. `packages/testing/src/index.ts` is the signature of record.
+
+⚠ **This tier was a false green until A5, and it belongs in a map about what each tier proves.** The
+fake's entry originally carried `contentRect` alone. Real consumers — `@gx/react`'s `useElementSize`
+among them — read `contentBoxSize[0]` first and fall back to `contentRect` only when it is absent, so
+every fake-driven test in this tier was exercising a branch **no real browser takes**: full green over
+code nobody runs. `contentRect` also reports the *transformed* box, so a chart inside a CSS
+`scale(0.5)` is reported at its apparent size and planned for a rung it does not occupy. The entry now
+carries both boxes, derived from the same numbers so they cannot disagree with each other, and the
+legacy shape is reachable only on request as `emit(w, h, { legacy: true })` — kept covered rather than
+merely unreachable, because Safari before 15.4 and every `contentRect`-only polyfill still in the
+registry are real places that branch runs. Never the default again.
 
 ---
 

@@ -1,0 +1,42 @@
+{
+  "$schema": "https://turborepo.com/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      /*
+       * ⚠ Both keys are overridden because the root definitions are shaped for a package that
+       * emits `dist/` from `src/`, and this app does neither. A package `turbo.json`
+       * *replaces* a task definition rather than merging into it, so `dependsOn` is restated
+       * here — dropping it would let a fixture build start before `@gx/core` had one.
+       *
+       * ⚠ The `outputs` miss is the dangerous half, and it fails silently. With the root's
+       * `dist/**` and no `.next/**`, turbo would happily record a cache hit for a build whose
+       * entire artefact it never saved, and the next `next start` would serve nothing — a
+       * green CI step followed by a gate failing for a reason that has nothing to do with
+       * RSC. `!.next/cache/**` keeps Turbopack's own incremental cache out of the tarball;
+       * it is scratch space, not output.
+       */
+      "inputs": ["app/**", "next.config.ts", "next-env.d.ts", "package.json", "tsconfig.json"],
+      "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["^build"],
+      /*
+       * ⚠ The root's `src/**` matches nothing in this app. Left alone, turbo would treat a
+       * typecheck as unaffected by every edit to `app/page.tsx` and replay a stale pass — the
+       * quietest possible way for a gate to stop gating.
+       *
+       * ⚠ There is deliberately **no** `dependsOn: ["build"]`. `next-env.d.ts` imports
+       * `./.next/types/routes.d.ts`, which does not exist before a build — but that import
+       * lives inside a declaration file, and `skipLibCheck` (set in `tsconfig.base.json`)
+       * makes TypeScript skip it rather than report it. Verified by hiding `.next/` and
+       * re-running `tsc --noEmit`: exit 0. So typecheck stays independent of build, and CI
+       * keeps its cheap check cheap. If `skipLibCheck` is ever turned off repo-wide, this is
+       * one of the places that breaks.
+       */
+      "inputs": ["app/**", "next.config.ts", "next-env.d.ts", "tsconfig.json", "../../tsconfig.base.json"],
+      "outputs": []
+    }
+  }
+}

@@ -103,3 +103,124 @@ jobs:
       - name: Gate G17 — fitting typography CSS matches its typed plan input
         if: '!cancelled()'
         run: pnpm lint:typography
+
+  # ⚠ **One job, two gates, one browser download — and that is the whole reason it exists.**
+  # G4 (RSC with JS disabled) and G11 (containment) are the only two gates in the register
+  # that need a real Chromium. `scripts/check-containment.mjs` carried the deferral in its
+  # header until this job existed to discharge it, on the grounds that *wiring one browser
+  # download into CI twice, for two gates, is the kind of duplication that gets half-removed
+  # later*. If a third browser gate arrives (G13, the screenshot gate at milestone D), it
+  # belongs here as another step, not in another job.
+  #
+  # ⚠ These two gates are **not** in `pnpm verify`, deliberately, and this job is the reason
+  # that is now safe rather than merely convenient. `verify` is what a fresh clone runs before
+  # it has decided to care about this repo, and it should not open with a ~150 MB download.
+  # Keeping them out of `verify` and in CI means the browser cost falls on the runner, which
+  # has already paid it, instead of on the first-time reader, who has not.
+  browser:
+    runs-on: ubuntu-latest
+    # ⚠ 20, not `verify`'s 15. A cold Chromium download plus two gates that each drive a real
+    # browser through a full resize sweep is a different shape of job from a lint pass, and a
+    # timeout tuned for the fast one turns a slow network into a flake.
+    timeout-minutes: 20
+
+    # ⚠ **No `needs: verify`, on purpose.** The two jobs share no artefact — each gate builds
+    # or serves what it needs, from source — so chaining them would add `verify`'s whole
+    # wall-clock to this one's and buy nothing. Worse, it would hide a containment regression
+    # behind an unrelated lint failure for as long as the lint took to fix, which is the same
+    # round-trip tax that `if: '!cancelled()'` exists to avoid *within* a job. The
+    # `concurrency` group above already stops superseded runs from piling up.
+
+    env:
+      # ⚠ **The switch that makes a skip unreachable here.** `scripts/check-containment.mjs`
+      # exits 0 with a `SKIPPED` line when Chromium will not launch, because on a developer's
+      # machine a declined 150 MB download is a legitimate opt-out and a gate that hard-fails
+      # on one gets deleted rather than fixed. A runner has no such opt-out: a silent skip
+      # here would be a gate that is not running while looking exactly like a gate that
+      # passed. With this set, a Chromium download that quietly failed exits 1 and says so.
+      GX_REQUIRE_BROWSER: '1'
+
+    steps:
+      # ⚠ Byte-identical to `verify`'s setup block, deliberately. Two browser gates failing
+      # on a runner configured differently from the one every other gate runs on would be a
+      # day spent on the difference before anyone looked at the chart.
+      - uses: actions/checkout@v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+        # ⚠ This does NOT download a browser, and that was checked rather than assumed:
+        # `playwright@1.62.1` ships no lifecycle scripts at all — no `scripts` field in its
+        # `package.json` — so the postinstall that older releases used to fetch browsers with
+        # is simply not there. A clean install leaves the npm package present and
+        # `~/.cache/ms-playwright` empty. (Not a pnpm policy, despite the neighbouring
+        # `ignoredBuiltDependencies` entry in `pnpm-workspace.yaml` making that the obvious
+        # guess — there is no script for pnpm to decline.) That separation is the whole reason
+        # `check-containment.mjs` diagnoses "package missing" and "browser missing" as two
+        # different failures, and the reason the step below is not optional.
+
+      # ⚠ Read out of the installed package rather than hardcoded. A cache key carrying a
+      # version number someone has to remember to bump is a cache that serves the *previous*
+      # browser after a playwright upgrade — and the symptom of that is a launch failure that
+      # reads like a bug in our own code, which is precisely the confusion this job exists to
+      # rule out. `playwright/package.json` is reachable through the package's `exports`;
+      # verified, not assumed.
+      - name: Read the installed playwright version
+        id: playwright
+        run: echo "version=$(node -p "require('playwright/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      # ⚠ Keyed on os + arch + version, and **not** on the lockfile hash. A lockfile key would
+      # throw away a 150 MB download every time any unrelated dependency moved; these three
+      # are the only inputs that actually change which browser build is correct. There is no
+      # `restore-keys` prefix for the same reason a stale playwright install was removed from
+      # the resolver: a near-miss restore would hand the job a browser from a different
+      # version, and a browser gate is only evidence if you know which browser it drove.
+      - name: Cache the Chromium download
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ms-playwright-${{ runner.os }}-${{ runner.arch }}-${{ steps.playwright.outputs.version }}
+
+      # ⚠ **Unconditional, and `--with-deps` even on a cache hit.** The cache holds the browser
+      # under `~/.cache/ms-playwright`; it does not hold the apt packages Chromium links
+      # against, which live in system paths outside any cache the runner restores. Skipping
+      # this step on a hit would trade a fast no-op for a launch that dies with a missing
+      # shared-library error — a message that reads like our code is broken rather than like
+      # the runner is unprovisioned. `playwright install` is idempotent: with the browser
+      # already present it verifies and returns.
+      - name: Install Chromium and the system libraries it links against
+        run: pnpm exec playwright install --with-deps chromium
+
+      # ⚠ **No build step here, and that was checked rather than assumed.** The obvious
+      # instinct is to add `pnpm build`, since this job cannot inherit `verify`'s artefacts.
+      # Neither gate needs it: `check-rsc.mjs` runs its own
+      # `turbo --filter @gx/rsc-fixture build` before serving the fixture (turbo's `^build`
+      # pulls the workspace packages it depends on with it), and `check-containment.mjs`
+      # spawns the playground under `vite dev`, which serves `@gx/core` from source because
+      # its `exports` map points at `src/`. A build step here would be two minutes spent
+      # producing `dist/` that nothing in this job reads.
+      #
+      # ⚠ Same reasoning for the servers: each gate starts and stops its own. G11 takes 5173,
+      # G4 takes 3210, so the two steps cannot collide, and `verify` runs on a different
+      # runner entirely. `ensureDevServer()` in `scripts/check-containment.mjs` kills the
+      # process **group** rather than the pid it holds, which is what makes a second gate in
+      # the same job safe after the first one has finished with its port.
+
+      # ⚠ Same `if: '!cancelled()'` discipline as `verify`, and it matters more here, not
+      # less: these are the two most expensive gates in the repo to reach. Learning that G11
+      # also fails only after fixing G4 and paying for a second browser download is the exact
+      # round-trip this pattern exists to prevent.
+      - name: Gate G4 — RSC with JS disabled (the SVG is in the HTML, not hydrated into it)
+        if: '!cancelled()'
+        run: pnpm lint:rsc
+
+      - name: Gate G11 — containment (no plan field alters the measured box)
+        if: '!cancelled()'
+        run: pnpm lint:containment

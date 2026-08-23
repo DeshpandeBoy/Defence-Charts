@@ -393,9 +393,21 @@ fallback size forever, green the whole way.
 
 The registry offers nothing healthy — `resize-observer-polyfill` 1.5.1 (2018), `@juggle/resize-observer`
 3.4.0 (2022), `jsdom-testing-mocks` 1.16.0 (2025), none with a 2026 release. So `@gx/testing` ships
-our own ~20-line fake with an `emit(el, width, height)` driver. **The point is not the polyfill: it is
+our own ~50-line fake with an `emit(width, height, options?)` driver. **The point is not the polyfill: it is
 that resize becomes an input we control rather than an event we wait for.** Every rung of the ladder
-then becomes `emit(el, 320, 180)` → assert the plan.
+then becomes `emit(320, 180)` → assert the plan.
+
+⚠ **Signature corrected at A5** — this section read `emit(el, width, height)` through A4, after the
+sketch in `raw/07` §6.2. The observed element moved into an optional `target` field on a third
+argument, because §6b's own point is that there is **one observer per widget**: almost every call site
+watches exactly one element and would otherwise have named it on every line. ⚠ **And the entry it
+emits was widened at the same time, for a worse reason.** It carried `contentRect` alone, while
+`useElementSize` reads `contentBoxSize[0]` first and treats `contentRect` as the fallback — so every
+fake-driven test was exercising a branch no real browser takes, green over code nobody runs. That is
+the happy-dom failure in §6b arriving through our own front door, and it is why the injected fake is
+only half the discipline: **a fake that is easy to control is also easy to make agree with itself
+about the wrong thing.** It now emits both boxes from one set of numbers, with the legacy shape
+reachable only as `emit(w, h, { legacy: true })`.
 
 Revised tiers:
 

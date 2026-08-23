@@ -1,0 +1,21 @@
+/* A stand-in for the stylesheet Next emits from `<Chart>`'s side-effect CSS import.
+ *
+ * ⚠ This file is the whole reason `collectClientScripts()` filters on `.js`. Every selector
+ * below is a marker the gate searches for, and every one of them is here legitimately: a
+ * correct RSC page still ships its stylesheet, and a stylesheet is made of the class names of
+ * the thing it styles. Copied in shape from a real `next build` of `apps/rsc-fixture`, where
+ * all four of these appeared in `.next/static/chunks/*.css` and none appeared in any `.js`.
+ */
+.gx-chart__svg {
+  display: block;
+  overflow: visible;
+}
+.gx-chart__caption {
+  margin-block-start: var(--gx-gap);
+}
+.gx-axis__tick-mark {
+  fill: var(--gx-axis-colour);
+}
+.gx-grid__line {
+  fill: var(--gx-grid-colour);
+}

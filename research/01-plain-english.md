@@ -390,15 +390,22 @@ Two rules, and both of them made the architecture *better* rather than working a
 **Never measure in the planner.** Text width comes from arithmetic on a character-width table.
 Something we wanted anyway for the server path — the fake-browser problem just made it non-negotiable.
 
-**Never trust the environment's resize detection. Inject our own.** We ship a ~20-line fake with an
-`emit(element, width, height)` method. The point is not that it is a polyfill. The point is that
+**Never trust the environment's resize detection. Inject our own.** We ship a ~50-line fake with an
+`emit(width, height)` method. The point is not that it is a polyfill. The point is that
 **resize becomes an input we control instead of an event we wait for.** Every rung of the ladder
 becomes two lines:
 
 ```
-emit(el, 320, 180)
+emit(320, 180)
 expect(plan).toEqual({ ...what a 320px chart should be })
 ```
+
+And there is a footnote worth keeping, because it is the same lesson twice. Our own fake was, for a
+while, wrong in exactly the way happy-dom is wrong: it reported the size in the older of the two
+shapes a browser can use, so every test took a code path that real browsers never take. Everything
+passed. Nothing was being checked. We found it, fixed it, and kept the old shape available for the
+tests that specifically want to check the old path — but the moral is that *writing your own fake
+does not exempt you from the problem*. A tool you control is a tool you can make agree with you.
 
 And happy-dom is banned from the repository. jsdom's loud crash is strictly the safer failure.
 

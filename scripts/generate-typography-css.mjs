@@ -5,6 +5,41 @@ const TARGET = fileURLToPath(
   new URL('../packages/tokens/src/themes/typography.css', import.meta.url),
 )
 
+/** @typedef {import('../packages/core/src/text.ts').TypeRank} TypeRank */
+
+/**
+ * Which rank each role takes its **size** from, and which it takes its **weight** from.
+ *
+ * The two are deliberately separable. `research/42-typography.md` §2.1 pins size, weight and
+ * feature settings together *within* a rank, but a role is free to cross ranks: `value-label`
+ * takes rank E's size at rank A's weight, and `subtitle` takes rank B's size at rank D's
+ * weight. That is why this is a table of pairs rather than a map from role to a single rank.
+ *
+ * ⚠ **The type annotation below is load-bearing, not decoration, and it is the fix for two
+ * TS2538s that sat here undetected.** Left to inference this literal is `string[][]`. Under
+ * `noUncheckedIndexedAccess` (`tsconfig.base.json`) that makes the destructured ranks
+ * `string | undefined`, and `typography.byRank[rank]` then fails with *"Type 'undefined'
+ * cannot be used as an index type"*. The checker was right on both counts: a bare `string` is
+ * not a key of a record keyed by five literals, and an element plucked out of an array
+ * genuinely might be absent.
+ *
+ * Naming the row shape answers both at once rather than silencing either. A tuple's elements
+ * are exact, so nothing here is possibly-absent; and `FittingTypography.byRank` is
+ * `Readonly<Record<TypeRank, FontRankStyle>>` — *total* over the rank union, with no fallback
+ * path and no nearest-size guess — so a `TypeRank` key resolves to a `FontRankStyle` and never
+ * to `undefined`. The `undefined` was never reachable at runtime; it was an artefact of the
+ * literal being widened past what it says.
+ *
+ * ⚠ The annotation is **checked against the literal, not asserted over the lookup**, and the
+ * difference is the whole point. Write `'F'` in any row below and this file stops compiling.
+ * Had the fix instead been an inline cast at `byRank[sizeRank]`, that same typo would have
+ * compiled, produced `undefined`, and thrown `Cannot read properties of undefined` at
+ * generate time — or worse, emitted `--gx-…-font-size: undefinedpx` into a stylesheet. This
+ * project's recurring failure species is a thing that looks like it works and quietly
+ * doesn't; a cast that asserts away a real possibility is how one gets built.
+ *
+ * @type {readonly (readonly [role: string, sizeRank: TypeRank, weightRank: TypeRank])[]}
+ */
 const ROLE_STYLES = [
   ['title', 'A', 'A'],
   ['subtitle', 'B', 'D'],
