@@ -1,0 +1,12 @@
+{
+  "name": "@fixture/allow-api-consumer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@fixture/allow-api": "workspace:*"
+  }
+}

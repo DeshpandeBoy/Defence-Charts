@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "license": "MIT",
-  "description": "Not shipped. The place where the resolver's decisions become visible before there is a chart to draw them on.",
+  "description": "Not shipped. The place where the resolver's decisions become visible beside the chart they draw.",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -13,6 +13,8 @@
   },
   "dependencies": {
     "@gx/core": "workspace:*",
+    "@gx/primitives": "workspace:*",
+    "@gx/react": "workspace:*",
     "@gx/tokens": "workspace:*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"

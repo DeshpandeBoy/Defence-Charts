@@ -139,6 +139,20 @@ export const DEFAULT_NOMINAL_CELL_SIZE = 100
  * The virtual grid is capped at twelve columns to preserve the dashboard model. Rows are
  * intentionally unbounded: `resolveSizeClass()` already saturates at Stage, while raw
  * height remains available for within-rung planning.
+ *
+ * ⚠ **A measured footprint floors at one cell, and the floor is what separates the two
+ * meanings of zero.** `resolveSizeClass()` reads `0` as *"not measured"* — its own comment
+ * says so, naming the transient `0` every browser delivers at least once. A bare
+ * `Math.floor` handed it a second, incompatible zero: *"measured, and smaller than one
+ * cell."* Under that spelling a 320×90 box reported `rows: 0` and classified as **Micro**,
+ * so the resolver planned `marks.primary.kind: 'none'` and the renderer drew an empty
+ * `<svg>` — a 900×99 strip silently becoming a single-value widget with no value in it.
+ *
+ * `Math.floor` answers *"how many whole cells fit"*. The question the grid model asks is
+ * *"how many cells does this widget span"*, and in a dashboard grid the minimum span is one:
+ * a widget that has been measured at a positive size occupies a cell, however short. So the
+ * floor lives inside the `measurable` branch, and the unmeasurable path still returns a
+ * true `0` for `resolveSizeClass()` to read as absence.
  */
 export function sizeContextFromPixels(
   width: number,
@@ -153,8 +167,8 @@ export function sizeContextFromPixels(
     height > 0 &&
     nominalCellSize > 0
 
-  const cols = measurable ? Math.min(12, Math.floor(width / nominalCellSize)) : 0
-  const rows = measurable ? Math.floor(height / nominalCellSize) : 0
+  const cols = measurable ? Math.min(12, Math.max(1, Math.floor(width / nominalCellSize))) : 0
+  const rows = measurable ? Math.max(1, Math.floor(height / nominalCellSize)) : 0
 
   return Object.freeze({
     width,

@@ -119,6 +119,38 @@ const AXIS_RULE_WIDTH = 1
 const REGION_GAP = 4
 
 /**
+ * The same four numbers, published so that the renderer draws chrome at the size the layout
+ * reserved for it.
+ *
+ * ⚠ **This is not a token, and it must not become one before the layout math reads the token
+ * too.** The obvious-looking alternative is to let CSS own tick length — `rect { height:
+ * var(--gx-tick-length) }`, which decision 012 makes *possible* by insisting on `<rect>` over
+ * `<line>`. But `xAxisBand()` above adds `TICK_LENGTH` into the band it subtracts from the
+ * plot. A theme that set the token to `8` would move the glyphs and not the band: the ticks
+ * would grow into the labels below them, the labels would still be positioned for a 4 px tick,
+ * and the resolver would have no way to know. Same failure as two disagreeing plot boxes, one
+ * layer down and harder to see, because a theme is the last place anyone looks for a layout
+ * bug.
+ *
+ * So the renderer reads these, and B1 may only tokenise them by routing `PlanPolicy` through
+ * the same values — which is exactly what the block above says it is waiting for.
+ *
+ * Tier **C** throughout; see the docblock above for why they are near-harmless anyway.
+ */
+export const CHROME_METRICS = Object.freeze({
+  /** How far a tick protrudes from the axis rule, px. */
+  tickLength: TICK_LENGTH,
+  /** Between the tick and its label, px. */
+  tickLabelGap: TICK_LABEL_GAP,
+  /** Between the tick labels and the axis title, px. */
+  axisTitleGap: AXIS_TITLE_GAP,
+  /** Thickness of the axis domain rule, px. */
+  axisRuleWidth: AXIS_RULE_WIDTH,
+  /** Between the plot and an adjacent region — legend, table affordance. px. */
+  regionGap: REGION_GAP,
+})
+
+/**
  * ⚠ **Tier C, and the weakest number in this file.** The y gutter is the width of the
  * widest y tick label, but `DataShape` deliberately carries no data — *"the resolver never
  * sees values"* (`./context.ts`) — so there is no formatted domain to measure.
@@ -247,6 +279,19 @@ export function legendBands(
  *
  * `valueRegionMaxShare` is Tier **C** — ours, unsourced. It is a share rather than a px
  * figure so that it degrades sensibly at every rung instead of starving small ones.
+ *
+ * ⚠ **The share is charged whether or not the plot below it draws anything, and at Micro
+ * it does not.** Observed at A4 by resizing the playground to 62 × 42: the value display
+ * takes the top half, `marks.primary.kind` is `'none'`, and the bottom half is a plot with
+ * nothing in it — half of the smallest rung in the ladder, reserved for marks that the
+ * rung has already decided not to draw.
+ *
+ * It is left that way deliberately. The obvious fix — give the band the whole budget when
+ * there are no marks — requires this function to know the mark kind, and at Tile the mark
+ * kind is *decided from* the plot height this function helps produce. That is a re-entry
+ * into the chain `resolvePlotBox()` is explicitly single-pass to avoid, and buying Micro
+ * 20 px by making the resolution order circular is a bad trade. The honest fix is a
+ * per-rung share, which is a policy-shape change and belongs with the token tree at B1.
  */
 export function valueBand(
   valueDisplay: NarrativePlan['valueDisplay'],

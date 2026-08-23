@@ -19,7 +19,58 @@
  *      `<line>` stays legal for anything no token controls. Gate **G14**, at A4 —
  *      `research/decisions/012-no-line-element-for-tokened-geometry.md`.
  *
- * ⚠ A1 scope: the package boundary only. `<Chart plan={...}>` lands at **A4**.
+ * ⚠ **Rule 2 governs what a *theme* controls, not what the *data* controls.** `d`, `cx`,
+ * `cy`, `x`, `y`, `width` and `height` are all real CSS properties in SVG2, and they are
+ * still emitted as attributes here, because a coordinate derived from a value is not
+ * something a stylesheet may move. The distinction the rule draws is authority, not syntax.
+ *
+ * ## The one exception, and why it is not one
+ *
+ * `<Axis>` takes tick length, tick-label gap and rule width from `@gx/core`'s
+ * `CHROME_METRICS` and writes them as attributes. That looks like a rule-2 violation and is
+ * not: `xAxisBand()` folds `TICK_LENGTH` into the vertical band it **subtracts from the
+ * plot**, so a theme that set a tick length in CSS would move the glyphs and leave the band
+ * where it was. The chart would be wrong in a way no stylesheet-parsing gate can see. The
+ * standing note lives on `CHROME_METRICS` itself; the numbers become tokens only when
+ * `PlanPolicy` routes the same values.
+ *
+ * Stroke width, point radius and the two mark opacities *are* tokens, because the resolver
+ * never subtracted them — `packages/tokens/src/themes/theme.css` carries the dividing line.
+ *
+ * ## What a consumer needs
+ *
+ * ```tsx
+ * import { Chart } from '@gx/primitives'
+ * import '@gx/primitives/src/chart.css'
+ * ```
+ *
+ * `chart.css` is a side effect (`package.json`'s `sideEffects`), so it survives
+ * tree-shaking and is not pulled in by a component import. Importing `Chart` and not the
+ * stylesheet renders a correct, unstyled, invisible chart — which is why it is said here.
+ *
+ * ⚠ **A4 scope.** Mark kinds `'line'`, `'horizon'` and `'none'` render. `'bar'`, `'arc'`,
+ * `'point'` and `'cell'` **throw**, naming the milestone that adds them — the same contract
+ * `planChart()` holds, and for the same reason: a silent fallback to a line would render
+ * bar data as a line chart.
  */
 
-export const PRIMITIVES_ARE_RSC_SAFE = true
+export type { AreaPathProps } from './AreaPath.tsx'
+export { AreaPath } from './AreaPath.tsx'
+export type { AxisProps } from './Axis.tsx'
+export { Axis } from './Axis.tsx'
+export type { ChartProps } from './Chart.tsx'
+export { Chart } from './Chart.tsx'
+export type { DataTableProps } from './DataTable.tsx'
+export { DataTable } from './DataTable.tsx'
+export type { GridProps } from './Grid.tsx'
+export { Grid } from './Grid.tsx'
+export type { HorizonBandsProps } from './HorizonBands.tsx'
+export { HorizonBands } from './HorizonBands.tsx'
+export type { LabelsProps } from './Labels.tsx'
+export { Labels } from './Labels.tsx'
+export type { LinePathProps } from './LinePath.tsx'
+export { LinePath } from './LinePath.tsx'
+export type { PointMarksProps } from './PointMarks.tsx'
+export { PointMarks } from './PointMarks.tsx'
+export type { ValueDisplayProps } from './ValueDisplay.tsx'
+export { ValueDisplay } from './ValueDisplay.tsx'

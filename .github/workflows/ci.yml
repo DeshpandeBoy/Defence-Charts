@@ -73,6 +73,18 @@ jobs:
         if: '!cancelled()'
         run: pnpm lint:determinism
 
+      - name: Gate G6 — public API surface (every public type is nameable from outside)
+        if: '!cancelled()'
+        run: pnpm lint:api
+
+      # ⚠ Reads `src/`, not `dist/`, so it runs before the build rather than after it like
+      # G3 below. It bundles each exported symbol on its own with rolldown in-process; what
+      # it is checking is what a *consumer's* bundler would keep, and that answer does not
+      # depend on our own `dist/` existing.
+      - name: Gate G5 — tree-shaking (import one chart, ship one chart)
+        if: '!cancelled()'
+        run: pnpm lint:treeshake
+
       - name: Test
         if: '!cancelled()'
         run: pnpm test

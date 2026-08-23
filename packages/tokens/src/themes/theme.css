@@ -51,14 +51,64 @@
     --gx-charcoal-900: #e2e5e8;
 
     /*
-     * --- Chrome: derived from currentColor at low opacity, so it tracks whatever theme
-     * is active. DESIGN.md:101. This is why gridlines are safe in BOTH themes by
-     * construction while the other five composition pairs are not — 43-theming.md §5.
+     * --- Ink: the ramp index this world writes with. Added at A4.
+     *
+     * ⚠ **The ramp is absolute and the theme picks an index — this is where the picking
+     * happens, and until A4 nothing did it.** The ramp is documented as 100 darkest to 900
+     * lightest, which means it does *not* flip with the ground; a world that flips the
+     * ground and not the ink writes light-on-light. `@gx/primitives`' `chart.css` set
+     * `color: var(--gx-charcoal-900)` directly, so on the light ground every axis label,
+     * every tick and every gridline rendered at #e2e5e8 on #f4f3ef — about 1.1:1, present
+     * in the DOM, in the a11y tree, and invisible. Measured in a real browser at A4, not
+     * reasoned about: the chart drew its lines and lost its entire reading apparatus.
+     *
+     * The playground's own `--pg-fg` had made exactly this choice three lines at a time
+     * since A2, with a comment predicting the library would have to make it too. It does.
+     */
+    --gx-ink: var(--gx-charcoal-900);
+
+    /*
+     * --- Chrome: derived from currentColor at low opacity, so it tracks whatever ink the
+     * active theme picked. DESIGN.md:101.
+     *
+     * ⚠ This used to claim gridlines were *"safe in BOTH themes by construction"*. They
+     * are safe by construction only against the ink — `currentColor` inherits, it does not
+     * choose. The construction that makes the claim true is `--gx-ink` above; before it
+     * existed the sentence was describing an intention. 43-theming.md §5's point stands
+     * for the right reason now: one token to re-pick, not five composition pairs to audit.
      * The alpha keeps its A-lit provenance (Talbot); the colour is ours.
      */
     --gx-grid-color: currentColor;
     --gx-grid-alpha: 0.2;
     --gx-axis-color: currentColor;
+
+    /*
+     * --- Marks. Added at A4, when @gx/primitives first needed them.
+     *
+     * ⚠ These are tokens and the four constants in core's layout.ts are NOT, and the
+     * dividing line is whether the resolver already subtracted the number. Tick length
+     * feeds xAxisBand(), so a theme that changed it would move the glyphs and leave the
+     * band where it was. Stroke width and point radius feed nothing: the plot box is the
+     * same either way, so a theme may own them outright. See CHROME_METRICS in
+     * packages/core/src/layout.ts for the standing note on the other direction.
+     *
+     * r is a real CSS property in SVG2 and browsers shipped it, which is what makes
+     * --gx-point-radius a token rather than an attribute — decision 012.
+     *
+     * UNVERIFIED defaults: the four values below are conventional, not derived. B1 owns
+     * them along with the other six.
+     */
+    --gx-line-width: 1.5px;
+    --gx-point-radius: 2.5px;
+    --gx-area-alpha: 0.15;
+    --gx-band-alpha: 0.3;
+
+    /*
+     * The colour a mark paints with. Defaults to the first emission line and is re-bound
+     * per series by @gx/primitives' chart.css, so a single-series chart can be recoloured
+     * by setting one property on the figure rather than by reaching into a data attribute.
+     */
+    --gx-series-color: var(--gx-series-1);
 
     /* --- Square Corner Rule, DESIGN.md:196. Unitless 0 is not a length literal, so it
            needs no gate exemption. --- */
@@ -88,6 +138,7 @@
   @media (prefers-color-scheme: light) {
     :where(:root) {
       --gx-ground: #f4f3ef; /* DESIGN.md:63 */
+      --gx-ink: var(--gx-charcoal-200); /* 21.0:1 on the ground. See --gx-ink above. */
       --gx-series-1: #084962; /* H-beta   ·  8.84 */
       --gx-series-2: #784009; /* Na I D₂  ·  7.46 */
       --gx-series-3: #137e10; /* Mg b₂    ·  4.71 */
@@ -102,6 +153,7 @@
   :where(:root)[data-gx-theme='rail-light'],
   .gx-theme-rail-light {
     --gx-ground: #f4f3ef;
+    --gx-ink: var(--gx-charcoal-200);
     --gx-series-1: #084962;
     --gx-series-2: #784009;
     --gx-series-3: #137e10;

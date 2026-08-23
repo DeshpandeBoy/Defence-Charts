@@ -1,0 +1,187 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`gate G14: the element set > 'Canvas' 1`] = `
+[
+  "1× caption",
+  "21× circle.gx-point",
+  "1× details.gx-data-table",
+  "1× figcaption.gx-chart__caption",
+  "1× figure.gx-chart",
+  "1× g.gx-axis gx-axis--x",
+  "1× g.gx-axis gx-axis--y",
+  "12× g.gx-axis__tick",
+  "1× g.gx-grid",
+  "3× g.gx-series",
+  "3× path.gx-line",
+  "1× rect.gx-axis__rule",
+  "12× rect.gx-axis__tick-mark",
+  "5× rect.gx-grid__line",
+  "1× rect.gx-grid__zero",
+  "1× summary.gx-data-table__summary",
+  "1× svg.gx-chart__svg",
+  "1× table.gx-data-table__table",
+  "1× tbody",
+  "21× td",
+  "12× text.gx-axis__tick-label",
+  "3× text.gx-label",
+  "11× th",
+  "1× thead",
+  "1× title",
+  "8× tr",
+]
+`;
+
+exports[`gate G14: the element set > 'Micro' 1`] = `
+[
+  "1× caption",
+  "1× details.gx-data-table",
+  "1× figcaption.gx-chart__caption",
+  "1× figure.gx-chart",
+  "3× g.gx-series",
+  "1× g.gx-value-display",
+  "1× summary.gx-data-table__summary",
+  "1× svg.gx-chart__svg",
+  "1× table.gx-data-table__table",
+  "1× tbody",
+  "9× td",
+  "1× text.gx-value",
+  "1× text.gx-value__overflow",
+  "7× th",
+  "1× thead",
+  "1× title",
+  "4× tr",
+]
+`;
+
+exports[`gate G14: the element set > 'Panel' 1`] = `
+[
+  "1× caption",
+  "1× details.gx-data-table",
+  "1× figcaption.gx-chart__caption",
+  "1× figure.gx-chart",
+  "1× g.gx-axis gx-axis--x",
+  "1× g.gx-axis gx-axis--y",
+  "8× g.gx-axis__tick",
+  "1× g.gx-grid",
+  "3× g.gx-series",
+  "3× path.gx-line",
+  "1× rect.gx-axis__rule",
+  "8× rect.gx-axis__tick-mark",
+  "5× rect.gx-grid__line",
+  "1× rect.gx-grid__zero",
+  "1× summary.gx-data-table__summary",
+  "1× svg.gx-chart__svg",
+  "1× table.gx-data-table__table",
+  "1× tbody",
+  "21× td",
+  "8× text.gx-axis__tick-label",
+  "3× text.gx-label",
+  "11× th",
+  "1× thead",
+  "1× title",
+  "8× tr",
+]
+`;
+
+exports[`gate G14: the element set > 'Stage' 1`] = `
+[
+  "1× caption",
+  "21× circle.gx-point",
+  "1× details.gx-data-table",
+  "1× figcaption.gx-chart__caption",
+  "1× figure.gx-chart",
+  "1× g.gx-axis gx-axis--x",
+  "1× g.gx-axis gx-axis--y",
+  "12× g.gx-axis__tick",
+  "1× g.gx-grid",
+  "3× g.gx-series",
+  "3× path.gx-line",
+  "1× rect.gx-axis__rule",
+  "12× rect.gx-axis__tick-mark",
+  "5× rect.gx-grid__line",
+  "1× rect.gx-grid__zero",
+  "1× summary.gx-data-table__summary",
+  "1× svg.gx-chart__svg",
+  "1× table.gx-data-table__table",
+  "1× tbody",
+  "21× td",
+  "12× text.gx-axis__tick-label",
+  "3× text.gx-label",
+  "8× text.gx-value-label",
+  "11× th",
+  "1× thead",
+  "1× title",
+  "8× tr",
+]
+`;
+
+exports[`gate G14: the element set > 'Strip' 1`] = `
+[
+  "1× caption",
+  "1× details.gx-data-table",
+  "1× figcaption.gx-chart__caption",
+  "1× figure.gx-chart",
+  "1× g.gx-axis gx-axis--x",
+  "2× g.gx-axis__tick",
+  "3× g.gx-series",
+  "3× path.gx-line",
+  "1× rect.gx-axis__rule",
+  "2× rect.gx-axis__tick-mark",
+  "1× summary.gx-data-table__summary",
+  "1× svg.gx-chart__svg",
+  "1× table.gx-data-table__table",
+  "1× tbody",
+  "21× td",
+  "2× text.gx-axis__tick-label",
+  "11× th",
+  "1× thead",
+  "1× title",
+  "8× tr",
+]
+`;
+
+exports[`gate G14: the element set > 'Tile-horizon' 1`] = `
+[
+  "1× caption",
+  "1× details.gx-data-table",
+  "1× figcaption.gx-chart__caption",
+  "1× figure.gx-chart",
+  "3× g.gx-series",
+  "1× g.gx-value-display",
+  "4× path.gx-band",
+  "1× summary.gx-data-table__summary",
+  "1× svg.gx-chart__svg",
+  "1× table.gx-data-table__table",
+  "1× tbody",
+  "9× td",
+  "3× text.gx-value",
+  "7× th",
+  "1× thead",
+  "1× title",
+  "4× tr",
+  "3× tspan.gx-value__delta",
+]
+`;
+
+exports[`gate G14: the element set > 'Tile-line' 1`] = `
+[
+  "1× caption",
+  "1× details.gx-data-table",
+  "1× figcaption.gx-chart__caption",
+  "1× figure.gx-chart",
+  "3× g.gx-series",
+  "1× g.gx-value-display",
+  "3× path.gx-line",
+  "1× summary.gx-data-table__summary",
+  "1× svg.gx-chart__svg",
+  "1× table.gx-data-table__table",
+  "1× tbody",
+  "9× td",
+  "3× text.gx-value",
+  "7× th",
+  "1× thead",
+  "1× title",
+  "4× tr",
+  "3× tspan.gx-value__delta",
+]
+`;

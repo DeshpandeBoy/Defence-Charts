@@ -89,6 +89,7 @@ export { tickCountForWidth } from './ticks.ts'
 // corpus is silent on it and Tile cannot pick its mark without it.
 export type { ChromeSpec, LabelDegrade, PlotBox } from './layout.ts'
 export {
+  CHROME_METRICS,
   degradeXLabels,
   legendBands,
   lineHeight,
@@ -117,3 +118,28 @@ export { applyOverrides } from './overrides.ts'
 
 // The resolver.
 export { planChart } from './plan-chart.ts'
+
+// --- A4: where data enters -----------------------------------------------------------------
+
+// The canonical series shape. Plain and serialisable, so it crosses the RSC boundary as a
+// prop — see `./data.ts` for why accessor functions could not.
+export type { DataPoint, Series } from './data.ts'
+export { describeShape } from './data.ts'
+
+// The one place a value becomes a string, so that the resolver's `labelMaxChars` and the
+// renderer's glyphs cannot disagree.
+export { formatXLabel, formatYLabel } from './format.ts'
+
+// Plan + data + pixel box → coordinates. The only module in this package that sees values.
+export type {
+  ChartFrame,
+  ComputedTick,
+  HorizonBand,
+  PointPos,
+  Rect,
+  SeriesFrame,
+  ValueDelta,
+  ValueEntry,
+  ValueFrame,
+} from './frame.ts'
+export { resolveFrame } from './frame.ts'

@@ -1,0 +1,138 @@
+/**
+ * The data table — the chart's text equivalent, and the only part of this package a screen
+ * reader can actually read row by row.
+ *
+ * ⚠ **It lives in `<figcaption>`, outside the `<svg>`, and that placement is load-bearing.**
+ * A `<table>` inside an `<svg>` is not a table: SVG's content model does not include HTML
+ * flow content, so browsers parse it into the SVG namespace where `<tr>` and `<td>` have no
+ * meaning and no table semantics reach the accessibility tree. It renders as nothing and
+ * announces as nothing. Outside the `<svg>` and inside the `<figure>`, it is an ordinary
+ * table associated with an ordinary figure.
+ *
+ * ⚠ **`<details>` and not a button with state.** `DataTablePlan.disclosure` asks for a
+ * disclosure control, and this package may not hold state — rule 1. `<details>`/`<summary>` is
+ * the disclosure widget the platform already ships: it toggles with **zero client JavaScript**,
+ * which is the same property gate G4 exists to defend, and it is keyboard-operable and
+ * correctly announced without an `aria-expanded` of our own. A `<button onClick>` here would
+ * have made the package client-only to save nothing.
+ *
+ * ⚠ **`x` values come from the raw `Series`, not from the frame.** `PointPos` carries pixel
+ * coordinates and the `y` value, but the `x` *value* is spent by the time the frame is built.
+ * A table of pixel offsets is a table that looks right and says nothing.
+ */
+
+import {
+  type DataTablePlan,
+  formatXLabel,
+  formatYLabel,
+  type Series,
+} from '@gx/core'
+
+import { classes } from './svg.ts'
+
+export type DataTableProps = {
+  readonly data: readonly Series[]
+  readonly plan: DataTablePlan
+  /** Names the table for assistive technology. `<Chart>` passes its own title through. */
+  readonly caption: string
+  readonly className?: string
+}
+
+export function DataTable({ data, plan, caption, className }: DataTableProps) {
+  if (!plan.present) return null
+
+  const table =
+    plan.columns === 'summary' ? (
+      <SummaryTable data={data} caption={caption} />
+    ) : (
+      <FullTable data={data} caption={caption} />
+    )
+
+  return (
+    <details className={classes('gx-data-table', className)} open={plan.initiallyExpanded}>
+      <summary className="gx-data-table__summary">{caption}</summary>
+      {table}
+    </details>
+  )
+}
+
+/** One row per x value, one column per series. The chart, transcribed. */
+function FullTable({ data, caption }: { data: readonly Series[]; caption: string }) {
+  // ⚠ Sorted, de-duplicated, and taken across *all* series — series need not share an x axis
+  // sampling, and a table keyed off the first series silently drops every point the others
+  // have and it does not.
+  const xs = [...new Set(data.flatMap((s) => s.points.map((p) => key(p.x))))].sort(
+    (a, b) => a - b,
+  )
+  const temporal = data.length > 0 && data.every((s) => s.points.every((p) => p.x instanceof Date))
+  const byX = data.map((s) => new Map(s.points.map((p) => [key(p.x), p.y])))
+
+  return (
+    <table className="gx-data-table__table">
+      <caption>{caption}</caption>
+      <thead>
+        <tr>
+          <th scope="col">{temporal ? 'Time' : 'X'}</th>
+          {data.map((s) => (
+            <th key={s.id} scope="col">
+              {s.label ?? s.id}
+            </th>
+          ))}
+        </tr>
+      </thead>
+      <tbody>
+        {xs.map((x) => (
+          <tr key={x}>
+            <th scope="row">{formatXLabel(temporal ? new Date(x) : x)}</th>
+            {byX.map((m, i) => {
+              const y = m.get(x)
+              return (
+                <td key={data[i]?.id ?? i}>
+                  {/* ⚠ An em dash, not `0` and not the empty string. `y: null` is a gap —
+                      §1.4's rule that null is a value rather than an absence — and a blank
+                      cell reads as "not measured yet" while a zero reads as "measured, and it
+                      was zero". Only one of those is true. */}
+                  {y === undefined || y === null ? '—' : formatYLabel(y)}
+                </td>
+              )
+            })}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
+}
+
+/** One row per series: min, max, last. What `DataTablePlan.columns: 'summary'` asks for. */
+function SummaryTable({ data, caption }: { data: readonly Series[]; caption: string }) {
+  return (
+    <table className="gx-data-table__table">
+      <caption>{caption}</caption>
+      <thead>
+        <tr>
+          <th scope="col">Series</th>
+          <th scope="col">Min</th>
+          <th scope="col">Max</th>
+          <th scope="col">Latest</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data.map((s) => {
+          const ys = s.points.map((p) => p.y).filter((y): y is number => y !== null && Number.isFinite(y))
+          return (
+            <tr key={s.id}>
+              <th scope="row">{s.label ?? s.id}</th>
+              <td>{ys.length === 0 ? '—' : formatYLabel(Math.min(...ys))}</td>
+              <td>{ys.length === 0 ? '—' : formatYLabel(Math.max(...ys))}</td>
+              <td>{ys.length === 0 ? '—' : formatYLabel(ys[ys.length - 1] ?? 0)}</td>
+            </tr>
+          )
+        })}
+      </tbody>
+    </table>
+  )
+}
+
+function key(x: number | Date): number {
+  return x instanceof Date ? x.getTime() : x
+}

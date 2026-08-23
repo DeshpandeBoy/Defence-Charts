@@ -1,0 +1,328 @@
+/*
+ * @gx/primitives — the structural stylesheet.
+ *
+ * ⚠ Every visual property in this package lives here and nowhere else. Rule 2 of
+ * src/index.ts: no presentation attributes in the markup, because `<line stroke="#ddd">`
+ * is CSS-shaped but is not CSS, so a stylesheet-parsing gate never sees it. Taking every
+ * visual property from a class closes that hole instead of documenting it, and it is the
+ * same discipline that makes per-widget theming work at all.
+ *
+ * ⚠ This file is NOT in the token gate's allowlist directory, which is the point. Every
+ * colour and every length below is a `var(--gx-*)`; scripts/check-tokens.mjs rejects the
+ * file otherwise. If a rule here needs a number that no token carries, the answer is a
+ * token in @gx/tokens, not a literal here.
+ *
+ * ⚠ Cascade layer `gx.theme`, declared by theme.css. Everything here therefore loses to
+ * any unlayered consumer rule, which is what lets someone restyle a chart without an
+ * `!important` and without knowing our selector specificity.
+ */
+
+@layer gx.theme {
+  /* --- Root ------------------------------------------------------------------------- */
+
+  .gx-chart {
+    /* A <figure> carries a UA margin. Unitless 0 is not a length literal. */
+    margin: 0;
+    /*
+     * ⚠ `--gx-ink`, not a ramp index. Every mark in this file that is not a series colour
+     * inherits from here — tick labels, the axis rule, the tick marks, the gridlines (all
+     * `currentColor` by way of `--gx-axis-color` / `--gx-grid-color`), the value display.
+     * Naming a ramp index here nails the ink to one ground: this line read
+     * `var(--gx-charcoal-900)` until A4, and on the light ground it drew #e2e5e8 on
+     * #f4f3ef. The chart kept its lines, which are series-coloured, and silently lost
+     * every axis, tick, label and gridline. Found by opening it in a browser, not by a
+     * test — a contrast failure is invisible to every gate this project has.
+     */
+    color: var(--gx-ink);
+    font-family: var(--gx-font-family);
+    font-feature-settings: var(--gx-font-feature-settings);
+    font-variant-numeric: var(--gx-numeric-variant);
+    font-optical-sizing: var(--gx-font-optical-sizing);
+  }
+
+  .gx-chart__svg {
+    /*
+     * ⚠ `display: block` removes the inline-layout baseline gap under the <svg>. Left
+     * inline, the figure is a few px taller than the box it was measured at, and at A5
+     * that difference feeds back through the ResizeObserver as growth — gate G11's
+     * feedback loop, arriving through a default nobody set.
+     */
+    display: block;
+    /*
+     * Direct-end series labels sit past the plot's right edge on purpose: yAxisGutter()
+     * reserves space on the left and nothing reserves it on the right until layout.ts
+     * grows a right gutter at B. Clipping them would hide the multi-series legend at
+     * exactly the sizes that depend on it. See Labels.tsx.
+     */
+    overflow: visible;
+  }
+
+  .gx-chart__caption {
+    margin-block-start: var(--gx-gap);
+    font-size: var(--gx-legend-label-font-size);
+  }
+
+  /* --- Chrome ----------------------------------------------------------------------- */
+
+  .gx-grid__line,
+  .gx-grid__zero {
+    fill: var(--gx-grid-color);
+    opacity: var(--gx-grid-alpha);
+  }
+
+  .gx-grid__zero {
+    /* The zero rule reads as chrome, not as a gridline: full strength, axis colour. */
+    fill: var(--gx-axis-color);
+    opacity: 1;
+  }
+
+  .gx-axis__rule,
+  .gx-axis__tick-mark {
+    fill: var(--gx-axis-color);
+  }
+
+  .gx-axis__tick-label {
+    fill: currentColor;
+    font-size: var(--gx-label-font-size);
+    font-weight: var(--gx-label-font-weight);
+    letter-spacing: var(--gx-label-letter-spacing);
+  }
+
+  /*
+   * ⚠ Alignment is CSS and not a `text-anchor` attribute, so a theme can restate it — a
+   * right-to-left locale inverts every one of these. The markup emits `data-anchor` as a
+   * hint and this is what reads it.
+   */
+  .gx-axis--x .gx-axis__tick-label {
+    text-anchor: middle;
+    dominant-baseline: hanging;
+  }
+
+  .gx-axis--x .gx-axis__tick-label[data-anchor='start'] {
+    text-anchor: start;
+  }
+
+  .gx-axis--x .gx-axis__tick-label[data-anchor='end'] {
+    text-anchor: end;
+  }
+
+  .gx-axis--y .gx-axis__tick-label {
+    text-anchor: end;
+    dominant-baseline: middle;
+  }
+
+  /* --- Marks ------------------------------------------------------------------------ */
+
+  /*
+   * ⚠ Six bindings and no seventh, because the ladder caps a legible chart at six series
+   * and the palette is six named emission lines. A series past the sixth inherits
+   * --gx-series-color's own default rather than wrapping to series-1, which makes the
+   * overflow visible instead of making it look intentional.
+   */
+  .gx-series[data-series-index='0'] {
+    --gx-series-color: var(--gx-series-1);
+  }
+  .gx-series[data-series-index='1'] {
+    --gx-series-color: var(--gx-series-2);
+  }
+  .gx-series[data-series-index='2'] {
+    --gx-series-color: var(--gx-series-3);
+  }
+  .gx-series[data-series-index='3'] {
+    --gx-series-color: var(--gx-series-4);
+  }
+  .gx-series[data-series-index='4'] {
+    --gx-series-color: var(--gx-series-5);
+  }
+  .gx-series[data-series-index='5'] {
+    --gx-series-color: var(--gx-series-6);
+  }
+
+  .gx-line {
+    fill: none;
+    stroke: var(--gx-series-color);
+    stroke-width: var(--gx-line-width);
+    /*
+     * Round joins and caps, so a one-point series still paints a dot and a steep vertex
+     * does not spike. `stroke-linecap: butt` on a single-point path renders nothing at
+     * all — a series that exists, has a value, and is invisible.
+     */
+    stroke-linejoin: round;
+    stroke-linecap: round;
+  }
+
+  .gx-area {
+    fill: var(--gx-series-color);
+    fill-opacity: var(--gx-area-alpha);
+    stroke: none;
+  }
+
+  /*
+   * ⚠ The horizon ramp. Band 0 sits nearest the baseline and is the faintest; each band
+   * outward is more opaque, and that ordering is the entire read of a horizon chart. It
+   * is expressed as a multiplier on one token so a theme restates the ramp by changing a
+   * single number.
+   */
+  .gx-band {
+    fill: var(--gx-series-color);
+    stroke: none;
+    fill-opacity: var(--gx-band-alpha);
+  }
+  .gx-band[data-band='1'] {
+    fill-opacity: calc(var(--gx-band-alpha) * 2);
+  }
+  .gx-band[data-band='2'] {
+    fill-opacity: calc(var(--gx-band-alpha) * 3);
+  }
+
+  .gx-point {
+    /*
+     * ⚠ `r` as a CSS property, which is the whole of decision 012's positive half: SVG2
+     * promoted cx/cy/r and browsers shipped them, so point radius can be a token. The
+     * same line written for a <line> element's y2 would parse, pass this gate, and do
+     * nothing.
+     */
+    r: var(--gx-point-radius);
+    fill: var(--gx-series-color);
+    stroke: none;
+  }
+
+  /* --- Direct labels ---------------------------------------------------------------- */
+
+  .gx-label {
+    fill: var(--gx-series-color);
+    font-size: var(--gx-legend-label-font-size);
+    font-weight: var(--gx-legend-label-font-weight);
+    letter-spacing: var(--gx-legend-label-letter-spacing);
+    text-anchor: start;
+    dominant-baseline: middle;
+  }
+
+  .gx-value-label {
+    fill: currentColor;
+    font-size: var(--gx-value-label-font-size);
+    font-weight: var(--gx-value-label-font-weight);
+    letter-spacing: var(--gx-value-label-letter-spacing);
+    text-anchor: middle;
+  }
+
+  /* --- Data table ------------------------------------------------------------------- */
+
+  .gx-data-table__summary {
+    cursor: pointer;
+  }
+
+  .gx-data-table__table {
+    border-collapse: collapse;
+    font-variant-numeric: var(--gx-numeric-variant);
+  }
+
+  .gx-data-table__table :is(th, td) {
+    padding: var(--gx-gap);
+    text-align: end;
+  }
+
+  .gx-data-table__table :is(th, td):first-child {
+    text-align: start;
+  }
+
+  /* --- Motion ----------------------------------------------------------------------- */
+
+  /*
+   * ⚠ **Opt-in polarity.** The query is `no-preference`, not `reduce`. Written the other
+   * way round the animation is the default and the media query is the exemption, so
+   * every environment that reports nothing — an older engine, a headless browser, a
+   * misconfigured OS — animates. Written this way, silence means stillness.
+   *
+   * ⚠ The final rendered state must be pixel-identical with and without this block, and
+   * it is: opacity ends at 1 either way. Nothing here changes a position, a size, or a
+   * colour at rest. research/20-architecture.md §7.4.
+   *
+   * Real transitions between plans — MotionPlan's two-stage rescale/recompose — are A6.
+   * This is the affordance, not the animation.
+   */
+  @media (prefers-reduced-motion: no-preference) {
+    .gx-line,
+    .gx-area,
+    .gx-band,
+    .gx-point {
+      transition: opacity 120ms ease-out;
+    }
+  }
+
+  /* --- Value display ---------------------------------------------------------------- */
+
+  /*
+   * ⚠ **`font-size` is deliberately not here, and its absence is the design.** The value
+   * display is fitted to the band `valueBand()` subtracted from the plot, so its size is
+   * computed per render from the measured box and arrives as an attribute. A theme that
+   * could set it could push the text out of a band the plot was already sized against, and
+   * the plot would not move. Rule 2 of src/index.ts governs what a *theme* controls, not
+   * what the *data* controls — the same line that leaves `x`, `y` and `d` as attributes.
+   *
+   * Everything below is theme, and every one of it is a token.
+   */
+  .gx-value {
+    /*
+     * Series-coloured, like a direct label and for the same reason: with more than one
+     * value in the band, colour is the only thing tying a number to the line it summarises.
+     * The index comes from the frame's own series index, so a series with no defined value
+     * does not shift the colour of the ones after it.
+     */
+    fill: var(--gx-series-color);
+    font-weight: var(--gx-value-label-font-weight);
+    letter-spacing: var(--gx-value-label-letter-spacing);
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+
+  /*
+   * The same six bindings the marks use, restated because the value display is not inside a
+   * .gx-series group — <Chart> mounts it once for the whole band, not once per series. A
+   * seventh series falls through to --gx-series-color's own default, exactly as a mark does.
+   */
+  .gx-value[data-series-index='0'] {
+    --gx-series-color: var(--gx-series-1);
+  }
+  .gx-value[data-series-index='1'] {
+    --gx-series-color: var(--gx-series-2);
+  }
+  .gx-value[data-series-index='2'] {
+    --gx-series-color: var(--gx-series-3);
+  }
+  .gx-value[data-series-index='3'] {
+    --gx-series-color: var(--gx-series-4);
+  }
+  .gx-value[data-series-index='4'] {
+    --gx-series-color: var(--gx-series-5);
+  }
+  .gx-value[data-series-index='5'] {
+    --gx-series-color: var(--gx-series-6);
+  }
+
+  /*
+   * ⚠ **The delta carries no colour of its own, and that is a decision rather than an
+   * omission.** There is no semantic positive/negative pair in this token tree — DESIGN.md's
+   * palette is six spectral emission lines chosen for categorical separation, and reusing
+   * two of them here would conflate the *series* channel with a *direction* channel on the
+   * same six colours. Green/red is also the one pair that fails for the largest group of
+   * colour-blind readers, so guessing it is worse than not having it. B1 owns the semantic
+   * pair; until then direction is carried redundantly by the sign the frame formats into the
+   * string (`+4`, `−4`, `0`) and by `data-direction`, which is here for a theme to bind.
+   *
+   * What it does carry is hierarchy: the value's weight is the display weight, the delta's
+   * is the label weight, so the qualifier reads as secondary to the number it qualifies.
+   */
+  .gx-value__delta {
+    fill: currentColor;
+    font-weight: var(--gx-label-font-weight);
+  }
+
+  /* The "+2 more" marker: not a value, so it takes the text colour rather than a series'. */
+  .gx-value__overflow {
+    fill: currentColor;
+    font-weight: var(--gx-label-font-weight);
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+}

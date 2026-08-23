@@ -5,25 +5,46 @@ import {
   sizeContextFromPixels,
   tickCountForWidth,
 } from '@gx/core'
+import { AutoChart, useElementSize } from '@gx/react'
 import { useState } from 'react'
 
 import { LadderStrip } from './LadderStrip.tsx'
 import type { PlaygroundChartType } from './PlanPanel.tsx'
 import { PlanPanel, resolveForPlayground } from './PlanPanel.tsx'
 import { TextMetricsPanel } from './TextMetricsPanel.tsx'
-import { useElementSize } from './useElementSize.ts'
 
 /**
  * The resize lab.
  *
- * ⚠ **There is still no chart here, and that is not an omission.** The renderer lands at A4;
- * what exists today is `@gx/core` through A3 — the plan contract, size classification, text
- * measurement, and now the resolver that turns the first two into a decision. Drawing a
- * placeholder chart would make the playground look further along than the library is, which
- * is the one thing a progress view must not do.
+ * ⚠ **There is a chart now, and it is the whole thesis in one gesture.** Through A3 this
+ * page deliberately drew nothing — the library had a plan contract and a resolver, and a
+ * placeholder chart would have made it look further along than it was. A4 supplies the
+ * renderer, so the plan on the right and the SVG on the left are now the same object twice:
+ * printed and drawn. Drag the corner and the mark kind, the axes, the legend placement and
+ * the data table all change in both at the same frame.
  *
- * What it shows is every input the resolver consults, every published threshold those inputs
- * cross, and the plan it resolves to — live, as you drag the handle.
+ * ⚠ **A5 replaced the hand-wiring with `<AutoChart>`, and the deletion is the point.** This
+ * file used to own a local `useElementSize.ts`, call `sizeContextFromPixels()` on its output,
+ * pass the result to `resolveForPlayground()`, and hand the plan to `<Chart>` — the measure /
+ * plan / render pipeline, spelled out by the app. All three steps now live inside one
+ * component in `@gx/react`, and the app supplies data and a box. Whatever this page still
+ * computes, it computes to *display*, not to draw.
+ *
+ * ## ⚠ Two observers, on purpose, and the CSS rule that keeps them honest
+ *
+ * `useElementSize` here observes `.widget`, because the panels on the right print those
+ * numbers and a lab that cannot report its own instrument is not a lab. `<AutoChart>`
+ * observes its own wrapper, inside it, because that is the library's real path and driving
+ * anything else would be testing the playground.
+ *
+ * Those are two different elements, so they are two different content boxes — and if they
+ * ever disagreed, every number on the right would be describing a box the chart was not
+ * planned for. One rule in `playground.css` pins them together: `.widget .gx-auto-chart`
+ * gets `block-size: 100%`. That is not a workaround. It is *precisely* the containment
+ * contract `<AutoChart>`'s docblock states for every consumer — **give the wrapper a
+ * height** — so the playground demonstrates the rule rather than dodging it. Delete that
+ * rule and the wrapper takes its height from the chart it contains, which is the loop, and
+ * gate **G11**'s browser half is what notices.
  *
  * ⚠ **The chart type and series count live here, not in `PlanPanel`.** They are plan
  * *inputs*, exactly like the size this component already owns, and the threshold list needs
@@ -35,6 +56,12 @@ export function App() {
   const [type, setType] = useState<PlaygroundChartType>('line')
   const [series, setSeries] = useState(3)
 
+  // ⚠ Resolved a second time, here, and it is a *display* copy rather than the one drawn.
+  // `<AutoChart>` resolves its own from its own measurement; this one feeds the JSON panel
+  // and the threshold list. They agree because both are `planChart()` over the same pure
+  // inputs — same data, same default nominal cell size, same box. If the fingerprint in
+  // `PlanPanel` ever stops matching the chart beside it, that agreement has broken and the
+  // `block-size: 100%` rule above is the first thing to check.
   const ctx: SizeContext = sizeContextFromPixels(size.width, size.height)
   const resolved = resolveForPlayground(ctx, type, series)
 
@@ -48,27 +75,70 @@ export function App() {
           by <code>@gx/core</code>, which has never seen the DOM.
         </p>
         <p className="note">
-          Milestone A3. The renderer arrives at A4, so there is deliberately no chart to look
-          at — only the plan one would be drawn from.
+          Milestone A5. The chart is a single <code>&lt;AutoChart&gt;</code> — it measures
+          its own box, resolves the plan beside it, and renders it with hook-free components
+          that work on a server with no client bundle. Watch the mark kind flip from{' '}
+          <code>line</code> to <code>horizon</code> as you drag the widget short.
         </p>
       </header>
 
       <div className="lab__stage">
         <div className="widget" ref={ref}>
-          <div className="widget__label">
-            <strong>{ctx.sizeClass}</strong>
-            <span>
-              {Math.round(size.width)} × {Math.round(size.height)} px
-            </span>
-            <span>
-              {ctx.cols} × {ctx.rows} cells · {ctx.aspect}
-            </span>
-          </div>
+          {/*
+            ⚠ `<AutoChart>` is the only child, and the guard that used to stand here is
+            gone because the component owns it. It renders nothing until a real measurement
+            has arrived — the first frame reports 0 × 0 on every browser, and a chart
+            planned for a zero box is a Micro rung that would flash on load and be gone.
+
+            ⚠ The size readout used to live in here, centred; it now sits outside the box.
+            A sibling in normal flow contributes to the content box the observer reports, so
+            the chart would have been planned for a height the label had already taken a
+            bite out of — and shrinking the widget past the label's own height would have
+            stopped the box shrinking at all. That is the containment loop, arriving through
+            the least interesting door.
+          */}
+          <AutoChart
+            type={type}
+            data={resolved.data}
+            title={`${type} chart, ${resolved.data.length} series`}
+            description="Demo data. Deterministic, so the same drag draws the same picture."
+          />
         </div>
+
+        <div className="widget__label">
+          <strong>{ctx.sizeClass}</strong>
+          <span>
+            {Math.round(size.width)} × {Math.round(size.height)} px
+          </span>
+          <span>
+            {ctx.cols} × {ctx.rows} cells · {ctx.aspect}
+          </span>
+        </div>
+
         <p className="note">
           The box is resized by the browser, not by JavaScript — <code>resize: both</code>.
           Nothing in this app tells it how big to be, which is the only honest way to test a
           resolver that must not influence its own container.
+        </p>
+        <p className="note">
+          ⚠ The last series has a deliberate gap at its fourth point. It breaks the line
+          rather than diving to the axis, because <code>y: null</code> is a gap and not a
+          zero — “no reading was taken” and “the reading was nothing” are different claims.
+        </p>
+        <p className="note">
+          ⚠ <strong>Two things are clipped, and you are meant to see that.</strong> At Canvas
+          and above, the direct end-of-line series labels are drawn at x&nbsp;706 on a 702 px
+          plot, and the topmost y tick label straddles y&nbsp;0 by about 8 px. Both are one
+          omission: <code>resolvePlotBox()</code> reserves a gutter on the left and nothing
+          on the right or the top, so §1.3’s horizontal chain — <em>y gutter → plot width →
+          x tick count → x label degrade</em> — has no step that pays for either. The
+          library’s answer today is <code>overflow: visible</code> on the{' '}
+          <code>&lt;svg&gt;</code>, which works when the chart has room around it and does
+          nothing in a dashboard cell, where the widget <em>is</em> the room. That gutter is
+          milestone B’s, written down in <code>chart.css</code> since A4. This box is{' '}
+          <code>overflow: hidden</code>, so the shortfall shows as clipping instead of hiding
+          behind a scrollbar — and a scrollbar here would feed the resize observer that
+          produced the box.
         </p>
       </div>
 

@@ -1,0 +1,59 @@
+/*
+ * @gx/react — the wrapper `<AutoChart>` measures.
+ *
+ * ⚠ Three declarations, and every one of them is a containment measure rather than a
+ * cosmetic choice. `research/30-implementation-plan.md` A5: *"a deadband cannot fix this
+ * class of bug — only structure can."* This file is that structure, in the only place a
+ * library can put it.
+ *
+ * ⚠ This file is NOT in the token gate's allowlist directory. Every colour and every length
+ * it could contain would have to be a `var(--gx-*)`; it contains neither, which is the
+ * cheapest way to satisfy `scripts/check-tokens.mjs` and also the honest state of things —
+ * a measurement wrapper has no appearance.
+ *
+ * ⚠ Cascade layer `gx.theme`, so everything here loses to any unlayered consumer rule. A
+ * consumer who needs `overflow: visible` can have it, in one line, with no `!important` —
+ * and takes on the loop themselves, which is the correct place for that decision to sit.
+ */
+
+@layer gx.theme {
+  .gx-auto-chart {
+    /*
+     * ⚠ `block`, so the wrapper never acquires an inline-layout baseline gap. Left inline,
+     * the box is a few px taller than the content it holds, and those few px are reported
+     * by the observer as growth caused by the thing being observed. It is the smallest
+     * possible version of the loop and it arrives through a default nobody set.
+     */
+    display: block;
+
+    /*
+     * ⚠ **The scrollbar is the loop's sneakiest entry point, and this is the door being
+     * shut.** Under `overflow: auto`, content that overhangs by a single pixel raises a
+     * scrollbar; the scrollbar takes ~15 px out of the content box; the observer reports
+     * the smaller box; the chart re-plans for it; the overhang may vanish; the scrollbar
+     * goes away; the box grows back. That oscillates rather than converging, and it is
+     * driven entirely by content the chart drew.
+     *
+     * It is not hypothetical here. `@gx/primitives`' direct end-of-line series labels are
+     * drawn past the plot's right edge — `resolvePlotBox()` reserves a gutter on the left
+     * and nothing on the right until milestone B grows one — so at Canvas and above there
+     * is real overhang to clip. `hidden` converts that shortfall into visible clipping,
+     * which is a thing someone can see and file, instead of an oscillation nobody can.
+     */
+    overflow: hidden;
+
+    /*
+     * ⚠ `block-size` is deliberately absent, and its absence is the contract. The wrapper
+     * must be sized by its container — a grid cell, an explicit height, a flex child. A
+     * library that set `block-size: 100%` here would be guessing at a parent it cannot see,
+     * and `100%` of an auto-height parent resolves to `auto`, so the guess would silently
+     * do nothing in exactly the case it was meant to protect.
+     *
+     * The exact CSS spelling of the rule is `contain: size`, and a consumer who has already
+     * committed to sizing the container should add it — it is the strongest guarantee
+     * available. It is not the default because on an auto-height parent it collapses the
+     * box to zero, and a chart that renders nothing is a worse failure than one gate G11
+     * can catch. `AutoChart.tsx`'s docblock carries the long version.
+     */
+  }
+}

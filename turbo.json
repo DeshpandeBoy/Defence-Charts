@@ -24,6 +24,24 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+
+    "//#lint:api": {
+      "inputs": [
+        "scripts/check-api.mjs",
+        "packages/*/src/**",
+        "packages/*/package.json"
+      ],
+      "outputs": []
+    },
+
+    "//#lint:treeshake": {
+      "inputs": [
+        "scripts/check-treeshake.mjs",
+        "packages/*/src/**",
+        "packages/*/package.json"
+      ],
+      "outputs": []
     }
   }
 }

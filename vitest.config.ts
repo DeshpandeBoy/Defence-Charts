@@ -57,6 +57,6 @@ export default defineConfig({
     restoreMocks: true,
     unstubGlobals: true,
 
-    include: ['packages/*/src/**/*.test.ts', 'scripts/**/*.test.mjs'],
+    include: ['packages/*/src/**/*.test.{ts,tsx}', 'scripts/**/*.test.mjs'],
   },
 })

@@ -1,39 +1,46 @@
-import type { ChartPlan, ChromeSpec, DataShape, PlotBox, SizeContext } from '@gx/core'
-import { DEFAULT_POLICY, planChart, resolvePlotBox } from '@gx/core'
+import type { ChartPlan, ChromeSpec, PlotBox, Series, SizeContext } from '@gx/core'
+import { DEFAULT_POLICY, describeShape, planChart, resolvePlotBox } from '@gx/core'
+
+import { demoSeries } from './demo.ts'
 
 export const CHART_TYPES = ['line', 'area'] as const
 export type PlaygroundChartType = (typeof CHART_TYPES)[number]
 
-/** What the playground resolves, and the box it resolved it in. */
-export type Resolved = { readonly plan: ChartPlan; readonly box: PlotBox }
+/** What the playground resolves, the box it resolved it in, and the data both describe. */
+export type Resolved = {
+  readonly plan: ChartPlan
+  readonly box: PlotBox
+  readonly data: readonly Series[]
+}
 
 /**
- * The plan and its plot box, for one size and one shape.
+ * The plan, its plot box, and the data — for one size and one shape.
  *
  * Lives beside the panel rather than inside it because `App` needs the same plot box for the
  * threshold list — and *the same one*, not a second one computed from slightly different
  * inputs. Two plot heights on one page, disagreeing by a few px, would be a worse lie than
  * the widget height this replaces.
+ *
+ * ⚠ **The data is returned, not just used, and that is the A4 change.** Until the renderer
+ * existed this function took a hand-written `DataShape` — a synthetic `{series, categories:
+ * 12, points: 120, hasNegative: false, labelMaxChars: 5}` that described no actual data,
+ * because no actual data existed. Now a chart is drawn beside the plan, and a plan resolved
+ * from a shape that does not describe the series being drawn is the same disagreement this
+ * docblock already warns about, one level down: the panel would report a decision taken for
+ * 120 points while the chart drew 60.
+ *
+ * So the shape is **derived** — `describeShape(data)` — and the data travels with it. The
+ * old assertions are preserved as *properties of the demo data itself* rather than as
+ * claims about it; `demo.ts` says which ones and why.
  */
 export function resolveForPlayground(
   ctx: SizeContext,
   type: PlaygroundChartType,
   series: number,
 ): Resolved {
-  // ⚠ Everything but `series` is a fixed probe shape, and `labelMaxChars: 5` is the one to
-  // know about: short labels, so the horizontal chain's degrade step never fires and what you
-  // see changing is the *size* response alone. Long-label degradation is real and is asserted
-  // in `rungs/line.snapshot.test.ts`; it is held still here so one variable moves at a time.
-  const shape: DataShape = {
-    series,
-    categories: 12,
-    points: 120,
-    hasNegative: false,
-    labelMaxChars: 5,
-    temporal: true,
-  }
-  const plan = planChart(type, ctx, shape)
-  return { plan, box: resolvePlotBox(ctx, chromeOf(plan), series, DEFAULT_POLICY) }
+  const data = demoSeries(series)
+  const plan = planChart(type, ctx, describeShape(data))
+  return { plan, box: resolvePlotBox(ctx, chromeOf(plan), data.length, DEFAULT_POLICY), data }
 }
 
 /**
@@ -43,8 +50,10 @@ export function resolveForPlayground(
  * produced one. Everything below is a pure function of the two numbers a `ResizeObserver`
  * reported plus the two shape controls, computed by a module that has never seen the DOM.
  *
- * ⚠ **Still no chart.** The renderer is A4. Drawing a placeholder here would make the
- * library look further along than it is, which is the one thing a progress view must not do.
+ * ⚠ **And now there is a chart beside it.** The point of the pairing is that the two are the
+ * same object twice: the JSON below and the SVG to its left are both `planChart()`'s output,
+ * one printed and one drawn. When the mark kind flips from `line` to `horizon` mid-drag, it
+ * flips in both at the same frame — and if it ever does not, one of them is lying.
  */
 export function PlanPanel({
   resolved,

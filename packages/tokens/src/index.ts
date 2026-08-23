@@ -24,6 +24,7 @@ export const GX_TOKENS = [
   'charcoal-700',
   'charcoal-800',
   'charcoal-900',
+  'ink',
   'grid-color',
   'grid-alpha',
   'axis-color',
@@ -64,6 +65,13 @@ export const GX_TOKENS = [
   'label-line-spacing',
   'gap',
   'plot-padding',
+  // Marks. Added at A4 with @gx/primitives; see the note in theme.css for why these are
+  // tokens while core's layout constants are not.
+  'line-width',
+  'point-radius',
+  'area-alpha',
+  'band-alpha',
+  'series-color',
 ] as const
 
 export type GxTokenName = (typeof GX_TOKENS)[number]

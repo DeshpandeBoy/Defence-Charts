@@ -229,6 +229,42 @@ describe('sizeContextFromPixels', () => {
     })
   })
 
+  /**
+   * ⚠ **The two zeros.** `resolveSizeClass()` reads `0` as *"not measured"*. A bare
+   * `Math.floor` also produced `0` for *"measured, and shorter than one cell"*, and the two
+   * are not the same claim. A 320×90 box reported `rows: 0`, classified as Micro, and the
+   * resolver planned `marks.primary.kind: 'none'` — so a 900×99 strip rendered an empty
+   * `<svg>`: a chart that looks like it works and draws nothing.
+   *
+   * These assertions pin both sides. Above: unmeasurable input still reports a true `0`.
+   * Below: a *measured* box spans at least one cell, because in a dashboard grid the
+   * minimum span is one.
+   */
+  it.each([
+    [60, 24, 1, 1, 'micro'],
+    [180, 40, 1, 1, 'micro'],
+    // The regression itself. 3 cols × a sub-cell height is a Strip, and a Strip draws a line.
+    [320, 90, 3, 1, 'strip'],
+    [900, 99, 9, 1, 'strip'],
+    [40, 900, 1, 9, 'micro'],
+  ] as const)(
+    'floors a measured %i×%i box at one cell, giving %i×%i and %s',
+    (width, height, cols, rows, sizeClass) => {
+      expect(sizeContextFromPixels(width, height)).toMatchObject({ cols, rows, sizeClass })
+    },
+  )
+
+  it('never reports a measured box as spanning zero cells, across a sweep', () => {
+    const offenders: string[] = []
+    for (let w = 1; w <= 400; w += 7) {
+      for (let h = 1; h <= 400; h += 11) {
+        const c = sizeContextFromPixels(w, h)
+        if (c.cols < 1 || c.rows < 1) offenders.push(`${w}×${h} → ${c.cols}×${c.rows}`)
+      }
+    }
+    expect(offenders).toEqual([])
+  })
+
   it('returns a frozen, serialisable value', () => {
     const context = sizeContextFromPixels(640, 480)
     expect(Object.isFrozen(context)).toBe(true)

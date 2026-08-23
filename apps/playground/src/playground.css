@@ -126,10 +126,24 @@ code {
  * `resize: both` hands sizing to the browser. Nothing in the app sets width or height, so
  * the only way a number reaches `@gx/core` is through the `ResizeObserver` — which is the
  * arrangement the library has to work under in production.
+ *
+ * ⚠ `overflow: hidden`, not `auto`, and the change is load-bearing rather than tidy. The
+ * chart is sized to exactly this element's content box, and its `<svg>` is `overflow:
+ * visible` so a direct end-of-line label can sit past the plot. Under `overflow: auto` that
+ * overhang raises a scrollbar, the scrollbar takes ~15 px off the content box, the observer
+ * fires with the smaller number, the chart is replanned smaller, the overhang goes away, the
+ * scrollbar disappears — and the box oscillates. Browsers cut that loop with a console error
+ * rather than a crash, which is this project's recurring failure species wearing a scrollbar.
+ * `hidden` keeps `resize: both` working and makes any real clipping *visible*, which is the
+ * point: the missing right-gutter reservation is a bug we would rather see than hide.
+ *
+ * ⚠ `display: block` and no `place-items`. Centring needs a box smaller than its container
+ * to centre, and there isn't one — the chart is the container's size by construction. Grid
+ * centring here would only be a second opinion about a layout that has no slack in it.
  */
 .widget {
   resize: both;
-  overflow: auto;
+  overflow: hidden;
   width: 34rem;
   height: 18rem;
   min-width: 40px;
@@ -138,19 +152,22 @@ code {
   border: 1px solid var(--pg-rule);
   border-radius: var(--gx-corner-radius);
   background: var(--pg-recede);
-  display: grid;
-  place-items: center;
+  display: block;
 }
 
+/*
+ * ⚠ Outside `.widget`, deliberately — see `App.tsx`. A readout that describes the measured
+ * box must not be inside the measured box.
+ */
 .widget__label {
-  display: grid;
-  justify-items: center;
-  gap: calc(var(--gx-gap) / 2);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: calc(var(--gx-gap) * 3);
+  margin-top: calc(var(--gx-gap) * 2);
   font-variant-numeric: var(--gx-numeric-variant);
   color: var(--pg-fg-dim);
   font-size: var(--gx-label-font-size);
-  text-align: center;
-  padding: var(--gx-plot-padding);
 }
 
 .widget__label strong {
@@ -159,6 +176,37 @@ code {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--gx-series-1);
+}
+
+/*
+ * ⚠ **The consumer half of the containment contract, and the whole reason this page is
+ * honest.** `auto-chart.css` deliberately sets no `block-size` on `.gx-auto-chart` — a
+ * library that guessed at a parent it cannot see would be wrong in the case it was meant to
+ * protect, and `100%` of an auto-height parent resolves to `auto` and silently does nothing.
+ * So the rule `<AutoChart>`'s docblock states for every consumer is: **give the wrapper a
+ * height.** This is the playground doing that, in one line.
+ *
+ * Two things follow from it. The wrapper is sized by `.widget` rather than by the chart it
+ * contains, which is what keeps the chart's own height out of the box that measures it. And
+ * `.widget`'s content box and `.gx-auto-chart`'s content box become the same rectangle —
+ * which matters because `App.tsx` observes the first and `<AutoChart>` observes the second,
+ * so every number in the right-hand panel is describing the box the chart was actually
+ * planned for. Delete this and both properties go at once.
+ *
+ * `inline-size` needs no rule: `.gx-auto-chart` is `display: block`, so it already fills.
+ */
+.widget .gx-auto-chart {
+  block-size: 100%;
+}
+
+/*
+ * The chart fills the widget. `chart.css` already sets `display: block` on the `<svg>`; the
+ * `<figure>` needs its own margin reset because the UA stylesheet gives it 40 px of inline
+ * margin, and a `<figure>` that indents itself would make the drawn chart narrower than the
+ * box it was planned for.
+ */
+.widget .gx-chart {
+  margin: 0;
 }
 
 /* --- The ladder --------------------------------------------------------------------- */
