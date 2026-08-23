@@ -22,7 +22,7 @@ exists to serve this document.
 | 6 | `aggregateAfter: 8` implied as a perceptual threshold. | Bar and donut remain usable to **24 categories at 320×320 px**. 8 is a *legend-scannability* choice. Radial's real ceiling is ~7. | ⚠ Reclassified, not changed. |
 | 7 | Line charts just get smaller at small rungs. | Below ~24 px plot height a line degrades measurably; the published fix is to **change encoding** (horizon/band), not shrink. | ⚠ New rung added. |
 | 8 | Rescale is open-ended at large sizes. | "Little benefit for increasing chart height beyond **80 px**." | ⚠ **This is the strongest published argument for the entire library.** Past saturation, extra space must buy *content*, not plot area. |
-| 9 | Hysteresis needs an ~8 px deadband. | No viz paper studies hysteresis at all. CSS prevents the cycle **structurally**; ResizeObserver **terminates and errors** rather than damping. Animation converts flicker into smear. | ⚠ Mechanism replaced; deadband demoted to fallback. |
+| 9 | Hysteresis needs an ~8 px deadband. | No viz paper studies hysteresis at all. CSS prevents the cycle **structurally**; ResizeObserver **terminates and errors** rather than damping. Animation converts flicker into smear. | ⚠ Mechanism replaced; deadband demoted to fallback — then **measured, and promoted back**. Animation smears geometry and cannot touch a mount, which is what a rung boundary actually does. [017](decisions/017-the-transition-is-not-the-hysteresis-mechanism.md). The original ~8 px was right to want a deadband and wrong to state it in px. |
 
 ---
 
@@ -452,6 +452,16 @@ deadband may not be needed at all.
 *(Flagged honestly: the research marks this inference as a design argument, not a citation. No paper
 retrieved makes the claim.)*
 
+⚠ **Measured after A6, and the bold claim above is false.** Decision
+[017](decisions/017-the-transition-is-not-the-hysteresis-mechanism.md). The argument is sound about
+*smear* and wrong about *what moves*. A transition does absorb a boundary wobble — measured down to
+about 0.33 Hz, where the 1500 ms envelope runs out — but this section's own first principle is that
+a rung changes **information content, not scale**, and content arrives as new elements. At the
+Panel → Canvas edge 179 `<circle>` marks mount at once, at full opacity on frame one, in all 84
+sampled frames. A transition needs a previous computed value; a node that has just mounted has none.
+So the marks blink at every frequency, including the five where the geometry is fully absorbed.
+A deadband is required. See item 1 of §8.
+
 ### 7.1 Shipped at A6 — what held, and what this section did not say
 
 Every bullet above landed as written; `30-implementation-plan.md` A6 has the field-by-field
@@ -479,18 +489,29 @@ and never specifies the overlap. A6 chose half the duration, tokenised it as
 delay it finds is the delay the stylesheet declares, and that it scales with the duration class — it
 does **not** assert the fraction, on purpose, because this section never fixed one.
 
-⚠ **Item 1 of §8 below is untouched by A6.** The hysteresis claim above — that animation converts
-flicker into smear and a deadband may be unnecessary — is still the design argument it was flagged as.
-The mechanism now exists; nobody has measured whether flicker is still observable.
+⚠ **Item 1 of §8 below was untouched by A6 itself, and is now measured.** The hysteresis claim
+above — that animation converts flicker into smear and a deadband may be unnecessary — was still the
+design argument it was flagged as when A6 landed. `pnpm probe:flicker` measured it the same day and
+it did not survive: decision
+[017](decisions/017-the-transition-is-not-the-hysteresis-mechanism.md). Flicker is still observable,
+for a reason the design argument had no way to reach — the boundary *mounts* rather than *moves*.
 
 ---
 
 ## 8. What is still open
 
-1. **Is the deadband needed at all?** Build containment + animation first, measure, and only add a
-   deadband if flicker is still observable. If we keep one, express it as a **fraction of the
-   boundary width** (~2–3%), not an absolute — 8 px means very different things at a 120 px boundary
-   and a 1200 px one. ⚠ Corrects the architecture doc, which specified an absolute 8 px.
+1. ~~Is the deadband needed at all?~~ — ✅ **resolved: yes, and not for the reason this item
+   anticipated.** Containment (**G11**) and animation (A6, **G19**) both shipped, and
+   `pnpm probe:flicker` measured what was left. Decision
+   [017](decisions/017-the-transition-is-not-the-hysteresis-mechanism.md): flicker is still
+   observable, because a rung boundary mounts elements rather than moving them and a mounted node
+   cannot transition. The instruction below stands and is now the live one — express it as a
+   **fraction of the boundary width**, not an absolute. The guessed ~2–3% has margin: the measured
+   *floor*, the smallest deadband that suppresses a ±6 px wobble at the Panel → Canvas edge, is
+   3 px on 600 px — **0.50%**. ⚠ Still open, and now **B1's**: the shipped fraction, whether the
+   right denominator at the Micro and Tile edges is the boundary or the cell size, and where a
+   stateful previous-rung may live given decisions 8 and 10. ⚠ Corrects the architecture doc, which
+   specified an absolute 8 px.
 2. ~~Does `prevClass` still belong in the resolver?~~ — ✅ **resolved: no.** `planChart()` ships as a
    pure function of size alone. See `40-chart-plan.md` §9 and `20-architecture.md` §3.3.
 3. **Bar geometry has no published numbers.** Talbot, Setlur & Agrawala 2014, *Four Experiments on

@@ -23,6 +23,13 @@ inside `@media (prefers-reduced-motion: no-preference)`, so an environment that 
 preference gets a still chart, and the still chart is the baseline rather than a degraded version of
 the animated one.
 
+Transitions turned out not to be enough on their own. A rung change adds and removes elements rather
+than only moving them — that is the point of the ladder — and a CSS transition needs a previous value
+to animate from, which an element that has just appeared does not have. So a container nudged back
+and forth across a rung boundary still shows the marks blinking, however smoothly the axis slides
+underneath them. Damping that is a small amount of state, and it belongs with the size classifier
+rather than in a stylesheet, so it is scheduled with the rest of the B work.
+
 ## Next
 
 | Milestone | Scope |

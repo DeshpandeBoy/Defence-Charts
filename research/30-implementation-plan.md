@@ -310,8 +310,16 @@ At the end of A3 the core thesis is testable with zero UI. That is the point.
   preference the rules do not exist. There is nothing to cut and no stage to skip.
 - **This is the primary hysteresis mechanism**, not a deadband. Measure whether flicker is still
   observable afterwards; only then consider a deadband, expressed as a fraction of the boundary
-  width, never as an absolute px value. ⚠ **Still owed.** Nothing here measured flicker; A6 shipped
-  the mechanism, not the evidence that it suffices.
+  width, never as an absolute px value. ✅ Measured — and the claim in bold is **false**. Decision
+  [017](decisions/017-the-transition-is-not-the-hysteresis-mechanism.md), probe
+  `pnpm probe:flicker`. The transition absorbs a boundary wobble down to about 0.33 Hz, which is
+  where the 1500 ms envelope runs out; below that each crossing completes and is seen. But the
+  frequency is beside the point, because **what crosses a rung boundary is a mount, not a move**:
+  179 `<circle>` elements appear at the Panel → Canvas edge, at full opacity on frame one, in all
+  84 sampled frames. A transition needs a previous value and a mounted node has none — 016 case 12,
+  one level up. So a deadband is **required**, not optional. Floor measured at 3px on a 600px
+  boundary, **0.50% of the boundary width**; the shipped value and the question of where a stateful
+  previous-rung is allowed to live are **B1's**.
 
 ⚠ **The load-bearing finding is that none of this was primarily about CSS.** Decision
 [016](decisions/016-what-svg-geometry-actually-transitions.md) drove Chromium and measured that a
