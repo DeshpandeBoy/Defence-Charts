@@ -61,6 +61,15 @@ jobs:
         if: '!cancelled()'
         run: pnpm lint
 
+      # ⚠ A second ESLint run, because the first one cannot reach this directory. The root
+      # config ignores `docs/**` on purpose — it is a fumadocs scaffold, and the library's
+      # house rules produce errors there in code nobody here wrote. `docs/eslint.config.mjs`
+      # is the config that applies to it. Without this step that config runs nowhere, which
+      # is the same as not having it.
+      - name: Lint (docs — its own flat config, ignored by the root one)
+        if: '!cancelled()'
+        run: pnpm lint:docs
+
       - name: Gate G1 — @gx/core imports no React
         if: '!cancelled()'
         run: pnpm lint:deps
