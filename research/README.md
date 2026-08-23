@@ -18,6 +18,7 @@ Working research for the new project in `Defence/`. Everything here is input to 
 | `42-typography.md` | The reconciled A–E type scale and its `--gx-*` mapping. |
 | `43-theming.md` | Default + neutral themes, composition review, token lint-gate allowlist. |
 | `../DESIGN.md` | The visual world ("The Emission-Line Rail"). Palette derivation, type ranks, layout and elevation rules. |
+| `../UX.md` | **Who it is for and what hurts.** The user problems, the use cases, and how the product is handed over so it is understood. The half `01-plain-english.md` deliberately leaves out. |
 | `maps/` | **Five flow maps** — package graph, runtime flow, milestone DAG, token flow, CI gates. Derived from the files above; they hold no values of their own. Read these when you need *"if I change X, what else moves?"* |
 | `decisions/` | **Decision register.** Decisions 1–11 are indexed from `00-decisions.md`, not copied; 012 onward get their own file with evidence and amendment lists. |
 | `raw/01-basedash-chart-types.md` | Per-chart-type spec scraped from Basedash docs. |
@@ -94,7 +95,14 @@ structurally cannot tell that a `var()` landed on a property that does not exist
 5. **The six neutral-theme hex values** and the five composition pairs with no structural guarantee
    (`43-theming.md` §4–§5). Derivable at B1; deliberately not guessed.
 
-**Next:** Milestone A1. Nothing blocks it — the A2–A4 pointers it hands off to now resolve to real
-specifications rather than to each other, the linter is chosen (**ESLint 9, flat config**, which is
-what gate G2 needs), and the SVG presentation-attribute question A1 was asked to decide is decided:
-**primitives carry no visual attributes and take everything from classes.**
+**Next:** Milestone A1. The A2–A4 pointers it hands off to now resolve to real specifications rather
+than to each other, the linter is chosen (**ESLint 9, flat config**, which is what gate G2 needs), and
+the SVG presentation-attribute question A1 was asked to decide is decided: **primitives carry no
+visual attributes and take everything from classes.**
+
+⚠ **One caveat, found by auditing the claim rather than repeating it.** The token lint gate is
+described everywhere as *ported*, and the source — `check-css-module-tokens.mjs`, named at
+`raw/04:353` — cannot express the rule `43-theming.md` §6.1 specifies. It collects `*.module.css`
+only (the allowlisted theme files are plain `.css`) and it has no declaration-level parsing, so the
+positional half of the allowlist is **new code, not a copy**. Nothing is unspecified; the estimate
+was just wrong. Delta table in `30-implementation-plan.md` A1.

@@ -242,6 +242,18 @@ The positional half is what makes this a real gate rather than a hole. A file-on
 any stylesheet that happens to live in the tokens package author arbitrary raw CSS, and the tokens
 package is precisely where someone would put a component style "just for now".
 
+⚠ **The implementing script does not do this yet, and cannot without new code.** `20-architecture.md`
+describes a *ported* gate; `raw/04:353` names the source as `check-css-module-tokens.mjs`. That script
+runs three global regexes (`raw-color`, `raw-pixel`, `gradient`) over whole-file text and has **no
+notion of a declaration**, so `--gx-series-1: #b4e4fd;` and `color: #b4e4fd;` are indistinguishable to
+it. It also collects `*.module.css` **only**, and the allowlisted theme files are plain `.css` — so
+ported unchanged the gate never opens them and passes trivially, which is §6.3's failure exactly.
+
+The source does contain the right shape in one place: `rawFontViolations()` matches
+`(?:^|[;{])\s*(font|font-family)\s*:\s*([^;}]+)` to obtain declaration-level context. Generalising that
+into the primary pass is what turns the file-glob allowlist into the positional one specified above.
+Budget it as new code at A1, not as a copy — full delta table in `30-implementation-plan.md` A1.
+
 ### 6.2 Edge cases that must be decided now, not argued about in review
 
 - **Unitless `0`** is not a `px` literal. Permitted everywhere. `--gx-corner-radius: 0` needs no
@@ -251,11 +263,11 @@ package is precisely where someone would put a component style "just for now".
 - **`currentColor`**, `transparent`, `inherit` are keywords, not literals. Permitted everywhere —
   and `currentColor` is *mandated* for chrome (§3.1).
 - **Media-query values** (`@media (prefers-color-scheme: light)`) are not declarations. Out of scope.
-- ✅ **SVG presentation attributes authored in TSX are not CSS and stylelint will not see them** — a
-  `<line stroke="#ddd" />` in `@gx/primitives` passes a CSS-only gate cleanly. **Decided at A1:
-  primitives carry no visual attributes at all and take everything from classes.** Same discipline
-  that makes per-widget CSS theming work, and it closes the hole rather than documenting it
-  (`30-implementation-plan.md` A1, `20-architecture.md` §2).
+- ✅ **SVG presentation attributes authored in TSX are CSS-shaped but are not CSS** — a
+  `<line stroke="#ddd" />` in `@gx/primitives` passes a CSS-only gate cleanly, because the gate never
+  parses `.tsx`. **Decided at A1: primitives carry no visual attributes at all and take everything
+  from classes.** Same discipline that makes per-widget CSS theming work, and it closes the hole
+  rather than documenting it (`30-implementation-plan.md` A1, `20-architecture.md` §2).
 - ⚠ **And a token can pass this gate and still do nothing.** The gate checks that a `var()` was used.
   It cannot check that the property the `var()` lands on exists. `x1`/`y1`/`x2`/`y2` on `<line>` are
   not CSS-settable in **any** browser, so a geometry token targeting them ships, is documented, is

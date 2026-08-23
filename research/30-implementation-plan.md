@@ -34,16 +34,43 @@ That is why it comes first.
     on the tokens package on the day it is mandated.
   - **A planted raw hex in a non-allowlisted package**, asserted to fail CI. A gate never observed to
     fail is not a gate.
-  - ✅ **SVG presentation attributes — decided.** `<line stroke="#ddd" />` in `@gx/primitives` is not
-    CSS and stylelint will not see it. **Primitives carry no visual attributes at all and take
-    everything from classes** — the same discipline that makes per-widget CSS theming work, and it
-    restores the gate's coverage rather than documenting a hole.
+  - ✅ **SVG presentation attributes — decided.** `<line stroke="#ddd" />` in `@gx/primitives` is
+    CSS-shaped but is not CSS, so a gate that parses stylesheets never sees it. **Primitives carry no
+    visual attributes at all and take everything from classes** — the same discipline that makes
+    per-widget CSS theming work, and it restores the gate's coverage rather than documenting a hole.
 - **Linter: ESLint 9, flat config (`eslint.config.js`).** Named here because `pnpm lint` was a CI job
   with no tool behind it. It is specifically what gate **G2** needs — the ban on `getBBox`,
   `getComputedTextLength`, `getTotalLength` and `getBoundingClientRect` inside `@gx/core`
   (`maps/04-ci-gate-map.md`). Flat config over `.eslintrc` because per-package overrides in a
   workspace are plain array entries rather than a cascade, and G2 applies to exactly one package.
-  Stylelint remains separate — it owns the token gate; ESLint owns the TS/TSX rules.
+  ESLint owns the TS/TSX rules **only** — it does not own the token gate; see below.
+
+⚠ **The token gate is a Node script, not stylelint.** `20-architecture.md` calls it *"the ported token
+lint gate"* and `raw/04:353` names the source: `check-css-module-tokens.mjs`, ~137 lines, three global
+regexes (`raw-color`, `raw-pixel`, `gradient`) plus a declaration-aware `raw-font` pass. **Porting it
+is not a copy.** Read it before estimating A1 — three concrete deltas, each of which would otherwise
+ship a gate that exits 0:
+
+| # | What the source does | What `43-theming.md` §6 requires |
+|---|---|---|
+| 1 | Collects `*.module.css` only (`entry.name.endsWith('.module.css')`) | The allowlisted files are `packages/tokens/src/themes/**/*.css` — **plain `.css`, not modules.** Ported unchanged, the gate never opens the one file set the allowlist exists for, and passes trivially |
+| 2 | Three regexes over whole-file text; no notion of a declaration | §6.1 is **positional** — a literal is legal *only* as the value of a `--gx-*` custom-property declaration. `--gx-series-1: #b4e4fd;` ✅ and `color: #b4e4fd;` ❌ are textually identical to a global regex |
+| 3 | `raw-font` hardcodes `var(--font-family)`, `--fa-font-`, `--fa-style-family` | Retarget to `--gx-*`. Mechanical, but it is Font Awesome / Qyrus-specific and will silently pass nothing useful if left |
+
+Delta 2 is the real work and it is **net-new code, not a port** — but the source already shows the
+shape: `rawFontViolations()` matches `(?:^|[;{])\s*(font|font-family)\s*:\s*([^;}]+)` to get
+declaration-level context. Generalise that into the primary pass and the positional rule falls out.
+⚠ Note delta 1 and delta 2 compound: fix the glob without fixing positionality and the tokens package
+fails on **every line**, since `raw-pixel` fires on `--gx-label-font-size: 11px` and `raw-color` on
+every theme hex.
+
+- ⚠ **Determinism preconditions belong in A1's config, before the first test** — they are specified in
+  `20-architecture.md` §6a and `maps/04-ci-gate-map.md`, but were not previously sited at a milestone:
+  `process.env.TZ = 'UTC'` (d3-time-format tick labels differ between a laptop and CI otherwise);
+  fake **only** `requestAnimationFrame`/`cancelAnimationFrame`, because the wider Vitest 4 timer
+  surface interferes with React scheduling; `restoreMocks` + `unstubGlobals`, both of which the
+  injected-`ResizeObserver` pattern depends on; and **happy-dom banned**, jsdom permitted.
+- CI: typecheck, lint (ESLint 9), token gate (both directions), test. Nothing else yet.
 
 ⚠ **The class-only rule is one of two, not one.** It fixes *authored* presentation. It does **not**
 fix the platform: `x1`/`y1`/`x2`/`y2` on `<line>` are not CSS-settable in any browser, so a class
@@ -54,6 +81,11 @@ and it binds at **A4**, when `@gx/primitives` is written.
 
 - CI: typecheck, lint (ESLint 9), token gate (both directions), test. Nothing else yet.
 - Decide the name and claim the npm scope. **Blocking for publish, not for code.**
+- ⚠ **Pick the licence.** Never stated anywhere in the corpus — `PRODUCT.md` says "open-source" and
+  `raw/03` evaluates the field *"for an MIT, presentational-only… library"*, so MIT is assumed and has
+  never been decided. Same class as the name: publish-blocking, not code-blocking, but it belongs in
+  `package.json` from the first commit rather than being retrofitted across seven of them. `publint`
+  flags a missing `license` field at E3 regardless.
 
 ### A2. `@gx/core` types
 - `SizeContext`, `DataShape`, `ChartPlan`, `ChartType`, `PlanOverrides`, `PlanPolicy`, `FontMetrics`.
