@@ -10,6 +10,17 @@
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
 
+    // Relative imports name the file that actually exists: `./plan.ts`, not `./plan` and
+    // not `./plan.js`. Extensionless specifiers resolve only under a bundler, and `.js`
+    // specifiers name a file no one authored — both make a reader guess. tsdown rewrites
+    // the extension on the way out, and the build gate greps `dist/` to prove it did
+    // rather than assuming it.
+    //
+    // ⚠ This option requires `noEmit` or `emitDeclarationOnly`. tsc never emits here —
+    // tsdown does — so the coupling holds, but a package that ever needs `tsc` to emit
+    // must move to `emitDeclarationOnly` rather than dropping this.
+    "allowImportingTsExtensions": true,
+
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,

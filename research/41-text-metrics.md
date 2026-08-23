@@ -308,6 +308,20 @@ Pure, deterministic, identical on server and client. Rules:
 5. Add `letterSpacing × (codePointCount − 1)` when non-zero.
 6. Multiply by the rank's font size, then by `safetyFactor`.
 
+⚠ Rules 5 and 6 are stated in the order a reader expects, not the order the arithmetic takes. Applied
+literally as a sequence, rule 6 would scale `letterSpacing` by font size and by `safetyFactor`, and
+both are wrong: advances are ratios *awaiting* a font size whereas `letterSpacing` is already px, and
+`safetyFactor` exists to absorb **glyph** drift between the reference face and a fallback — a CSS
+length does not drift with the face. The implementation is therefore
+`sum × fontSize × safetyFactor + spacing`. `packages/core/src/text.ts` carries the same note, and
+`text.test.ts` pins the distinction so a later "tidy-up" cannot fold the spacing back inside.
+
+⚠ Rule 5's `− 1` is followed as written, and it under-reports by one gap: browsers add a trailing gap
+after the final character too. That is the *unsafe* direction per §6.1, but it is bounded by a single
+`letterSpacing` and absorbed by `safetyFactor`. Recorded rather than silently corrected, because the
+correction would need to come with evidence about how the rendered box is actually measured at the
+call sites that matter.
+
 ### 6.1 What it deliberately gets wrong, and in which direction
 
 **Kerning and ligatures are ignored.** Both normally *reduce* rendered width, so summing bare advances

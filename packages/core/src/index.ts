@@ -6,32 +6,59 @@
  *
  *   1. No `react` import.        — dependency-cruiser, gate **G1**
  *   2. No DOM measurement API.   — ESLint `no-restricted-globals`/`no-restricted-syntax`,
- *      gate **G2**. `getComputedTextLength`, `getBBox`, `getTotalLength` and
+ *      gate **G2**, plus `"types": []` in this package's tsconfig so the DOM lib is not
+ *      even in scope. `getComputedTextLength`, `getBBox`, `getTotalLength` and
  *      `getBoundingClientRect` are unavailable here on purpose: jsdom *throws* on all
  *      four and happy-dom silently returns `0`, so a label-collision bug written against
  *      them would pass tests forever. Text width comes from a character-advance model
- *      instead (`research/41-text-metrics.md`).
+ *      instead (`./text.ts`, `research/41-text-metrics.md`).
  *
- * ⚠ A1 scope. `planChart()` and the `ChartPlan` contract land at **A2/A3** against
- * `research/40-chart-plan.md`. What is here is the one piece of layout math the ladder
- * already specifies exactly.
+ * ⚠ **A2 scope.** The `ChartPlan` contract, `PlanPolicy`, `measureText()` and size
+ * classification are here. `planChart()` itself — the resolver that turns
+ * `(type, ctx, shape)` into a plan — lands at **A3**. Its signature is pinned as
+ * `PlanChartFn` in `./policy.ts` so the implementation cannot quietly drift from
+ * `research/40-chart-plan.md` §5.
+ *
+ * This file is a barrel and nothing else. Everything it names is defined in a sibling
+ * module, so there is exactly one place to read for any given contract.
  */
 
-/**
- * Target tick count for a horizontal axis of `width` CSS pixels.
- *
- * `research/10-responsive-ladder.md` §6: `max(2, round(width / 100))`, **with no upper
- * cap**. The absent cap is the specified behaviour, not an oversight — the ladder
- * densifies continuously rather than snapping between breakpoints, and a cap would
- * reintroduce the breakpoint by the back door.
- *
- * Pure: no measurement, no state, no clock. Same input, same output, on a server or in a
- * worker.
- */
-export function tickCountForWidth(width: number): number {
-  if (!Number.isFinite(width) || width <= 0) return 2
-  return Math.max(2, Math.round(width / 100))
-}
+// The public contract: what a plan *is*.
+export type {
+  AggregatePlan,
+  AxesPlan,
+  AxisPlan,
+  ChartPlan,
+  ChartType,
+  DataTablePlan,
+  DegradeStep,
+  FacetPlan,
+  InteractionPlan,
+  LabelsPlan,
+  LegendPlan,
+  MarkSpec,
+  MarksPlan,
+  MotionPlan,
+  NarrativePlan,
+  PointPlan,
+  RegionName,
+  SizeClass,
+  TickPlan,
+  ValueLegibility,
+} from './plan.ts'
+export { AXIS_OFF } from './plan.ts'
 
-/** Placeholder for the A2 contract, so the package graph is real at A1. */
-export type ChartType = 'line' | 'area'
+// The resolver's two inputs, and the size classification they carry.
+export type { DataShape, SizeContext } from './context.ts'
+export { resolveAspect, resolveSizeClass } from './context.ts'
+
+// Text width without a DOM.
+export type { FontMetrics, GlyphAdvances, TypeRank, VerticalMetrics } from './text.ts'
+export { measureText, PROVISIONAL_FONT_METRICS, RANK_FONT_SIZE } from './text.ts'
+
+// What a consumer may move, before resolution and after.
+export type { DeepPartial, PlanChartFn, PlanOverrides, PlanPolicy } from './policy.ts'
+export { DEFAULT_POLICY, resolvePolicy } from './policy.ts'
+
+// Axis tick density.
+export { tickCountForWidth } from './ticks.ts'
