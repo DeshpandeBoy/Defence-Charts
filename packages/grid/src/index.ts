@@ -24,6 +24,8 @@ export {
   RGL_VERSION,
 } from './adapter.ts'
 export type { GridLayoutOptions } from './adapter.ts'
+export type { GridLayoutProposal, GridProposalErrorCode } from './constraints.ts'
+export { GridProposalError, applyGridProposal } from './constraints.ts'
 export type {
   WidgetGridInteraction,
   WidgetGridInteractionHandler,
