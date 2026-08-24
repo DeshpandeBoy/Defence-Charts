@@ -17,9 +17,9 @@ import {
   planForRow,
 } from '../apps/playground/src/family-matrix/matrix.ts'
 
-describe('D0.2 shared line and area family matrix', () => {
-  it('covers both families across all six information budgets', () => {
-    expect(FAMILY_TYPES).toEqual(['line', 'area'])
+describe('shared line, area, bar, and timebar family matrix', () => {
+  it('covers all four registered families across all six information budgets', () => {
+    expect(FAMILY_TYPES).toEqual(['line', 'area', 'bar', 'timebar'])
     expect(FAMILY_MATRIX.map((row) => row.id)).toEqual([
       'micro',
       'tile',
@@ -34,7 +34,18 @@ describe('D0.2 shared line and area family matrix', () => {
         const plan = planForRow(type, row)
         const expected = {
           ...row.expected,
-          area: row.expected.primary === 'line' && type === 'area' ? true : row.expected.area,
+          primary:
+            type === 'bar' || type === 'timebar'
+              ? row.id === 'micro'
+                ? 'none'
+                : 'bar'
+              : row.expected.primary,
+          area:
+            type === 'area' && row.expected.primary === 'line'
+              ? true
+              : type === 'bar' || type === 'timebar'
+                ? null
+                : row.expected.area,
         }
         expect(metadataForPlan(plan), type + '/' + row.id).toMatchObject(expected)
         expect(JSON.parse(JSON.stringify(plan)), type + '/' + row.id + ' JSON').toEqual(plan)

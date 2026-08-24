@@ -28,7 +28,7 @@ export function FamilyMatrixApp() {
       <header className="family-matrix__header">
         <div>
           <p className="family-matrix__eyebrow">D0.2 · shared family acceptance</p>
-          <h1>Line / area family matrix</h1>
+          <h1>Line / area / bar / timebar family matrix</h1>
           <p>
             One fixture exercises the six information budgets, the static accessibility surface,
             the host-owned states, and the measured resize boundary contract.
@@ -109,9 +109,9 @@ export function FamilyMatrixApp() {
           style={{ inlineSize: '599px', blockSize: '499px' }}
         >
           <AutoChart
-            type="line"
+            type="bar"
             data={MATRIX_DATA}
-            title="Resizable family matrix line chart"
+            title="Resizable family matrix bar chart"
             description="The same stable six-series data is observed while the box crosses the ladder boundaries."
             id="resize-probe"
           />

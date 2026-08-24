@@ -88,6 +88,7 @@ async function openFixture(page) {
   await page.goto(ORIGIN, { waitUntil: 'load' })
   await page.waitForSelector('[data-family-matrix]')
   await page.waitForSelector('[data-family-case="line-stage"] svg[role="graphics-document"]')
+  await page.waitForSelector('[data-family-case="bar-stage"] .gx-bar')
   await page.waitForSelector('[data-family-resize-probe] .gx-auto-chart .gx-chart')
   await settle(page)
 }
@@ -111,11 +112,12 @@ async function runStaticMatrix(page) {
     svg: card.querySelector('svg[role="graphics-document"]') !== null,
     title: card.querySelector('svg title') !== null,
     interactionMarkup: card.querySelector('.gx-interaction') !== null,
+    bars: card.querySelectorAll('.gx-bar').length,
     seriesIds: [...card.querySelectorAll('.gx-series[data-series-id]')].map((series) => series.getAttribute('data-series-id')),
   })))
 
-  if (observed.length !== 12) throw new Error('expected 12 line/area cards, got ' + observed.length)
-  for (const type of ['line', 'area']) {
+  if (observed.length !== 24) throw new Error('expected 24 line/area/bar/timebar cards, got ' + observed.length)
+  for (const type of ['line', 'area', 'bar', 'timebar']) {
     const rows = observed.filter((card) => card.type === type)
     if (JSON.stringify(rows.map((card) => card.rung)) !== JSON.stringify(EXPECTED_RUNGS)) {
       throw new Error(type + ' ladder order changed: ' + JSON.stringify(rows.map((card) => card.rung)))
@@ -130,6 +132,11 @@ async function runStaticMatrix(page) {
     }
     if (card.type === 'area' && card.rung !== 'micro' && card.area !== 'true') {
       throw new Error('area mark metadata missing for ' + card.caseId)
+    }
+    if ((card.type === 'bar' || card.type === 'timebar') && card.rung !== 'micro') {
+      if (card.mark !== 'bar' || card.bars === 0) {
+        throw new Error('bar geometry missing for ' + card.caseId + ': ' + JSON.stringify(card))
+      }
     }
   }
   return observed
@@ -309,7 +316,7 @@ try {
   const result = await runGate()
   await mkdir(new URL('./results/', import.meta.url), { recursive: true })
   await writeFile(RESULT_PATH, JSON.stringify(result, null, 2) + '\n')
-  console.log('D0.2 family matrix: Chromium passed — six line/area rungs, static a11y, states, themes, media, resize identity, and screenshot evidence ' + RESULT_PATH)
+  console.log('D1.1 family matrix: Chromium passed — line/area/bar/timebar rungs, static a11y, states, themes, media, resize identity, and screenshot evidence ' + RESULT_PATH)
 } catch (error) {
   console.error('D0.2 family matrix: FAILED — ' + (error instanceof Error ? error.message : String(error)))
   process.exitCode = 1
