@@ -423,7 +423,7 @@ try {
   const result = await runGate()
   await mkdir(new URL('./results/', import.meta.url), { recursive: true })
   await writeFile(RESULT_PATH, JSON.stringify(result, null, 2) + '\n')
-  console.log('D6.1 family matrix: Chromium passed — ten family rungs, static a11y, states, themes, media, resize identity, and screenshot evidence ' + RESULT_PATH)
+  console.log('D7.1 complete family matrix: Chromium passed — ten family rungs, static a11y, states, themes, media, resize identity, and screenshot evidence ' + RESULT_PATH)
 } catch (error) {
   console.error('D0.2 family matrix: FAILED — ' + (error instanceof Error ? error.message : String(error)))
   process.exitCode = 1
