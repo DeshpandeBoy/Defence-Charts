@@ -225,7 +225,7 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | E3.1 | Coordinator | backlog | D7.1, E2.1 | Free-v1 claim and release audit |
 | R1 | Claude research | ready | P0.1 | RGL/grid current evidence |
 | R2 | Claude research | ready | P0.1 | Chart-family evidence gaps |
-| R3 | Claude research | **handoff** | P0.1 | Partial interaction evidence; chart-semantics report remains |
+| R3 | Claude research | **handoff** | P0.1 | Interaction and chart-semantics evidence; CR-X04 remains required for real AT verification |
 | R4 | Claude research | ready | P0.1 | Publication and competitor refresh |
 | R5 | Claude/user research | optional | Preview | User-validation protocol and findings |
 
