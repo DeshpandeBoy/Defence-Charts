@@ -1,16 +1,17 @@
 import { Chart } from '@gx/primitives'
 import { AutoChart } from '@gx/react'
 import { useState, type ReactNode } from 'react'
+import type { Series } from '@gx/core'
 
 import {
   EMPTY_DATA,
   ERROR_MESSAGE,
   FAMILY_MATRIX,
-  FAMILY_STATES,
   FAMILY_TYPES,
   MATRIX_DATA,
   metadataForPlan,
   planForRow,
+  type FamilyState,
   type FamilyMatrixRow,
   type FamilyType,
 } from './matrix.ts'
@@ -20,9 +21,9 @@ export function FamilyMatrixApp() {
 
   return (
     <main
-      className={light ? 'family-matrix gx-theme-rail-light' : 'family-matrix'}
+      className={light ? 'family-matrix gx-theme-neutral-light' : 'family-matrix gx-theme-neutral'}
       data-family-matrix=""
-      data-gx-theme={light ? 'rail-light' : 'rail-dark'}
+      data-gx-theme={light ? 'neutral-light' : 'neutral'}
     >
       <header className="family-matrix__header">
         <div>
@@ -177,7 +178,7 @@ function StaticChart({
 }: {
   readonly type: FamilyType
   readonly row: FamilyMatrixRow
-  readonly data: readonly import('@gx/core').Series[]
+  readonly data: readonly Series[]
   readonly id: string
 }) {
   const plan = planForRow(type, row, data)
@@ -188,7 +189,7 @@ function StateCard({
   state,
   children,
 }: {
-  readonly state: (typeof FAMILY_STATES)[number]
+  readonly state: FamilyState
   readonly children: ReactNode
 }) {
   return (

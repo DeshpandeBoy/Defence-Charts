@@ -1,0 +1,242 @@
+{
+  "status": "pass",
+  "fixture": "apps/playground/src/family-matrix-fixture/",
+  "origin": "http://127.0.0.1:5186/",
+  "browser": "151.0.7922.34",
+  "playwrightFrom": "playwright",
+  "cards": 12,
+  "states": [
+    {
+      "state": "normal",
+      "chart": true,
+      "seriesCount": 6,
+      "alert": false,
+      "text": "normalline panel family fixtureAlphaBravoCharlieDeltaEchoFoxtrot0246010203040line panel family fixtureline panel family fixtureXAlphaBravoCharlieDeltaEchoFoxtrot05101520253016916192629278171827283871817282749619162926510520153025611421143124712322133223"
+    },
+    {
+      "state": "empty",
+      "chart": true,
+      "seriesCount": 0,
+      "alert": false,
+      "text": "emptyarea panel family fixture00.20.40.60.810200m400m600m800m1area panel family fixturearea panel family fixtureX"
+    },
+    {
+      "state": "error",
+      "chart": false,
+      "seriesCount": 0,
+      "alert": true,
+      "text": "errorUnable to render this widgetFamily fixture error: the host-owned state is announced here."
+    }
+  ],
+  "theme": {
+    "before": {
+      "theme": "neutral",
+      "surface": "rgb(24, 24, 24)",
+      "text": "rgb(196, 196, 196)"
+    },
+    "light": {
+      "theme": "neutral-light",
+      "surface": "rgb(247, 247, 247)",
+      "text": "rgb(63, 63, 63)"
+    }
+  },
+  "resize": {
+    "start": {
+      "width": 610,
+      "height": 510,
+      "sizeClass": "canvas",
+      "seriesIds": [
+        "alpha",
+        "bravo",
+        "charlie",
+        "delta",
+        "echo",
+        "foxtrot"
+      ]
+    },
+    "samples": [
+      {
+        "requested": {
+          "width": 610,
+          "height": 510,
+          "sizeClass": "canvas"
+        },
+        "observed": {
+          "width": 610,
+          "height": 510,
+          "sizeClass": "canvas",
+          "seriesIds": [
+            "alpha",
+            "bravo",
+            "charlie",
+            "delta",
+            "echo",
+            "foxtrot"
+          ]
+        }
+      },
+      {
+        "requested": {
+          "width": 930,
+          "height": 630,
+          "sizeClass": "stage"
+        },
+        "observed": {
+          "width": 930,
+          "height": 630,
+          "sizeClass": "stage",
+          "seriesIds": [
+            "alpha",
+            "bravo",
+            "charlie",
+            "delta",
+            "echo",
+            "foxtrot"
+          ]
+        }
+      },
+      {
+        "requested": {
+          "width": 890,
+          "height": 590,
+          "sizeClass": "canvas"
+        },
+        "observed": {
+          "width": 890,
+          "height": 590,
+          "sizeClass": "canvas",
+          "seriesIds": [
+            "alpha",
+            "bravo",
+            "charlie",
+            "delta",
+            "echo",
+            "foxtrot"
+          ]
+        }
+      },
+      {
+        "requested": {
+          "width": 590,
+          "height": 490,
+          "sizeClass": "panel"
+        },
+        "observed": {
+          "width": 590,
+          "height": 490,
+          "sizeClass": "panel",
+          "seriesIds": [
+            "alpha",
+            "bravo",
+            "charlie",
+            "delta",
+            "echo",
+            "foxtrot"
+          ]
+        }
+      },
+      {
+        "requested": {
+          "width": 390,
+          "height": 290,
+          "sizeClass": "strip"
+        },
+        "observed": {
+          "width": 390,
+          "height": 290,
+          "sizeClass": "strip",
+          "seriesIds": [
+            "alpha",
+            "bravo",
+            "charlie",
+            "delta",
+            "echo",
+            "foxtrot"
+          ]
+        }
+      },
+      {
+        "requested": {
+          "width": 290,
+          "height": 90,
+          "sizeClass": "tile"
+        },
+        "observed": {
+          "width": 290,
+          "height": 90,
+          "sizeClass": "tile",
+          "seriesIds": [
+            "alpha",
+            "bravo",
+            "charlie",
+            "delta",
+            "echo",
+            "foxtrot"
+          ]
+        }
+      },
+      {
+        "requested": {
+          "width": 190,
+          "height": 90,
+          "sizeClass": "micro"
+        },
+        "observed": {
+          "width": 190,
+          "height": 90,
+          "sizeClass": "micro",
+          "seriesIds": [
+            "alpha",
+            "bravo",
+            "charlie",
+            "delta",
+            "echo",
+            "foxtrot"
+          ]
+        }
+      },
+      {
+        "requested": {
+          "width": 610,
+          "height": 510,
+          "sizeClass": "canvas"
+        },
+        "observed": {
+          "width": 610,
+          "height": 510,
+          "sizeClass": "canvas",
+          "seriesIds": [
+            "alpha",
+            "bravo",
+            "charlie",
+            "delta",
+            "echo",
+            "foxtrot"
+          ]
+        }
+      }
+    ]
+  },
+  "reducedMotion": {
+    "reducedMotion": true,
+    "forcedColors": false,
+    "transitionDuration": "0s",
+    "background": "color(srgb 0.215529 0.215529 0.215529)",
+    "border": "color(srgb 0.768627 0.768627 0.768627 / 0.28)",
+    "rootBackground": "rgb(24, 24, 24)"
+  },
+  "forcedColors": {
+    "reducedMotion": false,
+    "forcedColors": true,
+    "transitionDuration": "1s, 1s",
+    "background": "rgb(255, 255, 255)",
+    "border": "rgb(0, 0, 0)",
+    "rootBackground": "rgb(255, 255, 255)"
+  },
+  "screenshot": "/Users/SameeraD/Defence-Charts/scripts/results/d0.2-family-matrix.latest.png",
+  "runtimeErrors": {
+    "console": [],
+    "page": [],
+    "resizeObserver": []
+  }
+}

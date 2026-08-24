@@ -2,6 +2,8 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { spawn } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
 
+/* eslint-disable no-undef -- DOM globals below are serialized into Playwright page callbacks. */
+
 import { openChromium } from './check-containment.mjs'
 
 const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
@@ -161,7 +163,7 @@ async function runTheme(page) {
     }
   })
   await page.locator('[data-family-theme-toggle]').click()
-  await page.waitForFunction(() => document.querySelector('[data-family-matrix]')?.getAttribute('data-gx-theme') === 'rail-light')
+  await page.waitForFunction(() => document.querySelector('[data-family-matrix]')?.getAttribute('data-gx-theme') === 'neutral-light')
   const light = await page.evaluate(() => {
     const root = document.querySelector('[data-family-matrix]')
     return {
@@ -170,7 +172,7 @@ async function runTheme(page) {
       text: root === null ? '' : getComputedStyle(root).color,
     }
   })
-  if (before.theme !== 'rail-dark' || light.theme !== 'rail-light' || before.surface === light.surface) {
+  if (before.theme !== 'neutral' || light.theme !== 'neutral-light' || before.surface === light.surface) {
     throw new Error('dark/light theme contract failed: ' + JSON.stringify({ before, light }))
   }
   await page.locator('[data-family-theme-toggle]').click()
@@ -205,10 +207,10 @@ async function runResize(page) {
 
   for (const sample of [
     { width: 610, height: 510, sizeClass: 'canvas' },
-    { width: 910, height: 610, sizeClass: 'stage' },
+    { width: 930, height: 630, sizeClass: 'stage' },
     { width: 890, height: 590, sizeClass: 'canvas' },
     { width: 590, height: 490, sizeClass: 'panel' },
-    { width: 290, height: 290, sizeClass: 'strip' },
+    { width: 390, height: 290, sizeClass: 'strip' },
     { width: 290, height: 90, sizeClass: 'tile' },
     { width: 190, height: 90, sizeClass: 'micro' },
     { width: 610, height: 510, sizeClass: 'canvas' },
