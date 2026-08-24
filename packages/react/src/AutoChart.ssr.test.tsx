@@ -162,14 +162,14 @@ describe('the contract the resolver holds is the contract this holds', () => {
     expect(() =>
       renderToStaticMarkup(
         <AutoChart
-          type="bar"
+          type="donut"
           data={DATA}
           title="Revenue"
           initialSize={{ width: 700, height: 520 }}
           id="t"
         />,
       ),
-    ).toThrow(/bar/)
+    ).toThrow(/donut/)
   })
 
   it('throws even with no size, because the plan is not conditional on being measured', () => {
@@ -184,7 +184,7 @@ describe('the contract the resolver holds is the contract this holds', () => {
     // `ResizeObserver` delivered a box — surfacing as a blank widget in one breakpoint on
     // someone else's machine. A build that stops is a build someone fixes.
     expect(() =>
-      renderToStaticMarkup(<AutoChart type="bar" data={DATA} title="Revenue" id="t" />),
-    ).toThrow(/bar/)
+      renderToStaticMarkup(<AutoChart type="donut" data={DATA} title="Revenue" id="t" />),
+    ).toThrow(/donut/)
   })
 })

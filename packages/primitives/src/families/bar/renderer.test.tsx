@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
 import type { MarkRendererInput } from '../../renderer-seam.ts'
+import { BAR_RENDERER_FIXTURE } from './fixture.ts'
 import { BAR_MARK_RENDERERS, renderBar } from './renderer.tsx'
 
 const input = {
@@ -12,7 +13,7 @@ const input = {
     line: null,
     area: null,
     bands: [],
-    cells: [{ x: 10, y: 20, width: 18, height: 40 }],
+    cells: BAR_RENDERER_FIXTURE.cells,
     points: [],
     extrema: null,
   },

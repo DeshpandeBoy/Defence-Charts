@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest'
 import { describeShape } from '../../data.ts'
 import type { SizeContext } from '../../context.ts'
 import { resolvePolicy } from '../../policy.ts'
+import { BAR_FAMILY_FIXTURE } from './fixture.ts'
 import { barFamilyPlanner, BAR_CHART_TYPES } from './planner.ts'
 
 const data = [
@@ -52,6 +53,11 @@ function context(sizeClass: Parameters<typeof barFamilyPlanner>[0]['ctx']['sizeC
 }
 
 describe('bar/timebar family planner', () => {
+  it('keeps the deterministic fixture inside the family test surface', () => {
+    expect(BAR_FAMILY_FIXTURE.type).toBe('bar')
+    expect(BAR_FAMILY_FIXTURE.shape.hasNegative).toBe(true)
+  })
+
   it('declares exactly the two family types', () => {
     expect(BAR_CHART_TYPES).toEqual(['bar', 'timebar'])
   })
