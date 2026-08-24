@@ -1,0 +1,314 @@
+import { mkdir, writeFile } from 'node:fs/promises'
+import { spawn } from 'node:child_process'
+import { fileURLToPath } from 'node:url'
+
+import { openChromium } from './check-containment.mjs'
+
+const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
+const ORIGIN = process.env.GX_FAMILY_MATRIX_ORIGIN ?? 'http://127.0.0.1:5186/'
+const RESULT_PATH = fileURLToPath(new URL('./results/d0.2-family-matrix.latest.json', import.meta.url))
+const SCREENSHOT_PATH = fileURLToPath(new URL('./results/d0.2-family-matrix.latest.png', import.meta.url))
+const EXPECTED_RUNGS = ['micro', 'tile', 'strip', 'panel', 'canvas', 'stage']
+const EXPECTED_IDS = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot']
+
+async function answers(origin) {
+  try {
+    const response = await fetch(origin, { signal: AbortSignal.timeout(1500) })
+    return response.ok
+  } catch {
+    return false
+  }
+}
+
+async function ensureServer() {
+  if (await answers(ORIGIN)) return { spawned: false, stop: () => {} }
+
+  const child = spawn(
+    'npx',
+    [
+      '--yes',
+      'pnpm@10.34.5',
+      '--filter',
+      '@gx/playground',
+      'exec',
+      'vite',
+      '--config',
+      'src/family-matrix-fixture.vite.ts',
+    ],
+    { cwd: REPO_ROOT, detached: true, stdio: ['ignore', 'pipe', 'pipe'] },
+  )
+
+  let stopped = false
+  const stop = () => {
+    if (stopped) return
+    stopped = true
+    try {
+      if (child.pid !== undefined) process.kill(-child.pid, 'SIGTERM')
+    } catch {
+      // The child already exited; no process group remains to stop.
+    }
+  }
+
+  process.once('exit', stop)
+  process.once('SIGINT', () => { stop(); process.exit(130) })
+  process.once('SIGTERM', () => { stop(); process.exit(143) })
+
+  const deadline = Date.now() + 60_000
+  while (Date.now() < deadline) {
+    if (await answers(ORIGIN)) return { spawned: true, stop }
+    await new Promise((resolve) => setTimeout(resolve, 500))
+  }
+
+  stop()
+  throw new Error('family matrix fixture never answered on ' + ORIGIN + ' within 60s')
+}
+
+async function settle(page) {
+  await page.evaluate(() => new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(resolve)))
+  }))
+}
+
+function captureErrors(page) {
+  const errors = { console: [], page: [], resizeObserver: [] }
+  page.on('console', (message) => {
+    if (message.type() === 'error') errors.console.push(message.text())
+    if (/resizeobserver loop/i.test(message.text())) errors.resizeObserver.push(message.text())
+  })
+  page.on('pageerror', (error) => {
+    errors.page.push(String(error))
+    if (/resizeobserver loop/i.test(String(error))) errors.resizeObserver.push(String(error))
+  })
+  return errors
+}
+
+async function openFixture(page) {
+  await page.goto(ORIGIN, { waitUntil: 'load' })
+  await page.waitForSelector('[data-family-matrix]')
+  await page.waitForSelector('[data-family-case="line-stage"] svg[role="graphics-document"]')
+  await page.waitForSelector('[data-family-resize-probe] .gx-auto-chart .gx-chart')
+  await settle(page)
+}
+
+async function runStaticMatrix(page) {
+  const observed = await page.locator('[data-family-case]').evaluateAll((cards) => cards.map((card) => ({
+    caseId: card.getAttribute('data-family-case'),
+    type: card.getAttribute('data-family-type'),
+    rung: card.getAttribute('data-family-rung'),
+    sizeClass: card.getAttribute('data-plan-size-class'),
+    mark: card.getAttribute('data-plan-mark'),
+    area: card.getAttribute('data-plan-area'),
+    interaction: card.getAttribute('data-plan-interaction'),
+    tooltip: card.getAttribute('data-plan-tooltip'),
+    legend: card.getAttribute('data-plan-legend'),
+    legendToggle: card.getAttribute('data-plan-legend-toggle'),
+    motionStages: card.getAttribute('data-plan-motion-stages'),
+    persistGridlines: card.getAttribute('data-plan-persist-gridlines'),
+    y2: card.getAttribute('data-plan-y2'),
+    facet: card.getAttribute('data-plan-facet'),
+    svg: card.querySelector('svg[role="graphics-document"]') !== null,
+    title: card.querySelector('svg title') !== null,
+    interactionMarkup: card.querySelector('.gx-interaction') !== null,
+    seriesIds: [...card.querySelectorAll('.gx-series[data-series-id]')].map((series) => series.getAttribute('data-series-id')),
+  })))
+
+  if (observed.length !== 12) throw new Error('expected 12 line/area cards, got ' + observed.length)
+  for (const type of ['line', 'area']) {
+    const rows = observed.filter((card) => card.type === type)
+    if (JSON.stringify(rows.map((card) => card.rung)) !== JSON.stringify(EXPECTED_RUNGS)) {
+      throw new Error(type + ' ladder order changed: ' + JSON.stringify(rows.map((card) => card.rung)))
+    }
+  }
+  for (const card of observed) {
+    if (!card.svg || !card.title || card.interactionMarkup) {
+      throw new Error('static accessibility/interaction contract failed: ' + JSON.stringify(card))
+    }
+    if (JSON.stringify(card.seriesIds) !== JSON.stringify(EXPECTED_IDS)) {
+      throw new Error('static series identity changed for ' + card.caseId + ': ' + JSON.stringify(card.seriesIds))
+    }
+    if (card.type === 'area' && card.rung !== 'micro' && card.area !== 'true') {
+      throw new Error('area mark metadata missing for ' + card.caseId)
+    }
+  }
+  return observed
+}
+
+async function runStates(page) {
+  const observed = await page.locator('[data-family-state]').evaluateAll((states) => states.map((state) => ({
+    state: state.getAttribute('data-family-state'),
+    chart: state.querySelector('svg[role="graphics-document"]') !== null,
+    seriesCount: state.querySelectorAll('.gx-series[data-series-id]').length,
+    alert: state.querySelector('[role="alert"]') !== null,
+    text: state.textContent?.trim() ?? '',
+  })))
+
+  const byState = new Map(observed.map((state) => [state.state, state]))
+  if (!byState.get('normal')?.chart) throw new Error('normal state lost its static chart')
+  if (!byState.get('empty')?.chart || byState.get('empty')?.seriesCount !== 0) {
+    throw new Error('empty state did not render an accessible empty chart')
+  }
+  if (!byState.get('error')?.alert) throw new Error('error state lost its host-owned alert')
+  return observed
+}
+
+async function runTheme(page) {
+  const before = await page.evaluate(() => {
+    const root = document.querySelector('[data-family-matrix]')
+    return {
+      theme: root?.getAttribute('data-gx-theme'),
+      surface: root === null ? '' : getComputedStyle(root).backgroundColor,
+      text: root === null ? '' : getComputedStyle(root).color,
+    }
+  })
+  await page.locator('[data-family-theme-toggle]').click()
+  await page.waitForFunction(() => document.querySelector('[data-family-matrix]')?.getAttribute('data-gx-theme') === 'rail-light')
+  const light = await page.evaluate(() => {
+    const root = document.querySelector('[data-family-matrix]')
+    return {
+      theme: root?.getAttribute('data-gx-theme'),
+      surface: root === null ? '' : getComputedStyle(root).backgroundColor,
+      text: root === null ? '' : getComputedStyle(root).color,
+    }
+  })
+  if (before.theme !== 'rail-dark' || light.theme !== 'rail-light' || before.surface === light.surface) {
+    throw new Error('dark/light theme contract failed: ' + JSON.stringify({ before, light }))
+  }
+  await page.locator('[data-family-theme-toggle]').click()
+  return { before, light }
+}
+
+async function probe(page) {
+  return page.locator('[data-family-resize-probe]').evaluate((probe) => ({
+    width: Math.round(probe.getBoundingClientRect().width),
+    height: Math.round(probe.getBoundingClientRect().height),
+    sizeClass: probe.querySelector('.gx-chart')?.getAttribute('data-size-class') ?? null,
+    seriesIds: [...probe.querySelectorAll('.gx-series[data-series-id]')].map((series) => series.getAttribute('data-series-id')),
+  }))
+}
+
+async function setProbe(page, width, height, expectedClass) {
+  await page.evaluate(({ nextWidth, nextHeight }) => {
+    const probe = document.querySelector('[data-family-resize-probe]')
+    if (probe === null) throw new Error('resize probe missing')
+    probe.style.width = nextWidth + 'px'
+    probe.style.height = nextHeight + 'px'
+  }, { nextWidth: width, nextHeight: height })
+  await page.waitForFunction((sizeClass) => document.querySelector('[data-family-resize-probe] .gx-chart')?.getAttribute('data-size-class') === sizeClass, expectedClass)
+  await settle(page)
+  return probe(page)
+}
+
+async function runResize(page) {
+  const samples = []
+  let previous = await probe(page)
+  if (previous.sizeClass !== 'panel') throw new Error('resize probe did not start at Panel: ' + JSON.stringify(previous))
+
+  for (const sample of [
+    { width: 610, height: 510, sizeClass: 'canvas' },
+    { width: 910, height: 610, sizeClass: 'stage' },
+    { width: 890, height: 590, sizeClass: 'canvas' },
+    { width: 590, height: 490, sizeClass: 'panel' },
+    { width: 290, height: 290, sizeClass: 'strip' },
+    { width: 290, height: 90, sizeClass: 'tile' },
+    { width: 190, height: 90, sizeClass: 'micro' },
+    { width: 610, height: 510, sizeClass: 'canvas' },
+  ]) {
+    const next = await setProbe(page, sample.width, sample.height, sample.sizeClass)
+    if (next.sizeClass !== sample.sizeClass) {
+      throw new Error('resize boundary class mismatch: ' + JSON.stringify({ sample, next }))
+    }
+    if (JSON.stringify(next.seriesIds) !== JSON.stringify(previous.seriesIds)) {
+      throw new Error('resize changed stable series identity: ' + JSON.stringify({ previous, next }))
+    }
+    samples.push({ requested: sample, observed: next })
+    previous = next
+  }
+  return { start: samples[0]?.observed ?? null, samples }
+}
+
+async function runMedia(browser, label, options) {
+  const context = await browser.newContext({ viewport: { width: 1500, height: 1100 }, ...options })
+  const page = await context.newPage()
+  const errors = captureErrors(page)
+  try {
+    await openFixture(page)
+    const observed = await page.evaluate(() => {
+      const chart = document.querySelector('[data-family-case="line-stage"]')
+      const root = document.querySelector('[data-family-matrix]')
+      const line = chart?.querySelector('.gx-line')
+      const card = chart
+      return {
+        reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
+        forcedColors: window.matchMedia('(forced-colors: active)').matches,
+        transitionDuration: line === null ? '' : getComputedStyle(line).transitionDuration,
+        background: card === null ? '' : getComputedStyle(card).backgroundColor,
+        border: card === null ? '' : getComputedStyle(card).borderTopColor,
+        rootBackground: root === null ? '' : getComputedStyle(root).backgroundColor,
+      }
+    })
+    if (label === 'reduced-motion' && (!observed.reducedMotion || observed.transitionDuration !== '0s')) {
+      throw new Error('reduced-motion contract failed: ' + JSON.stringify(observed))
+    }
+    if (label === 'forced-colors' && (!observed.forcedColors || observed.background === '' || observed.border === '')) {
+      throw new Error('forced-colors contract failed: ' + JSON.stringify(observed))
+    }
+    if (errors.console.length > 0 || errors.page.length > 0) {
+      throw new Error(label + ' runtime errors: ' + JSON.stringify(errors))
+    }
+    return observed
+  } finally {
+    await context.close().catch(() => {})
+  }
+}
+
+async function runGate() {
+  const { browser, from } = await openChromium('D0.2 family matrix browser')
+  const server = await ensureServer().catch(async (error) => {
+    await browser.close().catch(() => {})
+    throw error
+  })
+  const page = await browser.newPage({ viewport: { width: 1500, height: 1100 } })
+  const errors = captureErrors(page)
+  try {
+    await openFixture(page)
+    const staticMatrix = await runStaticMatrix(page)
+    const states = await runStates(page)
+    const theme = await runTheme(page)
+    const resize = await runResize(page)
+    const screenshot = await page.screenshot({ path: SCREENSHOT_PATH, fullPage: true })
+    void screenshot
+    const reducedMotion = await runMedia(browser, 'reduced-motion', { reducedMotion: 'reduce' })
+    const forcedColors = await runMedia(browser, 'forced-colors', { forcedColors: 'active' })
+    if (errors.console.length > 0 || errors.page.length > 0 || errors.resizeObserver.length > 0) {
+      throw new Error('family matrix runtime errors: ' + JSON.stringify(errors))
+    }
+    return {
+      status: 'pass',
+      fixture: 'apps/playground/src/family-matrix-fixture/',
+      origin: ORIGIN,
+      browser: browser.version(),
+      playwrightFrom: from,
+      cards: staticMatrix.length,
+      states,
+      theme,
+      resize,
+      reducedMotion,
+      forcedColors,
+      screenshot: SCREENSHOT_PATH,
+      runtimeErrors: errors,
+    }
+  } finally {
+    await browser.close().catch(() => {})
+    server.stop()
+  }
+}
+
+try {
+  const result = await runGate()
+  await mkdir(new URL('./results/', import.meta.url), { recursive: true })
+  await writeFile(RESULT_PATH, JSON.stringify(result, null, 2) + '\n')
+  console.log('D0.2 family matrix: Chromium passed — six line/area rungs, static a11y, states, themes, media, resize identity, and screenshot evidence ' + RESULT_PATH)
+} catch (error) {
+  console.error('D0.2 family matrix: FAILED — ' + (error instanceof Error ? error.message : String(error)))
+  process.exitCode = 1
+}
