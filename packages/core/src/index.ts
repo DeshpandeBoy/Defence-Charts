@@ -149,3 +149,25 @@ export type {
   ValueFrame,
 } from './frame.ts'
 export { resolveFrame } from './frame.ts'
+
+// Pure dashboard layout values. The grid package owns placement UI; core owns the
+// serialisable identity/layout boundary consumed by that UI and by host persistence.
+export type {
+  LayoutSnapshot,
+  LayoutValidationCode,
+  WidgetId,
+  WidgetLayout,
+  WidgetLayoutConstraints,
+  WidgetLayoutInput,
+} from './widget-layout.ts'
+export {
+  GRID_COLUMNS,
+  LAYOUT_SCHEMA_VERSION,
+  LayoutValidationError,
+  createLayoutSnapshot,
+  createWidgetId,
+  createWidgetLayout,
+  parseLayoutSnapshot,
+  serializeLayoutSnapshot,
+  validateWidgetLayouts,
+} from './widget-layout.ts'

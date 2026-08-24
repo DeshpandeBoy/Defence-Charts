@@ -190,7 +190,7 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | P0.2 | Claude research | **claimed** | P0.1 | Decision-conflict register |
 | P0.3 | User/coordinator | blocked on decision | — | Final public name and npm scope |
 | P0.4 | Codex integration | **done** | P0.2 | Record RGL `./core` + `./react` boundary and widget-shell owner |
-| C0.1 | Codex integration | ready | P0.1, P0.2, P0.4 | Grid/widget/identity contract |
+| C0.1 | Codex integration | **handoff** | P0.1, P0.2, P0.4 | Grid/widget/identity contract |
 | C0.2 | Codex integration | ready | C0.1 | Pin and prove RGL adapter boundary |
 | C1.1 | Codex grid | backlog | C0.2 | Controlled grid wrapper |
 | C1.2 | Codex grid | backlog | C1.1 | Constraints, collision and compaction |
