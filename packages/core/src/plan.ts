@@ -460,7 +460,7 @@ export type ChartPlan = {
    * carries what anyone can **produce**. Closed here too, a third-party or paid planner
    * could not emit a valid plan without editing `@gx/core` — there would be no seam at
    * all. `research/60-commercial-model.md` §3 costs that out: two lines today, a major
-   * version once B2 fills in the other eight types and first publish makes `ChartType` a
+   * version once D fills in the other eight types and first publish makes `ChartType` a
    * G6-guarded public surface. Worth doing even if no paid tier is ever built, because it
    * is also what lets a consumer write a bespoke chart type without forking.
    *

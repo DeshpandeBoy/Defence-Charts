@@ -8,7 +8,9 @@ web
 
 ## Stack
 
-Greenfield monorepo, no code written yet (research-only phase). Settled by `research/00-decisions.md` and `research/20-architecture.md`:
+Greenfield monorepo with the A1–A6 walking skeleton implemented. The research corpus still defines
+the public direction and the remaining B–E work; it is settled by `research/00-decisions.md` and
+`research/20-architecture.md`:
 
 - Open source, npm, scoped packages (`@scope/tokens`, `@scope/core`, `@scope/primitives`, `@scope/react`, `@scope/grid`, `@scope/testing`) — name/scope itself is undecided, see Capabilities and Constraints.
 - Build: `tsdown` with `unbundle: true`, ESM-only. TypeScript pinned to **6.0.3** (not 7.x).
@@ -30,7 +32,7 @@ Frontend/app developers who embed charts and dashboard widgets into their own pr
 
 ## Product Purpose
 
-A chart + grid widget library where a chart changes **what information it shows**, not just its pixel dimensions, as the space it's given changes ("the responsive ladder"). Paired with deep, per-widget, CSS-level control (~183 named tokens) over every stroke, gap, tick, and colour. Success looks like: a widget dragged smaller becomes a genuinely different, honest chart rather than an unreadable shrunken one, and any single widget can be restyled from a stylesheet with no JS and no re-render.
+A chart + grid widget library where a chart changes **what information it shows**, not just its pixel dimensions, as the space it's given changes ("the responsive ladder"). Paired with deep, per-widget, CSS-level control (186 declared presentation tokens) over every stroke, gap, tick, and colour. Success looks like: a widget dragged smaller becomes a genuinely different, honest chart rather than an unreadable shrunken one, and any single widget can be restyled from a stylesheet with no JS and no re-render.
 
 ⚠ **Six of those tokens are the exception, and the exception is load-bearing.** `font-family`, `font-size`, `font-weight`, `font-feature-settings`, `font-stretch`, and `letter-spacing` change the outcome of a fit-or-collide decision, so overriding them in CSS alone would let the planner keep predicting labels fit while the browser collides them (`research/41-text-metrics.md` §2). They are authored as typed values and their custom properties are *generated* from those values, so the two cannot drift. Everything else — every colour, length, opacity, dash, radius — restyles from CSS exactly as claimed.
 
@@ -48,7 +50,10 @@ Explicitly **not** the differentiator: raw knob count (Highcharts has more), axi
 
 ## Operating Context
 
-Research phase — still no code or `package.json`. `research/` plus `DESIGN.md` are the complete input to the build. Decisions were confirmed on 2026-08-22 (`research/00-decisions.md`); the visual world was seeded the following day (`DESIGN.md`).
+Implementation phase — the A1–A6 walking skeleton, docs site, playground, and verification gates
+are present. `research/` plus `DESIGN.md` remain the complete product and visual input. Decisions
+were confirmed on 2026-08-22 (`research/00-decisions.md`); the visual world was seeded the following
+day (`DESIGN.md`).
 
 A readiness review on 2026-08-23 found Milestone A1 genuinely unblocked but three specifications missing that A2–A4 depend on, two of which *read* as though they existed (the plan pointed at a document; the document did not contain the thing). Those gaps are now closed by documents, not code:
 
@@ -56,7 +61,11 @@ A readiness review on 2026-08-23 found Milestone A1 genuinely unblocked but thre
 - `research/41-text-metrics.md` — `measureText()` and font metrics as a **plan-input** token. Previously a correctness bug rather than a gap: `font-family` was classed presentation-only, so a consumer swapping in a wider face would move rendered text width while the planner kept its built-in table — the plan says the labels fit, the browser collides them.
 - `research/42-typography.md` and `research/43-theming.md` — one reconciled type scale, and the two-theme token architecture.
 
-The next concrete step is Milestone A1 (a single line chart, in a draggable box, proving the core idea end-to-end before any breadth).
+The walking skeleton is delivered through A6: a line/area chart plans six information rungs,
+renders as hook-free SVG, adapts through `AutoChart`, and transitions across rung changes. B1's
+generated theme surface, B2's renderer control surface, and B3's typed threshold policy are
+delivered for the line/area renderer. C grid work, D chart breadth, and E publishing remain
+sequenced work.
 
 A from-scratch, standalone public open-source npm project, **MIT licensed** — not derived from or dependent on any other codebase. The primary evidence/reference product studied throughout research is Basedash (demo video + frame-by-frame analysis in `research/00-source-analysis.md` and `research/assets/`) — treated as a studied reference and a source of anti-patterns to avoid (e.g. its single 480px breakpoint), not as a product to imitate wholesale, and not a dependency of any kind.
 
@@ -73,7 +82,7 @@ A from-scratch, standalone public open-source npm project, **MIT licensed** — 
 - **No DOM measurement in the planner.** `planChart()` may not call `getComputedTextLength`, `getBBox`, `getTotalLength`, or `getBoundingClientRect`; text width comes from a character-advance table. Non-negotiable because jsdom throws and happy-dom silently returns `0` on all four, which would let broken label-collision layouts pass tests forever.
 - **Two token mechanisms, never mixed:** CSS custom properties drive *presentation* only (server can't read them); anything that changes what `planChart()` decides is a typed value through a `<GxConfig>` component, so server and client always agree. ⚠ The split runs by **consequence, not by token name** — the test is *"does this token's value change the outcome of a fit-or-collide decision?"* Six do, all text-measurement properties (`research/41-text-metrics.md` §2); their custom properties are generated from the typed values rather than authored alongside them.
 - **ESM-only**, `tsdown` with `unbundle: true` (the only tested config where `"use client"` survives the build) — protected by a CI job that builds a real Next.js app and greps the output.
-- **Undecided, not to be invented:** the project name and npm scope (currently `@gx/*` placeholder — blocks publishing, not code); 43 `--gx-*` token names referenced but not yet specified; 6 token defaults the research explicitly declined to guess at; the six neutral-theme hex values, which are derivable at B1 rather than guessable; and whether Roboto Flex ships `tnum`, which blocks generating the metrics table.
+- **Undecided, not to be invented:** the project name and npm scope (currently `@gx/*` placeholder — blocks publishing, not code); the C grid and D chart-breadth integrations; release automation; and whether Roboto Flex ships `tnum`, which remains a final metrics-calibration question. B1's generated tree is complete for the shipped presentation surface, and B3 keeps research uncertainty explicit through typed provenance tiers rather than silently upgrading it.
 
 ## Brand Commitments
 

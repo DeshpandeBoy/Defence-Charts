@@ -4,9 +4,8 @@
  *
  * @gx/tokens — The Emission-Line Rail, the default theme.
  *
- * ⚠ The NEUTRAL theme is deliberately absent. Its six hex values are derivable, not
- * guessable (43-theming.md §4), and shipping a guess is exactly what that section
- * refuses to do. It arrives with the simulations that justify it.
+ * The Rail theme is the default. Neutral dark/light escape-hatch variants are emitted below
+ * from the typed source and are selected explicitly by class or data attribute.
  *
  * This file is the one place in the repo where raw colour and length literals are
  * legal, and only as custom-property values — see 43-theming.md §6.1 and the gate in
@@ -40,10 +39,10 @@
     --gx-plot-height-saturation: 80px;
     --gx-widget-padding: 16px;
     --gx-widget-padding-tight: 11px;
-    --gx-widget-radius: 8px;
-    --gx-widget-radius-inner: calc(var(--gx-widget-radius) - var(--gx-widget-padding));
+    --gx-widget-radius: 0;
+    --gx-widget-radius-inner: max(0px, calc(var(--gx-widget-radius) - var(--gx-widget-padding)));
     --gx-widget-gap: 16px;
-    --gx-widget-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+    --gx-widget-shadow: none;
 
     /* --- Series ------------------------------------------------------------------ */
     /*
@@ -195,7 +194,7 @@
     --gx-bar-min-length: 0;
     --gx-bar-width-max: none;
     --gx-bar-max-categories: 24;
-    --gx-point-radius-hover: —;
+    --gx-point-radius-hover: var(--gx-point-radius);
     --gx-point-stroke-width: 0;
     --gx-point-stroke-color: var(--gx-surface-color);
     --gx-point-shape: circle;
@@ -351,9 +350,9 @@
 
     /* --- Tooltip ----------------------------------------------------------------- */
     --gx-tooltip-color: #fff;
-    --gx-tooltip-radius: 4px;
+    --gx-tooltip-radius: 0;
     --gx-tooltip-padding: 8px;
-    --gx-tooltip-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+    --gx-tooltip-shadow: none;
     --gx-tooltip-offset: 16px;
     --gx-tooltip-header-gap: 5px;
     --gx-tooltip-row-padding: 3px 5px;
@@ -375,10 +374,8 @@
    * prefers-color-scheme picks the ground; a class picks the world. Four combinations, not
    * two — 43-theming.md §2. Same six wavelengths, re-solved for a light ground. 43-theming.md §2.
    *
-   * ⚠ The two blocks below are the SAME eight declarations, emitted twice from one authored
-   * list. Hand-maintained they had already diverged: the class block carried bare hex with
-   * the contrast ratios stripped off, so the copy a consumer is most likely to read was the
-   * copy with the evidence missing.
+   * The media and explicit class blocks are emitted from the same authored override list
+   * so the two selection paths cannot drift.
    */
   @media (prefers-color-scheme: light) {
     :where(:root) {
@@ -407,5 +404,117 @@
     --gx-series-4: #801bef; /* H-delta  ·  5.70 */
     --gx-series-5: #0d625d; /* He I     ·  6.47 */
     --gx-series-6: #710805; /* Fe I     · 10.88 */
+  }
+
+  /*
+   * Explicit escape-hatch theme. It is intentionally class/data-attribute only:
+   * never emit it into an unscoped prefers-color-scheme root block.
+   * Neutral dark escape hatch: true-neutral ramp and evenly spaced categorical hues.
+   */
+
+  /* The data attribute path is explicit and scoped to the selected world. */
+  :where(:root)[data-gx-theme='neutral'] {
+    --gx-surface-color: #181818;
+    --gx-surface-text-color: var(--gx-ramp-neutral-8);
+    --gx-ramp-neutral-1: #101010;
+    --gx-ramp-neutral-2: #252525;
+    --gx-ramp-neutral-3: #3b3b3b;
+    --gx-ramp-neutral-4: #525252;
+    --gx-ramp-neutral-5: #696969;
+    --gx-ramp-neutral-6: #858585;
+    --gx-ramp-neutral-7: #a1a1a1;
+    --gx-ramp-neutral-8: #c4c4c4;
+    --gx-ramp-neutral-9: #e8e8e8;
+    --gx-widget-radius: 4px;
+    --gx-widget-shadow: 0 2px 8px rgb(0 0 0 / 0.18);
+    --gx-tooltip-radius: 3px;
+    --gx-tooltip-shadow: 0 2px 12px rgb(0 0 0 / 0.18);
+    --gx-series-1: #8dd3c7;
+    --gx-series-2: #f28e7b;
+    --gx-series-3: #7eb6d9;
+    --gx-series-4: #b9a7d9;
+    --gx-series-5: #f2bd75;
+    --gx-series-6: #a8c96f;
+  }
+
+  /* The class path is explicit and scoped to the selected world. */
+  .gx-theme-neutral {
+    --gx-surface-color: #181818;
+    --gx-surface-text-color: var(--gx-ramp-neutral-8);
+    --gx-ramp-neutral-1: #101010;
+    --gx-ramp-neutral-2: #252525;
+    --gx-ramp-neutral-3: #3b3b3b;
+    --gx-ramp-neutral-4: #525252;
+    --gx-ramp-neutral-5: #696969;
+    --gx-ramp-neutral-6: #858585;
+    --gx-ramp-neutral-7: #a1a1a1;
+    --gx-ramp-neutral-8: #c4c4c4;
+    --gx-ramp-neutral-9: #e8e8e8;
+    --gx-widget-radius: 4px;
+    --gx-widget-shadow: 0 2px 8px rgb(0 0 0 / 0.18);
+    --gx-tooltip-radius: 3px;
+    --gx-tooltip-shadow: 0 2px 12px rgb(0 0 0 / 0.18);
+    --gx-series-1: #8dd3c7;
+    --gx-series-2: #f28e7b;
+    --gx-series-3: #7eb6d9;
+    --gx-series-4: #b9a7d9;
+    --gx-series-5: #f2bd75;
+    --gx-series-6: #a8c96f;
+  }
+
+  /*
+   * Explicit escape-hatch theme. It is intentionally class/data-attribute only:
+   * never emit it into an unscoped prefers-color-scheme root block.
+   * Neutral light escape hatch: true-neutral ramp and evenly spaced categorical hues.
+   */
+
+  /* The data attribute path is explicit and scoped to the selected world. */
+  :where(:root)[data-gx-theme='neutral-light'] {
+    --gx-surface-color: #f7f7f7;
+    --gx-surface-text-color: var(--gx-ramp-neutral-3);
+    --gx-ramp-neutral-1: #121212;
+    --gx-ramp-neutral-2: #282828;
+    --gx-ramp-neutral-3: #3f3f3f;
+    --gx-ramp-neutral-4: #565656;
+    --gx-ramp-neutral-5: #6d6d6d;
+    --gx-ramp-neutral-6: #898989;
+    --gx-ramp-neutral-7: #a5a5a5;
+    --gx-ramp-neutral-8: #c8c8c8;
+    --gx-ramp-neutral-9: #ececec;
+    --gx-widget-radius: 6px;
+    --gx-widget-shadow: 0 2px 10px rgb(0 0 0 / 0.16);
+    --gx-tooltip-radius: 5px;
+    --gx-tooltip-shadow: 0 2px 14px rgb(0 0 0 / 0.16);
+    --gx-series-1: #00695c;
+    --gx-series-2: #b23a31;
+    --gx-series-3: #185b83;
+    --gx-series-4: #654c9b;
+    --gx-series-5: #986000;
+    --gx-series-6: #4f7622;
+  }
+
+  /* The class path is explicit and scoped to the selected world. */
+  .gx-theme-neutral-light {
+    --gx-surface-color: #f7f7f7;
+    --gx-surface-text-color: var(--gx-ramp-neutral-3);
+    --gx-ramp-neutral-1: #121212;
+    --gx-ramp-neutral-2: #282828;
+    --gx-ramp-neutral-3: #3f3f3f;
+    --gx-ramp-neutral-4: #565656;
+    --gx-ramp-neutral-5: #6d6d6d;
+    --gx-ramp-neutral-6: #898989;
+    --gx-ramp-neutral-7: #a5a5a5;
+    --gx-ramp-neutral-8: #c8c8c8;
+    --gx-ramp-neutral-9: #ececec;
+    --gx-widget-radius: 6px;
+    --gx-widget-shadow: 0 2px 10px rgb(0 0 0 / 0.16);
+    --gx-tooltip-radius: 5px;
+    --gx-tooltip-shadow: 0 2px 14px rgb(0 0 0 / 0.16);
+    --gx-series-1: #00695c;
+    --gx-series-2: #b23a31;
+    --gx-series-3: #185b83;
+    --gx-series-4: #654c9b;
+    --gx-series-5: #986000;
+    --gx-series-6: #4f7622;
   }
 }

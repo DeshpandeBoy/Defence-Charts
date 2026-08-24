@@ -37,7 +37,7 @@ export const SHAPE: DataShape = Object.freeze({
   temporal: true,
 })
 
-/** Past `DIRECT_LABEL_MAX_SERIES`, so Canvas externalises its legend and Stage facets. */
+/** Past the default direct-label threshold, so Canvas externalises its legend and Stage facets. */
 export const MANY_SERIES: DataShape = Object.freeze({ ...SHAPE, series: 6 })
 
 /** One series — the shape for which Stage's optional secondary axis is indefensible. */

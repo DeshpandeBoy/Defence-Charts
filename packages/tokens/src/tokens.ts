@@ -119,10 +119,10 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
       { name: 'plot-height-saturation', value: '80px', tier: 'A-lit', source: 'Heer & Bostock CHI 2010 (via `05`)' },
       { name: 'widget-padding', value: '16px', tier: 'A-lit', source: 'Apple HIG: "the standard margin width for widgets — 16 points for most widgets"' },
       { name: 'widget-padding-tight', value: '11px', tier: 'A-lit', source: 'Apple HIG: "setting margins of 11 points can work well"' },
-      { name: 'widget-radius', value: '8px', tier: 'B', source: 'Spectrum `CORNER_RADIUS = 6`; Android OEM ceiling 16 dp. 8 sits between and is a common step' },
-      { name: 'widget-radius-inner', value: 'calc(var(--gx-widget-radius) - var(--gx-widget-padding))', tier: 'A-lit', source: 'Apple `ContainerRelativeShape` — "an inset version of the current container shape"' },
+      { name: 'widget-radius', value: '0', tier: 'C', source: 'DESIGN.md:196 — Rail Square Corner Rule' },
+      { name: 'widget-radius-inner', value: 'max(0px, calc(var(--gx-widget-radius) - var(--gx-widget-padding)))', tier: 'A-lit', source: 'Apple `ContainerRelativeShape` — "an inset version of the current container shape"' },
       { name: 'widget-gap', value: '16px', tier: 'C', source: 'No published source for a bento gutter (§4.5)' },
-      { name: 'widget-shadow', value: '0 1px 2px rgb(0 0 0 / 0.25)', tier: 'A-impl', source: 'Nivo tooltip `boxShadow` (Carbon uses `0 1px 6px 0 rgba(0,0,0,0.2)`)' },
+      { name: 'widget-shadow', value: 'none', tier: 'C', source: 'DESIGN.md:190 — Rail elevation tokens resolve to nothing' },
     ],
   },
   {
@@ -330,7 +330,12 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
       { name: 'bar-min-length', value: '0', tier: 'A-impl', source: 'Highcharts `minPointLength: 0`; ECharts `barMinHeight: 0`' },
       { name: 'bar-width-max', value: 'none', tier: 'A-impl', source: 'Highcharts `maxPointWidth: null`; ECharts `barMaxWidth: null`; Recharts `maxBarSize: undefined`' },
       { name: 'bar-max-categories', value: '24', tier: 'A-lit', source: 'Blascheck et al. InfoVis 2018 (via `05`)' },
-      { name: 'point-radius-hover', value: '—', tier: 'C', source: 'Spectrum scales point **area** by tier (`36/64/100`), not on hover' },
+      {
+        name: 'point-radius-hover',
+        value: 'var(--gx-point-radius)',
+        tier: 'C',
+        source: 'Spectrum scales point **area** by tier (`36/64/100`), not on hover; the no-op reuses the resting radius',
+      },
       { name: 'point-stroke-width', value: '0', tier: 'A-impl', source: 'Highcharts `marker.lineWidth: 0`; Nivo `pointBorderWidth: 0`. **Vega and Spectrum both use `2`** — the split is scatter (no stroke) vs line-with-markers (stroke to separate the dot from the line)' },
       { name: 'point-stroke-color', value: 'var(--gx-surface-color)', tier: 'A-impl', source: 'Highcharts `marker.lineColor: var(--highcharts-background-color)` — stroke the marker in the *background* colour so it knocks out the line behind it. A verified idiom worth copying exactly' },
       { name: 'point-shape', value: 'circle', tier: 'A-impl', source: 'Vega `legend.symbolType: \'circle\'`' },
@@ -569,9 +574,9 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
     title: 'Tooltip',
     tokens: [
       { name: 'tooltip-color', value: '#fff', tier: 'A-impl', source: 'Nivo `tooltip.container.background: \'white\'`' },
-      { name: 'tooltip-radius', value: '4px', tier: 'B', source: 'Nivo `\'2px\'`; Highcharts `borderRadius: 5`' },
+      { name: 'tooltip-radius', value: '0', tier: 'C', source: 'DESIGN.md:196 — Rail Square Corner Rule' },
       { name: 'tooltip-padding', value: '8px', tier: 'A-impl', source: 'Highcharts `tooltip.padding: 8` (Nivo `\'5px 9px\'`)' },
-      { name: 'tooltip-shadow', value: '0 1px 2px rgb(0 0 0 / 0.25)', tier: 'A-impl', source: 'Nivo `boxShadow` (Carbon: `0 1px 6px 0 rgba(0,0,0,0.2)`)' },
+      { name: 'tooltip-shadow', value: 'none', tier: 'C', source: 'DESIGN.md:190 — Rail elevation tokens resolve to nothing' },
       { name: 'tooltip-offset', value: '16px', tier: 'A-impl', source: 'Highcharts `tooltip.distance: 16`' },
       { name: 'tooltip-header-gap', value: '5px', tier: 'A-impl', source: 'Highcharts `tooltip.header.distance: 5`' },
       { name: 'tooltip-row-padding', value: '3px 5px', tier: 'A-impl', source: 'Nivo `tableCell.padding`' },
@@ -597,12 +602,73 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
 export type ThemeVariant = {
   readonly id: string
   readonly note?: string
+  /** Emit an OS preference block in addition to the explicit class/data attribute block. */
+  readonly prefersColorScheme?: 'dark' | 'light'
   readonly overrides: readonly Token[]
 }
+
+const NEUTRAL_DARK_RAMP: readonly Token[] = [
+  { name: 'ramp-neutral-1', value: '#101010', tier: 'C', source: 'B1 neutral palette derivation: true-neutral OKLCH ramp' },
+  { name: 'ramp-neutral-2', value: '#252525', tier: 'C', source: 'B1 neutral palette derivation: true-neutral OKLCH ramp' },
+  { name: 'ramp-neutral-3', value: '#3b3b3b', tier: 'C', source: 'B1 neutral palette derivation: true-neutral OKLCH ramp' },
+  { name: 'ramp-neutral-4', value: '#525252', tier: 'C', source: 'B1 neutral palette derivation: true-neutral OKLCH ramp' },
+  { name: 'ramp-neutral-5', value: '#696969', tier: 'C', source: 'B1 neutral palette derivation: true-neutral OKLCH ramp' },
+  { name: 'ramp-neutral-6', value: '#858585', tier: 'C', source: 'B1 neutral palette derivation: true-neutral OKLCH ramp' },
+  { name: 'ramp-neutral-7', value: '#a1a1a1', tier: 'C', source: 'B1 neutral palette derivation: true-neutral OKLCH ramp' },
+  { name: 'ramp-neutral-8', value: '#c4c4c4', tier: 'C', source: 'B1 neutral palette derivation: true-neutral OKLCH ramp' },
+  { name: 'ramp-neutral-9', value: '#e8e8e8', tier: 'C', source: 'B1 neutral palette derivation: true-neutral OKLCH ramp' },
+]
+
+const NEUTRAL_LIGHT_RAMP: readonly Token[] = [
+  { name: 'ramp-neutral-1', value: '#121212', tier: 'C', source: 'B1 neutral palette derivation: true-neutral OKLCH ramp' },
+  { name: 'ramp-neutral-2', value: '#282828', tier: 'C', source: 'B1 neutral palette derivation: true-neutral OKLCH ramp' },
+  { name: 'ramp-neutral-3', value: '#3f3f3f', tier: 'C', source: 'B1 neutral palette derivation: true-neutral OKLCH ramp' },
+  { name: 'ramp-neutral-4', value: '#565656', tier: 'C', source: 'B1 neutral palette derivation: true-neutral OKLCH ramp' },
+  { name: 'ramp-neutral-5', value: '#6d6d6d', tier: 'C', source: 'B1 neutral palette derivation: true-neutral OKLCH ramp' },
+  { name: 'ramp-neutral-6', value: '#898989', tier: 'C', source: 'B1 neutral palette derivation: true-neutral OKLCH ramp' },
+  { name: 'ramp-neutral-7', value: '#a5a5a5', tier: 'C', source: 'B1 neutral palette derivation: true-neutral OKLCH ramp' },
+  { name: 'ramp-neutral-8', value: '#c8c8c8', tier: 'C', source: 'B1 neutral palette derivation: true-neutral OKLCH ramp' },
+  { name: 'ramp-neutral-9', value: '#ececec', tier: 'C', source: 'B1 neutral palette derivation: true-neutral OKLCH ramp' },
+]
+
+const NEUTRAL_DARK_SURFACE_OVERRIDES: readonly Token[] = [
+  ...NEUTRAL_DARK_RAMP,
+  { name: 'widget-radius', value: '4px', tier: 'C', source: 'B1 neutral escape hatch: field-convention radius' },
+  { name: 'widget-shadow', value: '0 2px 8px rgb(0 0 0 / 0.18)', tier: 'C', source: 'B1 neutral escape hatch: field-convention elevation' },
+  { name: 'tooltip-radius', value: '3px', tier: 'C', source: 'B1 neutral escape hatch: field-convention radius' },
+  { name: 'tooltip-shadow', value: '0 2px 12px rgb(0 0 0 / 0.18)', tier: 'C', source: 'B1 neutral escape hatch: field-convention elevation' },
+]
+
+const NEUTRAL_LIGHT_SURFACE_OVERRIDES: readonly Token[] = [
+  ...NEUTRAL_LIGHT_RAMP,
+  { name: 'widget-radius', value: '6px', tier: 'C', source: 'B1 neutral escape hatch: field-convention radius' },
+  { name: 'widget-shadow', value: '0 2px 10px rgb(0 0 0 / 0.16)', tier: 'C', source: 'B1 neutral escape hatch: field-convention elevation' },
+  { name: 'tooltip-radius', value: '5px', tier: 'C', source: 'B1 neutral escape hatch: field-convention radius' },
+  { name: 'tooltip-shadow', value: '0 2px 14px rgb(0 0 0 / 0.16)', tier: 'C', source: 'B1 neutral escape hatch: field-convention elevation' },
+]
+
+const NEUTRAL_DARK_SERIES: readonly Token[] = [
+  { name: 'series-1', value: '#8dd3c7', tier: 'C', source: 'B1 neutral palette derivation: evenly spaced OKLCH hues on a dark ground' },
+  { name: 'series-2', value: '#f28e7b', tier: 'C', source: 'B1 neutral palette derivation: evenly spaced OKLCH hues on a dark ground' },
+  { name: 'series-3', value: '#7eb6d9', tier: 'C', source: 'B1 neutral palette derivation: evenly spaced OKLCH hues on a dark ground' },
+  { name: 'series-4', value: '#b9a7d9', tier: 'C', source: 'B1 neutral palette derivation: evenly spaced OKLCH hues on a dark ground' },
+  { name: 'series-5', value: '#f2bd75', tier: 'C', source: 'B1 neutral palette derivation: evenly spaced OKLCH hues on a dark ground' },
+  { name: 'series-6', value: '#a8c96f', tier: 'C', source: 'B1 neutral palette derivation: evenly spaced OKLCH hues on a dark ground' },
+]
+
+const NEUTRAL_LIGHT_SERIES: readonly Token[] = [
+  { name: 'series-1', value: '#00695c', tier: 'C', source: 'B1 neutral palette derivation: evenly spaced OKLCH hues on a light ground' },
+  { name: 'series-2', value: '#b23a31', tier: 'C', source: 'B1 neutral palette derivation: evenly spaced OKLCH hues on a light ground' },
+  { name: 'series-3', value: '#185b83', tier: 'C', source: 'B1 neutral palette derivation: evenly spaced OKLCH hues on a light ground' },
+  { name: 'series-4', value: '#654c9b', tier: 'C', source: 'B1 neutral palette derivation: evenly spaced OKLCH hues on a light ground' },
+  { name: 'series-5', value: '#986000', tier: 'C', source: 'B1 neutral palette derivation: evenly spaced OKLCH hues on a light ground' },
+  { name: 'series-6', value: '#4f7622', tier: 'C', source: 'B1 neutral palette derivation: evenly spaced OKLCH hues on a light ground' },
+]
 
 export const THEME_VARIANTS: readonly ThemeVariant[] = [
   {
     id: 'rail-light',
+    prefersColorScheme: 'light',
     note: 'Same six wavelengths, re-solved for a light ground. 43-theming.md §2.',
     overrides: [
       { name: 'surface-color', value: '#f4f3ef', tier: 'C', source: 'DESIGN.md:63' },
@@ -621,6 +687,26 @@ export const THEME_VARIANTS: readonly ThemeVariant[] = [
       { name: 'series-6', value: '#710805', tier: 'B', source: 'DESIGN.md:57', aside: 'Fe I     · 10.88' },
     ],
   },
+  {
+    id: 'neutral',
+    note: 'Neutral dark escape hatch: true-neutral ramp and evenly spaced categorical hues.',
+    overrides: [
+      { name: 'surface-color', value: '#181818', tier: 'C', source: 'B1 neutral palette derivation: neutral dark ground' },
+      { name: 'surface-text-color', value: 'var(--gx-ramp-neutral-8)', tier: 'C', source: 'B1 neutral palette derivation: dark-ground text index' },
+      ...NEUTRAL_DARK_SURFACE_OVERRIDES,
+      ...NEUTRAL_DARK_SERIES,
+    ],
+  },
+  {
+    id: 'neutral-light',
+    note: 'Neutral light escape hatch: true-neutral ramp and evenly spaced categorical hues.',
+    overrides: [
+      { name: 'surface-color', value: '#f7f7f7', tier: 'C', source: 'B1 neutral palette derivation: neutral light ground' },
+      { name: 'surface-text-color', value: 'var(--gx-ramp-neutral-3)', tier: 'C', source: 'B1 neutral palette derivation: light-ground text index' },
+      ...NEUTRAL_LIGHT_SURFACE_OVERRIDES,
+      ...NEUTRAL_LIGHT_SERIES,
+    ],
+  },
 ]
 
 /** Flat, in emitted order. */
@@ -629,8 +715,9 @@ export const ALL_TOKENS: readonly Token[] = TOKEN_GROUPS.flatMap((group) => grou
 /**
  * How much of the tree is actually specified.
  *
- * ⚠ This exists so that B1's remaining work is a **number the build prints**, not a paragraph
- * in a plan that goes stale. `untiered` falls to zero by transcribing `raw/06` §6.2–6.9;
+ * ⚠ This remains a **number the build prints**, not a paragraph in a plan that can go stale.
+ * B1's shipped tree is complete; the census now protects it against regressions. `untiered`
+ * falls to zero by transcribing `raw/06` §6.2–6.9;
  * `unverified` falls only by finding a source or taking a measurement, and
  * `30-implementation-plan.md` §B1 is explicit that it must never fall by relabelling.
  *

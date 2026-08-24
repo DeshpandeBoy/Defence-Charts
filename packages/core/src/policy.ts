@@ -37,14 +37,21 @@ import { DEFAULT_TYPOGRAPHY } from './text.ts'
 export type PlanPolicy = {
   /** px between X-axis ticks. **A-lit** — Talbot 2010 / Plot. */
   readonly tickTargetSpacingX: number
-  /** px between Y-axis ticks. **A-lit** — Talbot 2010 / Plot. */
-  readonly tickTargetSpacingY: number
   /** **A-lit** — Talbot 2010. */
   readonly ticksMin: number
   /** In `em`, not px. **A-lit** — Talbot 2010. */
   readonly labelMinSpacing: number
-  /** Series count threshold to adjust bar gaps (ECharts behavior). **C**. */
-  readonly barGapSeriesThreshold: number
+  /** Hand-authored Y-axis tick count for value-legible line rungs. **B** — §6. */
+  readonly yTickCount: number
+  /** Series count after which direct labels externalise into a legend. **B** — §4.4/§6. */
+  readonly directLabelMaxSeries: number
+  /** Minimum series count for the optional secondary axis. **C** — §4.1 leaves it open. */
+  readonly secondaryAxisMinSeries: number
+  /**
+   * Maximum small-multiple columns by aspect. **C** — §11 leaves facet sizing open; this
+   * keeps the current aspect-derived fallback typed until measured cell sizing lands.
+   */
+  readonly facetColumnsByAspect: Readonly<Record<SizeContext['aspect'], number>>
   /** px. Legend item gap. **C**. */
   readonly legendItemGap: number
   /** px. Tick mark length. **C**. */
@@ -60,25 +67,46 @@ export type PlanPolicy = {
 
   /** px. Optimal plot height for a line; below it, change encoding. **A-lit** — Heer 2009. */
   readonly plotHeightOptimal: number
-  /** px. Below it, value-estimation error rises, p < 0.001. **A-lit** — Heer & Bostock 2010. */
+  /**
+   * @future
+   * px. Below it, value-estimation error rises, p < 0.001. **A-lit** — Heer & Bostock 2010.
+   * Reserved for the value-legibility decisions of future non-line rungs; the current line
+   * ladder selects its rung from `SizeContext.sizeClass` and does not reclassify from px.
+   */
   readonly plotHeightMinValues: number
-  /** px. Little benefit beyond. **A-lit** — Heer & Bostock 2010. */
+  /**
+   * @future
+   * px. Little benefit beyond. **A-lit** — Heer & Bostock 2010. Reserved for future content
+   * expansion decisions; it is not a second threshold in the current line/area rungs.
+   */
   readonly plotHeightSaturation: number
 
   /** px. A 2-band horizon is still readable here. **A-lit** — Heer 2009. */
   readonly horizonMinHeight: number
-  /** **A-lit** — Heer 2009. The cap is a finding, not a style choice. */
+  /**
+   * @future
+   * **A-lit** — Heer 2009. The cap is a finding, not a style choice. The current Tile rung
+   * deliberately uses one band; future horizon-capable rungs will consume this upper bound.
+   */
   readonly horizonMaxBands: 1 | 2 | 3
 
-  /** Slices past which a radial encoding stops being readable. **A-lit**. */
+  /**
+   * @future
+   * Slices past which a radial encoding stops being readable. **A-lit**. Reserved for the
+   * future donut/radial resolver; line/area never creates slices.
+   */
   readonly categoriesMaxRadial: number
 
   /**
+   * @future
    * Categories past which the resolver buckets into "Other". **B**.
    *
    * ⚠ Appears here *and* as `ChartPlan.aggregate.after`, and that is not duplication:
    * policy states the threshold, the plan records what was decided. They differ whenever
    * a rung aggregates more aggressively than the threshold — which several do.
+   *
+   * Line/area explicitly returns `after: null` because bucketing a time series into `Other`
+   * is not a valid decision for this resolver; bar/donut rungs will consume this field.
    */
   readonly aggregateAfter: number
 
@@ -86,6 +114,8 @@ export type PlanPolicy = {
   readonly legendMaxEntries: number
   /** Points past which `marks.renderer` flips to canvas. **C**. */
   readonly pointBudget: number
+  /** px. Hide point markers when average horizontal spacing falls below this. **A-impl**. */
+  readonly pointAutoHideDensityThreshold: number
 
   /**
    * Whether the resolver may swap one encoding for another — line → horizon at
@@ -99,6 +129,7 @@ export type PlanPolicy = {
   readonly substitute: boolean
 
   /**
+   * @future
    * px floor for a heatmap cell; below it, bin coarser rather than shrinking further
    * (`research/10-responsive-ladder.md` §4 Heatmap). **C**.
    *
@@ -108,8 +139,9 @@ export type PlanPolicy = {
    * attached to the wrong finding is worse than an admitted gap, because it stops anyone
    * from checking.
    *
-  * ⚠ Unrelated to grid-cell geometry despite the name — standalone grid geometry uses
-  * `DEFAULT_NOMINAL_CELL_SIZE` in `./context.ts`, a different Tier C number.
+   * ⚠ Unrelated to grid-cell geometry despite the name — standalone grid geometry uses
+   * `DEFAULT_NOMINAL_CELL_SIZE` in `./context.ts`, a different Tier C number.
+   * This remains reserved for the future heatmap binning resolver; line/area has no cells.
    */
   readonly minCellSize: number
 
@@ -225,10 +257,17 @@ export type PlanChartFn = (
  */
 export const DEFAULT_POLICY: PlanPolicy = Object.freeze({
   tickTargetSpacingX: 100,
-  tickTargetSpacingY: 100,
   ticksMin: 2,
   labelMinSpacing: 1.5,
-  barGapSeriesThreshold: 4,
+  yTickCount: 4,
+  directLabelMaxSeries: 4,
+  secondaryAxisMinSeries: 2,
+  facetColumnsByAspect: Object.freeze({
+    portrait: 2,
+    square: 2,
+    landscape: 3,
+    ultrawide: 4,
+  }),
   legendItemGap: 16,
   tickLength: 4,
   tickLabelGap: 3,
@@ -244,6 +283,7 @@ export const DEFAULT_POLICY: PlanPolicy = Object.freeze({
   aggregateAfter: 8,
   legendMaxEntries: 8,
   pointBudget: 2000,
+  pointAutoHideDensityThreshold: 2,
   substitute: true,
   minCellSize: 8,
   valueRegionMaxShare: 0.5,

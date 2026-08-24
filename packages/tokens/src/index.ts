@@ -44,12 +44,12 @@ export type GxCustomProperty = `--gx-${GxTokenName}`
 export const toCustomProperty = (name: GxTokenName): GxCustomProperty => `--gx-${name}`
 
 /**
- * The four shipping theme combinations: {Rail} × {dark, light}, plus the OS default.
+ * The four shipping theme combinations: {Rail, Neutral} × {dark, light}.
  *
- * ⚠ **Not derived from `THEME_VARIANTS`, and the asymmetry is real rather than an oversight.**
+ * ⚠ **Not derived from `THEME_VARIANTS`, and the asymmetry is intentional.**
  * `rail-dark` has no entry there because it *is* `:where(:root)` — the default world needs no
- * override block. `THEME_VARIANTS` holds the deltas; this holds the worlds.
+ * override block. `THEME_VARIANTS` holds the deltas; this holds the four selectable worlds.
  */
-export const GX_THEMES = ['rail-dark', 'rail-light'] as const
+export const GX_THEMES = ['rail-dark', 'rail-light', 'neutral', 'neutral-light'] as const
 
 export type GxTheme = (typeof GX_THEMES)[number]

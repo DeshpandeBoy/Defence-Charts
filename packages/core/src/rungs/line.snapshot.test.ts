@@ -257,7 +257,7 @@ const CANVAS_PLAN: ChartPlan = {
    * recoverable direction; colliding is not.
    */
   labels: { ...PANEL_PLAN.labels, axisLabelDegrade: 'abbreviate', maxChars: 4 },
-  marks: { ...PANEL_PLAN.marks, points: { mode: 'all', autoHideDensityThreshold: null } },
+  marks: { ...PANEL_PLAN.marks, points: { mode: 'all', autoHideDensityThreshold: 2 } },
   // ⚠ Conditional on `shape.series > 4`. At ≤ 4 this rung keeps `'direct'` — §4.4's
   // non-monotonic rule. Canvas does not automatically have MORE legend than Panel.
   legend: {
@@ -458,8 +458,8 @@ describe('G9 — the renderer flips rather than sampling', () => {
 
 describe('G9 — unimplemented types throw rather than falling back', () => {
   it('names the milestone', () => {
-    expect(() => planChart('donut', PANEL, SHAPE)).toThrow(/milestone B2/)
-    expect(() => planChart('heatmap', PANEL, SHAPE)).toThrow(/milestone C/)
+    expect(() => planChart('donut', PANEL, SHAPE)).toThrow(/milestone D/)
+    expect(() => planChart('heatmap', PANEL, SHAPE)).toThrow(/milestone D/)
   })
 
   it('does not return a plan for them', () => {

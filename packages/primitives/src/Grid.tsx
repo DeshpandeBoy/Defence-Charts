@@ -37,6 +37,7 @@
  */
 
 import { CHROME_METRICS, type ComputedTick, type Rect } from '@gx/core'
+import type { CSSProperties } from 'react'
 
 import { classes, roundCoord, translate } from './svg.ts'
 
@@ -69,6 +70,8 @@ export function Grid({
   const { axisRuleWidth } = CHROME_METRICS
   const width = roundCoord(plot.width)
   const height = roundCoord(plot.height)
+  const xStyle = gridStyle(xDashPhase, xStrokeCap)
+  const yStyle = gridStyle(yDashPhase, yStrokeCap)
 
   return (
     <g className={classes('gx-grid', className)} transform={translate(plot.x, plot.y)}>
@@ -79,6 +82,7 @@ export function Grid({
           key={`y-${tick.value}`}
           data-dash-phase={yDashPhase}
           data-stroke-cap={yStrokeCap}
+          style={yStyle}
           x={0}
           y={roundCoord(tick.offset)}
           width={width}
@@ -92,6 +96,7 @@ export function Grid({
           key={`x-${tick.value}`}
           data-dash-phase={xDashPhase}
           data-stroke-cap={xStrokeCap}
+          style={xStyle}
           x={roundCoord(tick.offset)}
           y={0}
           width={axisRuleWidth}
@@ -110,4 +115,11 @@ export function Grid({
       )}
     </g>
   )
+}
+
+function gridStyle(dashPhase: number, strokeCap: 'butt' | 'round' | 'square'): CSSProperties {
+  return {
+    '--gx-grid-dash-offset': String(Number.isFinite(dashPhase) ? dashPhase : 0),
+    '--gx-grid-cap': strokeCap,
+  } as CSSProperties
 }

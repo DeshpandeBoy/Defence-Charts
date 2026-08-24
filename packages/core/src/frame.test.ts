@@ -153,6 +153,49 @@ describe('ticks', () => {
     }
   })
 
+  it('adds a finite numeric tick from the raw domain value', () => {
+    const base = planChart('line', PANEL, SHAPE)
+    const plan = applyOverrides(base, { axes: { x: { tickExtra: true } } })
+    const numeric: Series[] = [
+      { id: 'a', points: [{ x: 0, y: 10 }, { x: 10, y: 20 }, { x: 20, y: 15 }] },
+    ]
+    const baseFrame = resolveFrame(base, numeric, PANEL)
+    const frame = resolveFrame(plan, numeric, PANEL)
+    const extra = frame.xTicks.at(-1)
+
+    expect(frame.xTicks).toHaveLength(baseFrame.xTicks.length + 1)
+    expect(typeof extra?.value).toBe('number')
+    expect(extra?.value).toBeGreaterThan(baseFrame.xTicks.at(-1)?.value as number)
+    expect(Number.isFinite(extra?.offset)).toBe(true)
+  })
+
+  it('keeps temporal extra ticks as valid ISO strings', () => {
+    const base = planChart('line', PANEL, SHAPE)
+    const plan = applyOverrides(base, { axes: { x: { tickExtra: true } } })
+    const baseFrame = resolveFrame(base, ONE, PANEL)
+    const frame = resolveFrame(plan, ONE, PANEL)
+    const extra = frame.xTicks.at(-1)
+
+    expect(frame.xTicks).toHaveLength(baseFrame.xTicks.length + 1)
+    expect(typeof extra?.value).toBe('string')
+    expect(Number.isNaN(Date.parse(extra?.value as string))).toBe(false)
+    expect(Number.isFinite(extra?.offset)).toBe(true)
+  })
+
+  it('adds a finite extra tick on the inverted y axis', () => {
+    const base = planChart('line', PANEL, SHAPE)
+    const plan = applyOverrides(base, { axes: { y: { tickExtra: true } } })
+    const baseFrame = resolveFrame(base, ONE, PANEL)
+    const frame = resolveFrame(plan, ONE, PANEL)
+    const extra = frame.yTicks.at(-1)
+    const previous = baseFrame.yTicks.at(-1)
+
+    expect(frame.yTicks).toHaveLength(baseFrame.yTicks.length + 1)
+    expect(extra?.value).toBeGreaterThan(previous?.value as number)
+    expect(extra?.offset).toBeLessThan(previous?.offset as number)
+    expect(Number.isFinite(extra?.offset)).toBe(true)
+  })
+
   it('emits nothing when the axis is off', () => {
     const plan = planChart('line', TILE_SHORT, SHAPE)
     expect(plan.axes.x.ticks.mode).toBe('none')

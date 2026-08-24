@@ -101,7 +101,7 @@ That throw is *correct* and should stay — the file's own comment gets it exact
 fallback plan would be the same failure species as happy-dom's `0`. The problem is different:
 
 > **A paid package cannot add a chart type without editing `@gx/core`.** There is no seam. Today that
-> costs a two-line change; after B2 fills in the other eight types and after first publish makes
+> costs a two-line change; after D fills in the other eight types and after first publish makes
 > `ChartType` a G6-guarded public surface, it costs a breaking change.
 
 ### The obvious fix is the wrong one

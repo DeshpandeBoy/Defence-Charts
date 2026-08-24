@@ -1576,7 +1576,7 @@
       <section class="section intro" aria-labelledby="page-title">
         <div class="section-inner intro-grid">
           <div>
-            <p class="status-line"><span class="status-dot" aria-hidden="true"></span>Milestone A complete. B1 token expansion is active.</p>
+            <p class="status-line"><span class="status-dot" aria-hidden="true"></span>Milestones A1-A6 and B1-B3 complete. Next: C1 grid.</p>
             <h1 id="page-title">Responsive chart + dashboard grid library</h1>
             <p class="lede">
               We are building charts that change what information they show when their box changes size.
@@ -1715,15 +1715,16 @@
               <button class="package-toggle" type="button" aria-expanded="true" aria-controls="tokens-detail">
                 <span class="package-name">@gx/tokens</span>
                 <span class="package-role">The visual vocabulary</span>
-                <span class="package-state" data-state="ready">B1 slice 1 shipped</span>
+                <span class="package-state" data-state="ready">B1-B3 shipped</span>
                 <i class="fa-solid fa-minus" aria-hidden="true"></i>
               </button>
               <div class="package-detail" id="tokens-detail">
                 <p>
-                  Tokens name colours, type sizes, gaps, strokes and motion. TypeScript is now the source
-                  of truth for the first 40 presentation tokens; the Rail stylesheet and token-name types
-                  are generated from that data, and CI rejects drift or unresolved variables. The complete
-                  183-token tree, naming pass, neutral theme and data ramps remain in B1.
+                  Tokens name colours, type sizes, gaps, strokes and motion. TypeScript is the source
+                  of truth for 186 declared presentation tokens; the Rail stylesheet, Neutral dark/light
+                  themes and token-name types are generated from that data, and CI rejects drift or
+                  unresolved variables. B3 keeps plan-changing thresholds in typed <code>PlanPolicy</code>
+                  inputs, with explicit <code>@future</code> markers for later chart families.
                 </p>
                 <dl class="package-facts">
                   <div><dt>Input</dt><dd>Design decisions</dd></div>
@@ -2000,9 +2001,11 @@ return applyOverrides(rung({ type, ctx, shape, policy }), overrides)</code></pre
                 <p>
                   CSS variables choose color, type, stroke and spacing. Fit-sensitive typography is generated
                   from the same typed source as core's font metrics, so browser text and planner math agree.
+                  Thresholds that change the plan stay in serialisable TypeScript policy instead of the CSS
+                  cascade, keeping server and client decisions identical.
                 </p>
                 <span class="journey-owner">@gx/tokens</span><br>
-                <span class="implementation-state" data-state="partial"><i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i>Foundation ready; full tree B1</span>
+                <span class="implementation-state" data-state="done"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>Implemented · B1-B3</span>
               </div>
               <div class="journey-code">
                 <div class="journey-code-label"><span>Appearance stays in CSS</span><code>packages/tokens/src/themes</code></div>
@@ -2509,8 +2512,8 @@ import { AutoChart } from '@gx/react'
             </div>
             <p>
               The six-rung line and area proof now runs end to end: plan, accessible SVG, live measurement,
-              server rendering and motion. B1 is turning the visual vocabulary into a complete generated
-              token contract before the grid and additional chart families arrive.
+              server rendering and motion. B1-B3 are complete: generated tokens/themes and typed threshold
+              policy now protect the line/area proof. Next is the C1 grid and widget shell, followed by chart breadth.
             </p>
           </div>
 
@@ -2525,16 +2528,16 @@ import { AutoChart } from '@gx/react'
                 <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Adaptive client:</strong> AutoChart, animation-frame-batched ResizeObserver measurement and an honest SSR initial size.</span></li>
                 <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Browser proof:</strong> CI drives Chromium through zero-client-JS RSC rendering, fixed-box containment and reduced-motion-aware transitions.</span></li>
                 <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Documentation:</strong> the Fumadocs application, 15 authored pages and an interactive ResizeLab are implemented.</span></li>
+                <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>B1-B3 control surface:</strong> 186 generated presentation tokens, Rail + Neutral themes, renderer controls, typed threshold policy, provenance/consumption gate, and a green full verify chain.</span></li>
               </ul>
             </section>
 
             <section class="progress-column" data-progress="next" aria-labelledby="remaining-title">
               <h3 id="remaining-title">Still to implement</h3>
               <ul class="progress-list">
-                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>B1:</strong> expand 40 typed presentation tokens to the complete tree, resolve the nine owed provenance decisions, rename inconsistent tokens and derive the neutral theme.</span></li>
-                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>B1 behavior:</strong> add the measured 0.5% rung deadband; transitions smooth movement but cannot animate a newly mounted mark.</span></li>
-                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>B2–B3:</strong> finish field-granularity controls and typed threshold policy inputs.</span></li>
-                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>C–D:</strong> build the twelve-column grid, widget chrome and the remaining chart families, starting with bar and donut.</span></li>
+                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>C1-C2:</strong> build the twelve-column grid, per-widget minimums, resize/compaction behavior and widget chrome.</span></li>
+                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>D:</strong> add chart breadth, starting with bar/timebar and donut, then KPI, scatter, heatmap, funnel, progress and sparkline.</span></li>
+                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>Validation follow-up:</strong> finish the Roboto Flex <code>tnum</code>/safety-factor calibration and keep the measured rung-deadband question separate from the completed B3 policy contract.</span></li>
                 <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>E:</strong> choose the name and npm scope, add Changesets and trusted publishing, finish public examples, then publish.</span></li>
               </ul>
             </section>
@@ -2565,13 +2568,17 @@ import { AutoChart } from '@gx/react'
               <div class="milestone-code"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>A6</div>
               <div class="milestone-body"><strong>Transitions and browser proof</strong><span>Stable SVG identity, staged CSS motion, reduced-motion behavior and real-browser gate G19 are implemented.</span></div>
             </div>
+            <div class="milestone" data-status="done">
+              <div class="milestone-code"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>B1-B3</div>
+              <div class="milestone-body"><strong>Visual control and typed threshold policy</strong><span>186 generated presentation tokens, Rail + Neutral themes, renderer controls, typed <code>PlanPolicy</code> inputs, provenance/consumption gate, and a green 666-test verify run.</span></div>
+            </div>
             <div class="milestone" data-status="active">
-              <div class="milestone-code"><i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i>B</div>
-              <div class="milestone-body"><strong>Visual control and threshold policy</strong><span>Slice 1 generated the first 40 typed tokens and drift gates. Next: full tree, neutral theme, provenance closure and deadband.</span></div>
+              <div class="milestone-code"><i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i>C1-C2</div>
+              <div class="milestone-body"><strong>Dashboard grid and widget chrome</strong><span>Next: build the draggable 12-column shell, per-widget sizing/compaction and the widget frame.</span></div>
             </div>
             <div class="milestone">
-              <div class="milestone-code"><i class="fa-regular fa-circle" aria-hidden="true"></i>C-D</div>
-              <div class="milestone-body"><strong>Dashboard grid and chart breadth</strong><span>Build the draggable 12-column shell, widget chrome and the remaining chart families.</span></div>
+              <div class="milestone-code"><i class="fa-regular fa-circle" aria-hidden="true"></i>D</div>
+              <div class="milestone-body"><strong>Chart breadth</strong><span>Add bar/timebar, donut, KPI, scatter, heatmap, funnel, progress and sparkline one family at a time.</span></div>
             </div>
             <div class="milestone">
               <div class="milestone-code"><i class="fa-regular fa-circle" aria-hidden="true"></i>E</div>

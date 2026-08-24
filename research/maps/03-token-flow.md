@@ -147,19 +147,20 @@ it claims to enforce.
 
 ---
 
-## What is still open on this track
+## Current state of this track
 
-All three land at B1 and are the same shape of work:
+B1 is closed for the shipped presentation surface: the generated source reports 186 declarations,
+the Rail and Neutral dark/light themes are emitted from it, and membership, naming, provenance,
+and drift gates are green. The earlier 43-name, six-default, and neutral-theme entries were B1
+implementation work; they are no longer token-tree blockers. Any remaining research uncertainty is
+represented as an explicit implementation tier rather than promoted to external evidence.
 
-1. **43 `--gx-*` names referenced but never specified** — each gets a row or gets deleted. Was 51;
-   `../42-typography.md` §4 specified eight.
-2. **Six UNVERIFIED defaults** the research declined to guess.
-3. **Six neutral-theme hex values** plus five composition pairs with no structural contrast guarantee
-   (`../43-theming.md` §4–§5).
+B3 is also closed: the responsive threshold surface is a typed `PlanPolicy`, separate from
+`PlanOverrides`, and the policy gate checks serialisability, provenance, planner consumption, and
+the explicit `@future` marker on thresholds reserved for later chart families.
 
-Plus one on the plan-input side, which blocks *generating* the A2 metrics table rather than writing
-its types: **does Roboto Flex ship `tnum`**, and what is the correct `safetyFactor`
-(`../41-text-metrics.md` §4.1–§4.2)?
+The next dependency is C1's grid and per-widget sizing. Roboto Flex `tnum`/`safetyFactor` remains a
+final metrics-calibration follow-up, not a blocker for the B3 planner contract.
 
 Roboto Flex was chosen over Inter on two grounds: `opsz` spans 8–144 against Inter's 14–32 — and the
 Micro rung lives below 14 — and Inter has no `GRAD` axis at all, which would force the landmark

@@ -32,8 +32,8 @@
  * ## Thresholds
  *
  * Every threshold reads from the resolved `PlanPolicy`; there are no bare numbers in a
- * decision. The two module constants below are thresholds §5 does not carry, and each says
- * why it is not a policy field.
+ * decision. Values that are only relevant to future chart families remain in `PlanPolicy`
+ * as serialisable inputs, but are intentionally not forced into this line/area ladder.
  */
 
 import type { DataShape, SizeContext } from './../context.ts'
@@ -74,36 +74,6 @@ export type RungInput = {
 
 /** A rung: total size context and data shape in, complete plan out. */
 export type Rung = (input: RungInput) => ChartPlan
-
-// --- Thresholds §5 does not carry ------------------------------------------------------
-
-/**
- * Series past which direct end-of-line labels stop working and a legend appears
- * (`research/10-responsive-ladder.md` §4.4; `research/40-chart-plan.md` §6 Canvas and
- * Stage both key off it). Tier **B** — the ladder states the number, reifying it is ours.
- *
- * ⚠ Not a `PlanPolicy` field, on purpose. §5's list does not contain one, and this is a
- * transcribed threshold rather than a knob: moving it changes what the published ladder
- * says, not how aggressively a consumer wants the ladder applied. Promoting it is a §11
- * question, not a silent addition — `valueRegionMaxShare` was added to policy only because
- * A3 could not proceed without it.
- */
-const DIRECT_LABEL_MAX_SERIES = 4
-
-/**
- * y-axis tick count at every rung that has a y axis.
- *
- * `research/10-responsive-ladder.md` §4 gives a **range** — 3 to 4 — and §6 hand-authors
- * `count: 4` at Panel, Canvas and Stage. So the range is A-lit and picking its top is
- * ours: Tier **B**.
- *
- * ⚠ There is deliberately **no height-driven y tick formula** to mirror
- * `tickCountForWidth()`. The horizontal one is Talbot 2010; nothing published gives the
- * vertical equivalent, and inventing `round(height / k)` would manufacture a Tier C number
- * that looks exactly as authoritative as the A-lit one beside it. That is the failure the
- * tier system exists to prevent. Recorded in §11.
- */
-const Y_TICK_COUNT = 4
 
 // --- Shared derivations ----------------------------------------------------------------
 
@@ -517,7 +487,8 @@ export const panelRung: Rung = (input) => valueLegibleRung(input, 'panel')
  * *"Room for content, not more plot."* Past 80 px of plot height extra space buys content
  * (Heer & Bostock 2010) — which is the empirical justification for the whole library.
  *
- * ⚠ **The legend is conditional on `shape.series > 4`, and at ≤ 4 it stays `'direct'`.**
+ * ⚠ **The legend is conditional on `shape.series > policy.directLabelMaxSeries`, and at
+ *   or below it stays `'direct'`.**
  * §4.4's non-monotonic rule: Canvas does not automatically have *more* legend than Panel.
  * A monotonic model gets this wrong at both ends of the ladder.
  *
@@ -565,11 +536,11 @@ function valueLegibleRung(
 ): ChartPlan {
   const atLeastCanvas = rung !== 'panel'
   const isStage = rung === 'stage'
-  const manySeries = shape.series > DIRECT_LABEL_MAX_SERIES
+  const manySeries = shape.series > policy.directLabelMaxSeries
 
   const yTicks: TickPlan = Object.freeze({
     mode: 'count',
-    count: Math.max(policy.ticksMin, Y_TICK_COUNT),
+    count: Math.max(policy.ticksMin, policy.yTickCount),
   })
 
   const y: AxisPlan = Object.freeze({
@@ -590,9 +561,9 @@ function valueLegibleRung(
     dashPhase: 0,
   })
 
-  // See the `stageRung` docblock: Tier C, and deliberately not `shape.series > 4`.
+  // See the `stageRung` docblock: Tier C, and deliberately not the direct-label threshold.
   const y2: AxisPlan | null =
-    isStage && shape.series > 1
+    isStage && shape.series >= policy.secondaryAxisMinSeries
       ? Object.freeze({
           visible: true,
           domainLine: false,
@@ -667,7 +638,7 @@ function valueLegibleRung(
 
   const facet: FacetPlan =
     isStage && manySeries
-      ? Object.freeze({ mode: 'series', columns: facetColumns(ctx, shape) })
+      ? Object.freeze({ mode: 'series', columns: facetColumns(ctx, shape, policy) })
       : NO_FACET
 
   return Object.freeze({
@@ -681,9 +652,11 @@ function valueLegibleRung(
     marks: Object.freeze({
       primary,
       // Points appear at Canvas: below it they are noise, at it they are readable targets.
-      points: Object.freeze({ 
+      points: Object.freeze({
         mode: atLeastCanvas ? 'all' : 'none',
-        autoHideDensityThreshold: null 
+        autoHideDensityThreshold: atLeastCanvas
+          ? policy.pointAutoHideDensityThreshold
+          : null,
       }),
       pointBudget: policy.pointBudget,
       renderer: renderer(shape, policy),
@@ -741,9 +714,8 @@ function valueLegibleRung(
  * governs, and it never exceeds the series count, because a column with no facet in it is
  * whitespace pretending to be structure.
  */
-function facetColumns(ctx: SizeContext, shape: DataShape): number {
-  const byAspect =
-    ctx.aspect === 'ultrawide' ? 4 : ctx.aspect === 'landscape' ? 3 : 2
+function facetColumns(ctx: SizeContext, shape: DataShape, policy: PlanPolicy): number {
+  const byAspect = policy.facetColumnsByAspect[ctx.aspect]
   return Math.max(1, Math.min(shape.series, byAspect))
 }
 

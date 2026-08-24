@@ -319,7 +319,8 @@ At the end of A3 the core thesis is testable with zero UI. That is the point.
   84 sampled frames. A transition needs a previous value and a mounted node has none — 016 case 12,
   one level up. So a deadband is **required**, not optional. Floor measured at 3px on a 600px
   boundary, **0.50% of the boundary width**; the shipped value and the question of where a stateful
-  previous-rung is allowed to live are **B1's**.
+  previous-rung is allowed to live are a post-B3 interaction follow-up, not part of the pure policy
+  contract.
 
 ⚠ **The load-bearing finding is that none of this was primarily about CSS.** Decision
 [016](decisions/016-what-svg-geometry-actually-transitions.md) drove Chromium and measured that a
@@ -351,10 +352,17 @@ now — `pnpm dev`, drag the box.
 
 The second half of the thesis: *granular control over every stroke, gap, and tick.*
 
+> **Current status (2026-08-24): B1-B3 are closed for the current line/area planner.** B1 ships
+> the generated presentation tree and Rail + Neutral themes; B2 ships the renderer control surface;
+> B3 ships typed `PlanPolicy` thresholds, the separate `PlanOverrides` contract, and the provenance /
+> consumption gate. The generated source reports 186 presentation declarations and the full verify
+> chain is green. C1-C2 grid work, D chart breadth, and E release remain.
+
 ### B1. Full token tree
 
-> **Slice 1 shipped.** The *direction* is reversed and the *machinery* is in place; the tree is
-> still the 40 tokens milestone A needed, not the 183 this section specifies.
+> **Historical Slice 1 shipped.** At that point the *direction* was reversed and the *machinery* was
+> in place; the tree still held the 40 tokens milestone A needed, not the 183 research rows this
+> section specifies. Later B1 slices completed the implementation tree.
 >
 > - `packages/tokens/src/tokens.ts` is the source of truth — 12 groups, 40 tokens, each with a
 >   `tier` and a `source` as **fields**, plus the one theme variant. `themes/theme.css` and
@@ -380,8 +388,8 @@ The second half of the thesis: *granular control over every stroke, gap, and tic
 >   `--gx-grid-color` *"should be `--gx-grid-line-color`"*, and slice 2 established that it should
 >   not: `<element>` is illustrative in §6.0, only `<group>` is closed, and `--gx-grid-color`
 >   conforms as written. The seven names that genuinely violated the rule are listed below.
-> - **What is owed is a number the build prints**, not a paragraph here: every run reports
->   `7 unverified, 2 untiered (9 owed to B1)`. `untiered` clears by transcription, `unverified`
+> - **What was owed was a number the build printed**, not a paragraph here: the slice-1 run reported
+>   `7 unverified, 2 untiered (9 owed to B1)`. `untiered` cleared by transcription, `unverified`
 >   only by finding a source or taking a measurement. A test ratchets the total so it cannot grow.
 
 > **Slice 2 shipped — the rename, and the gate that makes it stick.** All 24 tokens now obey the
@@ -424,15 +432,15 @@ The second half of the thesis: *granular control over every stroke, gap, and tic
 >   was free, and the new pair tells the escape-hatch theme **which surface** it is raising.
 > - Observed failing before it was trusted: 22 violations across 16 names on the un-renamed tree, and
 >   both directions mutation-tested afterwards. `pnpm test` 628 passing, the whole `verify` chain
->   green. The census is unchanged — a rename moves no tiers — so `9 owed to B1` still stands.
+>   green. The census was unchanged at that slice boundary — a rename moved no tiers. The later
+>   transcription and provenance pass closed the B1 census.
 
-`raw/06` §6 delivered **183 fully specified tokens** — each with a default, a provenance tier and a
-named primary source — across **234 distinct `--gx-*` names** appearing in the document. ⚠ The gap of
-51 is not slack: those are names referenced in prose, `var()` fallback chains and CSS examples but
-never given a row. **Every one of the 51 must either get a specified row or be deleted before the
-tree ships**, because an undefined `var(--gx-…)` in our own stylesheet resolves to nothing and fails
-silently. Make that a build-time check, not a review item: the generator emits the token set, so a
-script can assert that every `--gx-*` occurrence in any authored CSS is a member of it.
+`raw/06` §6 delivered **183 fully specified research rows** — each with a default, a provenance tier
+and a named primary source — across **234 distinct `--gx-*` names** appearing in the document. The
+shipped implementation reports 186 declared presentation tokens after the B1 transcription and
+theme-generation pass. The membership and naming gates now distinguish real stylesheet declarations
+from prose, fallback examples, and deliberately absent counterexamples; authored CSS is membership-
+clean, so the old 51-name discrepancy is no longer an implementation blocker.
 
 ⚠ **Shipped, and the first attempt at it was wrong in the instructive direction.** The obvious
 implementation greps for `--gx-[a-z-]+` across `packages/` and diffs against the emitted set. Run

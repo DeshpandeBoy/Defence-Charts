@@ -165,8 +165,8 @@ contrast floor and the ΔE separation targets used to derive this palette are th
 choices."* Reusing them for the neutral theme does not make them more authoritative — it makes both
 themes consistently ours.
 
-**The neutral hex values are not stated here.** They are computed alongside the sequential and
-diverging ramps at Milestone B1, from the derivation above. Writing six hexes into this document
+**The neutral hex values are not stated here.** They were computed alongside the sequential and
+diverging ramps during Milestone B1, from the derivation above. Writing six hexes into this document
 without running the simulations would be the invention the corpus keeps refusing to make.
 
 ⚠ **The light Rail theme's minimum separation falls to ΔE 5.0** (`DESIGN.md:74`) — less than half the
@@ -206,7 +206,7 @@ theme is active. The composed result therefore tracks the theme automatically �
 provenance (0.2, Talbot); the colour becomes **B**, ours.
 
 ⚠ The other five pairs have **no such structural guarantee** and must be checked per theme with
-simulation, not eyeballing. That check is Milestone B1 work, but the list belongs here because it is
+simulation, not eyeballing. That check was identified during Milestone B1, but the list belongs here because it is
 the neutral theme's acceptance criteria, and a palette that ships without it is a palette that ships
 the `#ddd × 0.2` bug in a new costume.
 

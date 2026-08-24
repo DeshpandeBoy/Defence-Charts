@@ -28,7 +28,7 @@ flowchart LR
         G5["tree-shaking size"]
         G6["public API surface"]
         G7["token lint — 6 rules:<br/>literals, membership, naming"]
-        G8["provenance tier present"]
+        G8["B3 policy threshold gate"]
         G9["plan snapshots per rung"]
         G10["sweep up + down = pure"]
         G11["loop-error / containment"]
@@ -91,8 +91,8 @@ exactly why the motion gate is **G19** and not G18
 | G4 | Next.js 16 App Router page rendering `<Chart plan={…}>` in a **server component**, asserting **both**: (1) with `javaScriptEnabled: false` the SVG, a real `<path>` and the accessible title are in the DOM; (2) the **built client JS** contains no chart code | **A4** → landed at **A5**; green, and in CI's `browser` job | 7 | The RSC path silently degrades to SSR + hydration — which assertion 1 alone *cannot see* |
 | G5 | Bundle each exported symbol alone; assert the component set equals a known set; print `symmetricDifference` | **A4** | 5, packaging | "Import one chart, ship one chart" stops being true |
 | G6 | `ts-morph` walk from `src/index.ts` collecting `missingExports` + `forbiddenExports` | **A4** | 5 | A public prop's type is unnameable by consumers |
-| G7 | Token lint — **six rules**: raw colour literals (hex, `rgb()`, `hsl()`, `oklch()`, `lab()`, `hwb()`, `color()`, named), raw length literals, raw durations, gradients, **membership** (every `var(--gx-*)` names a token some theme declares) **and naming** (every `--gx-*` declaration obeys `raw/06` §6.0's grammar) — **planted in both directions: a violation asserted to fail *and* a valid theme file asserted to pass clean** | **A1** (written), **A6** (durations), **B1 s1** (membership), **B1 s2** (naming; full tree still owed) | theming | Someone hardcodes, someone misspells a token, someone invents a name, or the gate itself has broken |
-| G8 | Every threshold carries a provenance tier | **B3** | theming | A tuned number acquires the authority of a researched one |
+| G7 | Token lint — **six rules**: raw colour literals (hex, `rgb()`, `hsl()`, `oklch()`, `lab()`, `hwb()`, `color()`, named), raw length literals, raw durations, gradients, **membership** (every `var(--gx-*)` names a token some theme declares) **and naming** (every `--gx-*` declaration obeys `raw/06` §6.0's grammar) — **planted in both directions: a violation asserted to fail *and* a valid theme file asserted to pass clean** | **A1** (written), **A6** (durations), **B1 s1** (membership), **B1 s2** (naming; full tree now closed) | theming | Someone hardcodes, someone misspells a token, someone invents a name, or the gate itself has broken |
+| G8 | Every numeric `PlanPolicy` field has a default, provenance tier, JSON round-trip, and planner consumption; explicitly `@future` fields are reserved for later chart families | **B3** | planning | A tuned number acquires the authority of a researched one, or a threshold is declared but does not affect a plan |
 | G9 | Plan snapshots: `(type, size, shape) → plan`, per rung | **A3** | ladder | A rung's semantics change without anyone deciding to change them |
 | G10 | Sweep width **up then down** across every boundary; assert the plan is a pure function of size | **A3** | ladder | Hysteresis creeps in — the direction you approached from starts to matter |
 | G11 | Drag across every rung boundary; **four** assertions — no loop error; the measured box never moves unprompted; no scrollbar gutter; nothing the plan sizes overflows | **A5**. Green, and in CI's `browser` job. ⚠ Assertion 3 is **inert** on macOS — see below | ladder, containment | Any of the four — and the loop error is the *least* likely of them to fire |

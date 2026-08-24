@@ -432,34 +432,33 @@ function computeTicks(
   // key would put React's reconciler in exactly the state the keys exist to avoid.
   // See `research/decisions/016-what-svg-geometry-actually-transitions.md`.
   const seen = new Set<number | string>()
-  const ticks: ComputedTick[] = []
-  for (const value of scale.ticks(count)) {
-    const tick = toTick(value)
+  const ticks: Array<{ readonly rawValue: number; readonly tick: ComputedTick }> = []
+  for (const rawValue of scale.ticks(count)) {
+    const tick = toTick(rawValue)
     if (seen.has(tick.value)) continue
     seen.add(tick.value)
-    ticks.push(tick)
+    ticks.push({ rawValue, tick })
   }
 
   // Support tickExtra: Vega-Lite concept to add an extra tick past the strict domain
   if (tickExtra && count > 0 && ticks.length > 0) {
-    const step = ticks.length > 1 ? (ticks[1]!.offset - ticks[0]!.offset) : 0
-    if (step > 0) {
-      const lastTick = ticks[ticks.length - 1]!
-      const extraOffset = lastTick.offset + step
-      // Infer the value space step by taking the difference in values.
-      // For linear numeric scales, this is straightforward. For temporal, it's an approximation.
-      const valStep = ticks.length > 1 
-        ? (Number(ticks[1]!.value instanceof Date ? ticks[1]!.value.getTime() : ticks[1]!.value) - 
-           Number(ticks[0]!.value instanceof Date ? ticks[0]!.value.getTime() : ticks[0]!.value))
-        : 0;
-      
-      const extraValueRaw = Number(lastTick.value instanceof Date ? lastTick.value.getTime() : lastTick.value) + valStep;
-      const extraTick = toTick(extraValueRaw)
-      ticks.push(extraTick)
+    // Keep the raw numeric domain values alongside the serialised public values. Temporal
+    // tick values are ISO strings by contract, so using `ComputedTick.value` here would turn
+    // the next value into `NaN` rather than another epoch millisecond.
+    const first = ticks[0]!
+    const second = ticks[1]
+    const valueStep = second === undefined ? 0 : second.rawValue - first.rawValue
+    if (valueStep !== 0 && Number.isFinite(valueStep)) {
+      const last = ticks[ticks.length - 1]!
+      const extraRawValue = last.rawValue + valueStep
+      const extraTick = toTick(extraRawValue)
+      if (!seen.has(extraTick.value)) {
+        ticks.push({ rawValue: extraRawValue, tick: extraTick })
+      }
     }
   }
 
-  return Object.freeze(ticks)
+  return Object.freeze(ticks.map(({ tick }) => tick))
 }
 
 // --- The value display -------------------------------------------------------------------

@@ -67,9 +67,13 @@
 
   /* --- Chrome ----------------------------------------------------------------------- */
 
-  .gx-grid__line,
-  .gx-grid__zero {
-    fill: var(--gx-grid-color);
+  .gx-grid__line {
+    fill: none;
+    stroke: var(--gx-grid-color);
+    stroke-width: var(--gx-grid-width);
+    stroke-dasharray: var(--gx-grid-dash);
+    stroke-dashoffset: var(--gx-grid-dash-offset);
+    stroke-linecap: var(--gx-grid-cap);
     opacity: var(--gx-grid-opacity);
   }
 
@@ -150,8 +154,11 @@
      * does not spike. `stroke-linecap: butt` on a single-point path renders nothing at
      * all — a series that exists, has a value, and is invisible.
      */
-    stroke-linejoin: round;
-    stroke-linecap: round;
+    stroke-linejoin: var(--gx-line-join);
+    stroke-linecap: var(--gx-line-cap);
+    stroke-miterlimit: var(--gx-line-miter-limit);
+    stroke-dasharray: var(--gx-line-dash);
+    stroke-dashoffset: var(--gx-line-dash-offset);
   }
 
   .gx-area {
@@ -187,7 +194,8 @@
      */
     r: var(--gx-point-radius);
     fill: var(--gx-series-color);
-    stroke: none;
+    stroke: var(--gx-point-stroke-color);
+    stroke-width: var(--gx-point-stroke-width);
   }
 
   /* --- Direct labels ---------------------------------------------------------------- */
@@ -210,11 +218,18 @@
   }
 
   .gx-label[data-halo='light'],
-  .gx-label[data-halo='dark'],
-  .gx-value-label[data-halo='light'],
-  .gx-value-label[data-halo='dark'] {
+  .gx-value-label[data-halo='light'] {
     paint-order: stroke fill;
     stroke: var(--gx-value-label-halo-color);
+    stroke-width: var(--gx-value-label-halo-width);
+    stroke-opacity: var(--gx-value-label-halo-opacity);
+    stroke-linejoin: round;
+  }
+
+  .gx-label[data-halo='dark'],
+  .gx-value-label[data-halo='dark'] {
+    paint-order: stroke fill;
+    stroke: var(--gx-surface-text-color);
     stroke-width: var(--gx-value-label-halo-width);
     stroke-opacity: var(--gx-value-label-halo-opacity);
     stroke-linejoin: round;

@@ -1,10 +1,10 @@
 # 017 — The transition is not the hysteresis mechanism, because a rung boundary mounts
 
 **Status:** ✅ **measured** 2026-08-24 · probe `scripts/probe-flicker.mjs` (`pnpm probe:flicker`)
-**Applied to:** nothing. This record discharges A6's owed measurement and hands **B1** a specified
-deadband; it changes no code.
+**Applied to:** nothing. This record discharges A6's owed measurement and hands the next interaction
+pass a specified deadband candidate; it changes no code.
 **Affects:** `../10-responsive-ladder.md` §8 item 1, `sizeContextFromPixels()` in `@gx/core`,
-milestone **B1**
+the post-B3 interaction pass
 **Supersedes:** nothing. **Extends:** [016](016-what-svg-geometry-actually-transitions.md) — case 12
 again, one level up the tree.
 
@@ -117,7 +117,7 @@ Two mechanisms, and they are not alternatives:
 | Problem | Mechanism | Status |
 |---|---|---|
 | Geometry wobble within a rung | `transition` — measured absorbing ≥0.5 Hz | ✅ shipped at A6 |
-| Rung boundary re-crossing | **Deadband in the classifier** | ⛔ **B1**, specified below |
+| Rung boundary re-crossing | **Deadband in the classifier** | ⛔ post-B3 interaction pass, specified below |
 | A rung change the user actually asked for | `transition` under the mount | ✅ shipped at A6 |
 
 ### The deadband, as the plan requires it to be expressed
@@ -128,7 +128,7 @@ the wobble to a single crossing is **3 px at a 600 px boundary — 0.50% of the 
 ⚠ That is a floor from one boundary and one amplitude, not a recommendation. It is the number below
 which a deadband demonstrably does not work; a shipped value wants margin over it and wants checking
 at the Micro and Tile edges, where 0.50% is under half a pixel and the quantity that matters is
-probably the cell size rather than the boundary. **B1 owns the value.** What this record fixes is
+probably the cell size rather than the boundary. **The next interaction pass owns the value.** What this record fixes is
 the *form* — a fraction, per the plan's own instruction that it be *"expressed as a fraction of the
 boundary width, never as an absolute px value"* — and the fact that one is needed at all.
 
@@ -136,7 +136,7 @@ boundary width, never as an absolute px value"* — and the fact that one is nee
 and its output is the input to `planChart()`. Hysteresis is stateful by definition — it depends on
 which side you came from — so it cannot go inside a pure function without changing what that
 function is. Decision 10 (no DOM measurement in the resolver) and decision 8 (plan is data) both
-bear on where the previous rung is allowed to live, and B1 has to answer that before it picks a
+bear on where the previous rung is allowed to live, and the interaction pass has to answer that before it picks a
 number. This record does not answer it.
 
 ---
@@ -147,9 +147,9 @@ number. This record does not answer it.
   a confirmation would have been: the mechanism A6 shipped is sound, and the thing it was *claimed*
   to make unnecessary turns out to be necessary.
 - **`probe-flicker.mjs` is a probe, not a gate**, on the same reasoning as `probe-motion.mjs`. There
-  is nothing here to regress yet — the deadband does not exist. When B1 ships one, the assertion
+  is nothing here to regress yet — the deadband does not exist. When the interaction pass ships one, the assertion
   worth gating is section 2's table, which is falsifiable and cheap.
-- **The crossover frequency is a function of the envelope**, so a B1 tuning pass that shortens the
+- **The crossover frequency is a function of the envelope**, so a future tuning pass that shortens the
   recompose duration moves it upward and makes flicker *easier* to provoke. Anyone changing
   `--gx-motion-duration-recompose` should re-run the probe; the relationship is 1/(2 × envelope) and
   the probe prints it.
@@ -167,4 +167,4 @@ number. This record does not answer it.
 | `../30-implementation-plan.md` A6 | Replace *"⚠ Still owed"* with the finding | ✅ |
 | `../10-responsive-ladder.md` §8 item 1 | The deadband is required, not optional; §7's "primary mechanism" claim is corrected | ✅ |
 | `../maps/04-ci-gate-map.md` | Nothing — this is a probe and takes no gate number | ✅ n/a |
-| `@gx/core` `context.ts` | A deadband, and a decision about where the previous rung lives | ⛔ **B1** |
+| `@gx/core` `context.ts` | A deadband, and a decision about where the previous rung lives | ⛔ **post-B3 interaction pass** |

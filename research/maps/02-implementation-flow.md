@@ -16,9 +16,9 @@ flowchart TD
     A5["<b>A5</b> @gx/react &lt;AutoChart&gt;<br/><i>useElementSize · ResizeObserver</i>"]
     A6["<b>A6</b> Transitions<br/><i>rescale ~300ms · replace ~1000ms</i>"]
 
-    B1["<b>B1</b> Token tree<br/><i>183 tokens · generated CSS + TS</i>"]
+    B1["<b>B1</b> Token tree<br/><i>186 declarations · generated CSS + TS</i>"]
     B2["<b>B2</b> Prove-we-exceed<br/><i>the restyle demo</i>"]
-    B3["<b>B3</b> Threshold tokens<br/><i>provenance tiers A-lit/A-impl/B/C</i>"]
+    B3["<b>B3</b> Threshold policy<br/><i>typed inputs · provenance + consumption gate</i>"]
 
     C1["<b>C1</b> @gx/grid<br/><i>react-grid-layout@2/core</i>"]
     C2["<b>C2</b> Widget chrome<br/><i>header · menu · empty · error</i>"]
@@ -59,30 +59,27 @@ has invented a dependency that does not exist and lost several days to it.
 
 ---
 
-## What is actually blocked, and by what
+## Current sequencing
 
-The four remaining open items are **not** a wall in front of A1. Each blocks a different, later,
-specific thing. Drawn honestly:
+A1-A6 and B1-B3 are complete for the current line/area planner. The remaining work is downstream
+integration and release preparation; none of it requires reopening the B3 policy contract.
 
 ```mermaid
 flowchart LR
-    o1["<b>Open 1</b><br/>Project name + npm scope"] --> t1["blocks <b>E3 publish only</b><br/><i>one regex + one generator constant<br/>+ one template-literal type</i>"]
-    o4["<b>Open 4</b><br/>Roboto Flex tnum?<br/>safetyFactor calibration"] --> t4["blocks <b>generating the A2<br/>metrics table</b> — not A1, not the types"]
-    o2["<b>Open 2</b><br/>43 unspecified --gx-* names"] --> t2["blocks <b>B1</b>"]
-    o3["<b>Open 3</b><br/>6 UNVERIFIED defaults"] --> t2
-    o5["<b>Open 5</b><br/>6 neutral-theme hexes<br/>+ 5 unguaranteed pairs"] --> t2
+    o1["<b>Open</b><br/>Project name + npm scope"] --> t1["blocks <b>E3 publish</b>"]
+    o2["<b>Calibration</b><br/>Roboto Flex tnum?<br/>safetyFactor"] --> t2["blocks final metrics calibration<br/><i>not B3 planning</i>"]
+    o3["<b>Next C1-C2</b><br/>Grid + widget chrome"] --> t3["blocks <b>dashboard integration</b>"]
+    o4["<b>Next D</b><br/>Chart breadth"] --> t4["blocks <b>additional chart families</b>"]
 
     classDef q fill:#3d2a0b,stroke:#fbbf24,color:#fff8e6
     classDef r fill:#123a2a,stroke:#4ade80,color:#eafff3
-    class o1,o2,o3,o4,o5 q
-    class t1,t2,t4 r
+    class o1,o2,o3,o4 q
+    class t1,t2,t3,t4 r
 ```
 
-Nothing points at A1. **Start A1** (`../30-implementation-plan.md`, immediate next actions, item 5:
-*"Nothing is blocked any more."*).
-
-Open 2, 3 and 5 all land on B1 and are all the same kind of work — filling rows in a table whose
-shape is already fixed — so they resolve together in one sitting rather than three.
+The old Open 2/3/5 entries were B1 transcription items. B1's generated source, membership gate,
+naming gate, Neutral themes, and census now close that work; the historical risk remains in the
+research record, but it is no longer a current blocker.
 
 ---
 
@@ -144,5 +141,5 @@ milestone deliverables, not a cleanup pass before release:
 | A4 | RSC fixture builds · tree-shaking size assertion |
 | A5 | `FakeResizeObserver` rung transitions |
 | B1 | token lint, **both directions** |
-| B3 | every threshold carries a provenance tier |
+| B3 | every live threshold is typed, serialisable, tiered, and consumed by the planner; reserved future thresholds are explicitly marked `@future` |
 | E3 | provenance published · OIDC publish · pkg.pr.new preview |

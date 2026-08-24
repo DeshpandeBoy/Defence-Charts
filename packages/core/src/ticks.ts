@@ -39,7 +39,9 @@ export function tickCountForWidth(
   width: number,
   policy: Pick<PlanPolicy, 'tickTargetSpacingX' | 'ticksMin'> = DEFAULT_POLICY,
 ): number {
-  const min = Number.isFinite(policy.ticksMin) ? Math.max(0, Math.floor(policy.ticksMin)) : 2
+  const min = Number.isFinite(policy.ticksMin)
+    ? Math.max(0, Math.floor(policy.ticksMin))
+    : Math.max(0, Math.floor(DEFAULT_POLICY.ticksMin))
   if (!Number.isFinite(width) || width <= 0) return min
 
   // A non-positive target spacing would divide by zero or invert the density; fall back to

@@ -341,7 +341,7 @@ describe('the plan is obeyed, not approximated', () => {
       renderToStaticMarkup(
         <Chart plan={forced} data={ONE} ctx={ctx} title="Forced" id="t" />,
       ),
-    ).toThrow(/'bar' is not implemented.*B2/s)
+    ).toThrow(/'bar' is not implemented.*D chart breadth/s)
   })
 
   it('honours axes.x.visible', () => {
@@ -353,6 +353,36 @@ describe('the plan is obeyed, not approximated', () => {
     )
     expect(html).not.toContain('gx-axis--x')
     expect(html).toContain('gx-axis--y')
+  })
+
+  it('wires B2 axis and guide controls into rendered SVG', () => {
+    const ctx = sizeContextFromPixels(900, 520)
+    const base = planChart('line', ctx, describeShape(THREE))
+    const forced = applyOverrides(base, {
+      axes: {
+        x: {
+          labelFlush: true,
+          labelBound: true,
+          tickBand: 'extent',
+          translate: 0.5,
+        },
+        y: { labelBound: true, strokeCap: 'round', dashPhase: 3 },
+      },
+      labels: { labelHalo: 'dark' },
+    })
+    const html = renderToStaticMarkup(
+      <Chart plan={forced} data={THREE} ctx={ctx} title="B2" id="b2" />,
+    )
+
+    expect(html).toContain('data-tick-band="extent"')
+    expect(html).toContain('data-label-bound=""')
+    expect(html).toContain('<clipPath id="b2-axis-x-bound"')
+    expect(html).toContain('clip-path="url(#b2-axis-x-bound)"')
+    expect(html).toContain('data-dash-phase="3"')
+    expect(html).toContain('data-stroke-cap="round"')
+    expect(html).toContain('--gx-grid-dash-offset:3')
+    expect(html).toContain('--gx-grid-cap:round')
+    expect(html).toContain('data-halo="dark"')
   })
 })
 

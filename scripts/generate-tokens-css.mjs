@@ -48,9 +48,8 @@ const HEADER = `/*
  *
  * @gx/tokens — The Emission-Line Rail, the default theme.
  *
- * ⚠ The NEUTRAL theme is deliberately absent. Its six hex values are derivable, not
- * guessable (43-theming.md §4), and shipping a guess is exactly what that section
- * refuses to do. It arrives with the simulations that justify it.
+ * The Rail theme is the default. Neutral dark/light escape-hatch variants are emitted below
+ * from the typed source and are selected explicitly by class or data attribute.
  *
  * This file is the one place in the repo where raw colour and length literals are
  * legal, and only as custom-property values — see 43-theming.md §6.1 and the gate in
@@ -151,25 +150,51 @@ export function renderTokensCss() {
   )
 
   for (const variant of THEME_VARIANTS) {
+    if (variant.prefersColorScheme !== undefined) {
+      lines.push(
+        '',
+        ...blockComment(
+          [
+            'prefers-color-scheme picks the ground; a class picks the world. Four combinations, not',
+            `two — 43-theming.md §2. ${variant.note ?? ''}`.trimEnd(),
+            '',
+            'The media and explicit class blocks are emitted from the same authored override list',
+            'so the two selection paths cannot drift.',
+          ].join('\n'),
+          '  ',
+        ),
+        `  @media (prefers-color-scheme: ${variant.prefersColorScheme}) {`,
+        '    :where(:root) {',
+        ...renderOverrides(variant.overrides, '      '),
+        '    }',
+        '  }',
+      )
+    } else {
+      lines.push(
+        '',
+        ...blockComment(
+          [
+            'Explicit escape-hatch theme. It is intentionally class/data-attribute only:',
+            'never emit it into an unscoped prefers-color-scheme root block.',
+            variant.note ?? '',
+          ].filter(Boolean).join('\n'),
+          '  ',
+        ),
+        '',
+        ...blockComment('The data attribute path is explicit and scoped to the selected world.', '  '),
+        `  :where(:root)[data-gx-theme='${variant.id}'] {`,
+        ...renderOverrides(variant.overrides, '    '),
+        '  }',
+        '',
+        ...blockComment('The class path is explicit and scoped to the selected world.', '  '),
+        `  .gx-theme-${variant.id} {`,
+        ...renderOverrides(variant.overrides, '    '),
+        '  }',
+      )
+      continue
+    }
+
     lines.push(
-      '',
-      ...blockComment(
-        [
-          'prefers-color-scheme picks the ground; a class picks the world. Four combinations, not',
-          `two — 43-theming.md §2. ${variant.note ?? ''}`.trimEnd(),
-          '',
-          '⚠ The two blocks below are the SAME eight declarations, emitted twice from one authored',
-          'list. Hand-maintained they had already diverged: the class block carried bare hex with',
-          'the contrast ratios stripped off, so the copy a consumer is most likely to read was the',
-          'copy with the evidence missing.',
-        ].join('\n'),
-        '  ',
-      ),
-      '  @media (prefers-color-scheme: light) {',
-      '    :where(:root) {',
-      ...renderOverrides(variant.overrides, '      '),
-      '    }',
-      '  }',
       '',
       ...blockComment(
         [

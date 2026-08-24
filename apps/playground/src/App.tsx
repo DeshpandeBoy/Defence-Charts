@@ -75,7 +75,7 @@ export function App() {
           by <code>@gx/core</code>, which has never seen the DOM.
         </p>
         <p className="note">
-          Milestone A5. The chart is a single <code>&lt;AutoChart&gt;</code> — it measures
+          Milestone A6 / B1-B3. The chart is a single <code>&lt;AutoChart&gt;</code> — it measures
           its own box, resolves the plan beside it, and renders it with hook-free components
           that work on a server with no client bundle. Watch the mark kind flip from{' '}
           <code>line</code> to <code>horizon</code> as you drag the widget short.
@@ -135,7 +135,7 @@ export function App() {
           library’s answer today is <code>overflow: visible</code> on the{' '}
           <code>&lt;svg&gt;</code>, which works when the chart has room around it and does
           nothing in a dashboard cell, where the widget <em>is</em> the room. That gutter is
-          milestone B’s, written down in <code>chart.css</code> since A4. This box is{' '}
+          current grid/chrome work’s, written down in <code>chart.css</code> since A4. This box is{' '}
           <code>overflow: hidden</code>, so the shortfall shows as clipping instead of hiding
           behind a scrollbar — and a scrollbar here would feed the resize observer that
           produced the box.

@@ -13,9 +13,9 @@
  *      them would pass tests forever. Text width comes from a character-advance model
  *      instead (`./text.ts`, `research/41-text-metrics.md`).
  *
- * ⚠ **Still only `'line'` and `'area'`, as of A6.** The `ChartPlan` contract, `PlanPolicy`,
+ * ⚠ **Still only `'line'` and `'area'`, as of B3.** The `ChartPlan` contract, `PlanPolicy`,
  * `measureText()`, size classification and `planChart()` itself are all here, but every
- * other `ChartType` throws with the milestone that adds it — B2 for most of them. A silent
+ * other `ChartType` throws with the D milestone that adds it. A silent
  * fallback plan would be the same failure species as happy-dom's `0`.
  *
  * ⚠ `ChartPlan['type']` is `ChartType | (string & {})`, which is **wider than the ten

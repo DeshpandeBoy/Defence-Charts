@@ -8,9 +8,9 @@ When a widget gets smaller, GX can remove an unreadable axis, replace a line wit
 encoding, move a legend, or state one value directly. It does not merely squeeze the same chart.
 
 <Callout type="warn" title="Private workspace today">
-  The implementation through milestone A5 exists, but the packages are still private and
-  `@gx/*` is a placeholder scope. Examples on this site compile inside this monorepo. Public npm
-  installation waits for the project name and scope decision.
+  The implementation through B3 exists for the current line/area planner, but the packages are
+  still private and `@gx/*` is a placeholder scope. Examples on this site compile inside this
+  monorepo. Public npm installation waits for the project name and scope decision.
 </Callout>
 
 <ResizeLab />
@@ -48,10 +48,13 @@ needs; `resolveFrame(plan, data, ctx)` is where values become scales and coordin
 | A1-A3 | Implemented | Monorepo, token gates, data contract, pure line/area planning |
 | A4 | Implemented | Hook-free `<Chart>`, frame geometry, accessible SVG, semantic test helpers |
 | A5 | Implemented | `<AutoChart>`, `useElementSize`, containment checks, browser resize proof |
-| B | Planned | Full token tree, threshold configuration, visual-control breadth |
+| A6 | Implemented | CSS-only two-stage transitions, object-constant ticks/gridlines, reduced-motion baseline |
+| B1 | Implemented | Generated token tree, provenance census, and Neutral dark/light escape-hatch themes are green |
+| B2 | Implemented | Axis, guide, point, halo, and density-threshold controls are wired and browser-verified |
+| B3 | Implemented | Typed threshold policy/override split, provenance, and acceptance coverage |
 | C | Planned | Twelve-column dashboard grid and widget chrome |
 | D | Planned | Bar, donut, KPI, scatter, heatmap, funnel, progress, sparkline |
-| E | In progress | Documentation, naming, publishing, release automation |
+| E | In progress | Documentation scaffold is built; naming, publishing, and release automation remain |
 
 Continue with [installation](/docs/getting-started/installation), then build
 [your first chart](/docs/getting-started/first-chart).

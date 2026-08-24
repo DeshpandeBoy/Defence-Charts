@@ -36,7 +36,7 @@
      *
      * It is not hypothetical here. `@gx/primitives`' direct end-of-line series labels are
      * drawn past the plot's right edge — `resolvePlotBox()` reserves a gutter on the left
-     * and nothing on the right until milestone B grows one — so at Canvas and above there
+     * and nothing on the right until the grid/chrome work grows one — so at Canvas and above there
      * is real overhang to clip. `hidden` converts that shortfall into visible clipping,
      * which is a thing someone can see and file, instead of an oscillation nobody can.
      */

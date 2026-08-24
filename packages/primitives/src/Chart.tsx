@@ -194,8 +194,10 @@ export function Chart({
             rule={plan.axes.x.domainLine}
             labels={plan.axes.x.ticks.mode !== 'none'}
             labelFlush={plan.axes.x.labelFlush}
+            labelBound={plan.axes.x.labelBound}
             tickBand={plan.axes.x.tickBand}
             translateOffset={plan.axes.x.translate}
+            clipId={`${base}-axis-x-bound`}
           />
         ) : null}
         {plan.axes.y.visible ? (
@@ -206,8 +208,10 @@ export function Chart({
             rule={plan.axes.y.domainLine}
             labels={plan.axes.y.ticks.mode !== 'none'}
             labelFlush={plan.axes.y.labelFlush}
+            labelBound={plan.axes.y.labelBound}
             tickBand={plan.axes.y.tickBand}
             translateOffset={plan.axes.y.translate}
+            clipId={`${base}-axis-y-bound`}
           />
         ) : null}
 
@@ -253,7 +257,7 @@ function SeriesMarks({ frame, plan }: { frame: ChartFrame['series'][number]; pla
 
   if (kind === 'bar' || kind === 'arc' || kind === 'cell' || kind === 'point') {
     throw new Error(
-      `@gx/primitives: mark kind '${kind}' is not implemented. A4 renders 'line', 'horizon' and 'none' only; bar and arc land at B2.`,
+      `@gx/primitives: mark kind '${kind}' is not implemented. A4 renders 'line', 'horizon' and 'none' only; bar and arc land in D chart breadth.`,
     )
   }
 

@@ -79,6 +79,10 @@ describe('DEFAULT_POLICY', () => {
       expect(DEFAULT_POLICY.pointBudget).toBe(2000)
     })
 
+    it('pointAutoHideDensityThreshold is 2 px — Highcharts', () => {
+      expect(DEFAULT_POLICY.pointAutoHideDensityThreshold).toBe(2)
+    })
+
     it('minCellSize is 8 — tier C, and the citation stays absent on purpose', () => {
       // ⚠ `research/10-responsive-ladder.md` §4 is explicit that the 8 px *"coincides
       // numerically with Heer & Bostock's gridline result, but that finding is about

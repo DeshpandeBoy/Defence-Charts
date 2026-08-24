@@ -27,7 +27,7 @@ the one above it. That progression is what we call **the ladder**, and it is the
 
 The second half of the product is control. Every stroke width, every gap, every tick length, every
 colour is something you can change from CSS — for one chart on the page, without touching the others.
-Roughly 183 of those knobs, all named consistently.
+The shipped presentation surface currently declares 186 of those knobs, all named consistently.
 
 ---
 
@@ -511,10 +511,12 @@ The finish line is not a checklist. It is a reaction: someone drags the box, wat
 a different chart, and says *"oh, I see."* If that does not happen, the premise is wrong and
 everything after it is wasted work. That is exactly why it is first and why it is small.
 
-**Milestone B — the control surface.** All 183 tokens, light and dark themes, and the work of proving
-we actually match or beat the field knob for knob.
+**Milestone B — the control surface.** B1-B3 deliver the generated presentation tree, Rail and
+Neutral dark/light themes, renderer controls, and typed threshold policy for the current line/area
+proof. The shipped source declares 186 presentation tokens and the policy gate keeps research tiers
+separate from implementation choices.
 
-**Milestone C — the grid.** Widgets, drag, resize, per-widget minimums, the widget frame itself.
+**Milestone C — the grid.** Next: widgets, drag, resize, per-widget minimums, the widget frame itself.
 
 **Milestone D — more chart types.** Only now. Each one repeats the pattern Milestone A already proved.
 Bar first, because switching to horizontal is the most dramatic adaptation we have. Then donut, KPI,

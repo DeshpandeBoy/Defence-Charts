@@ -14,7 +14,7 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
         banner: (
           <div key="implementation-status" className="gx-docs-status">
             <FontAwesomeIcon icon={faCircleCheck} aria-hidden="true" />
-            <span>A1–A5 implemented</span>
+            <span>A1–A6 and B1–B3 implemented</span>
           </div>
         ),
       }}

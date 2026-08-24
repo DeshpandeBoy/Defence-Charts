@@ -159,7 +159,7 @@ export function xAxisBand(axis: AxisPlan, policy: PlanPolicy): number {
     band += policy.tickLength + policy.tickLabelGap + lineHeight(TICK_LABEL_RANK, policy)
   }
   if (axis.title) band += policy.axisTitleGap + lineHeight(AXIS_TITLE_RANK, policy)
-  return band
+  return boundAxisExtent(band, axis)
 }
 
 /**
@@ -185,9 +185,15 @@ export function yAxisGutter(axis: AxisPlan | null, policy: PlanPolicy): number {
   // direction; it is called out because the mistake reads as correct.
   if (axis.title) gutter += policy.axisTitleGap + lineHeight(AXIS_TITLE_RANK, policy)
 
-  if (axis.minExtent > 0) gutter = Math.max(gutter, axis.minExtent)
-  if (axis.maxExtent > 0) gutter = Math.min(gutter, axis.maxExtent)
-  return gutter
+  return boundAxisExtent(gutter, axis)
+}
+
+/** Apply the same Vega-style extent contract to both horizontal and vertical axes. */
+function boundAxisExtent(extent: number, axis: AxisPlan): number {
+  let bounded = extent
+  if (axis.minExtent > 0) bounded = Math.max(bounded, axis.minExtent)
+  if (axis.maxExtent > 0) bounded = Math.min(bounded, axis.maxExtent)
+  return bounded
 }
 
 /**

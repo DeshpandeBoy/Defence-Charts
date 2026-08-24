@@ -5,7 +5,7 @@ import type { SizeClass } from '@gx/core'
  * each one renders.
  *
  * ⚠ These strings are transcribed from `research/10-responsive-ladder.md` §4 "Line / area"
- * and describe what **A3** will draw, not what this playground draws. Nothing here is
+ * and describe what the resolver will draw, not what this playground draws. Nothing here is
  * computed — it is a legend for the highlight, so that a rung change reads as a change of
  * *content* rather than a change of label.
  */

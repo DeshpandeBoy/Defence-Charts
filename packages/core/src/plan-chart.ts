@@ -41,14 +41,14 @@ const LINE_TYPES: ReadonlySet<ChartType> = new Set<ChartType>(['line', 'area'])
  * a plan document nobody reads at 2am.
  */
 const TYPE_MILESTONE: Readonly<Partial<Record<ChartType, string>>> = Object.freeze({
-  bar: 'B2',
-  timebar: 'B2',
-  donut: 'B2',
-  scatter: 'B2',
-  funnel: 'C',
-  kpi: 'C',
-  heatmap: 'C',
-  progress: 'C',
+  bar: 'D',
+  timebar: 'D',
+  donut: 'D',
+  scatter: 'D',
+  funnel: 'D',
+  kpi: 'D',
+  heatmap: 'D',
+  progress: 'D',
 })
 
 /**

@@ -45,9 +45,13 @@ export type AxisProps = {
   readonly labels?: boolean
   readonly className?: string
   readonly children?: (ticks: readonly ComputedTick[]) => ReactNode
-  readonly labelFlush?: boolean
+  readonly labelFlush?: boolean | number
+  /** Clip axis content to the plot-aligned viewport along the axis direction. */
+  readonly labelBound?: boolean | number
   readonly tickBand?: 'center' | 'extent'
   readonly translateOffset?: number
+  /** Stable id supplied by `<Chart>` so multiple charts cannot share a clip path. */
+  readonly clipId?: string
 }
 
 export function Axis({
@@ -60,11 +64,19 @@ export function Axis({
   className,
   children,
   labelFlush = false,
+  labelBound = false,
   tickBand = 'center',
   translateOffset = 0,
+  clipId,
 }: AxisProps) {
   const horizontal = orientation === 'x'
   const { tickLength, tickLabelGap, axisRuleWidth } = CHROME_METRICS
+  const flushLabels = labelFlush === true || (typeof labelFlush === 'number' && labelFlush > 0)
+  const boundLabels = labelBound === true || (typeof labelBound === 'number' && labelBound > 0)
+  const axisClipId = clipId ?? `gx-axis-${orientation}-bound`
+  // Band ticks are positioned at the edge of their cell; the half-pixel correction keeps the
+  // rect's visible edge on the same coordinate as the continuous-axis center position.
+  const tickBandOffset = tickBand === 'extent' ? -0.5 : 0
 
   // ⚠ The x axis hangs off the *bottom* of the plot and the y axis stands at its *left*, so
   // only the x translate carries the plot height. Tick offsets are already plot-relative
@@ -83,21 +95,35 @@ export function Axis({
     <g
       className={classes('gx-axis', `gx-axis--${orientation}`, className)}
       data-axis={orientation}
+      data-tick-band={tickBand}
+      data-label-bound={boundLabels ? '' : undefined}
+      clipPath={boundLabels ? `url(#${axisClipId})` : undefined}
       transform={origin}
     >
-      {rule ? (
-        <rect
-          className="gx-axis__rule"
-          x={horizontal ? 0 : -axisRuleWidth}
-          y={0}
-          width={horizontal ? roundCoord(plot.width) : axisRuleWidth}
-          height={horizontal ? axisRuleWidth : roundCoord(plot.height)}
-        />
+      {boundLabels ? (
+        <clipPath id={axisClipId} clipPathUnits="userSpaceOnUse">
+          <rect
+            x={horizontal ? 0 : -roundCoord(plot.width)}
+            y={0}
+            width={horizontal ? roundCoord(plot.width) : roundCoord(plot.width)}
+            height={roundCoord(plot.height)}
+          />
+        </clipPath>
       ) : null}
 
+      {rule ? (
+          <rect
+            className="gx-axis__rule"
+            x={horizontal ? 0 : -axisRuleWidth}
+            y={0}
+            width={horizontal ? roundCoord(plot.width) : axisRuleWidth}
+            height={horizontal ? axisRuleWidth : roundCoord(plot.height)}
+          />
+        ) : null}
+
       {children
-        ? children(ticks)
-        : ticks.map((tick, i) => (
+          ? children(ticks)
+          : ticks.map((tick, i) => (
             // ⚠ **Keyed by value.** This read `${tick.offset}-${i}` until A6, and the old
             // reasoning was sound but aimed one step short: offset alone does collide when two
             // ticks land on the same pixel, and index alone does break object constancy. The
@@ -116,7 +142,9 @@ export function Axis({
               key={String(tick.value)}
               data-value={String(tick.value)}
               transform={
-                horizontal ? translate(tick.offset, 0) : translate(0, tick.offset)
+                horizontal
+                  ? translate(tick.offset + tickBandOffset, 0)
+                  : translate(0, tick.offset + tickBandOffset)
               }
             >
               {marks ? (
@@ -140,9 +168,9 @@ export function Axis({
                   // width, and the y gutter was never sized for it.
                   data-anchor={
                     horizontal
-                      ? (labelFlush && i === 0)
+                      ? (flushLabels && i === 0)
                         ? 'start'
-                        : (labelFlush && i === ticks.length - 1)
+                        : (flushLabels && i === ticks.length - 1)
                           ? 'end'
                           : 'middle'
                       : 'end'
@@ -152,7 +180,7 @@ export function Axis({
                 </text>
               ) : null}
             </g>
-          ))}
+        ))}
     </g>
   )
 }

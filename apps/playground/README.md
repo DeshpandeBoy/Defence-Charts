@@ -11,6 +11,13 @@ pnpm dev            # or: pnpm --filter @gx/playground dev
 
 Then open <http://localhost:5173>.
 
+## Current status
+
+Milestones A1-A6 and B1-B3 are implemented and verified for the line/area proof. The playground
+exercises the generated 186-token presentation surface, Rail/Neutral themes, renderer controls and
+typed `PlanPolicy` thresholds. C1-C2 grid work is next; bar/timebar and the remaining chart families
+are on the D track.
+
 ## What you are looking at
 
 A container with `resize: both` and nothing else deciding its size, measured by a
@@ -49,14 +56,11 @@ creeps back in as a "small fix", this is where you would see it first.
 
 ## What is deliberately missing
 
-**There is still no chart.** The renderer lands at **A4**. Drawing a placeholder would make
-the playground look further along than the library is, which is the one thing a progress
-view must not do. What exists today is `@gx/core` through **A3**: the plan contract, size
-classification, text measurement, and the resolver that turns the first two into a
-decision. The JSON panel is what a renderer would be handed.
+**The line chart is real now.** The playground exercises the delivered A4–A6 renderer,
+`AutoChart`, B1-B3 control surface and CSS transition path beside the resolver's JSON output. What is still absent
+is breadth: chart types other than line and area are missing for the same reason —
+`planChart()` **throws** for them rather than falling back to a plan it cannot justify.
 
-Chart types other than line and area are missing for the same reason — `planChart()`
-**throws** for them rather than falling back to a plan it cannot justify.
 
 ## The remaining open question this page makes visible
 

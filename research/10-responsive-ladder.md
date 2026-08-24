@@ -483,9 +483,9 @@ drag. Decision [016](decisions/016-what-svg-geometry-actually-transitions.md) me
 element never transitions at all — so before the keys were fixed, every motion rule in the sheet was
 inert, and would have stayed inert however carefully the CSS was written.
 
-⚠ **The staging has no timing, and still does not.** This section specifies *that* a change is staged
-and never specifies the overlap. A6 chose half the duration, tokenised it as
-`--gx-motion-stage-delay`, and marked it UNVERIFIED with B1 as the owner. Gate **G19** asserts the
+⚠ **The staging has no research-backed timing, and still does not.** This section specifies *that* a
+change is staged and never specifies the overlap. A6 chose half the duration; B1 records that choice
+as an explicit Tier-C implementation value in the generated token source. Gate **G19** asserts the
 delay it finds is the delay the stylesheet declares, and that it scales with the duration class — it
 does **not** assert the fraction, on purpose, because this section never fixed one.
 
@@ -508,7 +508,7 @@ for a reason the design argument had no way to reach — the boundary *mounts* r
    cannot transition. The instruction below stands and is now the live one — express it as a
    **fraction of the boundary width**, not an absolute. The guessed ~2–3% has margin: the measured
    *floor*, the smallest deadband that suppresses a ±6 px wobble at the Panel → Canvas edge, is
-   3 px on 600 px — **0.50%**. ⚠ Still open, and now **B1's**: the shipped fraction, whether the
+3 px on 600 px — **0.50%**. ⚠ Still open as a post-B3 interaction follow-up: the shipped fraction, whether the
    right denominator at the Micro and Tile edges is the boundary or the cell size, and where a
    stateful previous-rung may live given decisions 8 and 10. ⚠ Corrects the architecture doc, which
    specified an absolute 8 px.

@@ -28,17 +28,20 @@ has to actually exist). `scripts/check-granularity.test.mjs` enforces it, includ
 (no row may go un-dispositioned; no cited token may go undeclared beyond the count already owed)
 and planted-violation cases proving each hard failure can actually fire.
 
-**What this milestone is not**: it does not add any of the ~65 named tokens to
-`packages/tokens/src/tokens.ts`, and it does not wire the gate into `pnpm verify` or CI yet. See §4.
+**Current status:** B2's delivered control surface covers the implemented line/area renderer, and
+the audit is clean: all 30 research knobs are dispositioned and 0 are owed to B2. Fourteen named
+token candidates remain undeclared (`axis-domain-dash-offset`, `axis-domain-cap`, the two label-
+stagger fields, the two value-label skip fields, the domain-line dash/cap fields, and the six
+scale/breakpoint fields); they have no current CSS consumer and are an explicit breadth/follow-up
+queue, not a B3 blocker. The G20 audit is still not wired into `pnpm verify` or CI; see §4.
 
 ---
 
 ## 2. The disposition table
 
-Rendered from `scripts/granularity.mjs`'s `DISPOSITIONS`. "Owed to B1" means the token is named
-here but not yet declared in `packages/tokens/src/tokens.ts` — expected at this point in the
-timeline (B1 slice 3, transcribing `raw/06` §6.2–6.9, is concurrent with this document), not a
-defect in this manifest.
+Rendered from `scripts/granularity.mjs`'s `DISPOSITIONS`. "Owed to B1" means a research
+disposition names a token that is not in the current shipped presentation tree. The current count
+is 14; these are follow-up candidates, not undeclared `var()` references in authored CSS.
 
 | Knob | Tokens | Plan path(s) | Note |
 |---|---|---|---|
@@ -150,10 +153,9 @@ test file needs no such wiring to run — `vitest.config.ts`'s `include` already
 
 ## 5. What's still open
 
-- The ~65 named-but-undeclared tokens in `DISPOSITIONS` are B1's remaining work
-  (`research/30-implementation-plan.md` B1 slice 3 — transcribing `raw/06` §6.2–6.9), not this
-  document's. The `owedToB1` ratchet in `check-granularity.test.mjs` tracks it down as that lands.
-- Adding the genuinely new tokens this survey argues for beyond what `raw/06` already names (if
-  any surface once B1's transcription is done) is B2 slice 2.
-- The G20 wiring in §4 is B2 slice 3, or folds into whichever slice next touches `package.json` /
-  `ci.yml` without colliding with in-flight work.
+- Decide whether the 14 undeclared candidates belong in the public presentation surface or remain
+  research-only. They have no current stylesheet consumer and do not block the line/area proof.
+- The G20 wiring in §4 remains optional hardening: add the script to `package.json`, CI, and the gate
+  register when the next shared-file pass can absorb it safely.
+- Chart breadth is now the D track; each new family gets its own ladder, snapshots, renderer, and
+  disposition pass.

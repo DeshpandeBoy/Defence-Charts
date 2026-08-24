@@ -18,9 +18,9 @@ import { AutoChart } from '@gx/react'
 | `data` | `readonly Series[]` | Yes | Canonical values |
 | `title` | `string` | Yes | Accessible chart name |
 | `description` | `string` | No | Longer accessible description |
-| `policy` | `Partial<PlanPolicy>` | No | Pre-resolution thresholds and fitting policy |
-| `overrides` | `PlanOverrides` | No | Forced values applied after resolution |
-| `nominalCellSize` | `number` | No | Standalone pixel-to-cell conversion; default is 100 |
+| `policy` | `Partial<PlanPolicy>` | No | Typed thresholds and fitting inputs applied before resolution |
+| `overrides` | `PlanOverrides` | No | Forced `ChartPlan` values applied after resolution |
+| `nominalCellSize` | `number` | No | Tier-C standalone pixel-to-cell conversion; default is 100 |
 | `initialSize` | `{ width; height }` | No | Declared server-rendered first size |
 | `className` | `string` | No | Wrapper class |
 | `id` | `string` | No | Stable generated SVG IDs, useful in snapshots |
@@ -29,6 +29,41 @@ import { AutoChart } from '@gx/react'
 
 Without `initialSize`, server output contains the wrapper and no guessed chart. With `initialSize`,
 the server emits a real first chart. After hydration, the observer supplies the real dimensions.
+
+## Threshold policy and overrides
+
+B3 keeps plan inputs separate from presentation. `policy` carries serialisable TypeScript values
+such as `tickTargetSpacingX`, `plotHeightOptimal`, `substitute`, `pointBudget`, and
+`valueRegionMaxShare`. They are applied before `planChart()` resolves a rung, so the same inputs
+produce the same plan on the server and client.
+
+```tsx
+<AutoChart
+  type="line"
+  data={series}
+  title="Revenue"
+  policy={{ tickTargetSpacingX: 80, pointBudget: 1000, substitute: true }}
+/>
+```
+
+`overrides` is intentionally different: it is a `PlanOverrides` deep partial applied after the
+resolver and can force a decided plan field. It is not a second spelling of a threshold. For
+example, changing `marks.pointBudget` after resolution does not re-run the renderer decision.
+
+Threshold defaults carry provenance in the core policy source: A-lit is published perception or
+platform research, A-impl is a verified library convention, B is an evidence-consistent GX choice,
+and C is an explicit unsourced design choice. Presentation values such as color, stroke, radius,
+and opacity remain CSS custom properties; they never feed `planChart()`.
+
+| Typed input | Default | Provenance |
+| --- | ---: | --- |
+| `tickTargetSpacingX` | `100px` | A-lit — Talbot 2010 |
+| `plotHeightOptimal` | `24px` | A-lit — Heer 2009 |
+| `aggregateAfter` | `8` | B — GX choice consistent with legend scannability research |
+| `pointBudget` | `2000` | C — rendering budget, not a perception claim |
+| `minCellSize` | `8px` | C — explicit future heatmap cell-floor choice (`@future`) |
+| `valueRegionMaxShare` | `0.5` | C — explicit unsourced layout budget |
+| `nominalCellSize` | `100px` | C — standalone conversion default |
 
 ## Container contract
 

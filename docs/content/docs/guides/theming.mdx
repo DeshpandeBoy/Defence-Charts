@@ -22,12 +22,14 @@ Then scope ordinary presentation changes to one figure or dashboard region:
 
 ## Current token surface
 
-The A1-A5 skeleton includes the six emission-line series colors, charcoal ramp, ground and ink,
+The A1-A6 skeleton includes the six emission-line series colors, charcoal ramp, ground and ink,
 grid and axis chrome, line/point/area marks, square corners, no-op Rail elevation, typography, and
-base spacing.
+base spacing. B1-B3 add the generated presentation tree, Neutral escape-hatch themes, renderer
+control surface, and typed threshold policy for the current line/area planner.
 
-The full 183-token tree and neutral escape-hatch theme belong to milestone B1. The docs do not
-pretend those controls are already public.
+The generated token tree currently declares 186 presentation tokens, including the Neutral dark and
+Neutral light escape-hatch variants. Rail remains the default; Neutral restores conventional radius
+and elevation values without changing typography or planner thresholds.
 
 ## The split that matters
 
@@ -38,7 +40,42 @@ their CSS custom properties are generated from the same values.
 Colors, stroke widths, opacity, dash, point radius, and ordinary spacing can change in CSS without a
 re-render because they do not change the plan.
 
+## B3: thresholds are typed policy, not CSS
+
+Responsive thresholds change what the chart decides to draw, so they live in `PlanPolicy` and travel
+through `<GxConfig>` or chart props as plain serialisable TypeScript values. B3 covers tick density,
+value-region height budgets, encoding substitution, point-renderer budgets, and standalone nominal
+cell conversion. They are applied before resolution and therefore remain identical across server
+rendering and hydration.
+
+```tsx
+<AutoChart
+  type="line"
+  data={series}
+  title="Revenue"
+  policy={{
+    tickTargetSpacingX: 80,
+    valueRegionMaxShare: 0.45,
+    pointBudget: 1000,
+  }}
+/>
+```
+
+`PlanOverrides` is the separate post-resolution contract. Use it when a consumer must force a
+decided plan field; do not use it as a CSS-like threshold channel. Conversely, CSS presentation
+overrides must not be read by the planner. This boundary prevents a browser-only CSS value from
+making the server and client choose different rungs.
+
+Every default threshold carries a provenance tier in the core source: A-lit for published research
+or standards, A-impl for verified shipped-library convention, B for an evidence-consistent GX
+derivation, and C for an explicit unsourced choice. Provenance tells you where a number came from;
+it does not turn a presentation token into a plan input.
+
 ## Light theme
 
 Use `data-gx-theme="rail-light"` on the root or `.gx-theme-rail-light` on a subtree. It uses the same
 six physical wavelengths re-solved against a light ground.
+
+Use `data-gx-theme="neutral"`, `.gx-theme-neutral`, or the explicit light variant
+`data-gx-theme="neutral-light"` / `.gx-theme-neutral-light` when a field-convention visual world is
+preferred. Neutral changes presentation only; it does not change the responsive plan.
