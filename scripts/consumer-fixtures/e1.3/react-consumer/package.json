@@ -1,0 +1,26 @@
+{
+  "name": "gx-e1-3-react-consumer",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@gx/core": "file:__GX_TARBALL_ROOT__/gx-core-0.0.0.tgz",
+    "@gx/grid": "file:__GX_TARBALL_ROOT__/gx-grid-0.0.0.tgz",
+    "@gx/primitives": "file:__GX_TARBALL_ROOT__/gx-primitives-0.0.0.tgz",
+    "@gx/react": "file:__GX_TARBALL_ROOT__/gx-react-0.0.0.tgz",
+    "@gx/testing": "file:__GX_TARBALL_ROOT__/gx-testing-0.0.0.tgz",
+    "@gx/tokens": "file:__GX_TARBALL_ROOT__/gx-tokens-0.0.0.tgz",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
+  },
+  "devDependencies": {
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.4",
+    "@vitejs/plugin-react": "5.2.0",
+    "typescript": "6.0.3",
+    "vite": "7.3.6"
+  }
+}
