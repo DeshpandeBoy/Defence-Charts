@@ -1,0 +1,1853 @@
+{
+  "schema": "c4.2-grid-stress/v1",
+  "task": "C4.2",
+  "generatedAt": "2026-08-24T17:54:49.687Z",
+  "environment": {
+    "node": "v24.19.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "browser": "151.0.7922.34",
+    "playwrightFrom": "playwright",
+    "origin": "http://127.0.0.1:5185/",
+    "viewport": {
+      "width": 1440,
+      "height": 900
+    }
+  },
+  "method": {
+    "requestedWidgetCounts": [
+      1,
+      10,
+      50,
+      100,
+      200
+    ],
+    "warmupIterations": 2,
+    "measuredSamples": 5,
+    "transition": "0 widgets -> requested count",
+    "identicalLayoutInput": true,
+    "performanceBudget": null
+  },
+  "cases": [
+    {
+      "count": 1,
+      "inputFingerprint": "fnv1a-6dcee371-1",
+      "warmupIterations": 2,
+      "measuredSamples": 5,
+      "warmups": [
+        {
+          "index": 1,
+          "measurement": {
+            "count": 1,
+            "requestedAt": 365,
+            "committedAt": 367.2,
+            "layoutAt": 414.3,
+            "commitLatencyMs": 2.2,
+            "layoutLatencyMs": 47.1,
+            "totalLatencyMs": 49.3,
+            "domItemCount": 1,
+            "rootScrollHeight": 136
+          },
+          "memory": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 6900804,
+            "jsHeapTotalBytes": 8929280,
+            "nodes": 138,
+            "layoutCount": 2,
+            "recalcStyleCount": 3
+          }
+        },
+        {
+          "index": 2,
+          "measurement": {
+            "count": 1,
+            "requestedAt": 514.8,
+            "committedAt": 515.6,
+            "layoutAt": 564.3,
+            "commitLatencyMs": 0.8,
+            "layoutLatencyMs": 48.7,
+            "totalLatencyMs": 49.5,
+            "domItemCount": 1,
+            "rootScrollHeight": 136
+          },
+          "memory": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 6582988,
+            "jsHeapTotalBytes": 11026432,
+            "nodes": 217,
+            "layoutCount": 5,
+            "recalcStyleCount": 7
+          }
+        }
+      ],
+      "samples": [
+        {
+          "index": 1,
+          "measurement": {
+            "count": 1,
+            "requestedAt": 719.7,
+            "committedAt": 721.3,
+            "layoutAt": 764.3,
+            "commitLatencyMs": 1.6,
+            "layoutLatencyMs": 43,
+            "totalLatencyMs": 44.6,
+            "domItemCount": 1,
+            "rootScrollHeight": 136
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              1,
+              1
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 7863604,
+            "jsHeapTotalBytes": 11812864,
+            "nodes": 296,
+            "layoutCount": 8,
+            "recalcStyleCount": 11
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 7873080,
+            "jsHeapTotalBytes": 11812864,
+            "nodes": 296,
+            "layoutCount": 8,
+            "recalcStyleCount": 11
+          },
+          "resizeObserverLoopErrors": []
+        },
+        {
+          "index": 2,
+          "measurement": {
+            "count": 1,
+            "requestedAt": 917.3,
+            "committedAt": 918.7,
+            "layoutAt": 964.2,
+            "commitLatencyMs": 1.4,
+            "layoutLatencyMs": 45.5,
+            "totalLatencyMs": 46.9,
+            "domItemCount": 1,
+            "rootScrollHeight": 136
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              1,
+              1
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 7126108,
+            "jsHeapTotalBytes": 12599296,
+            "nodes": 375,
+            "layoutCount": 11,
+            "recalcStyleCount": 15
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 7135744,
+            "jsHeapTotalBytes": 12599296,
+            "nodes": 375,
+            "layoutCount": 11,
+            "recalcStyleCount": 15
+          },
+          "resizeObserverLoopErrors": []
+        },
+        {
+          "index": 3,
+          "measurement": {
+            "count": 1,
+            "requestedAt": 1117.7,
+            "committedAt": 1119.2,
+            "layoutAt": 1163.5,
+            "commitLatencyMs": 1.5,
+            "layoutLatencyMs": 44.3,
+            "totalLatencyMs": 45.8,
+            "domItemCount": 1,
+            "rootScrollHeight": 136
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              1,
+              1
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 8284080,
+            "jsHeapTotalBytes": 12599296,
+            "nodes": 454,
+            "layoutCount": 14,
+            "recalcStyleCount": 19
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 8294084,
+            "jsHeapTotalBytes": 12599296,
+            "nodes": 454,
+            "layoutCount": 14,
+            "recalcStyleCount": 19
+          },
+          "resizeObserverLoopErrors": []
+        },
+        {
+          "index": 4,
+          "measurement": {
+            "count": 1,
+            "requestedAt": 1317.2,
+            "committedAt": 1318.8,
+            "layoutAt": 1363.2,
+            "commitLatencyMs": 1.6,
+            "layoutLatencyMs": 44.4,
+            "totalLatencyMs": 46,
+            "domItemCount": 1,
+            "rootScrollHeight": 136
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              1,
+              1
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 7789228,
+            "jsHeapTotalBytes": 12599296,
+            "nodes": 533,
+            "layoutCount": 17,
+            "recalcStyleCount": 23
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 7799208,
+            "jsHeapTotalBytes": 12599296,
+            "nodes": 533,
+            "layoutCount": 17,
+            "recalcStyleCount": 23
+          },
+          "resizeObserverLoopErrors": []
+        },
+        {
+          "index": 5,
+          "measurement": {
+            "count": 1,
+            "requestedAt": 1515.1,
+            "committedAt": 1515.5,
+            "layoutAt": 1564.2,
+            "commitLatencyMs": 0.4,
+            "layoutLatencyMs": 48.7,
+            "totalLatencyMs": 49.1,
+            "domItemCount": 1,
+            "rootScrollHeight": 136
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              1,
+              1
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 7374324,
+            "jsHeapTotalBytes": 12599296,
+            "nodes": 612,
+            "layoutCount": 20,
+            "recalcStyleCount": 27
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 7384628,
+            "jsHeapTotalBytes": 12599296,
+            "nodes": 612,
+            "layoutCount": 20,
+            "recalcStyleCount": 27
+          },
+          "resizeObserverLoopErrors": []
+        }
+      ],
+      "callbackStability": {
+        "stableAfterQuiet": true,
+        "identityRetention": true,
+        "layoutChangeCounts": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "layoutCommitCounts": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "resizeObserverLoopErrors": [],
+      "memoryTrend": {
+        "available": true,
+        "source": "Chromium DevTools Performance.getMetrics",
+        "firstUsedBytes": 7873080,
+        "lastUsedBytes": 7384628,
+        "deltaBytes": -488452,
+        "samples": [
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 7873080,
+            "jsHeapTotalBytes": 11812864,
+            "nodes": 296,
+            "layoutCount": 8,
+            "recalcStyleCount": 11
+          },
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 7135744,
+            "jsHeapTotalBytes": 12599296,
+            "nodes": 375,
+            "layoutCount": 11,
+            "recalcStyleCount": 15
+          },
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 8294084,
+            "jsHeapTotalBytes": 12599296,
+            "nodes": 454,
+            "layoutCount": 14,
+            "recalcStyleCount": 19
+          },
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 7799208,
+            "jsHeapTotalBytes": 12599296,
+            "nodes": 533,
+            "layoutCount": 17,
+            "recalcStyleCount": 23
+          },
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 7384628,
+            "jsHeapTotalBytes": 12599296,
+            "nodes": 612,
+            "layoutCount": 20,
+            "recalcStyleCount": 27
+          }
+        ]
+      },
+      "browserRuntime": {
+        "pageErrors": [],
+        "consoleErrors": []
+      },
+      "runtime": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+        "platform": "MacIntel",
+        "crossOriginIsolated": false,
+        "devicePixelRatio": 1,
+        "performanceMemory": {
+          "jsHeapSizeLimit": 3760000000,
+          "totalJSHeapSize": 10600000,
+          "usedJSHeapSize": 10000000
+        }
+      },
+      "limitations": [
+        "Memory readings are Chromium JavaScript heap metrics, not operating-system available RAM.",
+        "The measured transition is an empty controlled layout to the deterministic target layout; it is not a drag or resize benchmark."
+      ]
+    },
+    {
+      "count": 10,
+      "inputFingerprint": "fnv1a-af8bf375-10",
+      "warmupIterations": 2,
+      "measuredSamples": 5,
+      "warmups": [
+        {
+          "index": 1,
+          "measurement": {
+            "count": 10,
+            "requestedAt": 113.3,
+            "committedAt": 115.4,
+            "layoutAt": 163,
+            "commitLatencyMs": 2.1,
+            "layoutLatencyMs": 47.6,
+            "totalLatencyMs": 49.7,
+            "domItemCount": 10,
+            "rootScrollHeight": 360
+          },
+          "memory": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 9313876,
+            "jsHeapTotalBytes": 13385728,
+            "nodes": 849,
+            "layoutCount": 2,
+            "recalcStyleCount": 12
+          }
+        },
+        {
+          "index": 2,
+          "measurement": {
+            "count": 10,
+            "requestedAt": 263.4,
+            "committedAt": 265.1,
+            "layoutAt": 313,
+            "commitLatencyMs": 1.7,
+            "layoutLatencyMs": 47.9,
+            "totalLatencyMs": 49.6,
+            "domItemCount": 10,
+            "rootScrollHeight": 360
+          },
+          "memory": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 12306524,
+            "jsHeapTotalBytes": 18628608,
+            "nodes": 1639,
+            "layoutCount": 5,
+            "recalcStyleCount": 25
+          }
+        }
+      ],
+      "samples": [
+        {
+          "index": 1,
+          "measurement": {
+            "count": 10,
+            "requestedAt": 467.9,
+            "committedAt": 471.3,
+            "layoutAt": 515.3,
+            "commitLatencyMs": 3.4,
+            "layoutLatencyMs": 44,
+            "totalLatencyMs": 47.4,
+            "domItemCount": 10,
+            "rootScrollHeight": 360
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              10,
+              10
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 7763420,
+            "jsHeapTotalBytes": 20463616,
+            "nodes": 835,
+            "layoutCount": 8,
+            "recalcStyleCount": 38
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 7773044,
+            "jsHeapTotalBytes": 20463616,
+            "nodes": 835,
+            "layoutCount": 8,
+            "recalcStyleCount": 38
+          },
+          "resizeObserverLoopErrors": []
+        },
+        {
+          "index": 2,
+          "measurement": {
+            "count": 10,
+            "requestedAt": 665.8,
+            "committedAt": 669.1,
+            "layoutAt": 712.8,
+            "commitLatencyMs": 3.3,
+            "layoutLatencyMs": 43.7,
+            "totalLatencyMs": 47,
+            "domItemCount": 10,
+            "rootScrollHeight": 360
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              10,
+              10
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 9467884,
+            "jsHeapTotalBytes": 24395776,
+            "nodes": 1625,
+            "layoutCount": 11,
+            "recalcStyleCount": 51
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 9477516,
+            "jsHeapTotalBytes": 24395776,
+            "nodes": 1625,
+            "layoutCount": 11,
+            "recalcStyleCount": 51
+          },
+          "resizeObserverLoopErrors": []
+        },
+        {
+          "index": 3,
+          "measurement": {
+            "count": 10,
+            "requestedAt": 867.5,
+            "committedAt": 870.9,
+            "layoutAt": 912.9,
+            "commitLatencyMs": 3.4,
+            "layoutLatencyMs": 42,
+            "totalLatencyMs": 45.4,
+            "domItemCount": 10,
+            "rootScrollHeight": 360
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              10,
+              10
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 13581504,
+            "jsHeapTotalBytes": 26492928,
+            "nodes": 2415,
+            "layoutCount": 14,
+            "recalcStyleCount": 64
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 13591392,
+            "jsHeapTotalBytes": 26492928,
+            "nodes": 2415,
+            "layoutCount": 14,
+            "recalcStyleCount": 64
+          },
+          "resizeObserverLoopErrors": []
+        },
+        {
+          "index": 4,
+          "measurement": {
+            "count": 10,
+            "requestedAt": 1065.7,
+            "committedAt": 1069.3,
+            "layoutAt": 1113.9,
+            "commitLatencyMs": 3.6,
+            "layoutLatencyMs": 44.6,
+            "totalLatencyMs": 48.2,
+            "domItemCount": 10,
+            "rootScrollHeight": 360
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              10,
+              10
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 14571460,
+            "jsHeapTotalBytes": 29114368,
+            "nodes": 3205,
+            "layoutCount": 17,
+            "recalcStyleCount": 77
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 14581424,
+            "jsHeapTotalBytes": 29114368,
+            "nodes": 3205,
+            "layoutCount": 17,
+            "recalcStyleCount": 77
+          },
+          "resizeObserverLoopErrors": []
+        },
+        {
+          "index": 5,
+          "measurement": {
+            "count": 10,
+            "requestedAt": 1265.3,
+            "committedAt": 1268.1,
+            "layoutAt": 1312.8,
+            "commitLatencyMs": 2.8,
+            "layoutLatencyMs": 44.7,
+            "totalLatencyMs": 47.5,
+            "domItemCount": 10,
+            "rootScrollHeight": 360
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              10,
+              10
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 15508724,
+            "jsHeapTotalBytes": 29376512,
+            "nodes": 3995,
+            "layoutCount": 20,
+            "recalcStyleCount": 90
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 15521980,
+            "jsHeapTotalBytes": 29376512,
+            "nodes": 3995,
+            "layoutCount": 20,
+            "recalcStyleCount": 90
+          },
+          "resizeObserverLoopErrors": []
+        }
+      ],
+      "callbackStability": {
+        "stableAfterQuiet": true,
+        "identityRetention": true,
+        "layoutChangeCounts": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "layoutCommitCounts": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "resizeObserverLoopErrors": [],
+      "memoryTrend": {
+        "available": true,
+        "source": "Chromium DevTools Performance.getMetrics",
+        "firstUsedBytes": 7773044,
+        "lastUsedBytes": 15521980,
+        "deltaBytes": 7748936,
+        "samples": [
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 7773044,
+            "jsHeapTotalBytes": 20463616,
+            "nodes": 835,
+            "layoutCount": 8,
+            "recalcStyleCount": 38
+          },
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 9477516,
+            "jsHeapTotalBytes": 24395776,
+            "nodes": 1625,
+            "layoutCount": 11,
+            "recalcStyleCount": 51
+          },
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 13591392,
+            "jsHeapTotalBytes": 26492928,
+            "nodes": 2415,
+            "layoutCount": 14,
+            "recalcStyleCount": 64
+          },
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 14581424,
+            "jsHeapTotalBytes": 29114368,
+            "nodes": 3205,
+            "layoutCount": 17,
+            "recalcStyleCount": 77
+          },
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 15521980,
+            "jsHeapTotalBytes": 29376512,
+            "nodes": 3995,
+            "layoutCount": 20,
+            "recalcStyleCount": 90
+          }
+        ]
+      },
+      "browserRuntime": {
+        "pageErrors": [],
+        "consoleErrors": []
+      },
+      "runtime": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+        "platform": "MacIntel",
+        "crossOriginIsolated": false,
+        "devicePixelRatio": 1,
+        "performanceMemory": {
+          "jsHeapSizeLimit": 3760000000,
+          "totalJSHeapSize": 10600000,
+          "usedJSHeapSize": 10000000
+        }
+      },
+      "limitations": [
+        "Memory readings are Chromium JavaScript heap metrics, not operating-system available RAM.",
+        "The measured transition is an empty controlled layout to the deterministic target layout; it is not a drag or resize benchmark."
+      ]
+    },
+    {
+      "count": 50,
+      "inputFingerprint": "fnv1a-081c5613-50",
+      "warmupIterations": 2,
+      "measuredSamples": 5,
+      "warmups": [
+        {
+          "index": 1,
+          "measurement": {
+            "count": 50,
+            "requestedAt": 106,
+            "committedAt": 110.9,
+            "layoutAt": 211.3,
+            "commitLatencyMs": 4.9,
+            "layoutLatencyMs": 100.4,
+            "totalLatencyMs": 105.3,
+            "domItemCount": 50,
+            "rootScrollHeight": 1480
+          },
+          "memory": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 12570448,
+            "jsHeapTotalBytes": 31211520,
+            "nodes": 3995,
+            "layoutCount": 2,
+            "recalcStyleCount": 52
+          }
+        },
+        {
+          "index": 2,
+          "measurement": {
+            "count": 50,
+            "requestedAt": 289.4,
+            "committedAt": 290.3,
+            "layoutAt": 339.3,
+            "commitLatencyMs": 0.9,
+            "layoutLatencyMs": 49,
+            "totalLatencyMs": 49.9,
+            "domItemCount": 50,
+            "rootScrollHeight": 1480
+          },
+          "memory": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 17214428,
+            "jsHeapTotalBytes": 34619392,
+            "nodes": 7945,
+            "layoutCount": 5,
+            "recalcStyleCount": 105
+          }
+        }
+      ],
+      "samples": [
+        {
+          "index": 1,
+          "measurement": {
+            "count": 50,
+            "requestedAt": 491.3,
+            "committedAt": 493.5,
+            "layoutAt": 543.5,
+            "commitLatencyMs": 2.2,
+            "layoutLatencyMs": 50,
+            "totalLatencyMs": 52.2,
+            "domItemCount": 50,
+            "rootScrollHeight": 1480
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              50,
+              50
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 20686800,
+            "jsHeapTotalBytes": 42483712,
+            "nodes": 11895,
+            "layoutCount": 8,
+            "recalcStyleCount": 158
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 20710716,
+            "jsHeapTotalBytes": 42483712,
+            "nodes": 11895,
+            "layoutCount": 8,
+            "recalcStyleCount": 158
+          },
+          "resizeObserverLoopErrors": []
+        },
+        {
+          "index": 2,
+          "measurement": {
+            "count": 50,
+            "requestedAt": 690,
+            "committedAt": 691.7,
+            "layoutAt": 741.7,
+            "commitLatencyMs": 1.7,
+            "layoutLatencyMs": 50,
+            "totalLatencyMs": 51.7,
+            "domItemCount": 50,
+            "rootScrollHeight": 1480
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              50,
+              50
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 23056688,
+            "jsHeapTotalBytes": 53231616,
+            "nodes": 15845,
+            "layoutCount": 11,
+            "recalcStyleCount": 211
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 23077168,
+            "jsHeapTotalBytes": 53231616,
+            "nodes": 15845,
+            "layoutCount": 11,
+            "recalcStyleCount": 211
+          },
+          "resizeObserverLoopErrors": []
+        },
+        {
+          "index": 3,
+          "measurement": {
+            "count": 50,
+            "requestedAt": 892.5,
+            "committedAt": 894.6,
+            "layoutAt": 944.6,
+            "commitLatencyMs": 2.1,
+            "layoutLatencyMs": 50,
+            "totalLatencyMs": 52.1,
+            "domItemCount": 50,
+            "rootScrollHeight": 1480
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              50,
+              50
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 25230872,
+            "jsHeapTotalBytes": 56639488,
+            "nodes": 19795,
+            "layoutCount": 14,
+            "recalcStyleCount": 264
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 25250916,
+            "jsHeapTotalBytes": 56639488,
+            "nodes": 19795,
+            "layoutCount": 14,
+            "recalcStyleCount": 264
+          },
+          "resizeObserverLoopErrors": []
+        },
+        {
+          "index": 4,
+          "measurement": {
+            "count": 50,
+            "requestedAt": 1089.9,
+            "committedAt": 1094.3,
+            "layoutAt": 1176.4,
+            "commitLatencyMs": 4.4,
+            "layoutLatencyMs": 82.1,
+            "totalLatencyMs": 86.5,
+            "domItemCount": 50,
+            "rootScrollHeight": 1480
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              50,
+              50
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 13488736,
+            "jsHeapTotalBytes": 63193088,
+            "nodes": 3995,
+            "layoutCount": 17,
+            "recalcStyleCount": 317
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 13498860,
+            "jsHeapTotalBytes": 63193088,
+            "nodes": 3995,
+            "layoutCount": 17,
+            "recalcStyleCount": 317
+          },
+          "resizeObserverLoopErrors": []
+        },
+        {
+          "index": 5,
+          "measurement": {
+            "count": 50,
+            "requestedAt": 1306.5,
+            "committedAt": 1307.5,
+            "layoutAt": 1355.8,
+            "commitLatencyMs": 1,
+            "layoutLatencyMs": 48.3,
+            "totalLatencyMs": 49.3,
+            "domItemCount": 50,
+            "rootScrollHeight": 1480
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              50,
+              50
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 27261552,
+            "jsHeapTotalBytes": 63193088,
+            "nodes": 7945,
+            "layoutCount": 20,
+            "recalcStyleCount": 370
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 27271856,
+            "jsHeapTotalBytes": 63193088,
+            "nodes": 7945,
+            "layoutCount": 20,
+            "recalcStyleCount": 370
+          },
+          "resizeObserverLoopErrors": []
+        }
+      ],
+      "callbackStability": {
+        "stableAfterQuiet": true,
+        "identityRetention": true,
+        "layoutChangeCounts": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "layoutCommitCounts": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "resizeObserverLoopErrors": [],
+      "memoryTrend": {
+        "available": true,
+        "source": "Chromium DevTools Performance.getMetrics",
+        "firstUsedBytes": 20710716,
+        "lastUsedBytes": 27271856,
+        "deltaBytes": 6561140,
+        "samples": [
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 20710716,
+            "jsHeapTotalBytes": 42483712,
+            "nodes": 11895,
+            "layoutCount": 8,
+            "recalcStyleCount": 158
+          },
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 23077168,
+            "jsHeapTotalBytes": 53231616,
+            "nodes": 15845,
+            "layoutCount": 11,
+            "recalcStyleCount": 211
+          },
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 25250916,
+            "jsHeapTotalBytes": 56639488,
+            "nodes": 19795,
+            "layoutCount": 14,
+            "recalcStyleCount": 264
+          },
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 13498860,
+            "jsHeapTotalBytes": 63193088,
+            "nodes": 3995,
+            "layoutCount": 17,
+            "recalcStyleCount": 317
+          },
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 27271856,
+            "jsHeapTotalBytes": 63193088,
+            "nodes": 7945,
+            "layoutCount": 20,
+            "recalcStyleCount": 370
+          }
+        ]
+      },
+      "browserRuntime": {
+        "pageErrors": [],
+        "consoleErrors": []
+      },
+      "runtime": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+        "platform": "MacIntel",
+        "crossOriginIsolated": false,
+        "devicePixelRatio": 1,
+        "performanceMemory": {
+          "jsHeapSizeLimit": 3760000000,
+          "totalJSHeapSize": 10600000,
+          "usedJSHeapSize": 10000000
+        }
+      },
+      "limitations": [
+        "Memory readings are Chromium JavaScript heap metrics, not operating-system available RAM.",
+        "The measured transition is an empty controlled layout to the deterministic target layout; it is not a drag or resize benchmark."
+      ]
+    },
+    {
+      "count": 100,
+      "inputFingerprint": "fnv1a-6ed9566f-100",
+      "warmupIterations": 2,
+      "measuredSamples": 5,
+      "warmups": [
+        {
+          "index": 1,
+          "measurement": {
+            "count": 100,
+            "requestedAt": 112.6,
+            "committedAt": 121.6,
+            "layoutAt": 232,
+            "commitLatencyMs": 9,
+            "layoutLatencyMs": 110.4,
+            "totalLatencyMs": 119.4,
+            "domItemCount": 100,
+            "rootScrollHeight": 2824
+          },
+          "memory": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 17608604,
+            "jsHeapTotalBytes": 33308672,
+            "nodes": 7959,
+            "layoutCount": 2,
+            "recalcStyleCount": 102
+          }
+        },
+        {
+          "index": 2,
+          "measurement": {
+            "count": 100,
+            "requestedAt": 329.3,
+            "committedAt": 331.1,
+            "layoutAt": 387.7,
+            "commitLatencyMs": 1.8,
+            "layoutLatencyMs": 56.6,
+            "totalLatencyMs": 58.4,
+            "domItemCount": 100,
+            "rootScrollHeight": 2824
+          },
+          "memory": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 26383384,
+            "jsHeapTotalBytes": 58998784,
+            "nodes": 15859,
+            "layoutCount": 5,
+            "recalcStyleCount": 205
+          }
+        }
+      ],
+      "samples": [
+        {
+          "index": 1,
+          "measurement": {
+            "count": 100,
+            "requestedAt": 529.9,
+            "committedAt": 532.3,
+            "layoutAt": 608.5,
+            "commitLatencyMs": 2.4,
+            "layoutLatencyMs": 76.2,
+            "totalLatencyMs": 78.6,
+            "domItemCount": 100,
+            "rootScrollHeight": 2824
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              100,
+              100
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 15748844,
+            "jsHeapTotalBytes": 56115200,
+            "nodes": 8101,
+            "layoutCount": 8,
+            "recalcStyleCount": 308
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 15758480,
+            "jsHeapTotalBytes": 56115200,
+            "nodes": 8101,
+            "layoutCount": 8,
+            "recalcStyleCount": 308
+          },
+          "resizeObserverLoopErrors": []
+        },
+        {
+          "index": 2,
+          "measurement": {
+            "count": 100,
+            "requestedAt": 746.5,
+            "committedAt": 748.8,
+            "layoutAt": 806.4,
+            "commitLatencyMs": 2.3,
+            "layoutLatencyMs": 57.6,
+            "totalLatencyMs": 59.9,
+            "domItemCount": 100,
+            "rootScrollHeight": 2824
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              100,
+              100
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 20100720,
+            "jsHeapTotalBytes": 70795264,
+            "nodes": 16001,
+            "layoutCount": 11,
+            "recalcStyleCount": 411
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 20124904,
+            "jsHeapTotalBytes": 70795264,
+            "nodes": 16001,
+            "layoutCount": 11,
+            "recalcStyleCount": 411
+          },
+          "resizeObserverLoopErrors": []
+        },
+        {
+          "index": 3,
+          "measurement": {
+            "count": 100,
+            "requestedAt": 946.4,
+            "committedAt": 948.6,
+            "layoutAt": 1004.8,
+            "commitLatencyMs": 2.2,
+            "layoutLatencyMs": 56.2,
+            "totalLatencyMs": 58.4,
+            "domItemCount": 100,
+            "rootScrollHeight": 2824
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              100,
+              100
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 25843820,
+            "jsHeapTotalBytes": 89669632,
+            "nodes": 23901,
+            "layoutCount": 14,
+            "recalcStyleCount": 514
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 25853592,
+            "jsHeapTotalBytes": 89669632,
+            "nodes": 23901,
+            "layoutCount": 14,
+            "recalcStyleCount": 514
+          },
+          "resizeObserverLoopErrors": []
+        },
+        {
+          "index": 4,
+          "measurement": {
+            "count": 100,
+            "requestedAt": 1196.2,
+            "committedAt": 1202.1,
+            "layoutAt": 1267.6,
+            "commitLatencyMs": 5.9,
+            "layoutLatencyMs": 65.5,
+            "totalLatencyMs": 71.4,
+            "domItemCount": 100,
+            "rootScrollHeight": 2824
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              100,
+              100
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 34726584,
+            "jsHeapTotalBytes": 87310336,
+            "nodes": 7945,
+            "layoutCount": 17,
+            "recalcStyleCount": 617
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 34736548,
+            "jsHeapTotalBytes": 87310336,
+            "nodes": 7945,
+            "layoutCount": 17,
+            "recalcStyleCount": 617
+          },
+          "resizeObserverLoopErrors": []
+        },
+        {
+          "index": 5,
+          "measurement": {
+            "count": 100,
+            "requestedAt": 1396.5,
+            "committedAt": 1398,
+            "layoutAt": 1457.2,
+            "commitLatencyMs": 1.5,
+            "layoutLatencyMs": 59.2,
+            "totalLatencyMs": 60.7,
+            "domItemCount": 100,
+            "rootScrollHeight": 2824
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              100,
+              100
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 18375440,
+            "jsHeapTotalBytes": 87310336,
+            "nodes": 15845,
+            "layoutCount": 20,
+            "recalcStyleCount": 720
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 18385744,
+            "jsHeapTotalBytes": 87310336,
+            "nodes": 15845,
+            "layoutCount": 20,
+            "recalcStyleCount": 720
+          },
+          "resizeObserverLoopErrors": []
+        }
+      ],
+      "callbackStability": {
+        "stableAfterQuiet": true,
+        "identityRetention": true,
+        "layoutChangeCounts": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "layoutCommitCounts": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "resizeObserverLoopErrors": [],
+      "memoryTrend": {
+        "available": true,
+        "source": "Chromium DevTools Performance.getMetrics",
+        "firstUsedBytes": 15758480,
+        "lastUsedBytes": 18385744,
+        "deltaBytes": 2627264,
+        "samples": [
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 15758480,
+            "jsHeapTotalBytes": 56115200,
+            "nodes": 8101,
+            "layoutCount": 8,
+            "recalcStyleCount": 308
+          },
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 20124904,
+            "jsHeapTotalBytes": 70795264,
+            "nodes": 16001,
+            "layoutCount": 11,
+            "recalcStyleCount": 411
+          },
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 25853592,
+            "jsHeapTotalBytes": 89669632,
+            "nodes": 23901,
+            "layoutCount": 14,
+            "recalcStyleCount": 514
+          },
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 34736548,
+            "jsHeapTotalBytes": 87310336,
+            "nodes": 7945,
+            "layoutCount": 17,
+            "recalcStyleCount": 617
+          },
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 18385744,
+            "jsHeapTotalBytes": 87310336,
+            "nodes": 15845,
+            "layoutCount": 20,
+            "recalcStyleCount": 720
+          }
+        ]
+      },
+      "browserRuntime": {
+        "pageErrors": [],
+        "consoleErrors": []
+      },
+      "runtime": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+        "platform": "MacIntel",
+        "crossOriginIsolated": false,
+        "devicePixelRatio": 1,
+        "performanceMemory": {
+          "jsHeapSizeLimit": 3760000000,
+          "totalJSHeapSize": 10600000,
+          "usedJSHeapSize": 10000000
+        }
+      },
+      "limitations": [
+        "Memory readings are Chromium JavaScript heap metrics, not operating-system available RAM.",
+        "The measured transition is an empty controlled layout to the deterministic target layout; it is not a drag or resize benchmark."
+      ]
+    },
+    {
+      "count": 200,
+      "inputFingerprint": "fnv1a-236358a1-200",
+      "warmupIterations": 2,
+      "measuredSamples": 5,
+      "warmups": [
+        {
+          "index": 1,
+          "measurement": {
+            "count": 200,
+            "requestedAt": 107.3,
+            "committedAt": 122.8,
+            "layoutAt": 220.8,
+            "commitLatencyMs": 15.5,
+            "layoutLatencyMs": 98,
+            "totalLatencyMs": 113.5,
+            "domItemCount": 200,
+            "rootScrollHeight": 5624
+          },
+          "memory": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 32942916,
+            "jsHeapTotalBytes": 43008000,
+            "nodes": 15859,
+            "layoutCount": 2,
+            "recalcStyleCount": 202
+          }
+        },
+        {
+          "index": 2,
+          "measurement": {
+            "count": 200,
+            "requestedAt": 373.6,
+            "committedAt": 377.4,
+            "layoutAt": 473.4,
+            "commitLatencyMs": 3.8,
+            "layoutLatencyMs": 96,
+            "totalLatencyMs": 99.8,
+            "domItemCount": 200,
+            "rootScrollHeight": 5624
+          },
+          "memory": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 25793572,
+            "jsHeapTotalBytes": 55328768,
+            "nodes": 26642,
+            "layoutCount": 5,
+            "recalcStyleCount": 405
+          }
+        }
+      ],
+      "samples": [
+        {
+          "index": 1,
+          "measurement": {
+            "count": 200,
+            "requestedAt": 657.4,
+            "committedAt": 663.8,
+            "layoutAt": 756.1,
+            "commitLatencyMs": 6.4,
+            "layoutLatencyMs": 92.3,
+            "totalLatencyMs": 98.7,
+            "domItemCount": 200,
+            "rootScrollHeight": 5624
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              200,
+              200
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 42881548,
+            "jsHeapTotalBytes": 91242496,
+            "nodes": 31959,
+            "layoutCount": 8,
+            "recalcStyleCount": 608
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 42965076,
+            "jsHeapTotalBytes": 91242496,
+            "nodes": 31959,
+            "layoutCount": 8,
+            "recalcStyleCount": 608
+          },
+          "resizeObserverLoopErrors": []
+        },
+        {
+          "index": 2,
+          "measurement": {
+            "count": 200,
+            "requestedAt": 940.6,
+            "committedAt": 945.6,
+            "layoutAt": 1034.8,
+            "commitLatencyMs": 5,
+            "layoutLatencyMs": 89.2,
+            "totalLatencyMs": 94.2,
+            "domItemCount": 200,
+            "rootScrollHeight": 5624
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              200,
+              200
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 48789992,
+            "jsHeapTotalBytes": 105398272,
+            "nodes": 47759,
+            "layoutCount": 11,
+            "recalcStyleCount": 811
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 48886596,
+            "jsHeapTotalBytes": 105398272,
+            "nodes": 47759,
+            "layoutCount": 11,
+            "recalcStyleCount": 811
+          },
+          "resizeObserverLoopErrors": []
+        },
+        {
+          "index": 3,
+          "measurement": {
+            "count": 200,
+            "requestedAt": 1257.2,
+            "committedAt": 1262.2,
+            "layoutAt": 1350.4,
+            "commitLatencyMs": 5,
+            "layoutLatencyMs": 88.2,
+            "totalLatencyMs": 93.2,
+            "domItemCount": 200,
+            "rootScrollHeight": 5624
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              200,
+              200
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 62086260,
+            "jsHeapTotalBytes": 118243328,
+            "nodes": 63559,
+            "layoutCount": 14,
+            "recalcStyleCount": 1014
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 20056308,
+            "jsHeapTotalBytes": 104087552,
+            "nodes": 15845,
+            "layoutCount": 14,
+            "recalcStyleCount": 1014
+          },
+          "resizeObserverLoopErrors": []
+        },
+        {
+          "index": 4,
+          "measurement": {
+            "count": 200,
+            "requestedAt": 1540.6,
+            "committedAt": 1545.3,
+            "layoutAt": 1631.3,
+            "commitLatencyMs": 4.7,
+            "layoutLatencyMs": 86,
+            "totalLatencyMs": 90.7,
+            "domItemCount": 200,
+            "rootScrollHeight": 5624
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              200,
+              200
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 51550464,
+            "jsHeapTotalBytes": 106708992,
+            "nodes": 31645,
+            "layoutCount": 17,
+            "recalcStyleCount": 1217
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 36525240,
+            "jsHeapTotalBytes": 106708992,
+            "nodes": 31645,
+            "layoutCount": 17,
+            "recalcStyleCount": 1217
+          },
+          "resizeObserverLoopErrors": []
+        },
+        {
+          "index": 5,
+          "measurement": {
+            "count": 200,
+            "requestedAt": 1807.1,
+            "committedAt": 1811.9,
+            "layoutAt": 1898.2,
+            "commitLatencyMs": 4.8,
+            "layoutLatencyMs": 86.3,
+            "totalLatencyMs": 91.1,
+            "domItemCount": 200,
+            "rootScrollHeight": 5624
+          },
+          "callbackDelta": {
+            "layoutChangeCount": 1,
+            "layoutCommitCount": 1,
+            "identityFailureCount": 0,
+            "callbackItemCounts": [
+              200,
+              200
+            ]
+          },
+          "callbackStableAfterQuiet": true,
+          "memoryAtLayout": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 68245024,
+            "jsHeapTotalBytes": 109592576,
+            "nodes": 47445,
+            "layoutCount": 20,
+            "recalcStyleCount": 1420
+          },
+          "memoryAfterQuiet": {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 50156356,
+            "jsHeapTotalBytes": 113262592,
+            "nodes": 47445,
+            "layoutCount": 20,
+            "recalcStyleCount": 1420
+          },
+          "resizeObserverLoopErrors": []
+        }
+      ],
+      "callbackStability": {
+        "stableAfterQuiet": true,
+        "identityRetention": true,
+        "layoutChangeCounts": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ],
+        "layoutCommitCounts": [
+          1,
+          1,
+          1,
+          1,
+          1
+        ]
+      },
+      "resizeObserverLoopErrors": [],
+      "memoryTrend": {
+        "available": true,
+        "source": "Chromium DevTools Performance.getMetrics",
+        "firstUsedBytes": 42965076,
+        "lastUsedBytes": 50156356,
+        "deltaBytes": 7191280,
+        "samples": [
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 42965076,
+            "jsHeapTotalBytes": 91242496,
+            "nodes": 31959,
+            "layoutCount": 8,
+            "recalcStyleCount": 608
+          },
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 48886596,
+            "jsHeapTotalBytes": 105398272,
+            "nodes": 47759,
+            "layoutCount": 11,
+            "recalcStyleCount": 811
+          },
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 20056308,
+            "jsHeapTotalBytes": 104087552,
+            "nodes": 15845,
+            "layoutCount": 14,
+            "recalcStyleCount": 1014
+          },
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 36525240,
+            "jsHeapTotalBytes": 106708992,
+            "nodes": 31645,
+            "layoutCount": 17,
+            "recalcStyleCount": 1217
+          },
+          {
+            "available": true,
+            "source": "Chromium DevTools Performance.getMetrics",
+            "jsHeapUsedBytes": 50156356,
+            "jsHeapTotalBytes": 113262592,
+            "nodes": 47445,
+            "layoutCount": 20,
+            "recalcStyleCount": 1420
+          }
+        ]
+      },
+      "browserRuntime": {
+        "pageErrors": [],
+        "consoleErrors": []
+      },
+      "runtime": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.7922.34 Safari/537.36",
+        "platform": "MacIntel",
+        "crossOriginIsolated": false,
+        "devicePixelRatio": 1,
+        "performanceMemory": {
+          "jsHeapSizeLimit": 3760000000,
+          "totalJSHeapSize": 10600000,
+          "usedJSHeapSize": 10000000
+        }
+      },
+      "limitations": [
+        "Memory readings are Chromium JavaScript heap metrics, not operating-system available RAM.",
+        "The measured transition is an empty controlled layout to the deterministic target layout; it is not a drag or resize benchmark."
+      ]
+    }
+  ],
+  "limitations": [
+    "Chromium exposes JavaScript heap metrics through the DevTools Performance domain; operating-system available memory is not exposed by this runner and is not fabricated.",
+    "The runner records evidence only. No performance threshold or pass/fail budget is inferred from the observed timings.",
+    "C4.1 owns pointer, resize, keyboard, and environment interaction coverage; C4.2 uses read-only mode to isolate repeated grid/layout population from input gesture cost."
+  ]
+}

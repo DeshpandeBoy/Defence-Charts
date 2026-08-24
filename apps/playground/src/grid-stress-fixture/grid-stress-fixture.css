@@ -1,0 +1,38 @@
+:root {
+  font-family: system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-block-size: 100%;
+  margin: 0;
+}
+
+body {
+  min-inline-size: 1220px;
+}
+
+[data-gx-stress='grid'] {
+  min-block-size: 100%;
+  padding: 16px;
+}
+
+.gx-grid-stress__slot {
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.gx-grid-stress__slot > .gx-widget-shell {
+  block-size: 100%;
+}
+
+.gx-grid-stress__slot .gx-auto-chart {
+  min-inline-size: 0;
+  min-block-size: 0;
+}
