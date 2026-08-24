@@ -351,17 +351,17 @@ describe('the plan is obeyed, not approximated', () => {
    * which is decision 8's whole point — the renderer must obey a forced plan exactly as it
    * obeys a resolved one, or overrides are advisory.
    */
-  it('throws for a mark kind A4 does not implement, naming the milestone', () => {
+  it('throws for a mark kind not yet implemented, naming the milestone', () => {
     const ctx = sizeContextFromPixels(900, 520)
     const base = planChart('line', ctx, describeShape(ONE))
     const forced: ChartPlan = applyOverrides(base, {
-      marks: { primary: { kind: 'bar', stacked: false, grouped: false } },
+      marks: { primary: { kind: 'arc', donut: true } },
     })
     expect(() =>
       renderToStaticMarkup(
         <Chart plan={forced} data={ONE} ctx={ctx} title="Forced" id="t" />,
       ),
-    ).toThrow(/'bar' is not implemented.*D chart breadth/s)
+    ).toThrow(/'arc' is not implemented.*later chart breadth/s)
   })
 
   it('honours axes.x.visible', () => {

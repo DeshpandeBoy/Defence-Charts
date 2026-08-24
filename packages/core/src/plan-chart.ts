@@ -29,7 +29,6 @@ import { applyOverrides } from './overrides.ts'
 import type { ChartPlan, ChartType } from './plan.ts'
 import type { PlanChartFn, PlanOverrides, PlanPolicy } from './policy.ts'
 import { resolvePolicy } from './policy.ts'
-import type { LineChartType } from './rungs/line.ts'
 
 /**
  * The milestone that adds each remaining type, quoted back in the error rather than kept in
@@ -57,7 +56,7 @@ const TYPE_MILESTONE: Readonly<Partial<Record<ChartType, string>>> = Object.free
  * an empty plan — is worse than a crash: it is the same failure species as happy-dom's `0`,
  * a thing that looks like it works and quietly doesn't. The message names the milestone.
  *
- * @param type Chart type. Only `'line'` and `'area'` resolve at A3.
+ * @param type Chart type. Registered family entries resolve; unsupported types throw with their milestone.
  * @param ctx The measured container. `sizeClass` picks the rung; raw px refine within it.
  * @param shape What the data looks like — never the data itself.
  * @param policy Applied **before** resolution; changes how the resolver decides.
@@ -77,13 +76,13 @@ export const planChart: PlanChartFn = (
       milestone === undefined
         ? `planChart: unknown chart type ${JSON.stringify(type)}.`
         : `planChart: chart type ${JSON.stringify(type)} has no rung set yet; it lands at ` +
-          `milestone ${milestone}. Only 'line' and 'area' resolve at A3.`,
+          `milestone ${milestone}. Registered families are explicit and never fall back to line.`,
     )
   }
 
   const resolved = resolvePolicy(policy)
   const plan = planner.plan({
-    type: type as LineChartType,
+    type,
     ctx,
     shape,
     policy: resolved,

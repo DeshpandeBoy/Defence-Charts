@@ -37,7 +37,8 @@ describe('D0.1 planner seam', () => {
     expect(registration?.chartTypes).toEqual(['line', 'area'])
     expect(findBuiltInPlanner('line')?.plan).toBe(registration?.plan)
     expect(findBuiltInPlanner('area')?.plan).toBe(registration?.plan)
-    expect(findBuiltInPlanner('bar')).toBeUndefined()
+    expect(findBuiltInPlanner('bar')?.family).toBe('bar')
+    expect(findBuiltInPlanner('timebar')?.family).toBe('bar')
   })
 
   it.each(['line', 'area'] as const)(
@@ -55,9 +56,12 @@ describe('D0.1 planner seam', () => {
     },
   )
 
-  it('keeps unsupported chart types on the existing explicit failure path', () => {
-    expect(() => planChart('bar', sizeContextFromPixels(900, 520), describeShape(DATA))).toThrow(
-      /chart type "bar" has no rung set yet; it lands at milestone D/,
+  it('resolves the registered bar family and keeps other types on the explicit failure path', () => {
+    const bar = planChart('bar', sizeContextFromPixels(900, 520), describeShape(DATA))
+    expect(bar.type).toBe('bar')
+    expect(bar.marks.primary.kind).toBe('bar')
+    expect(() => planChart('donut', sizeContextFromPixels(900, 520), describeShape(DATA))).toThrow(
+      /chart type "donut" has no rung set yet; it lands at milestone D/,
     )
   })
 })

@@ -158,7 +158,7 @@ export type SeriesFrame = {
   readonly area: string | null
   /** Empty unless the mark kind is `'horizon'`. */
   readonly bands: readonly HorizonBand[]
-  /** Empty unless the mark kind is `'cell'`. */
+  /** Empty unless the mark kind is `'bar'` or `'cell'`. */
   readonly cells: readonly CellFrame[]
   /**
    * ⚠ **Every** defined point, always — not only the ones `marks.points.mode` renders.
@@ -358,7 +358,10 @@ function xDomain(data: readonly Series[]): readonly [number, number] {
  * `hasNegative` therefore does not change the domain here. It reaches the plan, where it
  * belongs, and `zeroLine` below gives the renderer the baseline to draw when zero is in view.
  */
-function yDomain(data: readonly Series[]): readonly [number, number] {
+function yDomain(
+  data: readonly Series[],
+  mark: ChartPlan['marks']['primary'],
+): readonly [number, number] {
   const values: number[] = []
   for (const s of data) {
     for (const p of s.points) {
@@ -367,7 +370,10 @@ function yDomain(data: readonly Series[]): readonly [number, number] {
   }
   const [lo, hi] = extent(values)
   if (lo === undefined || hi === undefined) return [0, 1]
-  return padDegenerate(lo, hi)
+  // A bar's length is read from zero. Include the baseline before the scale is built so a
+  // positive-only or negative-only series cannot produce a truncated bar that exaggerates its
+  // magnitude. Line/area keep the data-only domain described above.
+  return mark.kind === 'bar' || mark.kind === 'cell' ? [Math.min(0, lo), Math.max(0, hi)] : padDegenerate(lo, hi)
 }
 
 // --- Ticks -------------------------------------------------------------------------------
@@ -721,7 +727,8 @@ export function resolveFrame(
   // and tick offsets subtract them back off. Building them plot-relative instead would make
   // every mark position depend on remembering to add the origin exactly once.
   const xd = xDomain(data)
-  const yd = yDomain(data)
+  const mark = plan.marks.primary
+  const yd = yDomain(data, mark)
 
   /**
    * ⚠ **Both x scales are wrapped into one epoch-milliseconds interface, so that nothing
@@ -744,14 +751,23 @@ export function resolveFrame(
     .nice(plan.axes.y.ticks.mode === 'count' ? plan.axes.y.ticks.count : 5)
 
   const toX = (v: number | Date): number => x.at(v instanceof Date ? v.getTime() : v)
-  const mark = plan.marks.primary
 
-  const series = data.map((s, index) => seriesFrame(s, index, mark, plot, toX, yScale))
+  // Category centres are shared across series so grouped bars keep the same slot even when one
+  // series has a missing value. The smallest positive gap is the nominal category width.
+  const sortedX = [...new Set(data.flatMap((s) => s.points.map(xValue)))].sort((a, b) => a - b)
+  const categoryStep = sortedX.reduce((smallest, value, index) => {
+    const previous = sortedX[index - 1]
+    if (previous === undefined || value <= previous) return smallest
+    return Math.min(smallest, Math.abs(toX(value) - toX(previous)))
+  }, Number.POSITIVE_INFINITY)
+  const nominalCategoryStep = Number.isFinite(categoryStep) && categoryStep > 0 ? categoryStep : plot.width
+
+  const series = data.map((s, index) =>
+    seriesFrame(s, index, mark, plot, toX, yScale, data.length, nominalCategoryStep),
+  )
 
   // `'endpoints'` labels the first and last *data* point, so it needs the x values in order —
   // across all series, since the earliest and latest may come from different ones.
-  const sortedX = [...new Set(data.flatMap((s) => s.points.map(xValue)))].sort((a, b) => a - b)
-
   const [ylo, yhi] = yScale.domain()
 
   // The band sits at the top of the box, below a top-placed external legend and to the right
@@ -819,6 +835,8 @@ function seriesFrame(
   plot: Rect,
   toX: (v: number | Date) => number,
   yScale: LinearScale,
+  seriesCount: number,
+  categoryStep: number,
 ): SeriesFrame {
   const defined = (p: DataPoint): boolean => p.y !== null && Number.isFinite(p.y)
 
@@ -880,6 +898,27 @@ function seriesFrame(
         width: Math.max(0, endX - startX),
         height: Math.abs(yLo - yHi),
       }))
+    }
+    cells = Object.freeze(cellsArr)
+  } else if (mark.kind === 'bar') {
+    const categoryWidth = Math.max(1, categoryStep * 0.8)
+    const slotWidth = mark.grouped ? categoryWidth / Math.max(1, seriesCount) : categoryWidth
+    const barWidth = Math.max(1, slotWidth * 0.9)
+    const baseline = yScale(0)
+    const cellsArr: CellFrame[] = []
+
+    for (const p of points) {
+      const slotOffset = mark.grouped ? (index - (seriesCount - 1) / 2) * slotWidth : 0
+      const x = p.x + slotOffset - barWidth / 2
+      const y = Math.min(baseline, p.y)
+      cellsArr.push(
+        Object.freeze({
+          x,
+          y,
+          width: barWidth,
+          height: Math.max(0.5, Math.abs(baseline - p.y)),
+        }),
+      )
     }
     cells = Object.freeze(cellsArr)
   }

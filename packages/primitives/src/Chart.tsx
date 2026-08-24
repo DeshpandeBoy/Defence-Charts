@@ -255,8 +255,9 @@ export function Chart({
  * has.
  *
  * ⚠ The mark kinds this package does *not* draw throw, naming the milestone that adds them —
- * the same contract `planChart()` holds. A silent fallback to a line would render bar data as
- * a line chart, which is the project's recurring failure species with a chart attached.
+ * the same contract `planChart()` holds. A silent fallback to a line would render another
+ * family's data as a line chart, which is the project's recurring failure species with a chart
+ * attached.
  */
 function SeriesMarks({
   frame,

@@ -337,6 +337,12 @@
     stroke: none;
   }
 
+  .gx-bar {
+    fill: var(--gx-series-color);
+    stroke: var(--gx-series-color);
+    stroke-width: var(--gx-bar-border-width);
+  }
+
   /*
    * ⚠ The horizon ramp. Band 0 sits nearest the baseline and is the faintest; each band
    * outward is more opaque, and that ordering is the entire read of a horizon chart. It
