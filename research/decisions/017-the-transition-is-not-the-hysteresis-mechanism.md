@@ -151,7 +151,7 @@ number. This record does not answer it.
   worth gating is section 2's table, which is falsifiable and cheap.
 - **The crossover frequency is a function of the envelope**, so a B1 tuning pass that shortens the
   recompose duration moves it upward and makes flicker *easier* to provoke. Anyone changing
-  `--gx-motion-recompose-duration` should re-run the probe; the relationship is 1/(2 × envelope) and
+  `--gx-motion-duration-recompose` should re-run the probe; the relationship is 1/(2 × envelope) and
   the probe prints it.
 - **Fading a mount is possible but is not free.** It needs the element rendered at `opacity: 0` and
   raised on the next frame, which is a second render or a JS write — decision 7's zero-client-JS

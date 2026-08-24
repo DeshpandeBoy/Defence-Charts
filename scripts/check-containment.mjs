@@ -7,12 +7,12 @@
  * own `ResizeObserver`, and the browser's response is the thing that makes this worth a
  * gate — it does not crash, it does not throw into any handler you wrote, it drops a
  * delivery and prints `"ResizeObserver loop completed with undelivered notifications"` to a
- * console nobody is reading. `research/30-implementation-plan.md:435` lists it as a top
+ * console nobody is reading. `research/30-implementation-plan.md:610` lists it as a top
  * risk and settles the remedy in one sentence: *"A deadband cannot fix this class of bug —
  * only structure can."*
  *
  * ⚠ **This gate cannot be written in Vitest, and the reason is not convenience.**
- * `research/30-implementation-plan.md:240` says so directly: *"This one needs a real
+ * `research/30-implementation-plan.md:279` says so directly: *"This one needs a real
  * browser — the fake cannot produce the loop error."* `FakeResizeObserver` in `@gx/testing`
  * exists so tests can **drive** resize deterministically; a driven observer has no
  * re-entrancy, no delivery queue, and therefore no loop to complete undelivered. Asserting

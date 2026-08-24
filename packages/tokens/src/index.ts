@@ -1,78 +1,34 @@
 /**
- * `@gx/tokens` — the TypeScript face of `theme.css`.
+ * `@gx/tokens` — the TypeScript face of the theme.
  *
- * ⚠ A1 scope. At **B1** this file is *generated* from the CSS, and a build-time check
- * asserts that every authored `var(--gx-*)` is a member of the generated set. Hand-
- * maintaining it past that point reintroduces the drift the generator exists to remove.
+ * ⚠ **The direction reversed at B1, and the docblock this replaces had it backwards.** It
+ * said this file would be *"generated from the CSS"*. What actually generates is the CSS:
+ * `./tokens.ts` is the source, `scripts/generate-tokens-css.mjs` emits `./themes/theme.css`
+ * from it, and `30-implementation-plan.md` §B1 asks for exactly that — *"author in TypeScript,
+ * generate CSS"*. The deciding argument is the `tier` field, which has no slot in a CSS
+ * declaration and is therefore uncheckable in a stylesheet.
+ *
+ * The name list below is the one thing that genuinely is read back off the CSS, because it has
+ * to span the *other* generator too. See `./tokens.generated.ts`.
  */
 
-/** Every `--gx-*` custom property the A1 skeleton theme defines. */
-export const GX_TOKENS = [
-  'ground',
-  'series-1',
-  'series-2',
-  'series-3',
-  'series-4',
-  'series-5',
-  'series-6',
-  'charcoal-100',
-  'charcoal-200',
-  'charcoal-300',
-  'charcoal-400',
-  'charcoal-500',
-  'charcoal-600',
-  'charcoal-700',
-  'charcoal-800',
-  'charcoal-900',
-  'ink',
-  'grid-color',
-  'grid-alpha',
-  'axis-color',
-  'corner-radius',
-  'elevation-raised',
-  'elevation-overlay',
-  'font-family',
-  'font-feature-settings',
-  'font-stretch',
-  'font-optical-sizing',
-  'numeric-variant',
-  'title-font-size',
-  'title-font-weight',
-  'title-letter-spacing',
-  'subtitle-font-size',
-  'subtitle-font-weight',
-  'subtitle-letter-spacing',
-  'axis-title-font-size',
-  'axis-title-font-weight',
-  'axis-title-letter-spacing',
-  'legend-label-font-size',
-  'legend-label-font-weight',
-  'legend-label-letter-spacing',
-  'label-font-size',
-  'label-font-weight',
-  'label-letter-spacing',
-  'label-font-size-min',
-  'label-landmark-grade',
-  'value-label-font-size',
-  'value-label-font-weight',
-  'value-label-letter-spacing',
-  'annotation-font-size',
-  'annotation-font-weight',
-  'annotation-letter-spacing',
-  'crosshair-label-font-size',
-  'crosshair-label-font-weight',
-  'crosshair-label-letter-spacing',
-  'label-line-spacing',
-  'gap',
-  'plot-padding',
-  // Marks. Added at A4 with @gx/primitives; see the note in theme.css for why these are
-  // tokens while core's layout constants are not.
-  'line-width',
-  'point-radius',
-  'area-alpha',
-  'band-alpha',
-  'series-color',
-] as const
+/**
+ * Every `--gx-*` custom property the shipped themes declare.
+ *
+ * ⚠ **Generated, and it had to become generated.** Hand-maintained, this array reached B1
+ * missing all seven A6 motion tokens — live in `theme.css`, referenced by `chart.css`,
+ * asserted by gate G19, and absent from the list that claims to be *every* token. Nothing
+ * failed, because nothing compared the two. `pnpm lint:tokens` now does, in both directions:
+ * G7's membership rule rejects a `var(--gx-*)` naming a token that does not exist, and
+ * `pnpm lint:tokens:drift` rejects a list that has fallen behind the stylesheet.
+ */
+export { GX_TOKENS } from './tokens.generated.ts'
+
+// ⚠ `import type` even though `GX_TOKENS` is a value: it is used here only inside a
+// `typeof` query, so the binding is erased. A plain import would be a second runtime
+// reference to the generated module and would defeat gate G5 — importing one token name
+// would pull the whole list into a consumer's bundle.
+import type { GX_TOKENS } from './tokens.generated.ts'
 
 export type GxTokenName = (typeof GX_TOKENS)[number]
 
@@ -87,7 +43,13 @@ export type GxCustomProperty = `--gx-${GxTokenName}`
 
 export const toCustomProperty = (name: GxTokenName): GxCustomProperty => `--gx-${name}`
 
-/** The four shipping theme combinations: {Rail} × {dark, light}, plus the OS default. */
+/**
+ * The four shipping theme combinations: {Rail} × {dark, light}, plus the OS default.
+ *
+ * ⚠ **Not derived from `THEME_VARIANTS`, and the asymmetry is real rather than an oversight.**
+ * `rail-dark` has no entry there because it *is* `:where(:root)` — the default world needs no
+ * override block. `THEME_VARIANTS` holds the deltas; this holds the worlds.
+ */
 export const GX_THEMES = ['rail-dark', 'rail-light'] as const
 
 export type GxTheme = (typeof GX_THEMES)[number]

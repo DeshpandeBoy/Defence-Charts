@@ -1,7 +1,7 @@
 /**
  * `planChart()` — the resolver.
  *
- * `research/30-implementation-plan.md:185` states A3's whole payoff: *"At the end of A3 the
+ * `research/30-implementation-plan.md:197` states A3's whole payoff: *"At the end of A3 the
  * core thesis is testable with zero UI. That is the point."* This is the function that makes
  * it so. Everything upstream of here is a contract; everything downstream is a renderer.
  *

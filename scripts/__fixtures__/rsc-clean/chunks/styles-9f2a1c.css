@@ -11,11 +11,11 @@
   overflow: visible;
 }
 .gx-chart__caption {
-  margin-block-start: var(--gx-gap);
+  margin-block-start: var(--gx-size-gap);
 }
 .gx-axis__tick-mark {
-  fill: var(--gx-axis-colour);
+  fill: var(--gx-axis-color);
 }
 .gx-grid__line {
-  fill: var(--gx-grid-colour);
+  fill: var(--gx-grid-color);
 }

@@ -24,16 +24,16 @@
     /* A <figure> carries a UA margin. Unitless 0 is not a length literal. */
     margin: 0;
     /*
-     * ⚠ `--gx-ink`, not a ramp index. Every mark in this file that is not a series colour
+     * ⚠ `--gx-surface-text-color`, not a ramp index. Every mark in this file that is not a series colour
      * inherits from here — tick labels, the axis rule, the tick marks, the gridlines (all
      * `currentColor` by way of `--gx-axis-color` / `--gx-grid-color`), the value display.
      * Naming a ramp index here nails the ink to one ground: this line read
-     * `var(--gx-charcoal-900)` until A4, and on the light ground it drew #e2e5e8 on
+     * `var(--gx-ramp-neutral-9)` until A4, and on the light ground it drew #e2e5e8 on
      * #f4f3ef. The chart kept its lines, which are series-coloured, and silently lost
      * every axis, tick, label and gridline. Found by opening it in a browser, not by a
      * test — a contrast failure is invisible to every gate this project has.
      */
-    color: var(--gx-ink);
+    color: var(--gx-surface-text-color);
     font-family: var(--gx-font-family);
     font-feature-settings: var(--gx-font-feature-settings);
     font-variant-numeric: var(--gx-numeric-variant);
@@ -58,7 +58,7 @@
   }
 
   .gx-chart__caption {
-    margin-block-start: var(--gx-gap);
+    margin-block-start: var(--gx-size-gap);
     font-size: var(--gx-legend-label-font-size);
   }
 
@@ -67,7 +67,7 @@
   .gx-grid__line,
   .gx-grid__zero {
     fill: var(--gx-grid-color);
-    opacity: var(--gx-grid-alpha);
+    opacity: var(--gx-grid-opacity);
   }
 
   .gx-grid__zero {
@@ -141,7 +141,7 @@
   .gx-line {
     fill: none;
     stroke: var(--gx-series-color);
-    stroke-width: var(--gx-line-width);
+    stroke-width: var(--gx-line-stroke-width);
     /*
      * Round joins and caps, so a one-point series still paints a dot and a steep vertex
      * does not spike. `stroke-linecap: butt` on a single-point path renders nothing at
@@ -153,7 +153,7 @@
 
   .gx-area {
     fill: var(--gx-series-color);
-    fill-opacity: var(--gx-area-alpha);
+    fill-opacity: var(--gx-area-opacity);
     stroke: none;
   }
 
@@ -166,13 +166,13 @@
   .gx-band {
     fill: var(--gx-series-color);
     stroke: none;
-    fill-opacity: var(--gx-band-alpha);
+    fill-opacity: var(--gx-horizon-band-opacity);
   }
   .gx-band[data-band='1'] {
-    fill-opacity: calc(var(--gx-band-alpha) * 2);
+    fill-opacity: calc(var(--gx-horizon-band-opacity) * 2);
   }
   .gx-band[data-band='2'] {
-    fill-opacity: calc(var(--gx-band-alpha) * 3);
+    fill-opacity: calc(var(--gx-horizon-band-opacity) * 3);
   }
 
   .gx-point {
@@ -218,7 +218,7 @@
   }
 
   .gx-data-table__table :is(th, td) {
-    padding: var(--gx-gap);
+    padding: var(--gx-size-gap);
     text-align: end;
   }
 
@@ -282,13 +282,13 @@
    * rather than half. See the note in `@gx/tokens`' theme.css for the measurement.
    */
   .gx-chart[data-motion-duration='rescale'] {
-    --gx-motion-duration: var(--gx-motion-rescale-duration);
-    --gx-motion-stage-delay: var(--gx-motion-rescale-stage-delay);
+    --gx-motion-duration: var(--gx-motion-duration-rescale);
+    --gx-motion-stage-delay: var(--gx-motion-stage-delay-rescale);
   }
 
   .gx-chart[data-motion-duration='recompose'] {
-    --gx-motion-duration: var(--gx-motion-recompose-duration);
-    --gx-motion-stage-delay: var(--gx-motion-recompose-stage-delay);
+    --gx-motion-duration: var(--gx-motion-duration-recompose);
+    --gx-motion-stage-delay: var(--gx-motion-stage-delay-recompose);
   }
 
   /*

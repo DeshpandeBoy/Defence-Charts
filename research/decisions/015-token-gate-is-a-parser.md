@@ -35,10 +35,10 @@ actually returns on the right:
 |---|---|---|
 | `--gx-series-1: #b4e4fd` | ✅ allow — a token definition | ❌ `raw-color` |
 | `--gx-label-font-size: 11px` | ✅ allow — a token definition | ❌ `raw-pixel` |
-| `--gx-corner-radius: 0` | ✅ allow — unitless `0` | ✅ allow |
+| `--gx-widget-radius: 0` | ✅ allow — unitless `0` | ✅ allow |
 | `color: #b4e4fd` | ❌ reject — normal declaration | ❌ `raw-color` |
 | `--gx-plot-bg: linear-gradient(…)` | ❌ reject — no allowlist | ❌ `gradient` |
-| `padding: calc(var(--gx-gap) * 2)` | ✅ allow — multiplier is not a length | ✅ allow |
+| `padding: calc(var(--gx-size-gap) * 2)` | ✅ allow — multiplier is not a length | ✅ allow |
 | `background: url("data:…base64,AA#ffffffBB")` | ✅ allow — **inside a data URI** | ❌ `raw-color` |
 | `content: "#ff0000"` | ✅ allow — **inside a string** | ❌ `raw-color` |
 

@@ -14,9 +14,10 @@ import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
-import { inspectCss } from './check-tokens.mjs'
+import { TOKEN_GROUPS, collectDeclaredTokens, inspectCss, inspectTokenName } from './check-tokens.mjs'
 
 const FIXTURES = fileURLToPath(new URL('./__fixtures__/', import.meta.url))
+const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
 
 const THEME_PATH = join('packages', 'tokens', 'src', 'themes', 'theme.css')
 const COMPONENT_PATH = join('packages', 'primitives', 'src', 'chart.css')
@@ -91,7 +92,7 @@ describe('the allowlist is positional, not decorative', () => {
 
   it('rejects a gradient even on a token definition in an allowlisted file', async () => {
     // ⚠ Gradients have no allowlist anywhere. The ban is semantic, so it does not relax.
-    const source = ':where(:root) { --gx-ground: linear-gradient(to top, #000, #fff) }'
+    const source = ':where(:root) { --gx-surface-color: linear-gradient(to top, #000, #fff) }'
     const violations = inspectCss(source, THEME_PATH)
     expect(violations).toHaveLength(1)
     expect(violations[0]?.rule).toBe('gradient')
@@ -105,7 +106,7 @@ describe('the traps', () => {
   })
 
   it('permits a unitless zero and a calc() multiplier', () => {
-    const source = '.p { margin: 0; gap: calc(var(--gx-gap) * 2) }'
+    const source = '.p { margin: 0; gap: calc(var(--gx-size-gap) * 2) }'
     expect(inspectCss(source, COMPONENT_PATH)).toEqual([])
   })
 
@@ -172,7 +173,7 @@ describe('durations, which this gate could not see until A6', () => {
    */
   it('keeps the allowlist positional', () => {
     expect(
-      inspectCss(':root { --gx-motion-recompose-duration: 1000ms; }', THEME_PATH),
+      inspectCss(':root { --gx-motion-duration-recompose: 1000ms; }', THEME_PATH),
     ).toEqual([])
     expect(inspectCss('.a { transition: opacity 300ms linear; }', THEME_PATH)).toHaveLength(1)
   })
@@ -184,5 +185,198 @@ describe('durations, which this gate could not see until A6', () => {
       COMPONENT_PATH,
     )
     expect(violations).toEqual([])
+  })
+})
+
+describe('membership, the rule G14 was written because G7 lacked', () => {
+  /**
+   * ⚠ **The gate map's note on G14 opens: *"G7 checks that a `var()` was used; it has no way
+   * to know whether the property that `var()` lands on exists."*** This rule closes the
+   * neighbouring hole, which is one indirection earlier — whether the *token* exists. A
+   * misspelt `var(--gx-serie-1)` parses, passes all four literal rules, builds, and paints
+   * the property's initial value. Same species, third door.
+   *
+   * ⚠ Membership is a set of *names*, so it cannot be a regex over the tree. Grepping for
+   * `--gx-[a-z-]+` across `packages/` reported `--gx-grid-width` and `--gx-tick-length` as
+   * used-and-undeclared; all seven occurrences of the pair are **prose comments quoting
+   * decision 012's counterexample** — the tokens it documents as deliberately absent. Two
+   * findings, two false positives. That is why the rule walks declarations.
+   */
+  const KNOWN = new Set(['--gx-surface-text-color', '--gx-motion-duration'])
+
+  it('accepts a var() naming a declared token', () => {
+    expect(inspectCss('.a { color: var(--gx-surface-text-color) }', COMPONENT_PATH, KNOWN)).toEqual([])
+  })
+
+  it('rejects a var() naming a token nobody declares', () => {
+    const violations = inspectCss('.a { color: var(--gx-inkk) }', COMPONENT_PATH, KNOWN)
+    expect(violations.map((v) => `${v.rule}:${v.detail}`)).toEqual(['undefined-token:--gx-inkk'])
+  })
+
+  /**
+   * ⚠ **The fallback is the case worth planting.** `var(--gx-typo-not-a-token, 4px)` renders
+   * a perfectly good 4px forever, so nothing downstream looks wrong and no author ever finds
+   * out the token was never real. The rule matches on the opening of the `var()` for exactly
+   * this reason — the comma is not a terminator it respects.
+   *
+   * ⚠ **Two violations, and the second one surprised the test that was written first.** The
+   * pre-existing `raw-length` rule fires on the `4px` as well, because a fallback literal is
+   * a length this file chose and this file will paint. That is not double-counting: the two
+   * findings have different fixes — declare the token, *and* stop hardcoding the fallback —
+   * and a reader who saw only the first would fix the name and leave the literal behind. No
+   * `var(--gx-*, <literal>)` exists anywhere in the tree today, which is why nothing had
+   * exercised the interaction before.
+   */
+  it('rejects an undeclared token even when a fallback hides the miss', () => {
+    const violations = inspectCss(
+      '.a { padding: var(--gx-typo-not-a-token, 4px) }',
+      COMPONENT_PATH,
+      KNOWN,
+    )
+    expect(violations.map((v) => `${v.rule}:${v.detail}`)).toEqual([
+      'undefined-token:--gx-typo-not-a-token',
+      'raw-length:4px',
+    ])
+  })
+
+  /**
+   * ⚠ The rule sits **before** the allowlist early-return, so it applies inside the tokens
+   * package too. `--gx-surface-text-color: var(--gx-ramp-neutral-9)` is a real chain in `theme.css`, and a
+   * typo in the right-hand side there breaks every theme at once.
+   */
+  it('applies inside the allowlisted tokens directory, where the var() chains live', () => {
+    expect(
+      inspectCss(
+        ':root { --gx-surface-text-color: var(--gx-nope) }',
+        THEME_PATH,
+        KNOWN,
+      ).map((v) => v.rule),
+    ).toEqual(['undefined-token'])
+  })
+
+  it('is inert when no set is supplied, so the other four rules stay testable alone', () => {
+    // ⚠ If this ever fails, every `inspectCss(source, file)` call above has silently
+    // acquired a fifth rule and the two-argument tests are asserting something else.
+    expect(inspectCss('.a { color: var(--gx-not-a-token) }', COMPONENT_PATH)).toEqual([])
+  })
+
+  it('ships the real tree clean against the real declarations', async () => {
+    const declared = await collectDeclaredTokens(
+      join(fileURLToPath(new URL('..', import.meta.url)), 'packages', 'tokens', 'src', 'themes'),
+    )
+    expect(declared.size).toBeGreaterThan(0)
+    const source = await readFile(
+      join(fileURLToPath(new URL('..', import.meta.url)), COMPONENT_PATH),
+      'utf8',
+    )
+    expect(inspectCss(source, COMPONENT_PATH, declared)).toEqual([])
+  })
+})
+
+describe('the naming rule — G7 rule 6, added with the B1 slice 2 rename', () => {
+  /**
+   * ⚠ **The vocabulary is asserted against `raw/06` itself, and that is the reverse
+   * direction the other five rules do not have.** `TOKEN_GROUPS` is a hand-kept union: 19
+   * groups §6.0 publishes plus thirteen §6.2–§6.9 uses without publishing. A hand-kept union
+   * is exactly the shape that drifts — `GX_TOKENS` was one, and it reached B1 seven tokens
+   * behind the stylesheet. So this parses the specification and asserts containment. Add a
+   * group to `raw/06` and the *test* names it; the gate can never quietly start rejecting a
+   * name the document specifies.
+   *
+   * Sections are located by heading text rather than line number: `raw/06` is 1800+ lines and
+   * anything anchored to a number there is anchored to nothing.
+   */
+  it('contains every first segment raw/06 §6.2–§6.9 actually uses', async () => {
+    const raw = await readFile(
+      join(REPO_ROOT, 'research', 'raw', '06-design-tokens-widgets.md'),
+      'utf8',
+    )
+    const start = raw.indexOf('### 6.2 ')
+    const end = raw.indexOf('### 6.10 ')
+    expect(start).toBeGreaterThan(0)
+    expect(end).toBeGreaterThan(start)
+
+    const used = new Set(
+      [...raw.slice(start, end).matchAll(/--gx-([a-z][a-z0-9]*)/g)].map((m) => m[1]),
+    )
+    // `color` and `cat` are named in `raw/06` as the spellings to avoid, not to adopt —
+    // see the ⚠ on TOKEN_GROUPS. They are not in this range, and this asserts it stays so.
+    expect(used.has('color')).toBe(false)
+    expect(used.has('cat')).toBe(false)
+
+    const missing = [...used].filter((group) => !TOKEN_GROUPS.has(group)).sort()
+    expect(missing).toEqual([])
+  })
+
+  it('accepts the shapes raw/06 §6.0 describes, including the ones it only implies', () => {
+    // group+property, group+element+property, group+modifier, group alone, and a property
+    // segment with no CSS property of that name (`grade` is a variable-font axis).
+    for (const name of [
+      '--gx-grid-color',
+      '--gx-axis-title-font-size',
+      '--gx-series-1',
+      '--gx-surface',
+      '--gx-label-landmark-grade',
+      '--gx-motion-stage-delay-recompose',
+      '--gx-widget-radius-inner',
+    ]) {
+      expect(inspectTokenName(name), name).toBeUndefined()
+    }
+  })
+
+  it('rejects every first segment the slice 2 rename removed', () => {
+    // ⚠ The ratchet. These seven are not hypothetical bad names — all seven shipped, and
+    // this is the test that stops them coming back one at a time.
+    for (const name of [
+      '--gx-ground',
+      '--gx-ink',
+      '--gx-charcoal-900',
+      '--gx-corner-radius',
+      '--gx-elevation-raised',
+      '--gx-band-alpha',
+      '--gx-gap',
+    ]) {
+      expect(inspectTokenName(name), name).toMatch(/is not a group/)
+    }
+  })
+
+  it('rejects a wrong property spelling even when the group is right', () => {
+    expect(inspectTokenName('--gx-grid-alpha')).toMatch(/use 'opacity'/)
+    expect(inspectTokenName('--gx-axis-colour')).toMatch(/use 'color'/)
+  })
+
+  it('rejects a prefix that recurs mid-name, which is what makes the rename one regex', () => {
+    // raw/06 §6.0's whole argument for `s/--gx-/--<new>-/g` being a safe rename is that `gx`
+    // appears in exactly one position. One token like this and the rename rewrites a middle
+    // segment too, silently.
+    expect(inspectTokenName('--gx-widget-gx-radius')).toMatch(/recurs mid-name/)
+  })
+
+  it('rejects the spellings CSS itself would not accept', () => {
+    expect(inspectTokenName('--gx-Grid-Color')).toMatch(/lowercase kebab/)
+    expect(inspectTokenName('--gx-grid_color')).toMatch(/lowercase kebab/)
+    expect(inspectTokenName('--gx-grid--color')).toMatch(/lowercase kebab/)
+    expect(inspectTokenName('--gx-grid-')).toMatch(/lowercase kebab/)
+    expect(inspectTokenName('--gx-')).toBe('no name after the prefix')
+  })
+
+  it('fires on the declaration and stays silent on the reference', () => {
+    // ⚠ Both halves matter. Reporting the reference would print one finding per `var()` site
+    // for a single line anybody has to edit — `--gx-ink` had eleven. And a reference to a
+    // badly-named token cannot escape: the membership rule above rejects it for not existing.
+    expect(
+      inspectCss(':root { --gx-nonsuch-color: red }', THEME_PATH).map((v) => v.rule),
+    ).toEqual(['token-name'])
+    expect(
+      inspectCss('.a { color: var(--gx-nonsuch-color) }', COMPONENT_PATH).map((v) => v.rule),
+    ).toEqual([])
+  })
+
+  it('ships both themes clean, which is the claim the rename was for', async () => {
+    for (const sheet of ['theme.css', 'typography.css']) {
+      const path = join('packages', 'tokens', 'src', 'themes', sheet)
+      const source = await readFile(join(REPO_ROOT, path), 'utf8')
+      expect(inspectCss(source, path).filter((v) => v.rule === 'token-name'), sheet).toEqual([])
+    }
   })
 })

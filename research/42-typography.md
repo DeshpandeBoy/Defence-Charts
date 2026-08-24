@@ -29,15 +29,15 @@ Two type systems exist in the corpus and they do not agree.
 
 | Token | Default | Tier | Source | Line |
 |---|---|---|---|---|
-| `--gx-label-font-size` | `11px` | **B** | field spread 10–14: Vega `guide-label` 10, Plot 10, Nivo 11, Spectrum 14 | `:1700` |
-| `--gx-label-font-size-min` | `10px` | C | *"No system publishes a legibility floor."* | `:1701` |
-| `--gx-axis-title-font-size` / `-weight` | `11px` / `700` | A-impl | Vega `guide-title: { fontSize: 11, fontWeight: 'bold' }` | `:1714` |
-| `--gx-title-font-size` / `-weight` | `13px` / `700` | A-impl | Vega `group-title: { fontSize: 13, fontWeight: 'bold' }` (Spectrum 18) | `:1716` |
-| `--gx-subtitle-font-size` | `12px` | A-impl | Vega `group-subtitle: { fontSize: 12 }` | `:1718` |
-| `--gx-value-label-font-size` | `10px` | **B** | Highcharts `dataLabels.style.fontSize: '0.7em'` — deliberately smaller than the legend's `0.8em` | `:1720` |
-| `--gx-value-label-font-weight` | `700` | A-impl ×2 | Highcharts `dataLabels…fontWeight: 'bold'`; Spectrum `DIRECT_LABEL_FONT_WEIGHT = 700` | `:1721` |
-| `--gx-label-landmark-weight` | `600` | A-impl | Carbon: *"semibold the label to make it a 'landmark' label"* | `:1712` |
-| `--gx-crosshair-label-font-size` | `11px` | A-impl | Highcharts `crosshair.label.style.fontSize: '11px'` | `:1779` |
+| `--gx-label-font-size` | `11px` | **B** | field spread 10–14: Vega `guide-label` 10, Plot 10, Nivo 11, Spectrum 14 | `:1731` |
+| `--gx-label-font-size-min` | `10px` | C | *"No system publishes a legibility floor."* | `:1732` |
+| `--gx-axis-title-font-size` / `-weight` | `11px` / `700` | A-impl | Vega `guide-title: { fontSize: 11, fontWeight: 'bold' }` | `:1745` |
+| `--gx-title-font-size` / `-weight` | `13px` / `700` | A-impl | Vega `group-title: { fontSize: 13, fontWeight: 'bold' }` (Spectrum 18) | `:1747` |
+| `--gx-subtitle-font-size` | `12px` | A-impl | Vega `group-subtitle: { fontSize: 12 }` | `:1749` |
+| `--gx-value-label-font-size` | `10px` | **B** | Highcharts `dataLabels.style.fontSize: '0.7em'` — deliberately smaller than the legend's `0.8em` | `:1751` |
+| `--gx-value-label-font-weight` | `700` | A-impl ×2 | Highcharts `dataLabels…fontWeight: 'bold'`; Spectrum `DIRECT_LABEL_FONT_WEIGHT = 700` | `:1752` |
+| `--gx-label-landmark-weight` | `600` | A-impl | Carbon: *"semibold the label to make it a 'landmark' label"* | `:1743` |
+| `--gx-crosshair-label-font-size` | `11px` | A-impl | Highcharts `crosshair.label.style.fontSize: '11px'` | `:1810` |
 
 ### 1.1 ⚠ The ordering is not merely inverted — it is unsatisfiable
 
@@ -141,7 +141,7 @@ approximately equivalent to weight 550.
 
 | Token | Default | Tier | Note |
 |---|---|---|---|
-| `--gx-label-landmark-grade` | `150` | **B** | Carbon's A-impl *intent* (`raw/06:1712`), retargeted to grade and clamped to Roboto Flex's verified `+150` ceiling |
+| `--gx-label-landmark-grade` | `150` | **B** | Carbon's A-impl *intent* (`raw/06:1743`), retargeted to grade and clamped to Roboto Flex's verified `+150` ceiling |
 
 This is a deliberate divergence in the `§6.2` pattern, and it costs the token its A-impl tier. Two
 consequences to write down rather than discover:
@@ -163,7 +163,7 @@ occurrences — exactly four in the corpus:
 |---|---|---|
 | `raw/06:1219` | `--gx-axis-label-landmark-weight: 600` | → `--gx-label-landmark-grade: 150` |
 | `raw/06:1436` | `--gx-axis-label-landmark-weight` (inventory) | → `--gx-label-landmark-grade` |
-| `raw/06:1712` | `--gx-label-landmark-weight` (the specified row) | → `--gx-label-landmark-grade`, tier A-impl → B |
+| `raw/06:1743` | `--gx-label-landmark-weight` (the specified row) | → `--gx-label-landmark-grade`, tier A-impl → B |
 | `DESIGN.md:246` | the collision note itself | → delete; resolved here |
 
 Both spellings are superseded by one name, so the collision cannot survive as a stale alias.
@@ -216,30 +216,30 @@ second family declaration.
 
 | Rank | Token | Default | Tier | Note |
 |---|---|---|---|---|
-| A | `--gx-title-font-size` | `13px` | A-impl | Vega `group-title` (`raw/06:1716`) |
+| A | `--gx-title-font-size` | `13px` | A-impl | Vega `group-title` (`raw/06:1747`) |
 | A | `--gx-title-font-weight` | `700` | A-impl | Vega `group-title` |
-| A− | `--gx-subtitle-font-size` | `12px` | A-impl | Vega `group-subtitle` (`raw/06:1718`) |
+| A− | `--gx-subtitle-font-size` | `12px` | A-impl | Vega `group-subtitle` (`raw/06:1749`) |
 | A− | `--gx-subtitle-font-weight` | `400` | **B** · New | Sits at B's size; separated by weight |
 | B | `--gx-axis-title-font-size` | **`12px`** | **B** | ⚠ **Changed from 11px.** Demoted from A-impl — §2 |
-| B | `--gx-axis-title-font-weight` | `700` | A-impl | Vega `guide-title` (`raw/06:1714`) — unchanged |
+| B | `--gx-axis-title-font-weight` | `700` | A-impl | Vega `guide-title` (`raw/06:1745`) — unchanged |
 | C | `--gx-legend-label-font-size` | `11px` | **B** · New | Was unspecified (`raw/06:1433`). Set to D's size, per §2.1 |
 | C | `--gx-legend-label-font-weight` | `500` | **B** · New | Distinguishes C from D without spending size |
-| D | `--gx-label-font-size` | `11px` | B | `raw/06:1700` — unchanged |
+| D | `--gx-label-font-size` | `11px` | B | `raw/06:1731` — unchanged |
 | D | `--gx-label-font-weight` | `400` | **B** · New | |
-| D | `--gx-label-font-size-min` | `10px` | **C** | `raw/06:1701`. ⚠ No system publishes a legibility floor; `DESIGN.md:131` refuses to assert one. **Ours.** |
+| D | `--gx-label-font-size-min` | `10px` | **C** | `raw/06:1732`. ⚠ No system publishes a legibility floor; `DESIGN.md:131` refuses to assert one. **Ours.** |
 | D | `--gx-label-landmark-grade` | `150` | **B** | §3 |
-| E | `--gx-value-label-font-size` | `10px` | B | `raw/06:1720` — Highcharts `0.7em` |
-| E | `--gx-value-label-font-weight` | `700` | A-impl ×2 | `raw/06:1721`. Placement compensation, not rank — §2.2 |
+| E | `--gx-value-label-font-size` | `10px` | B | `raw/06:1751` — Highcharts `0.7em` |
+| E | `--gx-value-label-font-weight` | `700` | A-impl ×2 | `raw/06:1752`. Placement compensation, not rank — §2.2 |
 | E | `--gx-annotation-font-size` | `10px` | **B** · New | Rank E per `DESIGN.md:121` |
 | E | `--gx-annotation-font-weight` | `400` | **B** · New | On the ground plane, so no compensation |
 
 **Unchanged and consistent:** `--gx-crosshair-label-font-size: 11px` (A-impl, Highcharts,
-`raw/06:1779`) already sits at rank D, which is right — a crosshair label reads a tick value.
+`raw/06:1810`) already sits at rank D, which is right — a crosshair label reads a tick value.
 
 **Out of scope here:** the `--gx-arc-summary-font-size-{ratio,min,max}` triple (`0.35` / `28px` /
-`60px`, A-impl Spectrum, `raw/06:1677`–`:1678`). Those are not rank-scale members — they are the
+`60px`, A-impl Spectrum, `raw/06:1708`–`:1709`). Those are not rank-scale members — they are the
 `ratio + min + max` clamp idiom for text sized from a geometry rather than from a scale
-(`raw/06:1685`). ⚠ Note the min of 28px is **2.15×** rank A: a donut's centre summary is display type,
+(`raw/06:1716`). ⚠ Note the min of 28px is **2.15×** rank A: a donut's centre summary is display type,
 not chart type, and lives outside this scale by design.
 
 ### 4.3 Line spacing
@@ -249,7 +249,7 @@ not chart type, and lives outside this scale by design.
 
 | Token | Default | Tier |
 |---|---|---|
-| `--gx-label-line-spacing` | `1.2em` | **C** · New |
+| `--gx-label-line-height` | `1.2em` | **C** · New |
 
 Used only by the `split` step of the label degrade ladder (`10-responsive-ladder.md` §5.2). ⚠ **No
 published source.** Talbot's 1.5em is *horizontal* spacing between adjacent labels, not vertical
@@ -293,8 +293,8 @@ optical size. `41-text-metrics.md` §5 is amended accordingly.
 | `DESIGN.md:123` | sizes resolved — §2.1 table |
 | `DESIGN.md:240` | drop "exact type sizes" and "line-height scale" from unresolved |
 | `DESIGN.md:246` | delete the `landmark-weight` collision note — superseded (§3.1) |
-| `raw/06:1219`, `:1436`, `:1712` | rename to `--gx-label-landmark-grade`, value `150`, tier B |
-| `raw/06:1714` | `--gx-axis-title-font-size` `11px` → `12px`, A-impl → **B** |
+| `raw/06:1219`, `:1436`, `:1743` | rename to `--gx-label-landmark-grade`, value `150`, tier B |
+| `raw/06:1745` | `--gx-axis-title-font-size` `11px` → `12px`, A-impl → **B** |
 | `raw/06:1433` | `--gx-legend-label-font-size` gains a specified row (11px / 500, B) |
 | `41-text-metrics.md` §5 | `byFontSize` → `byRank` (§5 above) |
 | `README.md` open item 2 | 51 unspecified names → **43**; eight specified here |
@@ -309,7 +309,7 @@ optical size. `41-text-metrics.md` §5 is amended accordingly.
    estimated. The tier system exists so that this is a recorded gap rather than a plausible number.
 2. **Is `GRAD: 150` a legible landmark at 11px?** (§3) — visual check at A4; fallback is a charcoal
    step, not a weight bump.
-3. **`--gx-label-line-spacing: 1.2em`** (§4.3) — Tier C with no source. If the `split` degrade step
+3. **`--gx-label-line-height: 1.2em`** (§4.3) — Tier C with no source. If the `split` degrade step
    proves rare in practice, the honest move is to delete the token rather than defend the number.
 4. **Spectrum's 14px label** sits well outside the adopted 11px and was not adopted. Spectrum also
    ships titles at 18px against Vega's 13. ⚠ **We have followed Vega's scale wholesale and Spectrum's

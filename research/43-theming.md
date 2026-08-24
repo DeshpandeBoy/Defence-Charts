@@ -45,13 +45,13 @@ so plainly is better than shipping a theme switch that silently invalidates the 
 
 :where(:root) {
   /* The Emission-Line Rail, dark ground. Specificity 0,0,0. */
-  --gx-ground: #141618;
+  --gx-surface-color: #141618;
   --gx-series-1: #b4e4fd;   /* H-beta 486.1nm */
   /* … */
 }
 
 @media (prefers-color-scheme: light) {
-  :where(:root) { --gx-ground: #f4f3ef; /* … */ }
+  :where(:root) { --gx-surface-color: #f4f3ef; /* … */ }
 }
 
 :where(:root)[data-gx-theme='rail-light'],
@@ -127,9 +127,16 @@ affordance a second theme needs, and there is no other reason to name a token th
 nothing. If that reading is wrong, the neutral theme has no shadows and only §6 of this document
 survives; nothing else depends on it.
 
-**Consequence for the token tree:** `--gx-elevation-*` and `--gx-*-corner-radius` must exist as names
-in **both** themes, resolving to `none` and `0` in the default. A token that exists in one theme only
-cannot be swapped by a class.
+**Consequence for the token tree:** `--gx-widget-shadow`, `--gx-tooltip-shadow` and
+`--gx-widget-radius` must exist as names in **both** themes, resolving to `none` and `0` in the
+default. A token that exists in one theme only cannot be swapped by a class.
+
+⚠ **Those three were `--gx-elevation-raised`, `--gx-elevation-overlay` and `--gx-corner-radius` until
+the B1 slice-2 rename** (§6.1d). The requirement above is about *arity and presence* — two shadow
+names, one radius name, all three in both themes — so the rename satisfies it unchanged. It also made
+the pair say which surface it raises, which the escape-hatch theme has to know before it can pick a
+shadow: a theme resolving `--gx-tooltip-shadow` is told it is styling a tooltip. Both had zero
+`var()` consumers at the time, so this cost nothing to correct.
 
 ---
 
@@ -205,7 +212,7 @@ the `#ddd × 0.2` bug in a new costume.
 
 ---
 
-## 6. The token lint-gate allowlist — the A1 deliverable
+## 6. The token lint-gate allowlist — the A1 deliverable, widened at A6 and B1
 
 The gate is specified consistently in three places:
 
@@ -301,11 +308,111 @@ engine and only *loads* a PostCSS config. Taken anyway: `postcss` is three small
 coupled to the bundler's engine. Budget it as new code at A1 — full evidence and rule set in
 [`decisions/015-token-gate-is-a-parser.md`](decisions/015-token-gate-is-a-parser.md).
 
+### 6.1c Membership — the fifth rule, and the one that is not positional — added at B1
+
+The four rules above all ask *"is this value a literal that should have been a token?"* None of them
+asks the question one step earlier: **does the token exist?** `var(--gx-serie-1)` parses, satisfies
+every rule on this page, builds, emits no warning, and paints the property's initial value. A chart
+loses a series colour and nothing anywhere says so.
+
+> Every `var(--gx-*)` in any authored stylesheet must name a custom property that some file under
+> `packages/tokens/src/themes/` declares.
+
+Three things make this rule shaped differently from the other four:
+
+- **It is not positional.** It applies *inside* the allowlisted directory too, because the theme
+  source is full of `var()` chains — `--gx-surface-text-color: var(--gx-ramp-neutral-9)` is the whole mechanism by
+  which the ramp is absolute and the theme picks an index (§3.2). A typo on the right-hand side there
+  breaks every theme at once, so the rule runs before the allowlist early-return, not after it.
+- **It needs a set, so it can be inert.** The other four are decidable from one file. This one needs
+  every declared name, which means it has a failure mode they do not: given an empty set, every
+  `var()` is undeclared, so the natural implementation of "skip if we found nothing" turns the rule
+  off while still exiting 0. The CLI therefore **refuses to run** on an empty set rather than passing
+  — §6.3's principle applied to a gate that can be disabled by its own input.
+- **§6.1b's lesson had to be learned a second time.** The obvious implementation greps
+  `--gx-[a-z-]+` across `packages/` and diffs. Run against this tree it reports two undeclared
+  tokens, `--gx-grid-width` and `--gx-tick-length`, and **both are false positives**: all seven
+  occurrences are prose comments quoting [decision 012](decisions/012-no-line-element-for-tokened-geometry.md)'s
+  counterexample — the tokens that decision documents as deliberately *absent*. Two findings, two
+  wrong, which is the same ratio the regex script scored in §6.1b. It walks declarations.
+
+⚠ **The case worth planting is the fallback.** `var(--gx-typo-not-a-token, 4px)` renders a perfectly
+good 4px forever, so nothing downstream looks wrong and no author ever finds out the token was never
+real; the rule matches on the *opening* of the `var()` for exactly that reason. It reports **two**
+violations there, not one — the missing token and the hardcoded `4px` — because the two have different
+fixes and a reader who saw only the first would fix the name and leave the literal behind.
+
+⚠ **This rule is why `theme.css` is generated rather than authored**, and the two arrived together at
+B1. The source of truth is `packages/tokens/src/tokens.ts`, where a token's tier and source are
+**fields**; `pnpm generate:tokens` emits the stylesheet and the name list. The reason is on this page:
+§6.1's whole subject is which values may be written by hand, and until B1 the *provenance* of those
+values was written by hand too — as comments. `--gx-grid-opacity` carried a citation to Talbot 2010 from
+A1 onward when [`10-responsive-ladder.md:373`](10-responsive-ladder.md) attributes it to Heer &
+Bostock; Talbot is the tick-spacing work. Nothing caught it for the whole of milestone A, because in
+CSS a citation is a comment and a comment is not checked. Gate G17 now compares the committed
+stylesheet against the typed tree on every run.
+
+### 6.1d Naming — the sixth rule, and the only one about the left-hand side — added at B1 slice 2
+
+The five rules above are all about the **value**. This one is about the **name**, and it is the only
+rule on this page that can fire on a line containing no literal at all.
+
+> Every `--gx-*` custom-property **declaration** must obey `raw/06` §6.0's grammar —
+> `--<prefix>-<group>[-<element>]-<property>[-<modifier>]`, lowercase kebab, no abbreviation CSS does
+> not itself use — of which the machine-checkable clause is that **`<group>` is a closed set**.
+
+§6.0 published that grammar during milestone A and nothing enforced it. In that time the tree
+accumulated `--gx-ground`, `--gx-ink`, `--gx-charcoal-*`, `--gx-corner-radius`, `--gx-elevation-*`,
+`--gx-band-alpha` and `--gx-gap` — seven first segments the closed set does not contain. None was a
+mistake anyone made twice. They were made once each, months apart, which is what an unenforced
+convention produces rather than what a careless author does. **Slice 2 renamed all 24 tokens and added
+this rule in the same change**, and the rule is the half that matters: the rename fixes the tree once,
+the rule fixes it from now on.
+
+⚠ **The enforced vocabulary is 34 groups, not §6.0's published 19, and the discrepancy is a finding
+about `raw/06` rather than a relaxation of it.** §6.2–§6.9 of that same document specify 205 distinct
+`--gx-*` names using 32 distinct first segments, and **13 of them are outside the closed set §6.0
+publishes** — `aggregate`, `alert`, `font`, `heatmap`, `horizon`, `numeric`, `scale`, `stroke`,
+`substitute`, `subtitle`, `title`, `transpose`, `value`. §6.0's list covers chart *anatomy*; the
+missing ones are chart *behaviour* (§6.9's carry-over table), *text* (§6.5), and *colour* (§3.7).
+A gate that copied §6.0's table verbatim would reject `--gx-title-font-size` — a name `raw/06` itself
+specifies and this repo ships today. So the gate enforces the union actually in use, and the
+anti-drift direction moved into a **test that parses `raw/06` §6.2–§6.9 and asserts the set contains
+every first segment those sections use**. Widening the vocabulary is a code change with a reason
+attached; it is not something that happens by writing a token.
+
+One member has no `raw/06` basis at all: `annotation`, specified by
+[`42-typography.md:233`](42-typography.md) and already emitted by `generate-typography-css.mjs`. It is
+marked as ours in the source. The set deliberately excludes `color` — which `raw/06:1021` names as *the
+failure mode to avoid* — and `cat`, an abbreviation `raw/06:873` uses in passing and §6.0 bans.
+
+**Only `<group>` is enforced, and the restraint is the finding.** §6.0 marks exactly one segment
+"closed set"; `<element>` and `<property>` are given as illustrations. A gate reading them as closed
+rejects `--gx-crosshair-label-font-size`, `--gx-legend-symbol-gap` and `--gx-tick-offset-band` — all
+three specified in `raw/06` — plus `--gx-label-landmark-grade`, where `grade` is a variable-font axis
+and no CSS property at all. Enforcing a convention past the point its author closed it produces a gate
+that is wrong more often than the code it checks.
+
+Three further constraints are mechanical and are enforced: the name is lowercase kebab with no doubled
+or trailing hyphen; the prefix may not recur mid-name (`--gx-widget-gx-radius`); and a small
+**banned-segment ratchet** rejects `alpha` (→ `opacity`), `colour` (→ `color`) and `bg`
+(→ `background`). The ratchet exists because `--gx-grid-alpha`, `--gx-area-alpha` and `--gx-band-alpha`
+all shipped while `alpha` is not a CSS property and `opacity` is — the closed-set rule alone would not
+have caught any of the three, since `grid`, `area` and `horizon` are all legal groups.
+
+⚠ **It fires on the declaration and never on a `var()` reference**, which is what makes the report
+actionable. A token is named once and read many times: `--gx-ink` had eleven reference sites, so a
+reference-side check would print eleven findings for one line anybody has to edit and bury it. A
+declaration is also the only place a *new* bad name can enter — a reference to a token nobody declared
+is already caught one rule earlier, by §6.1c. Like §6.1c it runs **before** the positional
+early-return, because the themes directory is exempt from *literals*, not from the grammar. It is the
+one directory where every token in the tree is named.
+
 ### 6.2 Edge cases that must be decided now, not argued about in review
 
-- **Unitless `0`** is not a `px` literal. Permitted everywhere. `--gx-corner-radius: 0` needs no
+- **Unitless `0`** is not a `px` literal. Permitted everywhere. `--gx-widget-radius: 0` needs no
   exemption — which is convenient, since the default theme sets it that way (`DESIGN.md:196`).
-- **Unitless numbers in `calc()`** (`calc(var(--gx-gap) * 2)`) are permitted. The multiplier is not a
+- **Unitless numbers in `calc()`** (`calc(var(--gx-size-gap) * 2)`) are permitted. The multiplier is not a
   length.
 - **`currentColor`**, `transparent`, `inherit` are keywords, not literals. Permitted everywhere —
   and `currentColor` is *mandated* for chrome (§3.1).

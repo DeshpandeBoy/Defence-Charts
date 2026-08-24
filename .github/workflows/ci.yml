@@ -74,9 +74,23 @@ jobs:
         if: '!cancelled()'
         run: pnpm lint:deps
 
-      - name: Gate G7 — token lint (raw colours, lengths, gradients)
+      - name: Gate G7 — token lint (raw colours, lengths, gradients; every var() resolves; every name obeys raw/06 §6.0)
         if: '!cancelled()'
         run: pnpm lint:tokens
+
+      # ⚠ **The same gate as G17 below, pointed at the second generator**, not a new one: both
+      # regenerate a committed stylesheet from its typed source and compare. It is a separate
+      # step only because the two scripts fail for different reasons and the step name should
+      # already say which.
+      #
+      # ⚠ It runs HERE rather than after the build, unlike G17, and the difference is real:
+      # `generate-tokens-css.mjs` imports `packages/tokens/src/tokens.ts` directly under Node's
+      # native type-stripping, so it needs no `dist/`. That is what `engines.node >= 22.18`
+      # buys — see the header of the script. Running it early means a stale `theme.css` is
+      # reported in seconds instead of after a full build.
+      - name: Gate G17 (tokens) — theme.css matches the typed token tree
+        if: '!cancelled()'
+        run: pnpm lint:tokens:drift
 
       - name: Gates G15/G16 — happy-dom ban, test environment directives
         if: '!cancelled()'
@@ -109,7 +123,9 @@ jobs:
         if: '!cancelled()'
         run: pnpm lint:boundary
 
-      - name: Gate G17 — fitting typography CSS matches its typed plan input
+      # ⚠ AFTER the build, and unlike its token sibling above it cannot move earlier: this
+      # generator imports the compiled `@gx/core` to reach `FittingTypography`.
+      - name: Gate G17 (typography) — fitting typography CSS matches its typed plan input
         if: '!cancelled()'
         run: pnpm lint:typography
 

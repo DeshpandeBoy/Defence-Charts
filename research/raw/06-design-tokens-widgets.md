@@ -1465,6 +1465,37 @@ fine because `border-radius` exists); dimensions carry their unit in the value (
 because `calc()` requires it; ratios, counts and unitless multipliers are documented as such and
 never given a unit.
 
+> ⚠ **Added by the implementation at B1 slice 2, when this grammar was turned into a CI gate: the
+> `<group>` row above is incomplete against this document's own §6.2–§6.9, and the rest of the table
+> is looser than it reads.** Recorded here rather than in the table because this is a research
+> artefact and its history is worth keeping; the annotation is the correction, not a rewrite.
+>
+> §6.2–§6.9 specify **205 distinct `--gx-*` names using 32 distinct first segments, 13 of which are
+> absent from the closed set above**: `aggregate`, `alert`, `font`, `heatmap`, `horizon`, `numeric`,
+> `scale`, `stroke`, `substitute`, `subtitle`, `title`, `transpose`, `value`. The omission is
+> structural rather than accidental — the 19 published above are chart *anatomy*, and the 13 missing
+> ones come from chart *behaviour* (§6.9's carry-over table), *text* (§6.5 and the §5.5 table it
+> points at) and *colour* (§3.7, reached from §6.5). A gate that copied this row verbatim would reject
+> `--gx-title-font-size`, which §6.5 specifies. The gate therefore enforces the union in use (34
+> groups, the extra one being `--gx-annotation-*`, which is ours and is specified by
+> `research/42-typography.md:233`, not here), and a test parses §6.2–§6.9 to assert that union still
+> covers them. `--gx-color-*` is deliberately **not** a group: §3.7's opening line names it as *"the
+> failure mode to avoid"*. Neither is `cat`, which §3.1 uses in passing (`--gx-cat-N`) and which the
+> abbreviation rule above bans.
+>
+> **Only `<group>` is enforceable, and this table already says so** — it is the one row marked
+> *closed set*. `<element>` and `<property>` list examples, and a reading that treated them as closed
+> would reject four names this document or the repo specifies: `--gx-crosshair-label-font-size`
+> (§6.5), `--gx-legend-symbol-gap` (§6.4), `--gx-tick-offset-band` (§6.3), and
+> `--gx-label-landmark-grade`, whose `grade` is a variable-font axis and no CSS property at all.
+>
+> The prefix rule and the abbreviation rule survive intact and are both enforced. So is a small
+> addition the tree earned: `alpha` is rejected in favour of `opacity`, because `--gx-grid-alpha`,
+> `--gx-area-alpha` and `--gx-band-alpha` all shipped, and `opacity` is a CSS property while `alpha`
+> is not — exactly the abbreviation rule above, applied to a word the table did not think to name.
+>
+> Full statement: `research/43-theming.md` §6.1d. Implementation: `scripts/check-tokens.mjs`.
+
 **Why prefix at all — three verified precedents plus one hard constraint.**
 
 | System | Prefix | Verified in |

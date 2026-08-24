@@ -88,20 +88,35 @@ structurally cannot tell that a `var()` landed on a property that does not exist
 
 1. **Project name and npm scope.** Blocking for publish, not for code. Everything is `@gx/*`
    placeholder; `raw/06` §6.0 verified the prefix appears only as the first path segment, so the
-   rename is one regex plus one generator constant plus one template-literal type.
+   rename is one regex plus one generator constant plus one template-literal type. ⚠ **That claim is
+   now enforced rather than verified once.** B1 slice 2 added G7's `token-name` rule, which rejects
+   any `--gx-*` declaration where the prefix recurs mid-name — so the property the cheap rename
+   depends on cannot quietly stop being true between now and the rename.
 2. **43 `--gx-*` names referenced but never specified** — must each get a row or be deleted before
    the token tree ships. See `30-implementation-plan.md` B1. (Was 51; `42-typography.md` §4
-   specified eight.)
+   specified eight.) ⚠ **No longer a review item.** B1 added the membership rule to gate G7: a
+   `var(--gx-*)` naming a token nothing declares now fails CI, so a name can be referenced-but-
+   unspecified only in prose, never in a stylesheet.
 3. **Six UNVERIFIED token defaults** the research agent declined to guess at. Same section.
 4. **Whether Roboto Flex ships `tnum`** (`41-text-metrics.md` §4.1) and the **`safetyFactor`**
    calibration (§4.2). These block *generating the metrics table* at A2, not A1.
 5. **The six neutral-theme hex values** and the five composition pairs with no structural guarantee
    (`43-theming.md` §4–§5). Derivable at B1; deliberately not guessed.
 
-**Next:** Milestone A1. The A2–A4 pointers it hands off to now resolve to real specifications rather
-than to each other, the linter is chosen (**ESLint 9, flat config**, which is what gate G2 needs), and
-the SVG presentation-attribute question A1 was asked to decide is decided: **primitives carry no
-visual attributes and take everything from classes.**
+**Next:** Milestone **B1, slice 3** — transcribing the rest of `raw/06` §6.2–6.9 into the typed tree.
+Milestone A is closed: A1–A6 shipped, and the three browser gates (G4, G11, G19) are green in CI.
+B1 **slice 1** reversed the token direction — the tree is authored in `packages/tokens/src/tokens.ts`
+and `theme.css` is generated from it, so a tier and a source are now fields rather than comments.
+B1 **slice 2** renamed all 24 tokens to `raw/06` §6.0's grammar and gave **G7 a sixth rule** so the
+next name that disobeys it fails CI; seven first segments had drifted outside the closed set during
+milestone A, one at a time, which is what an unenforced convention produces. How much is left is a
+number the build prints on every run — currently `9 owed to B1`.
+
+⚠ **Slice 2's own finding, and it is about `raw/06` rather than about the tree.** §6.0 publishes a
+19-group closed set; §6.2–§6.9 of the same document specify names using **13 first segments it omits**,
+so a gate copying that list verbatim would reject `--gx-title-font-size`, which §6.5 specifies. The
+gate enforces the union in use and a test parses `raw/06` to assert it stays covering — see
+[`43-theming.md`](43-theming.md) §6.1d. §6.0 now carries the annotation under its table.
 
 ⚠ **One caveat, found by auditing the claim rather than repeating it — and then by running it.** The
 token lint gate is described everywhere as *ported*, and the source — `check-css-module-tokens.mjs`,

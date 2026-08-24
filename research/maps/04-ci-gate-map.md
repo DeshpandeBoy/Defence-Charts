@@ -27,7 +27,7 @@ flowchart LR
         G4["RSC fixture, JS disabled"]
         G5["tree-shaking size"]
         G6["public API surface"]
-        G7["token lint, both directions"]
+        G7["token lint — 6 rules:<br/>literals, membership, naming"]
         G8["provenance tier present"]
         G9["plan snapshots per rung"]
         G10["sweep up + down = pure"]
@@ -37,7 +37,7 @@ flowchart LR
         G14["element-set snapshot<br/>no tokened &lt;line&gt;"]
         G15["happy-dom absent from<br/>manifests and lockfile"]
         G16["env directive in the header,<br/>not in the prose"]
-        G17["generated typography CSS<br/>matches its typed input"]
+        G17["generated CSS matches<br/>its typed source"]
         G19["motion: transitions run,<br/>stage, and stop when asked"]
     end
 
@@ -91,7 +91,7 @@ exactly why the motion gate is **G19** and not G18
 | G4 | Next.js 16 App Router page rendering `<Chart plan={…}>` in a **server component**, asserting **both**: (1) with `javaScriptEnabled: false` the SVG, a real `<path>` and the accessible title are in the DOM; (2) the **built client JS** contains no chart code | **A4** → landed at **A5**; green, and in CI's `browser` job | 7 | The RSC path silently degrades to SSR + hydration — which assertion 1 alone *cannot see* |
 | G5 | Bundle each exported symbol alone; assert the component set equals a known set; print `symmetricDifference` | **A4** | 5, packaging | "Import one chart, ship one chart" stops being true |
 | G6 | `ts-morph` walk from `src/index.ts` collecting `missingExports` + `forbiddenExports` | **A4** | 5 | A public prop's type is unnameable by consumers |
-| G7 | Token lint — raw colour literals (hex, `rgb()`, `hsl()`, `oklch()`, `lab()`, `hwb()`, `color()`, named), raw length literals, gradients — **planted in both directions: a violation asserted to fail *and* a valid theme file asserted to pass clean** | **A1** (written), **B1** (full tree) | theming | Either someone hardcodes, or the gate itself has broken |
+| G7 | Token lint — **six rules**: raw colour literals (hex, `rgb()`, `hsl()`, `oklch()`, `lab()`, `hwb()`, `color()`, named), raw length literals, raw durations, gradients, **membership** (every `var(--gx-*)` names a token some theme declares) **and naming** (every `--gx-*` declaration obeys `raw/06` §6.0's grammar) — **planted in both directions: a violation asserted to fail *and* a valid theme file asserted to pass clean** | **A1** (written), **A6** (durations), **B1 s1** (membership), **B1 s2** (naming; full tree still owed) | theming | Someone hardcodes, someone misspells a token, someone invents a name, or the gate itself has broken |
 | G8 | Every threshold carries a provenance tier | **B3** | theming | A tuned number acquires the authority of a researched one |
 | G9 | Plan snapshots: `(type, size, shape) → plan`, per rung | **A3** | ladder | A rung's semantics change without anyone deciding to change them |
 | G10 | Sweep width **up then down** across every boundary; assert the plan is a pure function of size | **A3** | ladder | Hysteresis creeps in — the direction you approached from starts to matter |
@@ -101,17 +101,46 @@ exactly why the motion gate is **G19** and not G18
 | G14 | Element-set snapshot per chart type; no `<line>` may carry `x1`/`y1`/`x2`/`y2` from a `var(--gx-*)` | **A4** | theming | A geometry token ships, is documented, and does nothing ([012](../decisions/012-no-line-element-for-tokened-geometry.md)) |
 | G15 | happy-dom absent from every manifest **and** from the lockfile | **A1** | 7, 8, determinism | A transitive dependency reintroduces the shim that answers `getBBox()` with `0` |
 | G16 | The Vitest environment directive appears only in a test file's first three lines | **A1** | determinism | A test acquires a DOM from a sentence about DOMs |
-| G17 | The committed fitting-typography CSS is regenerated and compared byte-for-byte against its typed plan input | **A4** | theming | The generated stylesheet and the plan it is generated from drift apart |
+| G17 | Each committed generated stylesheet is regenerated and compared byte-for-byte against its typed source — `typography.css` from `FittingTypography`, and `theme.css` + `tokens.generated.ts` from the token tree | **A4** (typography), **B1** (tokens) | theming | The generated stylesheet and the source it is generated from drift apart |
 | G18 | *Proposed, unimplemented* — no network APIs in any published package | — (`../60-commercial-model.md` §7) | trust | "This library never phones home" becomes a claim nobody checks |
 | G19 | Drive the real playground in Chromium across a rung change and sample every frame: chrome interpolates, marks interpolate **and lag it by the delay the stylesheet declares**, `prefers-reduced-motion: reduce` suppresses all of it, and the resting state is identical either way | **A6** | 7, ladder | Motion silently stops — a re-key, a collapsed delay, or an inverted media query, none of which any node test can see |
 | — | `publint --strict` + `attw`, with the §5.5 CSS-subpath exclusions | **E3** | packaging | The published artefact is broken in a way the repo never is |
 
-**G14 exists because G7 structurally cannot cover it.** G7 checks that a `var()` was used; it has no
+**G17 covers two generators and is deliberately not two gates.** The token drift check added at B1
+is the same property as the typography one — regenerate the committed file, compare, exit 1 — applied
+to a second source, so giving it G20 would have implied a distinction that does not exist. It is a
+separate CI *step* because the two fail for different reasons and the step name should already be the
+diagnosis. The one real asymmetry is where they can run: `generate-tokens-css.mjs` imports
+`packages/tokens/src/tokens.ts` directly under Node's native type-stripping and needs no `dist/`, so
+it sits next to G7 before the build; `generate-typography-css.mjs` imports the compiled `@gx/core`
+and cannot move earlier.
+
+**G14 exists because G7 structurally cannot cover it — but only by one indirection, and B1 closed
+the other.** G7 checks that a `var()` was used; it has no
 way to know whether the property that `var()` lands on exists. `line { y2: var(--gx-tick-length) }`
 parses, passes G7, builds, emits no warning, and has no effect — `x1`/`y1`/`x2`/`y2` are not
 CSS-settable in any browser. Same species as the happy-dom `0` this project already caught: a thing
 that looks like it works and quietly doesn't. Cheap at A4, near-impossible to retrofit once the tokens
 are published as working.
+
+The neighbouring hole — whether the *token* exists, one step before whether the *property* does — was
+open for the whole of milestone A and closed at B1. `var(--gx-serie-1)` parses, passes all four
+literal rules, builds, emits no warning and paints the property's initial value. Same species, third
+door. It is a membership test rather than a fifth literal rule, which is why it needs the set of
+declared names and why the CLI **refuses to run on an empty set**: a membership rule with nothing to
+be a member of passes everything, which is the failure mode §6.3 names.
+
+**The sixth rule is the first one about the left-hand side, and it is here because a convention nobody
+checked was not kept.** `raw/06` §6.0 published a token-naming grammar before milestone A began; by the
+end of it the tree held seven names that disobeyed it — `--gx-ground`, `--gx-ink`, `--gx-charcoal-*`,
+`--gx-corner-radius`, `--gx-elevation-*`, `--gx-band-alpha`, `--gx-gap` — made once each, months apart.
+That is the signature of an unenforced convention rather than of a careless author, and it is the same
+signature as the Talbot-for-Heer citation G17 now catches: a rule written in prose is checked by whoever
+happens to remember it. Slice 2 renamed all 24 tokens **and** added the rule, and the rule is the half
+that matters — the rename fixes the tree once. ⚠ Its vocabulary is deliberately **not** a verbatim copy
+of §6.0's closed set, because §6.2–§6.9 of `raw/06` specify names using 13 first segments §6.0 omits; a
+literal copy would be a gate that rejects the specification it enforces. A test parses `raw/06` and
+asserts the gate's set still covers it. See `../43-theming.md` §6.1d.
 
 **G7's *allow* direction is the one that actually fires.** The reflex is to plant a violation, watch it
 fail, and treat the passing side as ceremony. Measured against theme-shaped CSS, the regex script this

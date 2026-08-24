@@ -193,7 +193,7 @@ Depth is communicated by exactly two means:
 
 There are no cards. A grouping is made by a hairline boundary and by spacing, never by a raised or floating surface. Elevation tokens exist in name only and resolve to nothing — a widget cannot opt into a shadow.
 
-⚠ **A widget cannot; a theme can.** Keeping the elevation token *names* alive while resolving them to nothing is what lets the neutral escape-hatch theme resolve them to real shadows by swapping one class (`research/43-theming.md` §3.2). It is the only reason to name a token that resolves to nothing. The consequence for the token tree: `--gx-elevation-*` and `--gx-*-corner-radius` must exist as names in **both** themes — a token defined in one theme only cannot be swapped by a class.
+⚠ **A widget cannot; a theme can.** Keeping the elevation token *names* alive while resolving them to nothing is what lets the neutral escape-hatch theme resolve them to real shadows by swapping one class (`research/43-theming.md` §3.2). It is the only reason to name a token that resolves to nothing. The consequence for the token tree: `--gx-widget-shadow`, `--gx-tooltip-shadow` and `--gx-widget-radius` must exist as names in **both** themes — a token defined in one theme only cannot be swapped by a class. ⚠ Those three were spelled `--gx-elevation-*` and `--gx-*-corner-radius` until the B1 slice-2 rename; the *mechanism* this paragraph specifies is untouched by it, since what the mechanism needs is two names present in both themes, not any particular two.
 
 ---
 
@@ -256,7 +256,7 @@ look. Stroke weight sits on the left because it is legibility, not taste.
 
 Recorded so they are not quietly invented later:
 
-- ~~Typeface pairing, exact type sizes, and the line-height scale.~~ **Resolved** — Roboto Flex, the A–E scale above, and `--gx-label-line-spacing: 1.2em` (`research/41-text-metrics.md` §4, `research/42-typography.md` §2.1 and §4.3). ⚠ The line-spacing value is **Tier C**, invented: Talbot's 1.5em is a *horizontal* label-spacing finding and citing it for leading would be borrowed authority.
+- ~~Typeface pairing, exact type sizes, and the line-height scale.~~ **Resolved** — Roboto Flex, the A–E scale above, and `--gx-label-line-height: 1.2em` (`research/41-text-metrics.md` §4, `research/42-typography.md` §2.1 and §4.3). ⚠ The line-spacing value is **Tier C**, invented: Talbot's 1.5em is a *horizontal* label-spacing finding and citing it for leading would be borrowed authority.
 - Spacing scale steps and the rail's exact offset.
 - Motion *easing* curves. Durations are settled (300ms rescale / 1000ms mark movement); `--gx-motion-easing` is one of six token defaults the research explicitly declined to guess at, and it must not be given a Tier A label for looking plausible. The other five: the `--gx-axis-translate` half-pixel default, Spectrum's named dash-ramp arrays, `--gx-widget-gap`, `--gx-plot-border-width`, and `--gx-line-join` — where ECharts verifiably ships `bevel`, contradicting the intuitive `round`.
 - Sequential and diverging ramps for continuous data.

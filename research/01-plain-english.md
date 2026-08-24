@@ -271,10 +271,10 @@ Ordinary CSS custom properties.
 
 ```css
 /* every chart on the page */
-:root { --gx-line-width: 2px; }
+:root { --gx-line-stroke-width: 2px; }
 
 /* just this one widget — no re-render, no JS, no prop drilling */
-.revenue-widget { --gx-line-width: 3px; --gx-grid-opacity: 0.35; }
+.revenue-widget { --gx-line-stroke-width: 3px; --gx-grid-opacity: 0.35; }
 ```
 
 That second line is the thing we lead with — but ⚠ **more carefully than we first wrote it**

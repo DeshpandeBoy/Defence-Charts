@@ -122,8 +122,28 @@ has never been observed to fail is indistinguishable from a job that exits 0:
 | Forward | No package emits a raw hex, `rgb()`, `hsl()`, or `px` literal | Someone hardcodes a value |
 | Reverse | A deliberately-planted violation **is** caught | The gate itself has broken |
 
-The allowlist (`../43-theming.md` §5) is small and every entry needs a stated reason. An allowlist that
+The allowlist (`../43-theming.md` §6) is small and every entry needs a stated reason. An allowlist that
 grows without justification is the gate failing slowly rather than at once.
+
+⚠ **The table above describes four of six rules.** B1 added two that ask a different question, and
+neither is about a literal:
+
+| Rule | Asks | Added |
+|---|---|---|
+| `undefined-token` | Does the token this `var()` names **exist**? | B1 slice 1 |
+| `token-name` | Is the token being declared **named the way `raw/06` §6.0 says**? | B1 slice 2 |
+
+They sit at opposite ends of one token's life — the second checks the line that creates a name, the
+first every line that reads it — and both run *inside* the allowlisted theme directory, because the
+allowlist exempts literals and neither of these is about a literal. `../43-theming.md` §6.1c and §6.1d
+carry the full statements.
+
+⚠ **`token-name` enforces a 34-group vocabulary where §6.0 publishes 19**, because §6.2–§6.9 of that
+same document specify names using 13 first segments its own closed set omits. The gate takes the union
+in use; a **test parses `raw/06` and asserts the union still contains it**, so the discrepancy is
+checked rather than merely written down. That test is the reverse direction for this rule: planting a
+bad name proves the gate fires, and parsing the specification proves the gate has not drifted from what
+it claims to enforce.
 
 ---
 

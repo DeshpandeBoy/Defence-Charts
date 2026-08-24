@@ -73,7 +73,20 @@ const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
  * discover by being rejected, so the bar for a third is that someone actually shipped the
  * mistake.
  */
-const GENERATED_ALLOWLIST = new Set(['ROBOTO_FLEX_METRICS'])
+/**
+ * Generated symbols that are public on purpose.
+ *
+ * ⚠ **An entry here is a claim that the symbol's *shape* is hand-written even though its
+ * *contents* are not**, and both entries meet it: the generator template that emits them is
+ * source, reviewed like any other. `ROBOTO_FLEX_METRICS` is a font-metrics table;
+ * `GX_TOKENS` is the list of every declared `--gx-*`, added at B1 when it stopped being
+ * hand-maintained — it had drifted seven tokens behind the stylesheet by then, which is the
+ * argument for generating it rather than against exporting it.
+ *
+ * The rule is still worth having around them. What it catches is a generated module whose
+ * export *set* moves: regenerate, and the public API changed with no diff anyone read.
+ */
+const GENERATED_ALLOWLIST = new Set(['ROBOTO_FLEX_METRICS', 'GX_TOKENS'])
 
 /**
  * @typedef {{ pkg: string, symbol: string, file: string }} ExportSubject

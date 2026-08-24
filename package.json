@@ -6,7 +6,7 @@
   "license": "MIT",
   "description": "Responsive, size-adaptive chart + dashboard-grid widget library. Research and design in research/.",
   "engines": {
-    "node": ">=22"
+    "node": ">=22.18"
   },
   "devEngines": {
     "runtime": {
@@ -34,9 +34,11 @@
     "probe:motion": "node scripts/probe-motion.mjs",
     "probe:flicker": "node scripts/probe-flicker.mjs",
     "lint:typography": "node scripts/generate-typography-css.mjs",
+    "lint:tokens:drift": "node scripts/generate-tokens-css.mjs",
     "generate:typography": "pnpm --filter @gx/core build && node scripts/generate-typography-css.mjs --write",
+    "generate:tokens": "node scripts/generate-tokens-css.mjs --write",
     "test": "vitest run",
-    "verify": "pnpm typecheck && pnpm lint && pnpm lint:docs && pnpm lint:deps && pnpm lint:tokens && pnpm lint:determinism && pnpm lint:api && pnpm lint:treeshake && pnpm test && pnpm build && pnpm lint:boundary && pnpm lint:typography"
+    "verify": "pnpm typecheck && pnpm lint && pnpm lint:docs && pnpm lint:deps && pnpm lint:tokens && pnpm lint:determinism && pnpm lint:api && pnpm lint:treeshake && pnpm test && pnpm build && pnpm lint:boundary && pnpm lint:typography && pnpm lint:tokens:drift"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.0",

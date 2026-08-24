@@ -19,17 +19,20 @@
   --gx-label-font-size: 11px;
 
   /* A calc() multiplier. The bare `2` is not a length and must not be read as one. */
-  --gx-plot-padding: calc(var(--gx-gap) * 2);
+  --gx-plot-padding: calc(var(--gx-size-gap) * 2);
 
   /* Unitless zero. A length regex that fires on `0` makes the honest value unwritable. */
-  --gx-corner-radius: 0;
+  --gx-widget-radius: 0;
 
   /* ⚠ MANDATED by 43-theming.md §3.1, not merely tolerated. Chrome colour derives from
      currentColor so re-themed widgets stay coherent. A named-colour list that swallows
      this converts a requirement into a violation. */
   --gx-grid-color: currentColor;
 
-  /* CSS-wide and always-legal keywords. */
-  --gx-elevation-1: none;
+  /* CSS-wide and always-legal keywords. ⚠ Both names obey raw/06 §6.0 on purpose: G7's
+     naming rule fires on every `--gx-*` declaration, including in here, so a fixture with a
+     made-up group would fail the gate it exists to prove clean. This one used to read
+     `--gx-elevation-1`, and B1 slice 2 caught it. */
+  --gx-widget-shadow: none;
   --gx-line-join: inherit;
 }

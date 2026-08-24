@@ -25,20 +25,20 @@
 :root {
   color-scheme: dark light;
 
-  --pg-fg: var(--gx-charcoal-900);
-  --pg-fg-dim: var(--gx-charcoal-700);
-  --pg-fg-faint: var(--gx-charcoal-500);
-  --pg-rule: var(--gx-charcoal-300);
-  --pg-recede: var(--gx-charcoal-100);
+  --pg-fg: var(--gx-ramp-neutral-9);
+  --pg-fg-dim: var(--gx-ramp-neutral-7);
+  --pg-fg-faint: var(--gx-ramp-neutral-5);
+  --pg-rule: var(--gx-ramp-neutral-3);
+  --pg-recede: var(--gx-ramp-neutral-1);
 }
 
 @media (prefers-color-scheme: light) {
   :root {
-    --pg-fg: var(--gx-charcoal-200);
-    --pg-fg-dim: var(--gx-charcoal-400);
-    --pg-fg-faint: var(--gx-charcoal-600);
-    --pg-rule: var(--gx-charcoal-800);
-    --pg-recede: var(--gx-charcoal-900);
+    --pg-fg: var(--gx-ramp-neutral-2);
+    --pg-fg-dim: var(--gx-ramp-neutral-4);
+    --pg-fg-faint: var(--gx-ramp-neutral-6);
+    --pg-rule: var(--gx-ramp-neutral-8);
+    --pg-recede: var(--gx-ramp-neutral-9);
   }
 }
 
@@ -48,7 +48,7 @@
 
 body {
   margin: 0;
-  background: var(--gx-ground);
+  background: var(--gx-surface-color);
   color: var(--pg-fg);
   font-family: var(--gx-font-family);
   font-optical-sizing: var(--gx-font-optical-sizing);
@@ -70,9 +70,9 @@ code {
   grid-template-areas:
     'head panel'
     'stage panel';
-  gap: calc(var(--gx-gap) * 6);
+  gap: calc(var(--gx-size-gap) * 6);
   align-items: start;
-  padding: calc(var(--gx-gap) * 6);
+  padding: calc(var(--gx-size-gap) * 6);
   min-height: 100vh;
 }
 
@@ -92,7 +92,7 @@ code {
 }
 
 .lab__head h1 {
-  margin: 0 0 calc(var(--gx-gap) * 2);
+  margin: 0 0 calc(var(--gx-size-gap) * 2);
   font-size: 1.5rem;
   font-weight: var(--gx-title-font-weight);
   letter-spacing: -0.01em;
@@ -105,14 +105,14 @@ code {
 .lab__panel {
   grid-area: panel;
   border-left: 1px solid var(--pg-rule);
-  padding-left: calc(var(--gx-gap) * 5);
+  padding-left: calc(var(--gx-size-gap) * 5);
   display: flex;
   flex-direction: column;
-  gap: calc(var(--gx-gap) * 7);
+  gap: calc(var(--gx-size-gap) * 7);
 }
 
 .lab__panel h2 {
-  margin: 0 0 calc(var(--gx-gap) * 2);
+  margin: 0 0 calc(var(--gx-size-gap) * 2);
   font-size: var(--gx-axis-title-font-size);
   font-weight: var(--gx-axis-title-font-weight);
   text-transform: uppercase;
@@ -150,7 +150,7 @@ code {
   min-height: 24px;
   max-width: 100%;
   border: 1px solid var(--pg-rule);
-  border-radius: var(--gx-corner-radius);
+  border-radius: var(--gx-widget-radius);
   background: var(--pg-recede);
   display: block;
 }
@@ -163,8 +163,8 @@ code {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: calc(var(--gx-gap) * 3);
-  margin-top: calc(var(--gx-gap) * 2);
+  gap: calc(var(--gx-size-gap) * 3);
+  margin-top: calc(var(--gx-size-gap) * 2);
   font-variant-numeric: var(--gx-numeric-variant);
   color: var(--pg-fg-dim);
   font-size: var(--gx-label-font-size);
@@ -222,9 +222,9 @@ code {
 .rung {
   display: grid;
   grid-template-columns: 4.5rem minmax(0, 1fr);
-  gap: calc(var(--gx-gap) * 2);
-  padding: calc(var(--gx-gap) * 1.5) 0 calc(var(--gx-gap) * 1.5)
-    calc(var(--gx-gap) * 2);
+  gap: calc(var(--gx-size-gap) * 2);
+  padding: calc(var(--gx-size-gap) * 1.5) 0 calc(var(--gx-size-gap) * 1.5)
+    calc(var(--gx-size-gap) * 2);
   /* The rail: a hairline the active rung lights up. DESIGN.md's left-edge state. */
   border-left: 2px solid transparent;
   color: var(--pg-fg-faint);
@@ -253,7 +253,7 @@ code {
 .kv {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: calc(var(--gx-gap) / 2) calc(var(--gx-gap) * 3);
+  gap: calc(var(--gx-size-gap) / 2) calc(var(--gx-size-gap) * 3);
   margin: 0;
   font-size: var(--gx-label-font-size);
   font-variant-numeric: var(--gx-numeric-variant);
@@ -276,13 +276,13 @@ code {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: calc(var(--gx-gap) * 1.5);
+  gap: calc(var(--gx-size-gap) * 1.5);
 }
 
 .threshold {
   display: grid;
   grid-template-columns: 3.5rem minmax(0, 1fr);
-  gap: 0 calc(var(--gx-gap) * 2);
+  gap: 0 calc(var(--gx-size-gap) * 2);
   font-size: var(--gx-label-font-size);
   color: var(--pg-fg-faint);
   opacity: 0.55;
@@ -314,8 +314,8 @@ code {
 .control {
   display: flex;
   align-items: center;
-  gap: calc(var(--gx-gap) * 2);
-  margin-bottom: calc(var(--gx-gap) * 2);
+  gap: calc(var(--gx-size-gap) * 2);
+  margin-bottom: calc(var(--gx-size-gap) * 2);
   font-size: var(--gx-label-font-size);
 }
 
@@ -327,9 +327,9 @@ code {
 .control input[type='text'] {
   flex: 1;
   min-width: 0;
-  padding: calc(var(--gx-gap) * 1.5);
+  padding: calc(var(--gx-size-gap) * 1.5);
   border: 1px solid var(--pg-rule);
-  border-radius: var(--gx-corner-radius);
+  border-radius: var(--gx-widget-radius);
   background: var(--pg-recede);
   color: var(--pg-fg);
   font: inherit;
@@ -349,13 +349,13 @@ code {
 
 .control--ranks {
   flex-wrap: wrap;
-  gap: var(--gx-gap);
+  gap: var(--gx-size-gap);
 }
 
 .rank {
-  padding: calc(var(--gx-gap) / 2) var(--gx-gap);
+  padding: calc(var(--gx-size-gap) / 2) var(--gx-size-gap);
   border: 1px solid var(--pg-rule);
-  border-radius: var(--gx-corner-radius);
+  border-radius: var(--gx-widget-radius);
   background: transparent;
   color: var(--pg-fg-faint);
   font: inherit;
@@ -375,7 +375,7 @@ code {
   display: block;
   width: 100%;
   height: auto;
-  margin: calc(var(--gx-gap) * 3) 0;
+  margin: calc(var(--gx-size-gap) * 3) 0;
   overflow: visible;
 }
 
@@ -400,11 +400,11 @@ code {
    * tail is exactly the "looks complete, isn't" shape this project keeps naming.
    */
   max-height: 22rem;
-  margin: calc(var(--gx-gap) * 2) 0 0;
-  padding: calc(var(--gx-gap) * 1.5);
+  margin: calc(var(--gx-size-gap) * 2) 0 0;
+  padding: calc(var(--gx-size-gap) * 1.5);
   overflow: auto;
   border: 1px solid var(--pg-rule);
-  border-radius: var(--gx-corner-radius);
+  border-radius: var(--gx-widget-radius);
   background: var(--pg-recede);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: var(--gx-annotation-font-size);
@@ -416,15 +416,15 @@ code {
 /* --- Prose -------------------------------------------------------------------------- */
 
 .note {
-  margin: calc(var(--gx-gap) * 2) 0 0;
+  margin: calc(var(--gx-size-gap) * 2) 0 0;
   font-size: var(--gx-annotation-font-size);
   line-height: 1.6;
   color: var(--pg-fg-faint);
 }
 
 .warn {
-  margin: calc(var(--gx-gap) * 2) 0 0;
-  padding-left: calc(var(--gx-gap) * 2);
+  margin: calc(var(--gx-size-gap) * 2) 0 0;
+  padding-left: calc(var(--gx-size-gap) * 2);
   border-left: 2px solid var(--gx-series-2);
   font-size: var(--gx-annotation-font-size);
   line-height: 1.6;

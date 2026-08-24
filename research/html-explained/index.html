@@ -1576,7 +1576,7 @@
       <section class="section intro" aria-labelledby="page-title">
         <div class="section-inner intro-grid">
           <div>
-            <p class="status-line"><span class="status-dot" aria-hidden="true"></span>A1 through A3 complete. A4 SVG rendering is next.</p>
+            <p class="status-line"><span class="status-dot" aria-hidden="true"></span>Milestone A complete. B1 token expansion is active.</p>
             <h1 id="page-title">Responsive chart + dashboard grid library</h1>
             <p class="lede">
               We are building charts that change what information they show when their box changes size.
@@ -1715,15 +1715,15 @@
               <button class="package-toggle" type="button" aria-expanded="true" aria-controls="tokens-detail">
                 <span class="package-name">@gx/tokens</span>
                 <span class="package-role">The visual vocabulary</span>
-                <span class="package-state" data-state="ready">A2.1 foundation ready</span>
+                <span class="package-state" data-state="ready">B1 slice 1 shipped</span>
                 <i class="fa-solid fa-minus" aria-hidden="true"></i>
               </button>
               <div class="package-detail" id="tokens-detail">
                 <p>
-                  Tokens name colours, type sizes, gaps, strokes and theme choices. The Rail theme, typed
-                  token skeleton and generated fitting-typography CSS exist now. Roboto Flex character
-                  advances are generated from a pinned font and kept in sync with the CSS. The complete
-                  token tree, neutral theme and data ramps come later in B1.
+                  Tokens name colours, type sizes, gaps, strokes and motion. TypeScript is now the source
+                  of truth for the first 40 presentation tokens; the Rail stylesheet and token-name types
+                  are generated from that data, and CI rejects drift or unresolved variables. The complete
+                  183-token tree, naming pass, neutral theme and data ramps remain in B1.
                 </p>
                 <dl class="package-facts">
                   <div><dt>Input</dt><dd>Design decisions</dd></div>
@@ -1759,15 +1759,15 @@
               <button class="package-toggle" type="button" aria-expanded="false" aria-controls="primitives-detail">
                 <span class="package-name">@gx/primitives</span>
                 <span class="package-role">The hook-free SVG renderer</span>
-                <span class="package-state" data-state="next">A4 next</span>
+                <span class="package-state" data-state="ready">A4 complete</span>
                 <i class="fa-solid fa-plus" aria-hidden="true"></i>
               </button>
               <div class="package-detail" id="primitives-detail" hidden>
                 <p>
-                  Primitives will turn the completed ChartPlan into accessible SVG: Chart, Axis, Grid,
-                  LinePath, AreaPath, points and labels. The RSC-safe package boundary exists, but the
-                  components, semantic test matchers, element snapshots and Next.js server fixture are the
-                  active A4 work.
+                  Primitives turn ChartPlan and canonical data into accessible SVG: Chart, Axis, Grid,
+                  LinePath, AreaPath, horizon bands, points, labels, values and a data table. Semantic test
+                  helpers inspect chart meaning, and a real Next.js fixture proves the server component
+                  renders the chart without shipping GX chart code to the client.
                 </p>
                 <dl class="package-facts">
                   <div><dt>Input</dt><dd>ChartPlan + chart data</dd></div>
@@ -1781,14 +1781,15 @@
               <button class="package-toggle" type="button" aria-expanded="false" aria-controls="react-detail">
                 <span class="package-name">@gx/react</span>
                 <span class="package-role">The optional client behaviour</span>
-                <span class="package-state" data-state="next">Boundary only</span>
+                <span class="package-state" data-state="ready">A5 complete</span>
                 <i class="fa-solid fa-plus" aria-hidden="true"></i>
               </button>
               <div class="package-detail" id="react-detail" hidden>
                 <p>
-                  This is the only chart layer that measures the browser and adds tooltips, crosshairs,
-                  brushing and clickable legends. AutoChart will connect ResizeObserver to planChart() and
-                  then hand the result to primitives. Static server charts do not need this package.
+                  This is the client layer. AutoChart now observes its own box, converts the measurement to
+                  SizeContext, calls planChart() and hands the result to the same Chart renderer. A declared
+                  initial size produces a real server-rendered first paint; static charts still do not need
+                  this package. Tooltips, crosshairs, brushing and legend interaction remain later work.
                 </p>
                 <dl class="package-facts">
                   <div><dt>Input</dt><dd>A real element size</dd></div>
@@ -1830,7 +1831,9 @@
                 <p>
                   Testing owns a controllable, emit-driven FakeResizeObserver. Tests choose exactly when a
                   resize happens, so chart behaviour is repeatable instead of waiting for browser timing.
-                  Determinism, UTC and frame-timer checks already run; semantic SVG matchers arrive with A4.
+                  Determinism, UTC and frame-timer checks run alongside semantic SVG helpers for lines,
+                  axes, scales, bars and element sets. Real-browser gates cover the behavior a fake cannot:
+                  RSC output, resize containment and motion.
                 </p>
                 <dl class="package-facts">
                   <div><dt>Input</dt><dd>Chosen test dimensions</dd></div>
@@ -1901,8 +1904,8 @@
                   pixels into virtual cells. Both routes produce a <code>SizeContext</code>: a small object
                   that tells the planner how much room it has.
                 </p>
-                <span class="journey-owner">@gx/core · measurement prototype in playground</span><br>
-                <span class="implementation-state" data-state="partial"><i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i>Core ready; AutoChart pending</span>
+                <span class="journey-owner">@gx/core · @gx/react</span><br>
+                <span class="implementation-state"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>Implemented in AutoChart</span>
               </div>
               <div class="journey-code">
                 <div class="journey-code-label"><span>Convert a 360 x 220 box</span><code>packages/core/src/context.ts</code></div>
@@ -1966,22 +1969,27 @@ return applyOverrides(rung({ type, ctx, shape, policy }), overrides)</code></pre
             <article class="journey-step">
               <div class="journey-number">05</div>
               <div class="journey-explanation">
-                <h3>Primitives will turn instructions into SVG</h3>
+                <h3>Primitives turn instructions into SVG</h3>
                 <p>
-                  This layer will read the plan and draw only what the plan names. It will not resize,
+                  This layer reads the plan and draws only what the plan names. It does not resize,
                   re-plan, fetch data or hold interaction state. That means a server can draw a static chart
                   before sending it to the browser.
                 </p>
                 <span class="journey-owner">@gx/primitives</span><br>
-                <span class="implementation-state" data-state="planned"><i class="fa-regular fa-circle" aria-hidden="true"></i>Planned next · A4</span>
+                <span class="implementation-state"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>Implemented · A4</span>
               </div>
               <div class="journey-code">
-                <div class="journey-code-label"><span>Target API, not implemented yet</span><code>packages/primitives</code></div>
-                <pre class="code-block"><code>&lt;Chart plan={plan} data={revenueData} /&gt;
+                <div class="journey-code-label"><span>Current public component</span><code>packages/primitives/src/Chart.tsx</code></div>
+                <pre class="code-block"><code>&lt;Chart
+  plan={plan}
+  data={revenueData}
+  ctx={ctx}
+  title="Weekly revenue"
+/&gt;
 
 // The plan says y.visible is false,
 // so no y-axis element is rendered at all.</code></pre>
-                <p class="plain-translation"><strong>Translation:</strong> “The architect has finished the drawing; A4 builds the construction crew.”</p>
+                <p class="plain-translation"><strong>Translation:</strong> “The renderer follows the plan exactly, including what must be absent.”</p>
               </div>
             </article>
 
@@ -2012,16 +2020,16 @@ return applyOverrides(rung({ type, ctx, shape, policy }), overrides)</code></pre
             <article class="journey-step">
               <div class="journey-number">07</div>
               <div class="journey-explanation">
-                <h3>React will repeat the process when the box changes</h3>
+                <h3>React repeats the process when the box changes</h3>
                 <p>
-                  AutoChart will observe the element, rebuild SizeContext, ask core for a new plan and hand it
+                  AutoChart observes the element, rebuilds SizeContext, asks core for a new plan and hands it
                   to primitives. React coordinates the loop; it does not contain the chart rules.
                 </p>
                 <span class="journey-owner">@gx/react</span><br>
-                <span class="implementation-state" data-state="planned"><i class="fa-regular fa-circle" aria-hidden="true"></i>Planned · A5</span>
+                <span class="implementation-state"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>Implemented · A5</span>
               </div>
               <div class="journey-code">
-                <div class="journey-code-label"><span>Target flow; local prototype exists in playground</span><code>packages/react</code></div>
+                <div class="journey-code-label"><span>Current flow, exercised in the playground</span><code>packages/react/src/AutoChart.tsx</code></div>
                 <pre class="code-block"><code>ResizeObserver reports 360 x 220
             ↓
 sizeContextFromPixels(360, 220)
@@ -2035,6 +2043,32 @@ planChart('line', ctx, shape)
 
             <article class="journey-step">
               <div class="journey-number">08</div>
+              <div class="journey-explanation">
+                <h3>CSS carries motion without moving the client boundary</h3>
+                <p>
+                  Chart echoes the plan's duration and stage count as data attributes. CSS transitions
+                  stable SVG nodes, stages axes before marks, and exists only when the platform reports
+                  no reduced-motion preference. No animation hook or tween library is shipped.
+                </p>
+                <span class="journey-owner">@gx/primitives · @gx/tokens</span><br>
+                <span class="implementation-state"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>Implemented and browser-tested · A6</span>
+              </div>
+              <div class="journey-code">
+                <div class="journey-code-label"><span>The plan supplies structure; CSS decides whether to move</span><code>packages/primitives/src/chart.css</code></div>
+                <pre class="code-block"><code>&lt;figure
+  data-motion-duration="recompose"
+  data-motion-stages="2"
+&gt;
+
+@media (prefers-reduced-motion: no-preference) {
+  .gx-axis__tick { transition: transform var(--gx-motion-duration); }
+}</code></pre>
+                <p class="plain-translation"><strong>Translation:</strong> “The server still ships a complete still chart; motion is a browser enhancement, not a requirement.”</p>
+              </div>
+            </article>
+
+            <article class="journey-step">
+              <div class="journey-number">09</div>
               <div class="journey-explanation">
                 <h3>The grid owns placement, never chart content</h3>
                 <p>
@@ -2054,7 +2088,7 @@ export const GRID_COLUMNS = 12</code></pre>
             </article>
 
             <article class="journey-step">
-              <div class="journey-number">09</div>
+              <div class="journey-number">10</div>
               <div class="journey-explanation">
                 <h3>Tests drive sizes instead of waiting for a browser</h3>
                 <p>
@@ -2133,10 +2167,10 @@ expect(measured).toEqual({ width: 360, height: 220 })</code></pre>
             <div class="planned-api-note">
               <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i>
               <div>
-                <strong>Mixed current and target API:</strong> canonical <code>Series</code>,
-                <code>describeShape()</code>, <code>planChart()</code> and frame geometry exist now.
-                <code>Chart</code>, <code>AutoChart</code> and the grid components are the A4/A5/C target.
-                Every package is still private, and <code>@gx</code> remains a placeholder.
+                <strong>Current API, unpublished packages:</strong> canonical <code>Series</code>,
+                <code>describeShape()</code>, <code>planChart()</code>, <code>Chart</code> and
+                <code>AutoChart</code> exist now. The dashboard grid remains a Phase C target. Every
+                package is still private, and <code>@gx</code> remains a placeholder.
               </div>
             </div>
 
@@ -2149,13 +2183,13 @@ expect(measured).toEqual({ width: 360, height: 220 })</code></pre>
               </div>
               <div class="package-choice">
                 <i class="fa-solid fa-file-code" aria-hidden="true"></i>
-                <strong>I need a static chart <small class="route-status" data-state="target">A4 target</small></strong>
+                <strong>I need a static chart <small class="route-status">Available in source</small></strong>
                 <span>Server-render SVG for a report, email preview or fixed page slot.</span>
                 <code>pnpm add @gx/core @gx/primitives @gx/tokens</code>
               </div>
               <div class="package-choice">
                 <i class="fa-solid fa-arrows-left-right-to-line" aria-hidden="true"></i>
-                <strong>I need responsive charts <small class="route-status" data-state="target">A5 target</small></strong>
+                <strong>I need responsive charts <small class="route-status">Available in source</small></strong>
                 <span>AutoChart measures its box and re-plans when that box changes.</span>
                 <code>pnpm add @gx/core @gx/react @gx/tokens</code>
               </div>
@@ -2244,7 +2278,7 @@ expect(measured).toEqual({ width: 360, height: 220 })</code></pre>
                       API names; <code>planChart()</code> sees only counts; <code>Chart</code> receives the
                       real values and produces SVG before the browser loads the page.
                     </p>
-                    <pre class="code-block"><code>// app/revenue/page.tsx — proposed API
+                    <pre class="code-block"><code>// app/revenue/page.tsx — current source API
 import '@gx/tokens/theme.css'
 import {
   describeShape,
@@ -2282,8 +2316,8 @@ export default async function RevenuePage() {
   const dimensions = sizeContextFromPixels(600, 300)
   const plan = planChart('line', dimensions, describeShape(data))
 
-  return &lt;Chart plan={plan} data={data} dimensions={dimensions}
-    ariaLabel="Monthly revenue" /&gt;
+  return &lt;Chart plan={plan} data={data} ctx={dimensions}
+    title="Monthly revenue" /&gt;
 }</code></pre>
                   </div>
                   <div>
@@ -2292,11 +2326,11 @@ export default async function RevenuePage() {
                       <div><dt>Your mapping</dt><dd>Renames API fields once and returns plain canonical Series objects.</dd></div>
                       <div><dt>Core</dt><dd>Uses dimensions and DataShape to select one complete ChartPlan.</dd></div>
                       <div><dt>Frame geometry</dt><dd>resolveFrame uses actual values for domains, scales and path coordinates.</dd></div>
-                      <div><dt>Primitives</dt><dd>Will turn that frame into accessible SVG and the data table.</dd></div>
+                      <div><dt>Primitives</dt><dd>Turns that frame into accessible SVG and the data table.</dd></div>
                     </dl>
                     <div class="browser-receipt">
                       <strong><i class="fa-solid fa-circle-check" aria-hidden="true"></i> Browser receives SVG + CSS</strong>
-                      <p>The target is zero GX client JavaScript. Gate G4 will prove this in a real Next.js fixture before A4 closes.</p>
+                      <p>Gate G4 proves this in a real Next.js fixture: the SVG is in the HTML and no GX chart markers appear in the client JavaScript.</p>
                     </div>
                   </div>
                 </div>
@@ -2311,7 +2345,7 @@ export default async function RevenuePage() {
                       AutoChart owns only measurement and re-planning; it still does not fetch, cache or
                       understand your API's field names.
                     </p>
-                    <pre class="code-block"><code>// RevenueChart.tsx — proposed API
+                    <pre class="code-block"><code>// RevenueChart.tsx — current source API
 'use client'
 
 import '@gx/tokens/theme.css'
@@ -2322,7 +2356,8 @@ export function RevenueChart({ data }: { data: readonly Series[] }) {
   return (
     &lt;div style={{ width: '100%', height: 320 }}&gt;
       &lt;AutoChart type="line" data={data}
-        ariaLabel="Monthly revenue" /&gt;
+        title="Monthly revenue"
+        initialSize={{ width: 600, height: 320 }} /&gt;
     &lt;/div&gt;
   )
 }
@@ -2363,7 +2398,7 @@ import { AutoChart } from '@gx/react'
 &lt;DashboardGrid columns={12} layout={savedLayout}&gt;
   &lt;GridItem id="revenue" minWidth={2} minHeight={1}&gt;
     &lt;AutoChart type="line" data={revenueData}
-      ariaLabel="Monthly revenue" /&gt;
+      title="Monthly revenue" /&gt;
   &lt;/GridItem&gt;
 &lt;/DashboardGrid&gt;</code></pre>
                   </div>
@@ -2455,8 +2490,9 @@ import { AutoChart } from '@gx/react'
 
 &lt;AutoChart type="line" data={revenueData} /&gt;</code></pre>
               <p class="not-published">
-                <strong>Current status:</strong> this usage is the planned public API, not an available npm
-                install yet. Packages are still private, version 0.0.0, and <code>@gx</code> is a placeholder
+                <strong>Current status:</strong> the planning, static-chart and responsive-chart APIs exist
+                in this repository, but they are not available from npm yet. The dashboard API is still
+                proposed. Packages remain private at version 0.0.0, and <code>@gx</code> is a placeholder
                 until the project name and npm scope are decided.
               </p>
             </div>
@@ -2472,8 +2508,9 @@ import { AutoChart } from '@gx/react'
               <h2 id="roadmap-title">What we did and what comes next</h2>
             </div>
             <p>
-              The decision engine now proves the six-rung idea without a UI. The next goal is to draw that
-              plan as accessible SVG, then connect it to real browser resizing before adding more chart types.
+              The six-rung line and area proof now runs end to end: plan, accessible SVG, live measurement,
+              server rendering and motion. B1 is turning the visual vocabulary into a complete generated
+              token contract before the grid and additional chart families arrive.
             </p>
           </div>
 
@@ -2484,19 +2521,21 @@ import { AutoChart } from '@gx/react'
                 <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Repository foundation:</strong> six package boundaries, strict builds, deterministic tests and CI gates.</span></li>
                 <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Core contracts:</strong> ChartPlan, sizing, layout, policy, atomic typography and measured Roboto Flex advances.</span></li>
                 <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Line and area planning:</strong> Micro through Stage, including label degradation, overrides and plot-height decisions.</span></li>
-                <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Automated proof:</strong> 282 tests across 13 files, plus dependency, token, determinism, client-boundary and generated-file gates.</span></li>
-                <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Resize lab:</strong> a real measured box shows its current SizeContext and resolved ChartPlan live.</span></li>
+                <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Accessible renderer:</strong> hook-free Chart primitives, semantic test helpers, data-table output and deterministic frame geometry.</span></li>
+                <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Adaptive client:</strong> AutoChart, animation-frame-batched ResizeObserver measurement and an honest SSR initial size.</span></li>
+                <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Browser proof:</strong> CI drives Chromium through zero-client-JS RSC rendering, fixed-box containment and reduced-motion-aware transitions.</span></li>
+                <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Documentation:</strong> the Fumadocs application, 15 authored pages and an interactive ResizeLab are implemented.</span></li>
               </ul>
             </section>
 
             <section class="progress-column" data-progress="next" aria-labelledby="remaining-title">
               <h3 id="remaining-title">Still to implement</h3>
               <ul class="progress-list">
-                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>A4:</strong> hook-free accessible SVG primitives, semantic matchers and the zero-client-JS RSC fixture.</span></li>
-                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>A5:</strong> AutoChart, ResizeObserver batching, SSR initial sizing and browser containment tests.</span></li>
-                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>A6:</strong> transitions and the first end-to-end resize demonstration without loops or flicker.</span></li>
-                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>B through D:</strong> full tokens and themes, more chart types, dashboard grid and widget chrome.</span></li>
-                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>E:</strong> documentation, browser matrix, package audits and npm publication.</span></li>
+                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>B1:</strong> expand 40 typed presentation tokens to the complete tree, resolve the nine owed provenance decisions, rename inconsistent tokens and derive the neutral theme.</span></li>
+                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>B1 behavior:</strong> add the measured 0.5% rung deadband; transitions smooth movement but cannot animate a newly mounted mark.</span></li>
+                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>B2–B3:</strong> finish field-granularity controls and typed threshold policy inputs.</span></li>
+                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>C–D:</strong> build the twelve-column grid, widget chrome and the remaining chart families, starting with bar and donut.</span></li>
+                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>E:</strong> choose the name and npm scope, add Changesets and trusted publishing, finish public examples, then publish.</span></li>
               </ul>
             </section>
           </div>
@@ -2514,21 +2553,21 @@ import { AutoChart } from '@gx/react'
               <div class="milestone-code"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>A3</div>
               <div class="milestone-body"><strong>planChart() for line and area</strong><span>All six complete rungs, layout helpers, override semantics, snapshots, stability sweeps and honesty invariants are implemented.</span></div>
             </div>
+            <div class="milestone" data-status="done">
+              <div class="milestone-code"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>A4</div>
+              <div class="milestone-body"><strong>SVG primitives</strong><span>Accessible hook-free Chart, axes, grid, marks, labels and data table, with semantic helpers and a green RSC fixture.</span></div>
+            </div>
+            <div class="milestone" data-status="done">
+              <div class="milestone-code"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>A5</div>
+              <div class="milestone-body"><strong>AutoChart measurement</strong><span>ResizeObserver measures the box, React recomputes the plan, and the server can render a declared initial size.</span></div>
+            </div>
+            <div class="milestone" data-status="done">
+              <div class="milestone-code"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>A6</div>
+              <div class="milestone-body"><strong>Transitions and browser proof</strong><span>Stable SVG identity, staged CSS motion, reduced-motion behavior and real-browser gate G19 are implemented.</span></div>
+            </div>
             <div class="milestone" data-status="active">
-              <div class="milestone-code"><i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i>A4</div>
-              <div class="milestone-body"><strong>SVG primitives</strong><span>Next: render ChartPlan as accessible, hook-free, class-styled SVG and prove the server-only path.</span></div>
-            </div>
-            <div class="milestone">
-              <div class="milestone-code"><i class="fa-regular fa-circle" aria-hidden="true"></i>A5</div>
-              <div class="milestone-body"><strong>AutoChart measurement</strong><span>ResizeObserver measures the box; React recomputes the plan and adds optional interaction.</span></div>
-            </div>
-            <div class="milestone">
-              <div class="milestone-code"><i class="fa-regular fa-circle" aria-hidden="true"></i>A6</div>
-              <div class="milestone-body"><strong>Transitions and grid demo</strong><span>Drag one line chart through every rung without loops, flicker or dishonest labels.</span></div>
-            </div>
-            <div class="milestone">
-              <div class="milestone-code"><i class="fa-regular fa-circle" aria-hidden="true"></i>B</div>
-              <div class="milestone-body"><strong>Visual control and comparison proof</strong><span>Complete the token tree and themes, then add the chart families needed to prove we exceed fixed-size chart libraries.</span></div>
+              <div class="milestone-code"><i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i>B</div>
+              <div class="milestone-body"><strong>Visual control and threshold policy</strong><span>Slice 1 generated the first 40 typed tokens and drift gates. Next: full tree, neutral theme, provenance closure and deadband.</span></div>
             </div>
             <div class="milestone">
               <div class="milestone-code"><i class="fa-regular fa-circle" aria-hidden="true"></i>C-D</div>
@@ -2536,7 +2575,7 @@ import { AutoChart } from '@gx/react'
             </div>
             <div class="milestone">
               <div class="milestone-code"><i class="fa-regular fa-circle" aria-hidden="true"></i>E</div>
-              <div class="milestone-body"><strong>Documentation and release</strong><span>Finish the docs site and responsive-semantics guide, run package and browser audits, and publish.</span></div>
+              <div class="milestone-body"><strong>Documentation and release</strong><span>The docs application exists. Finish chart-specific semantics and public examples, run package audits, then publish.</span></div>
             </div>
           </div>
         </div>

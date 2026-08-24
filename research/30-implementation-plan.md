@@ -297,8 +297,8 @@ At the end of A3 the core thesis is testable with zero UI. That is the point.
 - Animate rung changes rather than cutting. ~300 ms for rescale-only, up to ~1000 ms when marks move.
   The 1000 ms upper bound is **A-lit and A-impl at once**: Heer & Robertson 2007 measured it, and
   Adobe Spectrum ships `DRAW_IN_ANIMATION_DURATION_MS = 1000`. Independent agreement to the
-  millisecond — cite both. ✅ `--gx-motion-rescale-duration: 300ms` and
-  `--gx-motion-recompose-duration: 1000ms` in `@gx/tokens`, bound per figure from
+  millisecond — cite both. ✅ `--gx-motion-duration-rescale: 300ms` and
+  `--gx-motion-duration-recompose: 1000ms` in `@gx/tokens`, bound per figure from
   `data-motion-duration`, which `<Chart>` echoes from `plan.motion.durationClass`.
 - Two-stage at most: axis/ticks first, marks second. ✅ Stage 2 carries
   `--gx-motion-stage-delay`; `data-motion-stages="1"` sets it to `0ms` below Panel, where there is no
@@ -352,6 +352,80 @@ now — `pnpm dev`, drag the box.
 The second half of the thesis: *granular control over every stroke, gap, and tick.*
 
 ### B1. Full token tree
+
+> **Slice 1 shipped.** The *direction* is reversed and the *machinery* is in place; the tree is
+> still the 40 tokens milestone A needed, not the 183 this section specifies.
+>
+> - `packages/tokens/src/tokens.ts` is the source of truth — 12 groups, 40 tokens, each with a
+>   `tier` and a `source` as **fields**, plus the one theme variant. `themes/theme.css` and
+>   `tokens.generated.ts` are both generated from it by `scripts/generate-tokens-css.mjs`
+>   (`pnpm generate:tokens`). The generator imports the `.ts` directly under Node's native
+>   type-stripping, so unlike its typography sibling it needs no build — which is what raised
+>   `engines.node` to `>=22.18`.
+> - The reversal was proved rather than assumed: the 56 selector/property/value triples of the
+>   hand-authored `theme.css` were captured first and are identical in the generated file. Byte
+>   equality would have failed, since comment formatting is normalised; declaration equality is
+>   the honest property.
+> - **Two things the move immediately caught, both invisible while provenance was a comment.**
+>   `--gx-grid-opacity` had credited Talbot 2010 since A1; `10-responsive-ladder.md:373` attributes
+>   it to **Heer & Bostock 2010** — Talbot is the tick-spacing work. And `GX_TOKENS` had drifted
+>   to 62 names against 69 declared, missing **every A6 motion token**, so the list that claims
+>   to be *every* token omitted the ones gate G19 asserts.
+> - The build-time check this section asks for exists: G7 gained an `undefined-token` rule
+>   (`pnpm lint:tokens`), and a G17-shaped drift gate covers both generated artefacts
+>   (`pnpm lint:tokens:drift`). Both are in `verify` and in CI, and both were observed failing.
+> - **Deliberately not done in slice 1: no renames.** Several current names violated the naming
+>   rule below, and renaming inside a direction reversal would have made the diff unreviewable.
+>   Slice 2 renames; slice 3 transcribes `raw/06` §6.2–6.9. ⚠ The example given here was
+>   `--gx-grid-color` *"should be `--gx-grid-line-color`"*, and slice 2 established that it should
+>   not: `<element>` is illustrative in §6.0, only `<group>` is closed, and `--gx-grid-color`
+>   conforms as written. The seven names that genuinely violated the rule are listed below.
+> - **What is owed is a number the build prints**, not a paragraph here: every run reports
+>   `7 unverified, 2 untiered (9 owed to B1)`. `untiered` clears by transcription, `unverified`
+>   only by finding a source or taking a measurement. A test ratchets the total so it cannot grow.
+
+> **Slice 2 shipped — the rename, and the gate that makes it stick.** All 24 tokens now obey the
+> naming rule below, and **G7 gained a sixth rule, `token-name`**, so the next one that does not is a
+> CI failure rather than a review comment. The rule is the deliverable; the rename is what it forced.
+>
+> - **Seven first segments were outside `raw/06` §6.0's closed set** — `ground`, `ink`, `charcoal-*`,
+>   `corner-radius`, `elevation-*`, `band-alpha`, `gap`. None was a mistake anyone made twice; they
+>   were made once each, months apart, which is what an unenforced convention produces rather than
+>   what a careless author does. The rename touched **19 files** and was applied by a throwaway
+>   codemod that has since been deleted — a codemod kept around is a codemod someone runs twice.
+> - ⚠ **The enforced vocabulary is 34 groups where §6.0 publishes 19, and that is a finding about
+>   `raw/06`.** Its own §6.2–§6.9 specify 205 names using 32 first segments, **13 of them absent from
+>   §6.0's closed set** (`title`, `value`, `font`, `scale`, `stroke`, `horizon`, `alert`, …). A gate
+>   copying that table verbatim would reject `--gx-title-font-size`, which §6.5 specifies and this
+>   repo ships. So the gate takes the union in use and a **test parses `raw/06` §6.2–§6.9 and asserts
+>   the union still contains it** — the discrepancy is checked, not merely written down. §6.0 now
+>   carries the annotation.
+> - **Only `<group>` is enforced**, because §6.0 marks exactly one segment *closed set*. Reading
+>   `<element>` and `<property>` as closed too would reject `--gx-crosshair-label-font-size`,
+>   `--gx-legend-symbol-gap`, `--gx-tick-offset-band` and `--gx-label-landmark-grade`. Three
+>   mechanical clauses are also enforced: lowercase kebab, the prefix may not recur mid-name, and a
+>   **banned-segment ratchet** (`alpha`→`opacity`, `colour`→`color`, `bg`→`background`) that exists
+>   because `grid-alpha`, `area-alpha` and `band-alpha` all shipped under legal groups.
+> - **It fires on the declaration, never on a `var()` reference.** `--gx-ink` had eleven reference
+>   sites; a reference-side check would print eleven findings for the one line anybody edits. A
+>   reference to a name nobody declared is already caught by slice 1's membership rule.
+> - **Three proposed renames were rejected as concept changes rather than renames**, since a slice
+>   whose scope is *one name → one name* cannot also redraw boundaries. `axis-color` →
+>   `axis-domain-color` was refused because that token paints `.gx-axis__tick-mark` as well as the
+>   rule (`chart.css:81`), so the new name would be a lie; it already conforms, so there is no gate
+>   pressure and it waits for slice 3. `gap` → `widget-gap` was refused because `raw/06:1565` gives
+>   `--gx-widget-gap` a different job — the bento gutter *between* widgets, not our 4px internal
+>   unit — and it became `size-gap` instead. The eight typography renames were refused on the
+>   typography reviewer's own advice: applied in isolation they make that family *less* internally
+>   consistent.
+> - **`elevation-raised`/`elevation-overlay` → `widget-shadow`/`tooltip-shadow`** looks like it
+>   contradicts `DESIGN.md:196`, and does not. That paragraph requires *two swappable names present in
+>   both themes*, which is preserved exactly; both tokens had zero `var()` consumers, so the change
+>   was free, and the new pair tells the escape-hatch theme **which surface** it is raising.
+> - Observed failing before it was trusted: 22 violations across 16 names on the un-renamed tree, and
+>   both directions mutation-tested afterwards. `pnpm test` 628 passing, the whole `verify` chain
+>   green. The census is unchanged — a rename moves no tiers — so `9 owed to B1` still stands.
+
 `raw/06` §6 delivered **183 fully specified tokens** — each with a default, a provenance tier and a
 named primary source — across **234 distinct `--gx-*` names** appearing in the document. ⚠ The gap of
 51 is not slack: those are names referenced in prose, `var()` fallback chains and CSS examples but
@@ -359,6 +433,16 @@ never given a row. **Every one of the 51 must either get a specified row or be d
 tree ships**, because an undefined `var(--gx-…)` in our own stylesheet resolves to nothing and fails
 silently. Make that a build-time check, not a review item: the generator emits the token set, so a
 script can assert that every `--gx-*` occurrence in any authored CSS is a member of it.
+
+⚠ **Shipped, and the first attempt at it was wrong in the instructive direction.** The obvious
+implementation greps for `--gx-[a-z-]+` across `packages/` and diffs against the emitted set. Run
+against this tree that reports two undeclared tokens, `--gx-grid-width` and `--gx-tick-length`, and
+**both are false positives**: all seven occurrences are prose comments quoting decision 012's
+counterexample — the tokens it documents as deliberately *absent*. Two findings, two wrong. So the
+rule walks PostCSS declarations instead, which is the same conclusion decision 015 reached about the
+literal rules, arrived at a second time. The case worth planting is a fallback:
+`var(--gx-typo-not-a-token, 4px)` renders a perfectly good 4px forever, so nothing downstream ever
+looks wrong.
 
 Groups: canvas/surface, grid+axis, marks (line/area/bar/point/arc), labels, legend, tooltip/crosshair,
 motion, plus the responsive-threshold tokens the ladder consumes. Distribution is uneven and that is
@@ -538,7 +622,8 @@ the site. The VRT baseline set (one screenshot per chart type per rung) *is* thi
 2. ✅ `raw/07` landed in full (1,129 lines). The build stack (tsdown + `unbundle`, ESM-only, TS 6.0.3),
    the test stack (bare Node for the ladder, injected fake RO, Vitest browser mode), the accessibility
    markup and the docs-site choice are settled and folded into `20-architecture.md` §5–7 and E1.
-3. ✅ `raw/06` landed in full (1,967 lines / 131 KB). The `--gx-*` token tree and the ten-library
+3. ✅ `raw/06` landed in full (1,967 lines / 131 KB as it landed; 2,008 / 132 KB today — implementation
+   annotates it in place rather than rewriting it, and B1 slice 2 added the largest such note). The `--gx-*` token tree and the ten-library
    granularity comparison are folded into B1–B3 and `00-decisions.md`. **All research streams are
    now closed.**
 4. **Decide the name and npm scope.** Now the only thing blocking publish, and cheaper than it looks:

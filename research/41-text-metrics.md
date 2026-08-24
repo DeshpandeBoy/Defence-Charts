@@ -1,6 +1,6 @@
 # Text measurement — `FontMetrics` as a plan input
 
-> Closes the gap at `30-implementation-plan.md:37` (A2 requires a character-advance model) and the
+> Closes the gap at `30-implementation-plan.md:152` (A2 requires a character-advance model) and the
 > unresolved typeface at `DESIGN.md:125`.
 >
 > ⚠ This document turned out to be a **correction**, not an addition. The token-split table at
@@ -109,7 +109,7 @@ assignment went wrong.
    advances per weight per size. Doing it with `GRAD` costs nothing, because advances are invariant.
    **`GRAD` is the correct mechanism, and it stays a presentation token.**
 
-2. ⚠ **The landmark-emphasis token should use `GRAD`, not `font-weight`.** `raw/06:1712` specifies
+2. ⚠ **The landmark-emphasis token should use `GRAD`, not `font-weight`.** `raw/06:1743` specifies
    `--gx-label-landmark-weight: 600` (A-impl, Carbon) — bumping `wght` from 400 to 600 on the *first
    and last* axis labels. Those are exactly the labels at the ends of the axis, where the collision
    budget is tightest, and a `wght` bump silently widens them past what the table predicted.
@@ -146,7 +146,7 @@ its title.)
 
 **Decided: Roboto Flex**, on two independent grounds.
 
-1. **`opsz` range.** Our label default is 11 px with a 10 px floor (`raw/06:1700`, `:1701`).
+1. **`opsz` range.** Our label default is 11 px with a 10 px floor (`raw/06:1731`, `:1732`).
    **Inter's optical range bottoms out at 14** — the entire small end of our type scale sits below it,
    where `font-optical-sizing: auto` clamps and does nothing. That is precisely the range
    `DESIGN.md:125` cares about, so Inter fails the requirement exactly where it was written to apply.
