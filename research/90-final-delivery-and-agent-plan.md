@@ -213,7 +213,7 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | D2.1 | Codex radial | backlog | D0.2, R2 | Donut family |
 | D3.1 | Codex metric | backlog | D0.2 | KPI family |
 | D3.2 | Codex metric | backlog | D3.1 | Progress family |
-| D4.1 | Codex scatter | backlog | D0.2, R2 | Scatter family |
+| D4.1 | Codex scatter | in progress | D0.2, R2 | Scatter family |
 | D5.1 | Codex heatmap | backlog | D0.2, R2 | Heatmap family |
 | D6.1 | Codex funnel | backlog | D0.2, R2 | Funnel or evidence-backed deferral |
 | D7.1 | Codex integration | backlog | D1–D6 | Central registration and complete family matrix |
