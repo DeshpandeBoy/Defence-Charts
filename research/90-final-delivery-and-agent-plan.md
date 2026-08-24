@@ -223,8 +223,8 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | E1.4 | Codex release | backlog | E1.2, E1.3 | `publint`, `attw`, package-content and no-network gates |
 | E2.1 | Codex release | backlog | P0.3, E1.4 | Rename, Changesets and trusted Preview publish |
 | E3.1 | Coordinator | backlog | D7.1, E2.1 | Free-v1 claim and release audit |
-| R1 | Claude research | ready | P0.1 | RGL/grid current evidence |
-| R2 | Claude research | ready | P0.1 | Chart-family evidence gaps |
+| R1 | Claude research | **handoff** | P0.1 | RGL/grid current evidence; coordinator review pending |
+| R2 | Claude research | **handoff** | P0.1 | Evidence-bounded launch catalogue; sparkline doc correction applied |
 | R3 | Claude research | **handoff** | P0.1 | Interaction and chart-semantics evidence; CR-X04 remains required for real AT verification |
 | R4 | Claude research | ready | P0.1 | Publication and competitor refresh |
 | R5 | Claude/user research | optional | Preview | User-validation protocol and findings |

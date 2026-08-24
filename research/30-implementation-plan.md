@@ -577,7 +577,8 @@ Priority order, by how much the responsive thesis pays off per type:
 3. **KPI / number** — the micro end; proves the ladder works at 1×1.
 4. **Scatter** — the point-budget and renderer-substitution case.
 5. **Activity heatmap** — the binning case (daily → weekly below minimum cell size).
-6. **Funnel, progress, sparkline** — straightforward once the pattern is set.
+6. **Funnel and progress** — straightforward once the pattern is set. Sparkline rendering is a
+   line-plan composition with axes suppressed, not a separate chart family.
 
 ---
 
