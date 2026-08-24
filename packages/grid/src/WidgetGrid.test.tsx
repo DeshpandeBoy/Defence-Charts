@@ -136,12 +136,22 @@ describe('WidgetGrid controlled wrapper', () => {
 
   it('uses explicit edit and read-only modes', () => {
     mount(INITIAL_LAYOUT, { mode: 'edit' })
-    expect(latest().dragConfig).toEqual({ enabled: true })
+    expect(latest().dragConfig).toMatchObject({ enabled: true })
     expect(latest().resizeConfig).toEqual({ enabled: true })
 
     mount(INITIAL_LAYOUT, { mode: 'read-only' })
-    expect(latest().dragConfig).toEqual({ enabled: false })
+    expect(latest().dragConfig).toMatchObject({ enabled: false })
     expect(latest().resizeConfig).toEqual({ enabled: false })
+  })
+
+  it('configures the explicit shell handle and content/control cancel scope', () => {
+    mount()
+
+    expect(latest().dragConfig).toEqual({
+      enabled: true,
+      handle: '[data-gx-drag-handle]',
+      cancel: '[data-gx-grid-cancel], [data-gx-grid-cancel] *, button, a, input, textarea, select, [role="button"]',
+    })
   })
 
   it('converts RGL layout callbacks into immutable snapshots', () => {

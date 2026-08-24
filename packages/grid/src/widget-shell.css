@@ -1,0 +1,84 @@
+@layer gx.theme {
+  .gx-widget-shell {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    min-block-size: 0;
+    padding: var(--gx-widget-padding);
+    border-radius: var(--gx-widget-radius);
+    background: var(--gx-surface-color);
+    color: var(--gx-surface-text-color);
+    box-shadow: var(--gx-widget-shadow);
+    font-family: var(--gx-font-family);
+  }
+
+  .gx-widget-shell__header {
+    display: flex;
+    align-items: center;
+    gap: var(--gx-widget-gap);
+    min-inline-size: 0;
+    padding-block-end: var(--gx-widget-padding-tight);
+  }
+
+  .gx-widget-shell__heading {
+    display: flex;
+    align-items: baseline;
+    gap: var(--gx-widget-padding-tight);
+    min-inline-size: 0;
+    flex: 1 1 auto;
+  }
+
+  .gx-widget-shell__title,
+  .gx-widget-shell__context {
+    min-inline-size: 0;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .gx-widget-shell__title {
+    font-size: var(--gx-title-font-size);
+    font-weight: var(--gx-title-font-weight);
+  }
+
+  .gx-widget-shell__context,
+  .gx-widget-shell__footer {
+    color: var(--gx-axis-color);
+    font-size: var(--gx-subtitle-font-size);
+    font-weight: var(--gx-subtitle-font-weight);
+  }
+
+  .gx-widget-shell__actions {
+    display: flex;
+    align-items: center;
+    gap: var(--gx-widget-padding-tight);
+  }
+
+  .gx-widget-shell__drag-handle {
+    display: inline-grid;
+    place-items: center;
+    inline-size: calc(var(--gx-widget-padding-tight) * 2);
+    block-size: calc(var(--gx-widget-padding-tight) * 2);
+    padding: 0;
+    border: 0;
+    border-radius: var(--gx-widget-radius-inner);
+    background: transparent;
+    color: currentColor;
+    cursor: grab;
+    font: inherit;
+  }
+
+  .gx-widget-shell__drag-handle:active {
+    cursor: grabbing;
+  }
+
+  .gx-widget-shell__content {
+    min-block-size: 0;
+    min-inline-size: 0;
+    overflow: hidden;
+  }
+
+  .gx-widget-shell__footer {
+    padding-block-start: var(--gx-widget-padding-tight);
+  }
+}

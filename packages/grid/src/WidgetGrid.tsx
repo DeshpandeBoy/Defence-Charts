@@ -192,7 +192,14 @@ export function WidgetGrid({
     }),
     [containerPadding, margin, rowHeight],
   )
-  const dragConfig = useMemo(() => ({ enabled: mode === 'edit' }), [mode])
+  const dragConfig = useMemo(
+    () => ({
+      enabled: mode === 'edit',
+      handle: '[data-gx-drag-handle]',
+      cancel: '[data-gx-grid-cancel], [data-gx-grid-cancel] *, button, a, input, textarea, select, [role="button"]',
+    }),
+    [mode],
+  )
   const resizeConfig = useMemo(() => ({ enabled: mode === 'edit' }), [mode])
   const activeInteractionRef = useRef<GridInteractionState | null>(null)
   const lastCommitSignatureRef = useRef<string | null>(null)

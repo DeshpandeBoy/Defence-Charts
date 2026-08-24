@@ -46,3 +46,5 @@ export type {
   WidgetGridProps,
 } from './WidgetGrid.tsx'
 export { WidgetGrid } from './WidgetGrid.tsx'
+export type { WidgetShellProps } from './WidgetShell.tsx'
+export { WidgetShell } from './WidgetShell.tsx'

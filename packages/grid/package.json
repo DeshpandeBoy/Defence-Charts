@@ -7,7 +7,8 @@
   "description": "12-column widget grid shell. Reports box size to a widget; never decides what the widget shows.",
   "sideEffects": ["*.css"],
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./widget-shell.css": "./src/widget-shell.css"
   },
   "files": ["dist"],
   "scripts": {
