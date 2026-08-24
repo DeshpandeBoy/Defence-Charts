@@ -2,7 +2,7 @@
 
 ## State
 
-`in progress`
+`handoff`
 
 ## Owner and workspace
 
@@ -59,10 +59,10 @@ this task.
 
 ## Checkpoint
 
-- Current checkpoint: build page and milestone ladder implemented; verification passed; committed in `196194b` (subject to the handoff metadata amend below).
+- Current checkpoint: build page and milestone ladder implemented; verification passed; documentation implementation committed in `196194b`.
 - Browser evidence: `http://localhost:8123/10-roadmap.html?audit=milestones-v3#milestones` loaded with title `10 / How we build it — GX explained`, three `.release-step` elements, three boundary-rule labels, and no console errors. At the 674px in-app browser width, the ladder computed to one column with step heights 367px, 343px, and 365px.
 - CLI evidence: `git diff --check` passed; the Python HTML parser parsed `research/html-explained/10-roadmap.html` (33,347 bytes at the time of the check); `curl` returned HTTP 200.
-- Unexpected concurrent change preserved and excluded from this task commit: `research/90-final-delivery-and-agent-plan.md` has ledger status updates from another workstream. It remains in the working tree untouched.
+- Unexpected concurrent workstream preserved and excluded from the documentation commit: `research/90-final-delivery-and-agent-plan.md` and `research/handoffs/C1.1.md` were advanced in shared-branch commit `a8d4bb1`. No documentation page was overwritten.
 - Resume command: `cd /Users/SameeraD/Defence-Charts && git diff --check && curl -fsS http://127.0.0.1:8123/10-roadmap.html >/dev/null`
 
 ## Changed paths
