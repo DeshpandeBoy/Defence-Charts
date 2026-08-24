@@ -85,9 +85,10 @@ The existing implementation already gives us a strong foundation:
   keyboard, crosshair, or data-table relationships. Add stable identity before implementing those
   interactions. See [`packages/core/src/frame.ts`](../packages/core/src/frame.ts).
 - The repository’s current `SizeContext` documents `cols` as `1..12`, while the Basedash evidence
-  includes an 18-column ultrawide mode. Do not pass `18` into the current contract silently. Before
-  shipping ultrawide layouts, either add an explicit `gridColumns`/profile field, widen the context
-  contract, or defer 18-column behavior to the grid package.
+  includes an 18-column ultrawide mode. **Resolved for the current delivery plan:** do not pass `18`
+  into the current contract silently; the public v1 grid stays 12 columns and any 18-column profile
+  is deferred beyond C1 until it has explicit migration semantics and contract tests. See
+  `90-final-delivery-and-agent-plan.md` §3 and §7.
 - `@gx/core` resolves only the line/area rung today; unsupported mark kinds still throw in the
   primitives. This document therefore specifies the architecture for the library, while the first
   implementation slice should remain line/area plus a real grid shell.
@@ -921,7 +922,8 @@ DOM alongside the image.
 7. **External legend direction:** use measured fit to choose left/right/bottom, with a consumer
    override for product-specific art direction.
 8. **Ultrawide grid contract:** deferred beyond v1. The public v1 grid remains the locked 12-column
-   model. Any later 18-column profile needs migration semantics and contract tests before exposure.
+   model. Any later 18-column profile needs migration semantics and contract tests before exposure;
+   this is the current plan resolution, not an open C1 contract question.
 9. **Filter prioritisation:** define the stable default order and the host override for which filters
    are promoted inline at wide/medium widths.
 10. **Accessible active chart role:** keep `graphics-document` for the static chart and test whether a

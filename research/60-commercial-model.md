@@ -25,6 +25,9 @@ The most important product rule is simple:
 > rendering scale, and operational confidence—not remove the responsive ladder, accessibility, or
 > the basic chart/grid foundation.**
 
+Preview and Free v1 are sequencing checkpoints inside this document's Free tier, not additional
+commercial tiers; the current release definitions live in `research/90-final-delivery-and-agent-plan.md` §1.
+
 The recommended first commercial architecture is:
 
 ```text

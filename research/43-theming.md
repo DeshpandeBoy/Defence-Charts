@@ -480,7 +480,14 @@ drawn in §1 and §3, and it is the test to apply to any future divergence.
 
 ## 9. Open, and deliberately not invented
 
-1. **The six neutral hex values** (§4) — derivable, not guessable. Milestone B1, with the ramps.
+**Currency note (2026-08-24):** B1 is closed for the current line/area token tree: the neutral ramp
+and named-colour gate inputs now exist in `packages/tokens/src/tokens.ts`. Items 1 and 7 below are
+therefore stale wording and should be read as repository evidence to verify, not future work. The
+five composition pairs in item 3 remain open until independently checked against the generated theme
+compositions; the neutral-light simulation, cascade-layer, and elevation questions remain open.
+
+1. **The six neutral hex values** (§4) — **closed for the current line/area tree**; see
+   `packages/tokens/src/tokens.ts` and `30-implementation-plan.md` §B1.
 2. **Whether the neutral light theme collapses like the Rail light theme does** to ΔE 5.0 (§4).
    Must be simulated, not assumed.
 3. **The five unguaranteed composition pairs** (§5) — B1, per theme, per ground.
@@ -491,6 +498,7 @@ drawn in §1 and §3, and it is the test to apply to any future divergence.
    A1:** primitives carry no visual attributes at all. The residue is the *platform* half — geometry
    that CSS cannot set on `<line>` — which is [`decisions/012`](decisions/012-no-line-element-for-tokened-geometry.md)
    and gate **G14** at A4, not a theming open question.
-7. **The named-colour list's shape** (§6.1a) — the full CSS colour keyword set, or a short deny-list of
-   the five or six that actually get typed. The full set is more correct and risks colliding with future
-   keywords; the short list is honest about what it catches. B1, with the token tree.
+7. **The named-colour list's shape** (§6.1a) — **closed for the current B1 gate**; the implemented
+   parser and allowlist are the evidence. The full CSS colour keyword set, or a short deny-list of
+   the five or six that actually get typed, remains a future maintenance choice if the token gate's
+   vocabulary expands.

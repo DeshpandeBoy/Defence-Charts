@@ -642,8 +642,10 @@ the site. The VRT baseline set (one screenshot per chart type per rung) *is* thi
    markup and the docs-site choice are settled and folded into `20-architecture.md` §5–7 and E1.
 3. ✅ `raw/06` landed in full (1,967 lines / 131 KB as it landed; 2,008 / 132 KB today — implementation
    annotates it in place rather than rewriting it, and B1 slice 2 added the largest such note). The `--gx-*` token tree and the ten-library
-   granularity comparison are folded into B1–B3 and `00-decisions.md`. **All research streams are
-   now closed.**
+   granularity comparison are folded into B1–B3 and `00-decisions.md`. **The line/area A/B research
+   inputs listed in this section are closed; the current research register in
+   `92-claude-research-workstream.md` remains active for grid, chart-family, interaction,
+   accessibility, publication, and empirical follow-up work.**
 4. **Decide the name and npm scope.** Now the only thing blocking publish, and cheaper than it looks:
    `raw/06` §6.0 verified the prefix appears *only* as the first path segment (0 hits elsewhere), so
    the rename is one regex, one generator constant, and one template-literal type. Still blocking for

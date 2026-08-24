@@ -36,6 +36,8 @@ and legal review are calendar risks and are not made faster by adding agents.
 - The planner is pure and serialisable; the static renderer is RSC-safe.
 - Responsive sizing, containment, motion, typography, policy, token, API, and tree-shaking gates exist.
 - The last A/B close reported 675 passing tests and a passing full verification chain.
+- The A/B line/area path is closed for its shipped gates; the separate `CR-TY01` review of Segoe/GRAD
+  visual calibration remains an evidence task and is not implied closed by this summary.
 - The workspace was clean at `9bd44ba` before these planning documents were added.
 
 ### Not complete

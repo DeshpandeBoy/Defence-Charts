@@ -62,6 +62,10 @@ Primary local evidence:
 | pnpm test | PASS in baseline run | 671 tests pass across 33 files |
 | pnpm lint:policy | ENVIRONMENT BLOCK | Node 22.12.0 is below the repository requirement of >=22.18; the script also imports a TypeScript source file directly |
 
+The policy row is an environment-floor finding, not a current code failure: the same gate and the
+full test suite pass under supported Node 24 in `research/handoffs/P0.1.md` and the P0.2
+reconciliation. Release verification must continue to use Node `>=22.18`.
+
 Important qualification: passing gates prove the implemented line/area scope and its test fixtures. They do not prove the unfinished grid, future chart types, consumer CSS combinations, or production-scale dashboards.
 
 ## 3. Research method and evidence grades
@@ -450,7 +454,9 @@ Reliability should be described as a staged property:
 4. WCAG contrast compliance does not establish color-vision-safe chart semantics by itself.
 5. RGL’s official feature list does not prove our proposed grid API, performance budget, or keyboard behavior.
 6. Current browser gates cover current fixtures, not all consumers’ flex, grid, overflow, transforms, or container-query combinations.
-7. The repository currently has a policy-gate environment problem under Node 22.12.0; release CI must run the supported engine and close the TypeScript loader mismatch.
+7. The repository's local Node 22.12.0 reproduces a policy-gate loader failure, while supported
+   Node 24 passes it; this is an environment-floor limitation, not evidence that the gate is broken.
+   Release CI must run Node `>=22.18`.
 8. The current package description for @gx/react mentions tooltip, crosshair, brush, and legend interaction, but the source inventory should be reconciled before presenting all of those as shipped public features.
 
 ## 13. Source register
