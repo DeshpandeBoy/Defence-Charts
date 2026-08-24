@@ -1,7 +1,6 @@
 import {
   GRID_COLUMNS,
   createLayoutSnapshot,
-  createWidgetLayout,
   validateWidgetLayouts,
 } from '@gx/core'
 import type { LayoutSnapshot, WidgetLayout, WidgetLayoutInput } from '@gx/core'

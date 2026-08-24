@@ -24,3 +24,10 @@ export {
   RGL_VERSION,
 } from './adapter.ts'
 export type { GridLayoutOptions } from './adapter.ts'
+export type {
+  WidgetGridInteraction,
+  WidgetGridInteractionHandler,
+  WidgetGridMode,
+  WidgetGridProps,
+} from './WidgetGrid.tsx'
+export { WidgetGrid } from './WidgetGrid.tsx'
