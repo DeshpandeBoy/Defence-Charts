@@ -218,7 +218,7 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | D6.1 | Codex funnel | backlog | D0.2, R2 | Funnel or evidence-backed deferral |
 | D7.1 | Codex integration | backlog | D1–D6 | Central registration and complete family matrix |
 | E1.1 | Codex release | done | C2.1 | Built exports and emitted CSS |
-| E1.2 | Codex release | backlog | E1.1 | Package metadata/licence/dependency corrections |
+| E1.2 | Codex release | in progress | E1.1 | Package metadata/licence/dependency corrections |
 | E1.3 | Codex release | in progress | E1.1 | Tarball Next/RSC and Vite consumers |
 | E1.4 | Codex release | backlog | E1.2, E1.3 | `publint`, `attw`, package-content and no-network gates |
 | E2.1 | Codex release | backlog | P0.3, E1.4 | Rename, Changesets and trusted Preview publish |
