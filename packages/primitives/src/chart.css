@@ -355,6 +355,25 @@
     fill-opacity: var(--gx-area-opacity);
   }
 
+  .gx-progress__track {
+    fill: currentColor;
+    fill-opacity: var(--gx-area-opacity);
+    stroke: none;
+  }
+
+  .gx-progress__fill {
+    fill: var(--gx-series-color);
+    stroke: var(--gx-series-color);
+    stroke-width: var(--gx-bar-border-width);
+  }
+
+  .gx-progress__state {
+    fill: currentColor;
+    font-weight: var(--gx-label-font-weight);
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+
   /*
    * ⚠ The horizon ramp. Band 0 sits nearest the baseline and is the faintest; each band
    * outward is more opaque, and that ordering is the entire read of a horizon chart. It
@@ -570,9 +589,12 @@
      */
     .gx-line,
     .gx-area,
-    .gx-band {
+    .gx-band,
+    .gx-progress__fill,
+    .gx-progress__track {
       transition:
         d var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
+        width var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
         opacity var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay);
     }
 
@@ -674,7 +696,8 @@
   /* KPI qualifiers remain visible text; themes may add emphasis without owning the meaning. */
   .gx-value__unit,
   .gx-value__target,
-  .gx-value__status {
+  .gx-value__status,
+  .gx-value__progress {
     fill: currentColor;
     font-weight: var(--gx-label-font-weight);
   }

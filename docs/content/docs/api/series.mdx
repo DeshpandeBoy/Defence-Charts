@@ -29,6 +29,10 @@ array index when the series can reorder.
 **KPI metadata:** `unit`, finite `target`, and textual `status` are optional metric qualifiers.
 They are rendered as visible text and in the summary table; status is not colour-only.
 
+**Progress:** the `progress` chart type uses the latest finite `y` as current and requires a
+finite positive `target` for determinate completion. It exposes `remaining` up to the target and
+`over target` beyond it; missing or invalid current/target values remain explicitly indeterminate.
+
 **`x`:** numeric or temporal. A series should not mix the two domains.
 
 **`y: null`:** a gap, not zero. The line breaks because no reading exists. Use `0` only when the

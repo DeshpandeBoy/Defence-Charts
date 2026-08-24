@@ -286,6 +286,16 @@ export type ChartFrame = {
       } | null
       /** Previous-value text when the plan requests a comparison basis. */
       readonly comparison: string | null
+      /** Progress qualifiers derived from the latest value and explicit target. */
+      readonly progress?: {
+        readonly current: number | null
+        readonly target: number | null
+        readonly remaining: number | null
+        readonly overTarget: number | null
+        readonly remainingText: string | null
+        readonly overTargetText: string | null
+        readonly indeterminate: boolean
+      } | null
       /** Centre of this entry's column, absolute SVG coordinates. */
       readonly x: number
       /** Vertical centre of the band, absolute SVG coordinates. */
@@ -658,6 +668,19 @@ function fitValueDisplay(
             : null,
         comparison:
           narrative.deltaBasis && previous !== undefined ? formatYLabel(previous.value) : null,
+        progress: s.progress === null
+          ? null
+          : Object.freeze({
+              current: s.progress.current,
+              target: s.progress.target,
+              remaining: s.progress.remaining,
+              overTarget: s.progress.overTarget,
+              remainingText:
+                s.progress.remaining === null ? null : formatYLabel(s.progress.remaining),
+              overTargetText:
+                s.progress.overTarget === null ? null : formatYLabel(s.progress.overTarget),
+              indeterminate: s.progress.indeterminate,
+            }),
       },
     ]
   })
@@ -673,6 +696,14 @@ function fitValueDisplay(
     if (d.comparison !== null) parts.push(`(${d.comparison})`)
     if (d.target !== null) parts.push(`target ${d.target.text}`)
     if (d.status !== null) parts.push(`status ${d.status}`)
+    if (d.progress !== null && d.progress !== undefined) {
+      if (d.progress.indeterminate) parts.push('indeterminate')
+      else if (d.progress.overTarget !== null && d.progress.overTarget > 0) {
+        parts.push(`over target ${formatYLabel(d.progress.overTarget)}`)
+      } else if (d.progress.remaining !== null) {
+        parts.push(`remaining ${formatYLabel(d.progress.remaining)}`)
+      }
+    }
     return parts.join(' ')
   }
 
@@ -995,6 +1026,8 @@ function seriesFrame(
     cells = Object.freeze(cellsArr)
   } else if (mark.kind === 'arc') {
     arcs = donutArcs(s, aggregate, plot)
+  } else if (mark.kind === 'progress') {
+    progress = progressFrame(s, mark.orientation, plot)
   }
 
   return Object.freeze({
@@ -1012,6 +1045,89 @@ function seriesFrame(
     progress,
     points: Object.freeze(points),
     extrema: extremaOf(points),
+  })
+}
+
+/** Resolve one series into target-aware progress semantics and finite SVG geometry. */
+function progressFrame(
+  series: Series,
+  orientation: 'horizontal' | 'radial',
+  plot: Rect,
+): ProgressFrame {
+  const currentPoint = [...series.points]
+    .reverse()
+    .find((point) => point.y !== null && Number.isFinite(point.y))
+  const current = currentPoint?.y ?? null
+  const target =
+    series.target !== undefined && series.target !== null && Number.isFinite(series.target)
+      ? series.target
+      : null
+  const validTarget = target !== null && target > 0
+  const ratio = current !== null && validTarget ? Math.max(0, Math.min(1, current / target)) : null
+  const remaining = current !== null && validTarget ? Math.max(0, target - current) : null
+  const overTarget = current !== null && validTarget ? Math.max(0, current - target) : null
+  const indeterminate = current === null || !validTarget
+
+  if (orientation === 'horizontal') {
+    const height = Math.max(0, Math.min(plot.height, plot.height * 0.3))
+    const y = plot.y + Math.max(0, (plot.height - height) / 2)
+    const track = Object.freeze({ x: plot.x, y, width: plot.width, height })
+    const fill =
+      ratio === null
+        ? null
+        : Object.freeze({ x: plot.x, y, width: plot.width * ratio, height })
+    return Object.freeze({
+      orientation,
+      current,
+      target,
+      ratio,
+      remaining,
+      overTarget,
+      indeterminate,
+      track,
+      fill,
+      trackPath: null,
+      fillPath: null,
+      cx: null,
+      cy: null,
+      innerRadius: null,
+      outerRadius: null,
+    })
+  }
+
+  const cx = plot.x + plot.width / 2
+  const cy = plot.y + plot.height / 2
+  const outerRadius = Math.max(0, Math.min(plot.width, plot.height) / 2)
+  const innerRadius = outerRadius * 0.55
+  const startAngle = -Math.PI / 2
+  const fullEndAngle = startAngle + Math.PI * 2
+  const pathFor = (endAngle: number): string | null => {
+    if (outerRadius <= 0 || endAngle <= startAngle) return null
+    return (
+      d3Arc<object>()
+        .innerRadius(innerRadius)
+        .outerRadius(outerRadius)
+        .startAngle(startAngle)
+        .endAngle(endAngle)
+        .digits(PATH_DIGITS)({}) ?? null
+    )
+  }
+  return Object.freeze({
+    orientation,
+    current,
+    target,
+    ratio,
+    remaining,
+    overTarget,
+    indeterminate,
+    track: null,
+    fill: null,
+    trackPath: pathFor(fullEndAngle),
+    fillPath: ratio === null || ratio <= 0 ? null : pathFor(startAngle + ratio * Math.PI * 2),
+    cx: outerRadius > 0 ? cx : null,
+    cy: outerRadius > 0 ? cy : null,
+    innerRadius: outerRadius > 0 ? innerRadius : null,
+    outerRadius: outerRadius > 0 ? outerRadius : null,
   })
 }
 

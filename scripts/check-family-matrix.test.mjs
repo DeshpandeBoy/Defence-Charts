@@ -18,9 +18,9 @@ import {
   planForRow,
 } from '../apps/playground/src/family-matrix/matrix.ts'
 
-describe('shared line, area, bar, timebar, scatter, donut, and KPI family matrix', () => {
-  it('covers all seven registered families across all six information budgets', () => {
-    expect(FAMILY_TYPES).toEqual(['line', 'area', 'bar', 'timebar', 'scatter', 'donut', 'kpi'])
+describe('shared line, area, bar, timebar, scatter, donut, KPI, and progress family matrix', () => {
+  it('covers all eight registered families across all six information budgets', () => {
+    expect(FAMILY_TYPES).toEqual(['line', 'area', 'bar', 'timebar', 'scatter', 'donut', 'kpi', 'progress'])
     expect(FAMILY_MATRIX.map((row) => row.id)).toEqual([
       'micro',
       'tile',
@@ -52,11 +52,13 @@ describe('shared line, area, bar, timebar, scatter, donut, and KPI family matrix
                     ? row.id === 'micro'
                       ? 'none'
                       : 'line'
-                  : row.expected.primary,
+                    : type === 'progress'
+                      ? 'progress'
+                    : row.expected.primary,
           area:
             type === 'area' && row.expected.primary === 'line'
               ? true
-              : type === 'bar' || type === 'timebar' || type === 'scatter' || type === 'donut'
+              : type === 'bar' || type === 'timebar' || type === 'scatter' || type === 'donut' || type === 'progress'
                 ? null
                 : row.expected.area,
           valueLegibility:
@@ -68,6 +70,10 @@ describe('shared line, area, bar, timebar, scatter, donut, and KPI family matrix
                 ? ['micro', 'tile', 'strip'].includes(row.id)
                   ? 'single-value'
                   : 'values'
+                : type === 'progress'
+                  ? row.id === 'micro'
+                    ? 'shape-only'
+                    : 'single-value'
                 : row.expected.valueLegibility,
           regions:
             type === 'donut'
@@ -80,6 +86,10 @@ describe('shared line, area, bar, timebar, scatter, donut, and KPI family matrix
                 ? row.id === 'micro'
                   ? ['value', 'table']
                   : ['value', 'plot', 'table']
+                : type === 'progress'
+                  ? row.id === 'micro'
+                    ? ['plot', 'table']
+                    : ['value', 'plot', 'table']
                 : row.expected.regions,
           legend:
             type === 'donut'
@@ -92,13 +102,21 @@ describe('shared line, area, bar, timebar, scatter, donut, and KPI family matrix
                 ? ['micro', 'tile', 'strip'].includes(row.id)
                   ? 'absent'
                   : 'direct'
+              : type === 'progress'
+                ? 'absent'
                 : row.expected.legend,
-          legendToggle: type === 'kpi' ? ['canvas', 'stage'].includes(row.id) : row.expected.legendToggle,
+          legendToggle: type === 'kpi' ? ['canvas', 'stage'].includes(row.id) : type === 'progress' ? false : row.expected.legendToggle,
           interaction:
             type === 'kpi'
               ? ['micro', 'tile', 'strip'].includes(row.id)
                 ? 'none'
                 : 'hover'
+              : type === 'progress'
+                ? ['micro', 'tile'].includes(row.id)
+                  ? 'none'
+                  : row.id === 'strip'
+                    ? 'tap'
+                    : 'hover'
               : row.expected.interaction,
           tooltip:
             type === 'kpi'
@@ -107,12 +125,18 @@ describe('shared line, area, bar, timebar, scatter, donut, and KPI family matrix
                 : row.id === 'panel'
                   ? 'fix'
                   : 'fluid'
+              : type === 'progress'
+                ? ['micro', 'tile'].includes(row.id)
+                  ? 'disabled'
+                  : ['strip', 'panel'].includes(row.id)
+                    ? 'fix'
+                    : 'fluid'
               : row.expected.tooltip,
-          crosshair: type === 'kpi' ? !['micro', 'tile', 'strip'].includes(row.id) : row.expected.crosshair,
-          motionStages: type === 'kpi' && ['micro', 'tile', 'strip'].includes(row.id) ? 1 : row.expected.motionStages,
-          persistGridlines: type === 'kpi' ? !['micro', 'tile', 'strip'].includes(row.id) : row.expected.persistGridlines,
-          y2: type === 'donut' || type === 'kpi' ? false : row.expected.y2,
-          facet: type === 'donut' || type === 'kpi' ? 'none' : row.expected.facet,
+          crosshair: type === 'kpi' ? !['micro', 'tile', 'strip'].includes(row.id) : type === 'progress' ? false : row.expected.crosshair,
+          motionStages: type === 'progress' ? 1 : type === 'kpi' && ['micro', 'tile', 'strip'].includes(row.id) ? 1 : row.expected.motionStages,
+          persistGridlines: type === 'kpi' ? !['micro', 'tile', 'strip'].includes(row.id) : type === 'progress' ? false : row.expected.persistGridlines,
+          y2: type === 'donut' || type === 'kpi' || type === 'progress' ? false : row.expected.y2,
+          facet: type === 'donut' || type === 'kpi' || type === 'progress' ? 'none' : row.expected.facet,
         }
         expect(metadataForPlan(plan), type + '/' + row.id).toMatchObject(expected)
         expect(JSON.parse(JSON.stringify(plan)), type + '/' + row.id + ' JSON').toEqual(plan)
@@ -147,7 +171,7 @@ describe('shared line, area, bar, timebar, scatter, donut, and KPI family matrix
       for (const row of FAMILY_MATRIX) {
         expect(identitySignature(MATRIX_DATA)).toBe(identity)
         expect(planForRow(type, row).type).toBe(type)
-        expect(dataForType(type).length).toBe(type === 'donut' || type === 'kpi' ? 1 : MATRIX_DATA.length)
+        expect(dataForType(type).length).toBe(['donut', 'kpi', 'progress'].includes(type) ? 1 : MATRIX_DATA.length)
       }
     }
   })

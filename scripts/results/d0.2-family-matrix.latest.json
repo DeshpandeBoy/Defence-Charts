@@ -4,7 +4,7 @@
   "origin": "http://127.0.0.1:5186/",
   "browser": "151.0.7922.34",
   "playwrightFrom": "playwright",
-  "cards": 42,
+  "cards": 48,
   "states": [
     {
       "state": "normal",
@@ -228,7 +228,7 @@
   "forcedColors": {
     "reducedMotion": false,
     "forcedColors": true,
-    "transitionDuration": "1s, 1s",
+    "transitionDuration": "1s, 1s, 1s",
     "background": "rgb(255, 255, 255)",
     "border": "rgb(0, 0, 0)",
     "rootBackground": "rgb(255, 255, 255)"

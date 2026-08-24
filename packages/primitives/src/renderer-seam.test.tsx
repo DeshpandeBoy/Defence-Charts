@@ -34,6 +34,8 @@ describe('D0.1 renderer seam', () => {
       'scatter',
       'donut',
       'donut',
+      'progress',
+      'progress',
     ])
     expect(BUILT_IN_MARK_RENDERERS.flatMap((entry) => entry.markKinds)).toEqual([
       'none',
@@ -45,6 +47,8 @@ describe('D0.1 renderer seam', () => {
       'point',
       'none',
       'arc',
+      'none',
+      'progress',
     ])
   })
 
@@ -94,6 +98,21 @@ describe('D0.1 renderer seam', () => {
     )
     expect(html).toContain('class="gx-arc"')
     expect(html).toContain('data-slice-id="sales:number:0"')
+  })
+
+  it('renders registered progress geometry from the shared target-aware seam', () => {
+    const data = [{ id: 'completion', points: [{ x: 0, y: 50 }], target: 100 }]
+    const ctx = sizeContextFromPixels(900, 520)
+    const plan = planChart('progress', ctx, describeShape(data))
+    const frame = resolveFrame(plan, data, ctx, resolvePolicy()).series[0]
+    expect(frame).toBeDefined()
+    const html = renderToStaticMarkup(
+      <svg>{renderBuiltInMark({ frame: frame!, plan, policy: resolvePolicy() })}</svg>,
+    )
+    expect(html).toContain('class="gx-progress')
+    expect(html).toContain('data-progress-current="50"')
+    expect(html).toContain('data-progress-target="100"')
+    expect(html).not.toContain('gx-line')
   })
 
   it('preserves the explicit unsupported-mark failure path', () => {

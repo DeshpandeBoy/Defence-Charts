@@ -11,6 +11,7 @@ import type { BuiltInPlannerRegistry, PlannerRegistration } from './family-seam.
 import { BAR_CHART_TYPES, barFamilyPlanner } from './families/bar/planner.ts'
 import { DONUT_CHART_TYPES, donutFamilyPlanner } from './families/donut/planner.ts'
 import { KPI_CHART_TYPES, kpiFamilyPlanner } from './families/kpi/planner.ts'
+import { PROGRESS_CHART_TYPES, progressFamilyPlanner } from './families/progress/planner.ts'
 import { LINE_CHART_TYPES, lineFamilyPlanner } from './families/line/planner.ts'
 import { SCATTER_CHART_TYPES, scatterFamilyPlanner } from './families/scatter/planner.ts'
 import type { LineChartType } from './rungs/line.ts'
@@ -52,6 +53,13 @@ const KPI_PLANNER: BuiltInPlanner = Object.freeze({
     kpiFamilyPlanner({ type: type as 'kpi', ctx, shape, policy }),
 })
 
+const PROGRESS_PLANNER: BuiltInPlanner = Object.freeze({
+  family: 'progress',
+  chartTypes: PROGRESS_CHART_TYPES,
+  plan: ({ type, ctx, shape, policy }) =>
+    progressFamilyPlanner({ type: type as 'progress', ctx, shape, policy }),
+})
+
 /** The only built-in planner table. Every nested value is immutable. */
 export const BUILT_IN_PLANNER_REGISTRY: BuiltInPlannerRegistry<ChartType> = Object.freeze([
   LINE_PLANNER,
@@ -59,6 +67,7 @@ export const BUILT_IN_PLANNER_REGISTRY: BuiltInPlannerRegistry<ChartType> = Obje
   SCATTER_PLANNER,
   DONUT_PLANNER,
   KPI_PLANNER,
+  PROGRESS_PLANNER,
 ])
 
 /** Find a built-in planner without constructing or mutating a registry at runtime. */

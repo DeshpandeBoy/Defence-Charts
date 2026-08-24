@@ -238,7 +238,7 @@ export function Chart({
 
       {plan.dataTable.present ? (
         <figcaption className="gx-chart__caption">
-          <DataTable data={data} plan={plan.dataTable} caption={title} />
+          <DataTable data={data} plan={plan.dataTable} caption={title} progress={plan.type === 'progress'} />
         </figcaption>
       ) : null}
     </figure>

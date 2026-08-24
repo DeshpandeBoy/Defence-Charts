@@ -7,7 +7,7 @@ import {
   type SizeContext,
 } from '@gx/core'
 
-export const FAMILY_TYPES = ['line', 'area', 'bar', 'timebar', 'scatter', 'donut', 'kpi'] as const
+export const FAMILY_TYPES = ['line', 'area', 'bar', 'timebar', 'scatter', 'donut', 'kpi', 'progress'] as const
 export type FamilyType = (typeof FAMILY_TYPES)[number]
 
 export const MATRIX_SERIES_IDS = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot'] as const
@@ -62,8 +62,19 @@ export const KPI_MATRIX_DATA: readonly Series[] = Object.freeze([
   },
 ])
 
+export const PROGRESS_MATRIX_DATA: readonly Series[] = Object.freeze([
+  {
+    id: 'progress',
+    label: 'Readiness',
+    unit: '%',
+    target: 100,
+    status: 'positive',
+    points: Object.freeze([{ x: 0, y: 74 }]),
+  },
+])
+
 export type ExpectedFamilyMetadata = {
-  readonly primary: 'none' | 'line' | 'bar' | 'point' | 'arc'
+  readonly primary: 'none' | 'line' | 'bar' | 'point' | 'arc' | 'progress'
   readonly area: boolean | null
   readonly valueLegibility: 'single-value' | 'shape-only' | 'values'
   readonly interaction: 'none' | 'tap' | 'hover'
@@ -280,6 +291,7 @@ export const MATRIX_SHAPE = describeShape(MATRIX_DATA)
 export function dataForType(type: FamilyType): readonly Series[] {
   if (type === 'donut') return DONUT_MATRIX_DATA
   if (type === 'kpi') return KPI_MATRIX_DATA
+  if (type === 'progress') return PROGRESS_MATRIX_DATA
   return MATRIX_DATA
 }
 
@@ -296,7 +308,7 @@ export function metadataForPlan(plan: ChartPlan): ExpectedFamilyMetadata & {
     type: plan.type,
     sizeClass: plan.sizeClass,
     primary:
-      primary.kind === 'line' || primary.kind === 'none' || primary.kind === 'bar' || primary.kind === 'point' || primary.kind === 'arc'
+      primary.kind === 'line' || primary.kind === 'none' || primary.kind === 'bar' || primary.kind === 'point' || primary.kind === 'arc' || primary.kind === 'progress'
         ? primary.kind
         : 'line',
     area: primary.kind === 'line' ? primary.area : null,

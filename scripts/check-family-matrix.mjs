@@ -92,6 +92,7 @@ async function openFixture(page) {
   await page.waitForSelector('[data-family-case="scatter-stage"] .gx-scatter-point')
   await page.waitForSelector('[data-family-case="donut-stage"] .gx-arc')
   await page.waitForSelector('[data-family-case="kpi-stage"] .gx-value')
+  await page.waitForSelector('[data-family-case="progress-stage"] .gx-progress')
   await page.waitForSelector('[data-family-resize-probe] .gx-auto-chart .gx-chart')
   await settle(page)
 }
@@ -119,15 +120,22 @@ async function runStaticMatrix(page) {
     scatterPoints: card.querySelectorAll('.gx-scatter-point').length,
     arcs: card.querySelectorAll('.gx-arc').length,
     otherArcs: card.querySelectorAll('.gx-arc--other').length,
+    progress: card.querySelectorAll('.gx-progress').length,
+    progressFills: card.querySelectorAll('.gx-progress__fill').length,
+    progressStates: card.querySelectorAll('.gx-progress__state').length,
+    progressOrientation: card.querySelector('.gx-progress')?.getAttribute('data-progress-orientation') ?? null,
     valueUnits: card.querySelectorAll('.gx-value__unit').length,
     valueTargets: card.querySelectorAll('.gx-value__target').length,
     valueStatuses: card.querySelectorAll('.gx-value__status').length,
+    valueProgress: card.querySelectorAll('.gx-value__progress').length,
     tableMetricHeaders: card.querySelectorAll('.gx-data-table__table th').length,
+    tableHasProgressSemantics: [...card.querySelectorAll('.gx-data-table__table th')].some((header) =>
+      ['Remaining', 'Over target', 'Progress state'].includes(header.textContent?.trim() ?? '')),
     seriesIds: [...card.querySelectorAll('.gx-series[data-series-id]')].map((series) => series.getAttribute('data-series-id')),
   })))
 
-  if (observed.length !== 42) throw new Error('expected 42 line/area/bar/timebar/scatter/donut/kpi cards, got ' + observed.length)
-  for (const type of ['line', 'area', 'bar', 'timebar', 'scatter', 'donut', 'kpi']) {
+  if (observed.length !== 48) throw new Error('expected 48 line/area/bar/timebar/scatter/donut/kpi/progress cards, got ' + observed.length)
+  for (const type of ['line', 'area', 'bar', 'timebar', 'scatter', 'donut', 'kpi', 'progress']) {
     const rows = observed.filter((card) => card.type === type)
     if (JSON.stringify(rows.map((card) => card.rung)) !== JSON.stringify(EXPECTED_RUNGS)) {
       throw new Error(type + ' ladder order changed: ' + JSON.stringify(rows.map((card) => card.rung)))
@@ -137,7 +145,7 @@ async function runStaticMatrix(page) {
     if (!card.svg || !card.title || card.interactionMarkup) {
       throw new Error('static accessibility/interaction contract failed: ' + JSON.stringify(card))
     }
-    const expectedSeriesIds = card.type === 'donut' ? ['donut'] : card.type === 'kpi' ? ['kpi'] : EXPECTED_IDS
+    const expectedSeriesIds = card.type === 'donut' ? ['donut'] : card.type === 'kpi' ? ['kpi'] : card.type === 'progress' ? ['progress'] : EXPECTED_IDS
     if (JSON.stringify(card.seriesIds) !== JSON.stringify(expectedSeriesIds)) {
       throw new Error('static series identity changed for ' + card.caseId + ': ' + JSON.stringify(card.seriesIds))
     }
@@ -168,6 +176,27 @@ async function runStaticMatrix(page) {
       }
       if (card.rung !== 'micro' && (card.mark !== 'line' || card.valueUnits === 0 || card.valueTargets === 0 || card.valueStatuses === 0)) {
         throw new Error('KPI metadata or line composition missing for ' + card.caseId + ': ' + JSON.stringify(card))
+      }
+    }
+    if (card.type === 'progress') {
+      if (card.mark !== 'progress' || card.progress !== 1 || card.progressFills !== 1) {
+        throw new Error('progress geometry missing for ' + card.caseId + ': ' + JSON.stringify(card))
+      }
+      const radial = card.rung === 'micro' || card.rung === 'tile'
+      if (card.progressOrientation !== (radial ? 'radial' : 'horizontal')) {
+        throw new Error('Progress orientation missing for ' + card.caseId + ': ' + JSON.stringify(card))
+      }
+      if (card.rung === 'micro' && card.valueProgress !== 0) {
+        throw new Error('Progress Micro should remain ring-only: ' + JSON.stringify(card))
+      }
+      if (card.rung !== 'micro' && card.valueProgress === 0) {
+        throw new Error('Progress value semantics missing for ' + card.caseId + ': ' + JSON.stringify(card))
+      }
+      if (!card.tableHasProgressSemantics) {
+        throw new Error('Progress table semantics missing for ' + card.caseId + ': ' + JSON.stringify(card))
+      }
+      if (radial && card.progressStates !== 0) {
+        throw new Error('Progress normal radial fixture unexpectedly emitted state text: ' + JSON.stringify(card))
       }
     }
   }
@@ -348,7 +377,7 @@ try {
   const result = await runGate()
   await mkdir(new URL('./results/', import.meta.url), { recursive: true })
   await writeFile(RESULT_PATH, JSON.stringify(result, null, 2) + '\n')
-  console.log('D3.1 family matrix: Chromium passed — line/area/bar/timebar/scatter/donut/kpi rungs, static a11y, states, themes, media, resize identity, and screenshot evidence ' + RESULT_PATH)
+  console.log('D3.2 family matrix: Chromium passed — line/area/bar/timebar/scatter/donut/kpi/progress rungs, static a11y, states, themes, media, resize identity, and screenshot evidence ' + RESULT_PATH)
 } catch (error) {
   console.error('D0.2 family matrix: FAILED — ' + (error instanceof Error ? error.message : String(error)))
   process.exitCode = 1

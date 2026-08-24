@@ -42,6 +42,7 @@ describe('D0.1 planner seam', () => {
     expect(findBuiltInPlanner('scatter')?.family).toBe('scatter')
     expect(findBuiltInPlanner('donut')?.family).toBe('donut')
     expect(findBuiltInPlanner('kpi')?.family).toBe('kpi')
+    expect(findBuiltInPlanner('progress')?.family).toBe('progress')
   })
 
   it.each(['line', 'area'] as const)(
@@ -85,5 +86,11 @@ describe('D0.1 planner seam', () => {
     expect(kpi.type).toBe('kpi')
     expect(kpi.narrative.valueDisplay).toBe('latest+delta')
     expect(kpi.marks.primary.kind).toBe('line')
+  })
+
+  it('resolves the registered progress family without falling back to another mark', () => {
+    const progress = planChart('progress', sizeContextFromPixels(900, 520), describeShape(DATA))
+    expect(progress.type).toBe('progress')
+    expect(progress.marks.primary).toEqual({ kind: 'progress', orientation: 'horizontal' })
   })
 })

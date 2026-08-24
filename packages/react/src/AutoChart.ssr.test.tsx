@@ -41,6 +41,17 @@ const DATA: readonly Series[] = [
   series('beta', [4, 6, 5, 9, 7, 11, 12]),
 ]
 
+const PROGRESS_DATA: readonly Series[] = [
+  {
+    id: 'readiness',
+    label: 'Readiness',
+    unit: '%',
+    target: 100,
+    status: 'positive',
+    points: [{ x: 0, y: 74 }],
+  },
+]
+
 describe('the DOM is genuinely absent while this renders', () => {
   it('has no window and no document to reach for', () => {
     // ⚠ Asserted rather than assumed. A shared setup file, a stray import with a side
@@ -192,5 +203,22 @@ describe('the contract the resolver holds is the contract this holds', () => {
     expect(html).toContain('data-chart-type="kpi"')
     expect(html).toContain('gx-value-display')
     expect(html).toContain('gx-line')
+  })
+
+  it('renders the registered target-aware progress composition on the measured SSR path', () => {
+    const html = renderToStaticMarkup(
+      <AutoChart
+        type="progress"
+        data={PROGRESS_DATA}
+        title="Readiness progress"
+        initialSize={{ width: 700, height: 520 }}
+        id="progress"
+      />,
+    )
+    expect(html).toContain('data-chart-type="progress"')
+    expect(html).toContain('gx-progress')
+    expect(html).toContain('data-progress-current="74"')
+    expect(html).toContain('data-progress-target="100"')
+    expect(html).toContain('remaining 26')
   })
 })

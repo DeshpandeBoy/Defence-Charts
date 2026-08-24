@@ -102,6 +102,20 @@ export function ValueDisplay({ value, className }: ValueDisplayProps) {
               {` status ${entry.status}`}
             </tspan>
           )}
+          {entry.progress === undefined || entry.progress === null ? null : (
+            <tspan
+              className="gx-value__progress"
+              data-progress-state={entry.progress.indeterminate ? 'indeterminate' : 'determinate'}
+            >
+              {entry.progress.indeterminate
+                ? ' indeterminate'
+                : entry.progress.overTarget !== null && entry.progress.overTarget > 0
+                  ? ` over target ${entry.progress.overTargetText ?? ''}`
+                  : entry.progress.remaining === null
+                    ? ''
+                    : ` remaining ${entry.progress.remainingText ?? ''}`}
+            </tspan>
+          )}
         </text>
       ))}
 

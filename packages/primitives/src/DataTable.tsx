@@ -35,15 +35,17 @@ export type DataTableProps = {
   readonly plan: DataTablePlan
   /** Names the table for assistive technology. `<Chart>` passes its own title through. */
   readonly caption: string
+  /** Progress asks the summary table to expose target-relative state text. */
+  readonly progress?: boolean | undefined
   readonly className?: string
 }
 
-export function DataTable({ data, plan, caption, className }: DataTableProps) {
+export function DataTable({ data, plan, caption, progress = false, className }: DataTableProps) {
   if (!plan.present) return null
 
   const table =
-    plan.columns === 'summary' ? (
-      <SummaryTable data={data} caption={caption} />
+    plan.columns === 'summary' || progress ? (
+      <SummaryTable data={data} caption={caption} progress={progress} />
     ) : (
       <FullTable data={data} caption={caption} />
     )
@@ -104,8 +106,16 @@ function FullTable({ data, caption }: { data: readonly Series[]; caption: string
 }
 
 /** One row per series: min, max, last. What `DataTablePlan.columns: 'summary'` asks for. */
-function SummaryTable({ data, caption }: { data: readonly Series[]; caption: string }) {
-  const metric = data.some(
+function SummaryTable({
+  data,
+  caption,
+  progress,
+}: {
+  readonly data: readonly Series[]
+  readonly caption: string
+  readonly progress: boolean
+}) {
+  const metric = progress || data.some(
     (series) =>
       (series.unit !== undefined && series.unit !== null && series.unit.length > 0) ||
       series.target !== undefined ||
@@ -124,6 +134,9 @@ function SummaryTable({ data, caption }: { data: readonly Series[]; caption: str
           {metric ? <th scope="col">Target</th> : null}
           {metric ? <th scope="col">Status</th> : null}
           {metric ? <th scope="col">Direction</th> : null}
+          {progress ? <th scope="col">Remaining</th> : null}
+          {progress ? <th scope="col">Over target</th> : null}
+          {progress ? <th scope="col">Progress state</th> : null}
         </tr>
       </thead>
       <tbody>
@@ -139,8 +152,14 @@ function SummaryTable({ data, caption }: { data: readonly Series[]; caption: str
               : latest > previous
                 ? 'up'
                 : latest < previous
-                  ? 'down'
-                  : 'flat'
+                ? 'down'
+                : 'flat'
+          const target =
+            s.target !== undefined && s.target !== null && Number.isFinite(s.target) && s.target > 0
+              ? s.target
+              : null
+          const remaining = latest === undefined || target === null ? null : Math.max(0, target - latest)
+          const overTarget = latest === undefined || target === null ? null : Math.max(0, latest - target)
           return (
             <tr key={s.id}>
               <th scope="row">{s.label ?? s.id}</th>
@@ -159,6 +178,9 @@ function SummaryTable({ data, caption }: { data: readonly Series[]; caption: str
               ) : null}
               {metric ? <td>{s.status ?? '—'}</td> : null}
               {metric ? <td>{direction}</td> : null}
+              {progress ? <td>{remaining === null ? '—' : formatYLabel(remaining)}</td> : null}
+              {progress ? <td>{overTarget === null ? '—' : formatYLabel(overTarget)}</td> : null}
+              {progress ? <td>{remaining === null ? 'indeterminate' : 'determinate'}</td> : null}
             </tr>
           )
         })}

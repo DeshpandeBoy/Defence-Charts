@@ -11,6 +11,7 @@ import type { ReactNode } from 'react'
 import { BAR_MARK_RENDERERS } from './families/bar/renderer.tsx'
 import { DONUT_MARK_RENDERERS } from './families/donut/renderer.tsx'
 import { LINE_MARK_RENDERERS } from './families/line/renderer.tsx'
+import { PROGRESS_MARK_RENDERERS } from './families/progress/renderer.tsx'
 import { SCATTER_MARK_RENDERERS } from './families/scatter/renderer.tsx'
 import type { MarkRendererInput, MarkRendererRegistration } from './renderer-seam.ts'
 
@@ -21,6 +22,7 @@ const BUILT_IN_MARK_RENDERERS: readonly BuiltInMarkRenderer[] = Object.freeze([
   ...BAR_MARK_RENDERERS,
   ...SCATTER_MARK_RENDERERS,
   ...DONUT_MARK_RENDERERS,
+  ...PROGRESS_MARK_RENDERERS,
 ])
 
 export function renderBuiltInMark(input: MarkRendererInput): ReactNode {
@@ -32,7 +34,7 @@ export function renderBuiltInMark(input: MarkRendererInput): ReactNode {
   }
 
   throw new Error(
-    "@gx/primitives: mark kind '" + kind + "' is not implemented. A4 renders 'line', 'horizon', 'none', D1.1 renders 'bar', D4.1 renders 'point', and D2.1 renders donut 'arc'; cell lands in later chart breadth.",
+    "@gx/primitives: mark kind '" + kind + "' is not implemented. A4 renders 'line', 'horizon', 'none', D1.1 renders 'bar', D3.2 renders 'progress', D4.1 renders 'point', and D2.1 renders donut 'arc'; cell lands in later chart breadth.",
   )
 }
 
