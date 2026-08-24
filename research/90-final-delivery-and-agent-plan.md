@@ -202,7 +202,7 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | C3.2 | Codex grid | backlog | C1.2 | Layout serialisation and migration |
 | C4.1 | Codex verification | backlog | C2.2, C3.1 | Grid browser gate |
 | C4.2 | Codex verification | backlog | C4.1 | 1/10/50/100/200-widget stress evidence |
-| I1.1 | Codex interaction | backlog | C2.2 | Datum identity and interaction state |
+| I1.1 | Codex interaction | done | C2.2 | Datum identity and interaction state |
 | I1.2 | Codex interaction | backlog | I1.1 | Pure overlay placement |
 | I1.3 | Codex interaction | backlog | I1.2 | Tooltip and crosshair layer |
 | I1.4 | Codex interaction | backlog | I1.1 | Static and interactive legends |

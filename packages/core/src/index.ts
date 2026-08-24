@@ -131,6 +131,28 @@ export { planChart } from './plan-chart.ts'
 export type { DataPoint, Series } from './data.ts'
 export { describeShape } from './data.ts'
 
+// Controlled, serialisable interaction identity/state. Tooltip placement and React event layers
+// stay in the later I1.2–I1.5 tasks; this module only owns the pure contract.
+export type {
+  DatumIdentity,
+  InteractionState,
+  InteractionStateInput,
+  InteractionStateUpdate,
+  InteractionValidationCode,
+  LegendVisibilityState,
+  TooltipMode,
+  TooltipState,
+} from './interaction-state.ts'
+export {
+  InteractionValidationError,
+  createDatumIdentity,
+  createInteractionState,
+  datumIdentityKey,
+  normalizeInteractionState,
+  reconcileInteractionState,
+  updateInteractionState,
+} from './interaction-state.ts'
+
 // The one place a value becomes a string, so that the resolver's `labelMaxChars` and the
 // renderer's glyphs cannot disagree.
 export { formatXLabel, formatYLabel } from './format.ts'
