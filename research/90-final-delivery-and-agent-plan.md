@@ -204,8 +204,8 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | C4.2 | Codex verification | done | C4.1 | 1/10/50/100/200-widget stress evidence |
 | I1.1 | Codex interaction | done | C2.2 | Datum identity and interaction state |
 | I1.2 | Codex interaction | done | I1.1 | Pure overlay placement |
-| I1.3 | Codex interaction | backlog | I1.2 | Tooltip and crosshair layer |
-| I1.4 | Codex interaction | backlog | I1.1 | Static and interactive legends |
+| I1.3 | Codex interaction | in progress | I1.2 | Tooltip and crosshair layer |
+| I1.4 | Codex interaction | in progress | I1.1 | Static and interactive legends |
 | I1.5 | Codex interaction | backlog | I1.3, I1.4 | Keyboard/touch interaction matrix |
 | D0.1 | Codex integration | backlog | C0.1 | Parallel chart-family module seam |
 | D0.2 | Codex verification | backlog | D0.1 | Shared family acceptance/visual fixture |
@@ -219,7 +219,7 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | D7.1 | Codex integration | backlog | D1–D6 | Central registration and complete family matrix |
 | E1.1 | Codex release | done | C2.1 | Built exports and emitted CSS |
 | E1.2 | Codex release | backlog | E1.1 | Package metadata/licence/dependency corrections |
-| E1.3 | Codex release | backlog | E1.1 | Tarball Next/RSC and Vite consumers |
+| E1.3 | Codex release | in progress | E1.1 | Tarball Next/RSC and Vite consumers |
 | E1.4 | Codex release | backlog | E1.2, E1.3 | `publint`, `attw`, package-content and no-network gates |
 | E2.1 | Codex release | backlog | P0.3, E1.4 | Rename, Changesets and trusted Preview publish |
 | E3.1 | Coordinator | backlog | D7.1, E2.1 | Free-v1 claim and release audit |
