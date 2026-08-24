@@ -183,6 +183,7 @@ export type {
   ComputedTick,
   HorizonBand,
   PointPos,
+  ProgressFrame,
   Rect,
   SeriesFrame,
   CellFrame,

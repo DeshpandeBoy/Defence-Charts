@@ -181,6 +181,7 @@ export type MarkSpec =
   | { readonly kind: 'horizon'; readonly bands: 1 | 2 | 3 }
   | { readonly kind: 'bar'; readonly stacked: boolean; readonly grouped: boolean }
   | { readonly kind: 'arc'; readonly donut: boolean }
+  | { readonly kind: 'progress'; readonly orientation: 'horizontal' | 'radial' }
   | { readonly kind: 'point' }
   | { readonly kind: 'cell'; readonly bandStart: number; readonly bandEnd: number }
 

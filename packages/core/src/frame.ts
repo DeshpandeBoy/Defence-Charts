@@ -152,6 +152,27 @@ export type ArcFrame = {
   readonly other: boolean
 }
 
+/** Target-aware progress geometry and semantics, kept separate from donut slices and bars. */
+export type ProgressFrame = {
+  readonly orientation: 'horizontal' | 'radial'
+  readonly current: number | null
+  readonly target: number | null
+  readonly ratio: number | null
+  readonly remaining: number | null
+  readonly overTarget: number | null
+  readonly indeterminate: boolean
+  /** Horizontal track/fill rectangles; null for radial progress. */
+  readonly track: Rect | null
+  readonly fill: Rect | null
+  /** Radial local paths and their absolute centre; null for horizontal progress. */
+  readonly trackPath: string | null
+  readonly fillPath: string | null
+  readonly cx: number | null
+  readonly cy: number | null
+  readonly innerRadius: number | null
+  readonly outerRadius: number | null
+}
+
 /**
  * One horizon band. `sign` is `1` for bands above the baseline and `-1` for the mirrored
  * negative bands; `band` is the 0-based index outward from the baseline, which is what drives
@@ -183,6 +204,8 @@ export type SeriesFrame = {
   readonly cells: readonly CellFrame[]
   /** Empty unless the mark kind is `'arc'`. */
   readonly arcs: readonly ArcFrame[]
+  /** Non-null only for the target-aware progress mark. */
+  readonly progress: ProgressFrame | null
   /**
    * ⚠ **Every** defined point, always — not only the ones `marks.points.mode` renders.
    * Geometry belongs to the frame and the decision to draw belongs to the plan, so
@@ -900,6 +923,7 @@ function seriesFrame(
   let bands: readonly HorizonBand[] = []
   let cells: readonly CellFrame[] = []
   let arcs: readonly ArcFrame[] = []
+  let progress: ProgressFrame | null = null
 
   if (mark.kind === 'line') {
     // ⚠ `.defined()` is what makes `y: null` a gap rather than an interpolation. Without it
@@ -985,6 +1009,7 @@ function seriesFrame(
     bands,
     cells,
     arcs,
+    progress,
     points: Object.freeze(points),
     extrema: extremaOf(points),
   })
