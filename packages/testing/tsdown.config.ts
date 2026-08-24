@@ -10,6 +10,7 @@ export default defineConfig({
   dts: true,
   clean: true,
   platform: 'neutral',
+  exports: { devExports: true },
 
   /**
    * ⚠ jsdom, declared external **explicitly**, because it is already external by accident.

@@ -5,14 +5,26 @@
   "type": "module",
   "license": "MIT",
   "description": "CSS custom properties and their generated TypeScript types. Depends on nothing.",
-  "sideEffects": ["*.css"],
+  "sideEffects": [
+    "**/*.css"
+  ],
   "exports": {
     ".": "./src/index.ts",
+    "./package.json": "./package.json",
     "./theme.css": "./src/themes/theme.css"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown && node ../../scripts/emit-package-assets.mjs",
     "typecheck": "tsc --noEmit"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.js",
+      "./package.json": "./package.json",
+      "./theme.css": "./dist/themes/theme.css"
+    }
   }
 }

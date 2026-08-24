@@ -6,17 +6,18 @@
   "license": "MIT",
   "description": "Hook-free SVG marks and axes. RSC-safe. <Chart plan={...}> lives here.",
   "sideEffects": [
-    "*.css"
+    "**/*.css"
   ],
   "exports": {
     ".": "./src/index.ts",
+    "./package.json": "./package.json",
     "./chart.css": "./src/chart.css"
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown && node ../../scripts/emit-package-assets.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -30,5 +31,12 @@
     "@types/react-dom": "^19.2.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.8"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.js",
+      "./package.json": "./package.json",
+      "./chart.css": "./dist/chart.css"
+    }
   }
 }

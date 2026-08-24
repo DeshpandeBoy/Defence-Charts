@@ -5,16 +5,21 @@
   "type": "module",
   "license": "MIT",
   "description": "12-column widget grid shell. Reports box size to a widget; never decides what the widget shows.",
-  "sideEffects": ["*.css"],
+  "sideEffects": [
+    "**/*.css"
+  ],
   "exports": {
     ".": "./src/index.ts",
+    "./package.json": "./package.json",
     "./widget-shell.css": "./src/widget-shell.css",
     "./widget-states.css": "./src/widget-states.css",
     "./keyboard-grid.css": "./src/keyboard-grid.css"
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "build": "tsdown",
+    "build": "tsdown && node ../../scripts/emit-package-assets.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -29,5 +34,14 @@
   "devDependencies": {
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4"
+  },
+  "publishConfig": {
+    "exports": {
+      ".": "./dist/index.js",
+      "./package.json": "./package.json",
+      "./widget-shell.css": "./dist/widget-shell.css",
+      "./widget-states.css": "./dist/widget-states.css",
+      "./keyboard-grid.css": "./dist/keyboard-grid.css"
+    }
   }
 }

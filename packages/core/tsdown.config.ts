@@ -10,4 +10,5 @@ export default defineConfig({
   dts: true,
   clean: true,
   platform: 'neutral',
+  exports: { devExports: true },
 })
