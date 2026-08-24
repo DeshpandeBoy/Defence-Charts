@@ -187,12 +187,12 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | ID | Owner lane | State | Depends on | Deliverable |
 |---|---|---|---|---|
 | P0.1 | Coordinator | **done** | — | Final agent plan and continuity system; committed and verified |
-| P0.2 | Claude research | **claimed** | P0.1 | Decision-conflict register |
+| P0.2 | Claude research | **handoff** | P0.1 | Decision-conflict register |
 | P0.3 | User/coordinator | blocked on decision | — | Final public name and npm scope |
 | P0.4 | Codex integration | **done** | P0.2 | Record RGL `./core` + `./react` boundary and widget-shell owner |
-| C0.1 | Codex integration | **handoff** | P0.1, P0.2, P0.4 | Grid/widget/identity contract |
-| C0.2 | Codex integration | **in progress** | C0.1 | Pin and prove RGL adapter boundary |
-| C1.1 | Codex grid | backlog | C0.2 | Controlled grid wrapper |
+| C0.1 | Codex integration | **done** | P0.1, P0.2, P0.4 | Grid/widget/identity contract |
+| C0.2 | Codex integration | **handoff** | C0.1 | Pin and prove RGL adapter boundary |
+| C1.1 | Codex grid | **in progress** | C0.2 | Controlled grid wrapper |
 | C1.2 | Codex grid | backlog | C1.1 | Constraints, collision and compaction |
 | C1.3 | Codex grid | backlog | C1.2 | Preview/commit callback contract |
 | C2.1 | Codex shell | backlog | C1.1 | Widget regions and drag handle |
@@ -226,7 +226,7 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | R1 | Claude research | **handoff** | P0.1 | RGL/grid current evidence; coordinator review pending |
 | R2 | Claude research | **handoff** | P0.1 | Evidence-bounded launch catalogue; sparkline doc correction applied |
 | R3 | Claude research | **handoff** | P0.1 | Interaction and chart-semantics evidence; CR-X04 remains required for real AT verification |
-| R4 | Claude research | ready | P0.1 | Publication and competitor refresh |
+| R4 | Claude research | **handoff** | P0.1 | Publication and competitor refresh |
 | R5 | Claude/user research | optional | Preview | User-validation protocol and findings |
 
 Allowed states: `backlog`, `ready`, `claimed`, `in progress`, `handoff`, `verifying`, `done`,
