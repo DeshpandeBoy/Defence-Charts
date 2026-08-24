@@ -216,7 +216,7 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | D4.1 | Codex scatter | done | D0.2, R2 | Scatter family |
 | D5.1 | Codex heatmap | done | D0.2, R2 | Heatmap family |
 | D6.1 | Codex funnel | done | D0.2, R2 | Funnel or evidence-backed deferral |
-| D7.1 | Codex integration | backlog | D1–D6 | Central registration and complete family matrix |
+| D7.1 | Codex integration | in progress | D1–D6 | Central registration and complete family matrix |
 | E1.1 | Codex release | done | C2.1 | Built exports and emitted CSS |
 | E1.2 | Codex release | done | E1.1 | Package metadata/licence/dependency corrections |
 | E1.3 | Codex release | done | E1.1 | Tarball Next/RSC and Vite consumers |
