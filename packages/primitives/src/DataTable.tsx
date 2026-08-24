@@ -105,6 +105,12 @@ function FullTable({ data, caption }: { data: readonly Series[]; caption: string
 
 /** One row per series: min, max, last. What `DataTablePlan.columns: 'summary'` asks for. */
 function SummaryTable({ data, caption }: { data: readonly Series[]; caption: string }) {
+  const metric = data.some(
+    (series) =>
+      (series.unit !== undefined && series.unit !== null && series.unit.length > 0) ||
+      series.target !== undefined ||
+      (series.status !== undefined && series.status !== null),
+  )
   return (
     <table className="gx-data-table__table">
       <caption>{caption}</caption>
@@ -114,17 +120,45 @@ function SummaryTable({ data, caption }: { data: readonly Series[]; caption: str
           <th scope="col">Min</th>
           <th scope="col">Max</th>
           <th scope="col">Latest</th>
+          {metric ? <th scope="col">Unit</th> : null}
+          {metric ? <th scope="col">Target</th> : null}
+          {metric ? <th scope="col">Status</th> : null}
+          {metric ? <th scope="col">Direction</th> : null}
         </tr>
       </thead>
       <tbody>
         {data.map((s) => {
-          const ys = s.points.map((p) => p.y).filter((y): y is number => y !== null && Number.isFinite(y))
+          const ys = s.points
+            .map((p) => p.y)
+            .filter((y): y is number => y !== null && Number.isFinite(y))
+          const latest = ys[ys.length - 1]
+          const previous = ys[ys.length - 2]
+          const direction =
+            latest === undefined || previous === undefined
+              ? '—'
+              : latest > previous
+                ? 'up'
+                : latest < previous
+                  ? 'down'
+                  : 'flat'
           return (
             <tr key={s.id}>
               <th scope="row">{s.label ?? s.id}</th>
               <td>{ys.length === 0 ? '—' : formatYLabel(Math.min(...ys))}</td>
               <td>{ys.length === 0 ? '—' : formatYLabel(Math.max(...ys))}</td>
-              <td>{ys.length === 0 ? '—' : formatYLabel(ys[ys.length - 1] ?? 0)}</td>
+              <td>{latest === undefined ? '—' : formatYLabel(latest)}</td>
+              {metric ? (
+                <td>{s.unit === undefined || s.unit === null || s.unit === '' ? '—' : s.unit}</td>
+              ) : null}
+              {metric ? (
+                <td>
+                  {s.target !== undefined && s.target !== null && Number.isFinite(s.target)
+                    ? formatYLabel(s.target)
+                    : '—'}
+                </td>
+              ) : null}
+              {metric ? <td>{s.status ?? '—'}</td> : null}
+              {metric ? <td>{direction}</td> : null}
             </tr>
           )
         })}

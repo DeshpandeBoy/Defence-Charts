@@ -178,4 +178,19 @@ describe('the contract the resolver holds is the contract this holds', () => {
     const html = renderToStaticMarkup(<AutoChart type="donut" data={DATA} title="Revenue" id="t" />)
     expect(html).toBe('<div class="gx-auto-chart"></div>')
   })
+
+  it('renders the registered KPI composition on the measured SSR path', () => {
+    const html = renderToStaticMarkup(
+      <AutoChart
+        type="kpi"
+        data={DATA}
+        title="Revenue KPI"
+        initialSize={{ width: 240, height: 80 }}
+        id="kpi"
+      />,
+    )
+    expect(html).toContain('data-chart-type="kpi"')
+    expect(html).toContain('gx-value-display')
+    expect(html).toContain('gx-line')
+  })
 })

@@ -41,6 +41,7 @@ describe('D0.1 planner seam', () => {
     expect(findBuiltInPlanner('timebar')?.family).toBe('bar')
     expect(findBuiltInPlanner('scatter')?.family).toBe('scatter')
     expect(findBuiltInPlanner('donut')?.family).toBe('donut')
+    expect(findBuiltInPlanner('kpi')?.family).toBe('kpi')
   })
 
   it.each(['line', 'area'] as const)(
@@ -77,5 +78,12 @@ describe('D0.1 planner seam', () => {
     const donut = planChart('donut', sizeContextFromPixels(900, 520), describeShape(DATA))
     expect(donut.type).toBe('donut')
     expect(donut.marks.primary.kind).toBe('arc')
+  })
+
+  it('resolves the registered KPI family as a value composition', () => {
+    const kpi = planChart('kpi', sizeContextFromPixels(240, 80), describeShape(DATA))
+    expect(kpi.type).toBe('kpi')
+    expect(kpi.narrative.valueDisplay).toBe('latest+delta')
+    expect(kpi.marks.primary.kind).toBe('line')
   })
 })

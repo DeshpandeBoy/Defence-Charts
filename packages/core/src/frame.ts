@@ -50,7 +50,7 @@
  */
 
 import type { SizeContext } from './context.ts'
-import type { DataPoint, Series } from './data.ts'
+import type { DataPoint, MetricStatus, Series } from './data.ts'
 import { formatXLabel, formatYLabel } from './format.ts'
 import {
   legendBands,
@@ -169,6 +169,10 @@ export type SeriesFrame = {
   readonly label: string
   /** 0-based, and the index into the `--gx-series-N` colour ramp. */
   readonly index: number
+  /** Optional KPI metadata copied into the serialisable frame. */
+  readonly unit: string | null
+  readonly target: number | null
+  readonly status: MetricStatus | null
   /** `null` when the mark kind is not `'line'`, or when nothing is defined. */
   readonly line: string | null
   /** `null` unless the plan asked for an area. */
@@ -246,11 +250,19 @@ export type ChartFrame = {
       readonly label: string
       /** The formatted latest value. */
       readonly text: string
+      /** Optional KPI unit, rendered as visible text rather than inferred from formatting. */
+      readonly unit: string | null
+      /** Optional KPI target, rendered with its label when finite and present. */
+      readonly target: { readonly value: number; readonly text: string } | null
+      /** Optional KPI state, rendered as text and available to a theme as metadata. */
+      readonly status: MetricStatus | null
       /** `'latest+delta'` only, and only when a previous defined point exists. */
       readonly delta: {
         readonly text: string
         readonly direction: 'up' | 'down' | 'flat'
       } | null
+      /** Previous-value text when the plan requests a comparison basis. */
+      readonly comparison: string | null
       /** Centre of this entry's column, absolute SVG coordinates. */
       readonly x: number
       /** Vertical centre of the band, absolute SVG coordinates. */
@@ -611,10 +623,18 @@ function fitValueDisplay(
         seriesIndex: s.index,
         label: s.label,
         text: formatYLabel(last.value),
+        unit: s.unit,
+        target:
+          s.target !== null && s.target !== undefined && Number.isFinite(s.target)
+            ? Object.freeze({ value: s.target, text: formatYLabel(s.target) })
+            : null,
+        status: s.status,
         delta:
           narrative.valueDisplay === 'latest+delta' && previous !== undefined
             ? deltaOf(last.value - previous.value)
             : null,
+        comparison:
+          narrative.deltaBasis && previous !== undefined ? formatYLabel(previous.value) : null,
       },
     ]
   })
@@ -623,8 +643,15 @@ function fitValueDisplay(
   // The painted string, which is the string measured. The gap between a value and its delta
   // is a space *inside* the text rather than a `dx` on the tspan, so that the width fitted is
   // the width drawn; a gap added after measurement is a gap the fit does not know about.
-  const painted = (d: (typeof drafts)[number]): string =>
-    d.delta === null ? d.text : `${d.text} ${d.delta.text}`
+  const painted = (d: (typeof drafts)[number]): string => {
+    const parts = [d.text]
+    if (d.unit !== null && d.unit !== undefined && d.unit.length > 0) parts.push(d.unit)
+    if (d.delta !== null) parts.push(d.delta.text)
+    if (d.comparison !== null) parts.push(`(${d.comparison})`)
+    if (d.target !== null) parts.push(`target ${d.target.text}`)
+    if (d.status !== null) parts.push(`status ${d.status}`)
+    return parts.join(' ')
+  }
 
   const v = policy.typography.metrics.vertical
   const emHeight = v.ascent + v.descent + v.lineGap
@@ -950,6 +977,9 @@ function seriesFrame(
     id: s.id,
     label: s.label ?? s.id,
     index,
+    unit: s.unit ?? null,
+    target: s.target !== undefined && s.target !== null && Number.isFinite(s.target) ? s.target : null,
+    status: s.status ?? null,
     line,
     area,
     bands,

@@ -12,6 +12,9 @@ export type DataPoint = {
 export type Series = {
   readonly id: string
   readonly label?: string
+  readonly unit?: string | null
+  readonly target?: number | null
+  readonly status?: 'positive' | 'negative' | 'neutral' | 'warning' | 'critical' | null
   readonly points: readonly DataPoint[]
 }
 ```
@@ -22,6 +25,9 @@ export type Series = {
 array index when the series can reorder.
 
 **Optional `label`:** human-readable text for legends, direct labels, and tables.
+
+**KPI metadata:** `unit`, finite `target`, and textual `status` are optional metric qualifiers.
+They are rendered as visible text and in the summary table; status is not colour-only.
 
 **`x`:** numeric or temporal. A series should not mix the two domains.
 

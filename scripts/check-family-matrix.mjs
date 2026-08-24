@@ -91,6 +91,7 @@ async function openFixture(page) {
   await page.waitForSelector('[data-family-case="bar-stage"] .gx-bar')
   await page.waitForSelector('[data-family-case="scatter-stage"] .gx-scatter-point')
   await page.waitForSelector('[data-family-case="donut-stage"] .gx-arc')
+  await page.waitForSelector('[data-family-case="kpi-stage"] .gx-value')
   await page.waitForSelector('[data-family-resize-probe] .gx-auto-chart .gx-chart')
   await settle(page)
 }
@@ -118,11 +119,15 @@ async function runStaticMatrix(page) {
     scatterPoints: card.querySelectorAll('.gx-scatter-point').length,
     arcs: card.querySelectorAll('.gx-arc').length,
     otherArcs: card.querySelectorAll('.gx-arc--other').length,
+    valueUnits: card.querySelectorAll('.gx-value__unit').length,
+    valueTargets: card.querySelectorAll('.gx-value__target').length,
+    valueStatuses: card.querySelectorAll('.gx-value__status').length,
+    tableMetricHeaders: card.querySelectorAll('.gx-data-table__table th').length,
     seriesIds: [...card.querySelectorAll('.gx-series[data-series-id]')].map((series) => series.getAttribute('data-series-id')),
   })))
 
-  if (observed.length !== 36) throw new Error('expected 36 line/area/bar/timebar/scatter/donut cards, got ' + observed.length)
-  for (const type of ['line', 'area', 'bar', 'timebar', 'scatter', 'donut']) {
+  if (observed.length !== 42) throw new Error('expected 42 line/area/bar/timebar/scatter/donut/kpi cards, got ' + observed.length)
+  for (const type of ['line', 'area', 'bar', 'timebar', 'scatter', 'donut', 'kpi']) {
     const rows = observed.filter((card) => card.type === type)
     if (JSON.stringify(rows.map((card) => card.rung)) !== JSON.stringify(EXPECTED_RUNGS)) {
       throw new Error(type + ' ladder order changed: ' + JSON.stringify(rows.map((card) => card.rung)))
@@ -132,7 +137,7 @@ async function runStaticMatrix(page) {
     if (!card.svg || !card.title || card.interactionMarkup) {
       throw new Error('static accessibility/interaction contract failed: ' + JSON.stringify(card))
     }
-    const expectedSeriesIds = card.type === 'donut' ? ['donut'] : EXPECTED_IDS
+    const expectedSeriesIds = card.type === 'donut' ? ['donut'] : card.type === 'kpi' ? ['kpi'] : EXPECTED_IDS
     if (JSON.stringify(card.seriesIds) !== JSON.stringify(expectedSeriesIds)) {
       throw new Error('static series identity changed for ' + card.caseId + ': ' + JSON.stringify(card.seriesIds))
     }
@@ -155,6 +160,14 @@ async function runStaticMatrix(page) {
       }
       if ((card.rung === 'canvas' || card.rung === 'stage') && card.otherArcs === 0) {
         throw new Error('donut Other bucket missing for ' + card.caseId + ': ' + JSON.stringify(card))
+      }
+    }
+    if (card.type === 'kpi') {
+      if (card.rung === 'micro' && card.mark !== 'none') {
+        throw new Error('KPI Micro did not replace the plot with its value: ' + JSON.stringify(card))
+      }
+      if (card.rung !== 'micro' && (card.mark !== 'line' || card.valueUnits === 0 || card.valueTargets === 0 || card.valueStatuses === 0)) {
+        throw new Error('KPI metadata or line composition missing for ' + card.caseId + ': ' + JSON.stringify(card))
       }
     }
   }
@@ -335,7 +348,7 @@ try {
   const result = await runGate()
   await mkdir(new URL('./results/', import.meta.url), { recursive: true })
   await writeFile(RESULT_PATH, JSON.stringify(result, null, 2) + '\n')
-  console.log('D2.1 family matrix: Chromium passed — line/area/bar/timebar/scatter/donut rungs, static a11y, states, themes, media, resize identity, and screenshot evidence ' + RESULT_PATH)
+  console.log('D3.1 family matrix: Chromium passed — line/area/bar/timebar/scatter/donut/kpi rungs, static a11y, states, themes, media, resize identity, and screenshot evidence ' + RESULT_PATH)
 } catch (error) {
   console.error('D0.2 family matrix: FAILED — ' + (error instanceof Error ? error.message : String(error)))
   process.exitCode = 1

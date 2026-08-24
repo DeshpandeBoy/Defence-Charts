@@ -591,7 +591,10 @@
     .gx-label,
     .gx-value-label,
     .gx-value,
+    .gx-value__unit,
     .gx-value__delta,
+    .gx-value__target,
+    .gx-value__status,
     .gx-value__overflow {
       transition:
         x var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
@@ -664,6 +667,14 @@
    * is the label weight, so the qualifier reads as secondary to the number it qualifies.
    */
   .gx-value__delta {
+    fill: currentColor;
+    font-weight: var(--gx-label-font-weight);
+  }
+
+  /* KPI qualifiers remain visible text; themes may add emphasis without owning the meaning. */
+  .gx-value__unit,
+  .gx-value__target,
+  .gx-value__status {
     fill: currentColor;
     font-weight: var(--gx-label-font-weight);
   }

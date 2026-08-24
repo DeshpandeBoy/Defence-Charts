@@ -43,7 +43,7 @@ and legal review are calendar risks and are not made faster by adding agents.
 ### Not complete
 
 - `@gx/grid` exports only `GRID_COLUMNS`; it has no real layout component.
-- `planChart()` and the renderer now ship line/area, bar/timebar, scatter, and donut; funnel, KPI,
+- `planChart()` and the renderer now ship line/area, bar/timebar, scatter, donut, and KPI; funnel,
   heatmap, and progress remain explicit unsupported types.
 - Basic interactive tooltip/legend/keyboard contracts are incomplete.
 - Packages are `private: true`, version `0.0.0`, use placeholder `@gx/*` names, and export workspace
@@ -211,7 +211,7 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | D0.2 | Codex verification | done | D0.1 | Shared family acceptance/visual fixture |
 | D1.1 | Codex bar | done | D0.2, R2 | Bar/timebar family |
 | D2.1 | Codex radial | done | D0.2, R2 | Donut family |
-| D3.1 | Codex metric | backlog | D0.2 | KPI family |
+| D3.1 | Codex metric | done | D0.2 | KPI family |
 | D3.2 | Codex metric | backlog | D3.1 | Progress family |
 | D4.1 | Codex scatter | done | D0.2, R2 | Scatter family |
 | D5.1 | Codex heatmap | backlog | D0.2, R2 | Heatmap family |

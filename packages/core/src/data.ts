@@ -50,8 +50,12 @@ export type DataPoint = {
   readonly y: number | null
 }
 
+/** A visible metric state. The word is rendered as text; it is never colour-only. */
+export type MetricStatus = 'positive' | 'negative' | 'neutral' | 'warning' | 'critical'
+
 /**
- * One line.
+ * One series. KPI qualifiers are optional metadata on the same canonical shape; line, donut, and
+ * other families ignore them unless their composition asks for metric output.
  *
  * ⚠ `label` is genuinely optional here, which contradicts the plan's *"spelled, not absent"*
  * rule on purpose. That rule exists because a `ChartPlan` is snapshot-compared and
@@ -63,6 +67,12 @@ export type Series = {
   /** Stable across renders. Object constancy during a transition depends on it (`MotionPlan`). */
   readonly id: string
   readonly label?: string
+  /** Optional KPI unit, such as `%`, `ms`, or `items`; absent means no suffix. */
+  readonly unit?: string | null
+  /** Optional KPI target. It is displayed only when finite and present. */
+  readonly target?: number | null
+  /** Optional KPI state. It is displayed as text and remains meaningful without colour. */
+  readonly status?: MetricStatus | null
   readonly points: readonly DataPoint[]
 }
 

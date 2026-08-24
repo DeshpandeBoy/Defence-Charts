@@ -4,7 +4,7 @@
   "origin": "http://127.0.0.1:5186/",
   "browser": "151.0.7922.34",
   "playwrightFrom": "playwright",
-  "cards": 36,
+  "cards": 42,
   "states": [
     {
       "state": "normal",

@@ -7,7 +7,7 @@ import {
   type SizeContext,
 } from '@gx/core'
 
-export const FAMILY_TYPES = ['line', 'area', 'bar', 'timebar', 'scatter', 'donut'] as const
+export const FAMILY_TYPES = ['line', 'area', 'bar', 'timebar', 'scatter', 'donut', 'kpi'] as const
 export type FamilyType = (typeof FAMILY_TYPES)[number]
 
 export const MATRIX_SERIES_IDS = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot'] as const
@@ -43,6 +43,21 @@ export const DONUT_MATRIX_DATA: readonly Series[] = Object.freeze([
       { x: 7, y: 2 },
       { x: 8, y: 1 },
       { x: 9, y: 1 },
+    ]),
+  },
+])
+
+export const KPI_MATRIX_DATA: readonly Series[] = Object.freeze([
+  {
+    id: 'kpi',
+    label: 'Readiness',
+    unit: '%',
+    target: 75,
+    status: 'positive',
+    points: Object.freeze([
+      { x: 0, y: 68 },
+      { x: 1, y: 71 },
+      { x: 2, y: 74 },
     ]),
   },
 ])
@@ -263,7 +278,9 @@ export type FamilyState = (typeof FAMILY_STATES)[number]
 export const MATRIX_SHAPE = describeShape(MATRIX_DATA)
 
 export function dataForType(type: FamilyType): readonly Series[] {
-  return type === 'donut' ? DONUT_MATRIX_DATA : MATRIX_DATA
+  if (type === 'donut') return DONUT_MATRIX_DATA
+  if (type === 'kpi') return KPI_MATRIX_DATA
+  return MATRIX_DATA
 }
 
 export function planForRow(type: FamilyType, row: FamilyMatrixRow, data = dataForType(type)): ChartPlan {

@@ -464,7 +464,7 @@ describe('G9 — unimplemented types throw rather than falling back', () => {
   it('does not return a plan for them', () => {
     // A silent fallback is the failure species this project keeps naming: a thing that
     // looks like it works and quietly doesn't.
-    for (const type of ['funnel', 'kpi', 'progress'] as const) {
+    for (const type of ['funnel', 'progress'] as const) {
       expect(() => planChart(type, PANEL, SHAPE)).toThrow()
     }
   })

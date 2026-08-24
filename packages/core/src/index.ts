@@ -13,8 +13,8 @@
  *      them would pass tests forever. Text width comes from a character-advance model
  *      instead (`./text.ts`, `research/41-text-metrics.md`).
  *
- * ⚠ **The registered families are `'line'`, `'area'`, `'bar'`, `'timebar'`, `'scatter'`, and
- * `'donut'`.** The
+ * ⚠ **The registered families are `'line'`, `'area'`, `'bar'`, `'timebar'`, `'scatter'`,
+ * `'donut'`, and `'kpi'`.** The
  * `ChartPlan` contract, `PlanPolicy`, `measureText()`, size classification and `planChart()`
  * itself are all here, while every other `ChartType` throws with the D milestone that adds it.
  * A silent fallback plan would be the same failure species as happy-dom's `0`.
@@ -129,7 +129,7 @@ export { planChart } from './plan-chart.ts'
 
 // The canonical series shape. Plain and serialisable, so it crosses the RSC boundary as a
 // prop — see `./data.ts` for why accessor functions could not.
-export type { DataPoint, Series } from './data.ts'
+export type { DataPoint, MetricStatus, Series } from './data.ts'
 export { describeShape } from './data.ts'
 
 // Controlled, serialisable interaction identity/state. Tooltip placement and React event layers

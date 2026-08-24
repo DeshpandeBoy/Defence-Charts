@@ -80,15 +80,26 @@ export function ValueDisplay({ value, className }: ValueDisplayProps) {
           fontSize={fontSize}
         >
           {entry.text}
+          {entry.unit === null || entry.unit.length === 0 ? null : (
+            <tspan className="gx-value__unit">{` ${entry.unit}`}</tspan>
+          )}
           {entry.delta === null ? null : (
             /*
              * ⚠ The separating space is inside the string, not a `dx` on the tspan. `@gx/core`
              * fitted the width of `"36 +4"` including that space; a gap introduced here would
              * be a gap the fit never measured, and the text would run wider than the column it
              * was sized for.
-             */
+            */
             <tspan className="gx-value__delta" data-direction={entry.delta.direction}>
-              {` ${entry.delta.text}`}
+              {` ${entry.delta.text}${entry.comparison === null ? '' : ` (${entry.comparison})`}`}
+            </tspan>
+          )}
+          {entry.target === null ? null : (
+            <tspan className="gx-value__target">{` target ${entry.target.text}`}</tspan>
+          )}
+          {entry.status === null ? null : (
+            <tspan className="gx-value__status" data-status={entry.status}>
+              {` status ${entry.status}`}
             </tspan>
           )}
         </text>
