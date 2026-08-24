@@ -11,6 +11,7 @@ import '@gx/grid/widget-shell.css'
 import '@gx/grid/widget-states.css'
 import '@gx/primitives/chart.css'
 import '@gx/react/auto-chart.css'
+import '@gx/react/interaction-overlay.css'
 import '@gx/tokens/theme.css'
 
 const DATA: readonly Series[] = [

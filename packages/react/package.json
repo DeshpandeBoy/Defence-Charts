@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "type": "module",
   "license": "MIT",
-  "description": "Client-side AutoChart measurement boundary and useElementSize hook for responsive line and area charts.",
+  "description": "Client-side responsive chart boundary with AutoChart measurement, tooltip and crosshair behavior, and controlled legend interaction.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DeshpandeBoy/Defence-Charts.git",
@@ -22,7 +22,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./package.json": "./package.json",
-    "./auto-chart.css": "./src/auto-chart.css"
+    "./auto-chart.css": "./src/auto-chart.css",
+    "./interaction-overlay.css": "./src/interaction-overlay.css"
   },
   "files": [
     "dist",
@@ -53,7 +54,8 @@
     "exports": {
       ".": "./dist/index.js",
       "./package.json": "./package.json",
-      "./auto-chart.css": "./dist/auto-chart.css"
+      "./auto-chart.css": "./dist/auto-chart.css",
+      "./interaction-overlay.css": "./dist/interaction-overlay.css"
     }
   }
 }

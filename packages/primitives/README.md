@@ -2,7 +2,8 @@
 
 Hook-free, React Server Component-safe SVG primitives for the static line and area renderer.
 Exports include Chart, axes, labels, data-table output, line/area paths, points, horizon bands,
-and value display components. Visual presentation is supplied by the package stylesheet.
+value display components, and hook-free Legend output. Visual presentation is supplied by the
+package stylesheet.
 
 ~~~tsx
 import { Chart } from '@gx/primitives'

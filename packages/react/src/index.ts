@@ -45,6 +45,8 @@ export type { AutoChartProps, ChartGridSize } from './AutoChart.tsx'
 export { AutoChart } from './AutoChart.tsx'
 export type { LegendControlProps } from './LegendControl.tsx'
 export { LegendControl } from './LegendControl.tsx'
+export type { InteractionOverlayProps } from './InteractionOverlay.tsx'
+export { InteractionOverlay } from './InteractionOverlay.tsx'
 
 export type {
   CreateObserver,
