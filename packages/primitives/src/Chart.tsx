@@ -238,7 +238,13 @@ export function Chart({
 
       {plan.dataTable.present ? (
         <figcaption className="gx-chart__caption">
-          <DataTable data={data} plan={plan.dataTable} caption={title} progress={plan.type === 'progress'} />
+          <DataTable
+            data={data}
+            plan={plan.dataTable}
+            caption={title}
+            progress={plan.type === 'progress'}
+            heatmap={plan.type === 'heatmap'}
+          />
         </figcaption>
       ) : null}
     </figure>

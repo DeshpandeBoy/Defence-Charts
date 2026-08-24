@@ -351,7 +351,7 @@ describe('the plan is obeyed, not approximated', () => {
    * which is decision 8's whole point — the renderer must obey a forced plan exactly as it
    * obeys a resolved one, or overrides are advisory.
    */
-  it('throws for a mark kind not yet implemented, naming the milestone', () => {
+  it('throws for a heatmap cell forced into the wrong family plan', () => {
     const ctx = sizeContextFromPixels(900, 520)
     const base = planChart('line', ctx, describeShape(ONE))
     const forced: ChartPlan = applyOverrides(base, {
@@ -361,7 +361,7 @@ describe('the plan is obeyed, not approximated', () => {
       renderToStaticMarkup(
         <Chart plan={forced} data={ONE} ctx={ctx} title="Forced" id="t" />,
       ),
-    ).toThrow(/'cell' is not implemented.*later chart breadth/s)
+    ).toThrow(/heatmap renderer requires a heatmap plan/)
   })
 
   it('honours axes.x.visible', () => {

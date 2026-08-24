@@ -36,6 +36,8 @@ describe('D0.1 renderer seam', () => {
       'donut',
       'progress',
       'progress',
+      'heatmap',
+      'heatmap',
     ])
     expect(BUILT_IN_MARK_RENDERERS.flatMap((entry) => entry.markKinds)).toEqual([
       'none',
@@ -49,6 +51,8 @@ describe('D0.1 renderer seam', () => {
       'arc',
       'none',
       'progress',
+      'none',
+      'cell',
     ])
   })
 
@@ -126,6 +130,22 @@ describe('D0.1 renderer seam', () => {
     expect(frame).toBeDefined()
     expect(() =>
       renderBuiltInMark({ frame: frame!, plan: unsupported, policy: resolvePolicy() }),
-    ).toThrow(/'cell' is not implemented.*later chart breadth/s)
+    ).toThrow(/requires a heatmap plan/)
+  })
+
+  it('renders registered heatmap cells from the shared frame seam', () => {
+    const data = [
+      { id: 'activity', points: [{ x: new Date('2026-01-01'), y: 1 }, { x: new Date('2026-01-02'), y: 4 }] },
+    ]
+    const ctx = sizeContextFromPixels(900, 520)
+    const plan = planChart('heatmap', ctx, describeShape(data))
+    const frame = resolveFrame(plan, data, ctx, resolvePolicy()).series[0]
+    expect(frame).toBeDefined()
+    const html = renderToStaticMarkup(
+      <svg>{renderBuiltInMark({ frame: frame!, plan, policy: resolvePolicy() })}</svg>,
+    )
+    expect(html).toContain('class="gx-cell gx-heatmap-cell"')
+    expect(html).toContain('data-heatmap-cell-id="activity:1767225600000"')
+    expect(html).not.toContain('gx-line')
   })
 })

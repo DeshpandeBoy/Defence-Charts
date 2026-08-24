@@ -221,4 +221,20 @@ describe('the contract the resolver holds is the contract this holds', () => {
     expect(html).toContain('data-progress-target="100"')
     expect(html).toContain('remaining 26')
   })
+
+  it('renders the registered heatmap cell composition on the measured SSR path', () => {
+    const html = renderToStaticMarkup(
+      <AutoChart
+        type="heatmap"
+        data={DATA}
+        title="Activity heatmap"
+        initialSize={{ width: 700, height: 520 }}
+        id="heatmap"
+      />,
+    )
+    expect(html).toContain('data-chart-type="heatmap"')
+    expect(html).toContain('gx-heatmap-cell')
+    expect(html).toContain('data-heatmap-value="10"')
+    expect(html).toContain('gx-data-table')
+  })
 })

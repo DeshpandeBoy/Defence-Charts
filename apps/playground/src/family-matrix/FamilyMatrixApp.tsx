@@ -29,9 +29,9 @@ export function FamilyMatrixApp() {
       <header className="family-matrix__header">
         <div>
           <p className="family-matrix__eyebrow">D0.2 · shared family acceptance</p>
-          <h1>Line / area / bar / timebar / scatter / donut / KPI / progress family matrix</h1>
+          <h1>Line / area / bar / timebar / scatter / donut / KPI / progress / heatmap family matrix</h1>
           <p>
-            One fixture exercises the eight registered families across six information budgets, the static accessibility surface,
+            One fixture exercises the nine registered families across six information budgets, the static accessibility surface,
             the host-owned states, and the measured resize boundary contract.
           </p>
         </div>

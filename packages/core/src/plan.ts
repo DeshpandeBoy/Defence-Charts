@@ -371,6 +371,23 @@ export type AggregatePlan = {
   readonly temporalBin: 'none' | 'daily' | 'weekly' | 'monthly'
 }
 
+/** Activity-heatmap information state, promoted from D5.1's family-local contract. */
+export type HeatmapSemantics = {
+  readonly range: 'total' | 'recent-weeks' | 'full-range'
+  readonly weekdayLabels: 'none' | 'axis-intent' | 'spelled'
+  readonly monthLabels: 'none' | 'axis-intent'
+  readonly intensityLegend: 'none' | 'external'
+  readonly cellValues: 'none' | 'hover'
+  readonly streakAnnotations: 'none' | 'visible'
+  readonly cellBudget: number
+  readonly nominalCellFloorPx: number
+  readonly nominalCellFloorTier: 'C'
+  readonly accessibility: {
+    readonly cellText: 'summary' | 'table' | 'table-and-hover'
+    readonly keyboard: 'widget' | 'cells'
+  }
+}
+
 // --- 4.8 dataTable -------------------------------------------------------------------
 
 /**
@@ -486,6 +503,8 @@ export type ChartPlan = {
   readonly interaction: InteractionPlan
   readonly narrative: NarrativePlan
   readonly aggregate: AggregatePlan
+  /** Present only for the registered heatmap family; null is reserved for explicit custom plans. */
+  readonly heatmap?: HeatmapSemantics | null | undefined
   readonly dataTable: DataTablePlan
   readonly motion: MotionPlan
 }

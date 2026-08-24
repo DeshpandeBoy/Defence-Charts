@@ -7,7 +7,7 @@ import {
   type SizeContext,
 } from '@gx/core'
 
-export const FAMILY_TYPES = ['line', 'area', 'bar', 'timebar', 'scatter', 'donut', 'kpi', 'progress'] as const
+export const FAMILY_TYPES = ['line', 'area', 'bar', 'timebar', 'scatter', 'donut', 'kpi', 'progress', 'heatmap'] as const
 export type FamilyType = (typeof FAMILY_TYPES)[number]
 
 export const MATRIX_SERIES_IDS = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot'] as const
@@ -73,8 +73,31 @@ export const PROGRESS_MATRIX_DATA: readonly Series[] = Object.freeze([
   },
 ])
 
+export const HEATMAP_MATRIX_DATA: readonly Series[] = Object.freeze([
+  {
+    id: 'heatmap-maintenance',
+    label: 'Maintenance',
+    points: Object.freeze(
+      Array.from({ length: 8 }, (_, index) => ({
+        x: new Date(Date.UTC(2026, 0, index + 1)),
+        y: [0, 4, null, 12, -2, 9, 1, 6][index] ?? null,
+      })),
+    ),
+  },
+  {
+    id: 'heatmap-inspection',
+    label: 'Inspection',
+    points: Object.freeze(
+      Array.from({ length: 8 }, (_, index) => ({
+        x: new Date(Date.UTC(2026, 0, index + 1)),
+        y: [3, 7, 5, null, 18, 2, 4, 8][index] ?? null,
+      })),
+    ),
+  },
+])
+
 export type ExpectedFamilyMetadata = {
-  readonly primary: 'none' | 'line' | 'bar' | 'point' | 'arc' | 'progress'
+  readonly primary: 'none' | 'line' | 'bar' | 'point' | 'arc' | 'progress' | 'cell'
   readonly area: boolean | null
   readonly valueLegibility: 'single-value' | 'shape-only' | 'values'
   readonly interaction: 'none' | 'tap' | 'hover'
@@ -292,6 +315,7 @@ export function dataForType(type: FamilyType): readonly Series[] {
   if (type === 'donut') return DONUT_MATRIX_DATA
   if (type === 'kpi') return KPI_MATRIX_DATA
   if (type === 'progress') return PROGRESS_MATRIX_DATA
+  if (type === 'heatmap') return HEATMAP_MATRIX_DATA
   return MATRIX_DATA
 }
 
@@ -308,7 +332,7 @@ export function metadataForPlan(plan: ChartPlan): ExpectedFamilyMetadata & {
     type: plan.type,
     sizeClass: plan.sizeClass,
     primary:
-      primary.kind === 'line' || primary.kind === 'none' || primary.kind === 'bar' || primary.kind === 'point' || primary.kind === 'arc' || primary.kind === 'progress'
+      primary.kind === 'line' || primary.kind === 'none' || primary.kind === 'bar' || primary.kind === 'point' || primary.kind === 'arc' || primary.kind === 'progress' || primary.kind === 'cell'
         ? primary.kind
         : 'line',
     area: primary.kind === 'line' ? primary.area : null,

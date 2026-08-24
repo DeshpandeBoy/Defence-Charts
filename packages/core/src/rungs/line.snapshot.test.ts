@@ -457,10 +457,6 @@ describe('G9 — the renderer flips rather than sampling', () => {
 })
 
 describe('G9 — unimplemented types throw rather than falling back', () => {
-  it('names the milestone', () => {
-    expect(() => planChart('heatmap', PANEL, SHAPE)).toThrow(/milestone D/)
-  })
-
   it('does not return a plan for them', () => {
     // A silent fallback is the failure species this project keeps naming: a thing that
     // looks like it works and quietly doesn't.

@@ -33,6 +33,11 @@ They are rendered as visible text and in the summary table; status is not colour
 finite positive `target` for determinate completion. It exposes `remaining` up to the target and
 `over target` beyond it; missing or invalid current/target values remain explicitly indeterminate.
 
+**Heatmap:** the `heatmap` chart type expects temporal `x` values and treats each series as a row
+of activity cells. `y: null` remains an explicit missing cell. Dense temporal grids may use weekly
+binning when the project-owned nominal cell floor cannot be maintained; the floor is Tier C, not a
+perception claim. The HTML data table is the non-colour equivalent of the cell intensity encoding.
+
 **`x`:** numeric or temporal. A series should not mix the two domains.
 
 **`y: null`:** a gap, not zero. The line breaks because no reading exists. Use `0` only when the

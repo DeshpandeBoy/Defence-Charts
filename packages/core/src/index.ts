@@ -14,7 +14,7 @@
  *      instead (`./text.ts`, `research/41-text-metrics.md`).
  *
  * ⚠ **The registered families are `'line'`, `'area'`, `'bar'`, `'timebar'`, `'scatter'`,
- * `'donut'`, `'kpi'`, and `'progress'`.** The
+ * `'donut'`, `'kpi'`, `'progress'`, and `'heatmap'`.** The
  * `ChartPlan` contract, `PlanPolicy`, `measureText()`, size classification and `planChart()`
  * itself are all here, while every other `ChartType` throws with the D milestone that adds it.
  * A silent fallback plan would be the same failure species as happy-dom's `0`.
@@ -39,6 +39,7 @@ export type {
   DataTablePlan,
   DegradeStep,
   FacetPlan,
+  HeatmapSemantics,
   InteractionPlan,
   LabelsPlan,
   LegendPlan,

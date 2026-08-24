@@ -43,6 +43,7 @@ describe('D0.1 planner seam', () => {
     expect(findBuiltInPlanner('donut')?.family).toBe('donut')
     expect(findBuiltInPlanner('kpi')?.family).toBe('kpi')
     expect(findBuiltInPlanner('progress')?.family).toBe('progress')
+    expect(findBuiltInPlanner('heatmap')?.family).toBe('heatmap')
   })
 
   it.each(['line', 'area'] as const)(
@@ -92,5 +93,14 @@ describe('D0.1 planner seam', () => {
     const progress = planChart('progress', sizeContextFromPixels(900, 520), describeShape(DATA))
     expect(progress.type).toBe('progress')
     expect(progress.marks.primary).toEqual({ kind: 'progress', orientation: 'horizontal' })
+  })
+
+  it('resolves the registered heatmap family without falling back to a line or bar', () => {
+    const heatmapData = [
+      { id: 'activity', points: [{ x: new Date('2026-01-01'), y: 1 }, { x: new Date('2026-01-02'), y: 4 }] },
+    ]
+    const heatmap = planChart('heatmap', sizeContextFromPixels(900, 520), describeShape(heatmapData))
+    expect(heatmap.type).toBe('heatmap')
+    expect(heatmap.marks.primary.kind).toBe('cell')
   })
 })

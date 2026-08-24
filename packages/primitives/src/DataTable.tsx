@@ -37,15 +37,17 @@ export type DataTableProps = {
   readonly caption: string
   /** Progress asks the summary table to expose target-relative state text. */
   readonly progress?: boolean | undefined
+  /** Heatmap keeps the static value table as the non-colour equivalent. */
+  readonly heatmap?: boolean | undefined
   readonly className?: string
 }
 
-export function DataTable({ data, plan, caption, progress = false, className }: DataTableProps) {
+export function DataTable({ data, plan, caption, progress = false, heatmap = false, className }: DataTableProps) {
   if (!plan.present) return null
 
   const table =
     plan.columns === 'summary' || progress ? (
-      <SummaryTable data={data} caption={caption} progress={progress} />
+      <SummaryTable data={data} caption={caption} progress={progress} heatmap={heatmap} />
     ) : (
       <FullTable data={data} caption={caption} />
     )
@@ -110,12 +112,14 @@ function SummaryTable({
   data,
   caption,
   progress,
+  heatmap,
 }: {
   readonly data: readonly Series[]
   readonly caption: string
   readonly progress: boolean
+  readonly heatmap: boolean
 }) {
-  const metric = progress || data.some(
+  const metric = progress || heatmap || data.some(
     (series) =>
       (series.unit !== undefined && series.unit !== null && series.unit.length > 0) ||
       series.target !== undefined ||

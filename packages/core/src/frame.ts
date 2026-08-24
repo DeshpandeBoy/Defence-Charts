@@ -319,6 +319,14 @@ export type CellFrame = {
   readonly y: number
   readonly width: number
   readonly height: number
+  /** Heatmap identity; bar cells omit these family-specific qualifiers. */
+  readonly id?: string | undefined
+  /** Heatmap intensity source; null spells an explicit missing cell. */
+  readonly value?: number | null | undefined
+  /** Normalised 0–1 intensity for heatmap presentation; null for missing cells. */
+  readonly intensity?: number | null | undefined
+  readonly column?: number | undefined
+  readonly row?: number | undefined
 }
 
 /**
@@ -397,11 +405,14 @@ function padDegenerate(lo: number, hi: number): readonly [number, number] {
   return [lo - pad, hi + pad]
 }
 
-function xDomain(data: readonly Series[]): readonly [number, number] {
+function xDomain(
+  data: readonly Series[],
+  temporalBin: ChartPlan['aggregate']['temporalBin'] = 'none',
+): readonly [number, number] {
   const values: number[] = []
   for (const s of data) {
     for (const p of s.points) {
-      const v = p.x instanceof Date ? p.x.getTime() : p.x
+      const v = heatmapXValue(p.x, temporalBin)
       if (Number.isFinite(v)) values.push(v)
     }
   }
@@ -826,8 +837,8 @@ export function resolveFrame(
   // Scales are built in ABSOLUTE svg coordinates, so `plot.x`/`plot.y` are the range origins
   // and tick offsets subtract them back off. Building them plot-relative instead would make
   // every mark position depend on remembering to add the origin exactly once.
-  const xd = xDomain(data)
   const mark = plan.marks.primary
+  const xd = xDomain(data, mark.kind === 'cell' ? plan.aggregate.temporalBin : 'none')
   const yd = yDomain(data, mark)
 
   /**
@@ -854,7 +865,15 @@ export function resolveFrame(
 
   // Category centres are shared across series so grouped bars keep the same slot even when one
   // series has a missing value. The smallest positive gap is the nominal category width.
-  const sortedX = [...new Set(data.flatMap((s) => s.points.map(xValue)))].sort((a, b) => a - b)
+  const sortedX = [
+    ...new Set(
+      data.flatMap((s) =>
+        s.points.map((point) =>
+          mark.kind === 'cell' ? heatmapXValue(point.x, plan.aggregate.temporalBin) : xValue(point),
+        ),
+      ),
+    ),
+  ].sort((a, b) => a - b)
   const categoryStep = sortedX.reduce((smallest, value, index) => {
     const previous = sortedX[index - 1]
     if (previous === undefined || value <= previous) return smallest
@@ -863,7 +882,19 @@ export function resolveFrame(
   const nominalCategoryStep = Number.isFinite(categoryStep) && categoryStep > 0 ? categoryStep : plot.width
 
   const series = data.map((s, index) =>
-    seriesFrame(s, index, mark, plan.aggregate, plot, toX, yScale, data.length, nominalCategoryStep),
+    seriesFrame(
+      s,
+      index,
+      mark,
+      plan.aggregate,
+      plot,
+      toX,
+      yScale,
+      data.length,
+      nominalCategoryStep,
+      sortedX,
+      heatmapExtent(data),
+    ),
   )
 
   // `'endpoints'` labels the first and last *data* point, so it needs the x values in order —
@@ -927,6 +958,37 @@ function xValue(p: DataPoint): number {
   return p.x instanceof Date ? p.x.getTime() : p.x
 }
 
+const DAY_MS = 86_400_000
+const WEEK_MS = DAY_MS * 7
+
+function heatmapXValue(x: number | Date, temporalBin: ChartPlan['aggregate']['temporalBin']): number {
+  const value = x instanceof Date ? x.getTime() : x
+  if (temporalBin !== 'weekly' || !Number.isFinite(value) || !(x instanceof Date)) return value
+  return Math.floor((value + DAY_MS * 3) / WEEK_MS) * WEEK_MS - DAY_MS * 3
+}
+
+function heatmapExtent(data: readonly Series[]): readonly [number, number] {
+  let lo = Number.POSITIVE_INFINITY
+  let hi = Number.NEGATIVE_INFINITY
+  for (const series of data) {
+    for (const point of series.points) {
+      if (point.y === null || !Number.isFinite(point.y)) continue
+      lo = Math.min(lo, point.y)
+      hi = Math.max(hi, point.y)
+    }
+  }
+  if (!Number.isFinite(lo) || !Number.isFinite(hi)) return [0, 1]
+  return [lo, hi]
+}
+
+function heatmapIntensity(value: number, lo: number, hi: number): number {
+  if (hi === lo) return 1
+  const span = hi - lo
+  if (!Number.isFinite(span)) return value === hi ? 1 : value === lo ? 0 : value > 0 ? 1 : 0
+  const ratio = (value - lo) / span
+  return Number.isFinite(ratio) ? Math.max(0, Math.min(1, ratio)) : value > 0 ? 1 : 0
+}
+
 /** One series' geometry, keyed off the mark kind the plan chose. */
 function seriesFrame(
   s: Series,
@@ -938,6 +1000,8 @@ function seriesFrame(
   yScale: LinearScale,
   seriesCount: number,
   categoryStep: number,
+  heatmapColumns: readonly number[],
+  heatmapValueExtent: readonly [number, number],
 ): SeriesFrame {
   const defined = (p: DataPoint): boolean => p.y !== null && Number.isFinite(p.y)
 
@@ -978,31 +1042,15 @@ function seriesFrame(
   } else if (mark.kind === 'horizon') {
     bands = horizonBands(s.points, mark.bands, plot, toX, defined)
   } else if (mark.kind === 'cell') {
-    // A cell is a rectangle (like a bar) defined by the band coordinates and the Y value.
-    // toX() gives the start of the category band, but wait — for categorical data, toX might give the centre.
-    // If it gives the centre, we'd need the bandWidth to calculate start/end.
-    // Assuming toX gives the band's start or centre, we can compute the width if we know the point spacing.
-    // Since we don't have the explicit bandWidth here, we calculate it from the distance between points.
-    const bandWidth = points.length > 1 ? points[1]!.x - points[0]!.x : plot.width
-    const cellsArr: CellFrame[] = []
-    
-    for (const p of points) {
-      // If toX(p.x) returns the centre of the band, the band starts at toX(p.x) - bandWidth/2.
-      // ECharts/amCharts logic: `bandStart` and `bandEnd` are fractions (0..1) of the bandWidth.
-      const startX = (p.x - bandWidth / 2) + bandWidth * mark.bandStart
-      const endX = (p.x - bandWidth / 2) + bandWidth * mark.bandEnd
-      
-      const yHi = p.y
-      const yLo = yScale(0) // Bars typically start at 0
-      
-      cellsArr.push(Object.freeze({
-        x: startX,
-        y: Math.min(yHi, yLo),
-        width: Math.max(0, endX - startX),
-        height: Math.abs(yLo - yHi),
-      }))
-    }
-    cells = Object.freeze(cellsArr)
+    cells = heatmapCells(
+      s,
+      index,
+      seriesCount,
+      plot,
+      heatmapColumns,
+      heatmapValueExtent,
+      aggregate.temporalBin,
+    )
   } else if (mark.kind === 'bar') {
     const categoryWidth = Math.max(1, categoryStep * 0.8)
     const slotWidth = mark.grouped ? categoryWidth / Math.max(1, seriesCount) : categoryWidth
@@ -1046,6 +1094,67 @@ function seriesFrame(
     points: Object.freeze(points),
     extrema: extremaOf(points),
   })
+}
+
+/** Build the complete rectangular heatmap grid, including explicit missing cells. */
+function heatmapCells(
+  series: Series,
+  row: number,
+  seriesCount: number,
+  plot: Rect,
+  columns: readonly number[],
+  valueExtent: readonly [number, number],
+  temporalBin: ChartPlan['aggregate']['temporalBin'],
+): readonly CellFrame[] {
+  if (columns.length === 0 || seriesCount === 0) return Object.freeze([])
+
+  const columnIndex = new Map(columns.map((column, index) => [column, index]))
+  const values = new Map<number, number | null>()
+  const rawColumns = new Set<number>()
+  for (const point of series.points) {
+    const rawColumn = xValue(point)
+    if (rawColumns.has(rawColumn)) {
+      throw new Error(`@gx/core: heatmap series '${series.id}' has duplicate cell '${rawColumn}'.`)
+    }
+    rawColumns.add(rawColumn)
+    const column = heatmapXValue(point.x, temporalBin)
+    const index = columnIndex.get(column)
+    if (index === undefined) continue
+    if (values.has(column)) {
+      if (temporalBin !== 'weekly') {
+        throw new Error(`@gx/core: heatmap series '${series.id}' has duplicate cell '${column}'.`)
+      }
+      const previous = values.get(column)!
+      const current = point.y !== null && Number.isFinite(point.y) ? point.y : null
+      values.set(column, previous === null ? current : current === null ? previous : previous + current)
+      continue
+    }
+    values.set(column, point.y !== null && Number.isFinite(point.y) ? point.y : null)
+  }
+
+  const cellWidth = plot.width / columns.length
+  const cellHeight = plot.height / seriesCount
+  const [lo, hi] = valueExtent
+  return Object.freeze(
+    columns.map((column, columnNumber) => {
+      const value = values.get(column) ?? null
+      const intensity =
+        value === null
+          ? null
+          : heatmapIntensity(value, lo, hi)
+      return Object.freeze({
+        id: `${series.id}:${column}`,
+        x: plot.x + columnNumber * cellWidth,
+        y: plot.y + row * cellHeight,
+        width: Math.max(0, cellWidth),
+        height: Math.max(0, cellHeight),
+        value,
+        intensity,
+        column: columnNumber,
+        row,
+      })
+    }),
+  )
 }
 
 /** Resolve one series into target-aware progress semantics and finite SVG geometry. */

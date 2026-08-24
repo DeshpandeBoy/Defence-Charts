@@ -47,7 +47,7 @@
  * stylesheet renders a correct, unstyled, invisible chart — which is why it is said here.
  *
  * ⚠ **Current scope.** Mark kinds `'line'`, `'horizon'`, `'none'`, D1.1's `'bar'`, D3.2's
- * target-aware `'progress'`, D4.1's `'point'`, and D2.1's donut `'arc'` render. D3.1's KPI is
+ * target-aware `'progress'`, D4.1's `'point'`, D5.1's heatmap `'cell'`, and D2.1's donut `'arc'` render. D3.1's KPI is
  * composed from these existing marks and the value/table primitives. `'cell'` throws, naming the later
  * milestone that adds it — the same
  * contract `planChart()` holds, and for the same reason: a silent fallback to a line would

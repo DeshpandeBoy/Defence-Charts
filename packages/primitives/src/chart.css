@@ -367,6 +367,38 @@
     stroke-width: var(--gx-bar-border-width);
   }
 
+  .gx-heatmap-cell {
+    fill: var(--gx-series-color);
+    stroke: var(--gx-plot-border-color);
+    stroke-width: var(--gx-plot-border-width);
+  }
+
+  .gx-heatmap-cell[data-heatmap-state='missing'] {
+    fill: var(--gx-plot-color);
+    stroke: var(--gx-plot-border-color);
+    fill-opacity: 1;
+  }
+
+  .gx-heatmap-cell[data-heatmap-intensity='0'] {
+    fill-opacity: calc(var(--gx-area-opacity) * 0.5);
+  }
+
+  .gx-heatmap-cell[data-heatmap-intensity='1'] {
+    fill-opacity: var(--gx-area-opacity);
+  }
+
+  .gx-heatmap-cell[data-heatmap-intensity='2'] {
+    fill-opacity: calc(var(--gx-area-opacity) * 1.5);
+  }
+
+  .gx-heatmap-cell[data-heatmap-intensity='3'] {
+    fill-opacity: calc(var(--gx-area-opacity) * 2);
+  }
+
+  .gx-heatmap-cell[data-heatmap-intensity='4'] {
+    fill-opacity: 1;
+  }
+
   .gx-progress__state {
     fill: currentColor;
     font-weight: var(--gx-label-font-weight);
@@ -591,9 +623,13 @@
     .gx-area,
     .gx-band,
     .gx-progress__fill,
-    .gx-progress__track {
+    .gx-progress__track,
+    .gx-heatmap-cell {
       transition:
         d var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
+        x var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
+        y var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
+        height var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
         width var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
         opacity var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay);
     }
