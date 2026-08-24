@@ -1,0 +1,93 @@
+:root {
+  color-scheme: light;
+  font-family: system-ui, sans-serif;
+  background: var(--gx-surface-color);
+  color: var(--gx-surface-text-color);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-inline-size: 1100px;
+}
+
+button {
+  font: inherit;
+}
+
+.interaction-fixture {
+  min-block-size: 2200px;
+  padding: 24px;
+}
+
+.interaction-fixture__header {
+  max-inline-size: 900px;
+}
+
+.interaction-fixture__header h1,
+.interaction-fixture__section h2 {
+  margin-block-start: 0;
+}
+
+.interaction-fixture__section {
+  display: grid;
+  gap: 12px;
+  margin-block: 28px;
+  max-inline-size: 820px;
+}
+
+.interaction-fixture__section > h2 {
+  margin-block-end: 0;
+}
+
+.interaction-fixture__chart-frame,
+.interaction-fixture__static-frame {
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: hidden;
+  border: 1px solid currentColor;
+}
+
+.interaction-fixture__chart-frame .gx-auto-chart,
+.interaction-fixture__static-frame .gx-chart {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.interaction-fixture__static-frame {
+  inline-size: 760px;
+  block-size: 520px;
+}
+
+.interaction-fixture__section > button {
+  justify-self: start;
+  min-block-size: 32px;
+  padding-inline: 10px;
+}
+
+[data-gx-legend-control] {
+  max-inline-size: 760px;
+  min-block-size: 44px;
+}
+
+[data-gx-legend-control] .gx-legend {
+  position: relative;
+  inset: auto;
+  max-block-size: none;
+  overflow: visible;
+  pointer-events: auto;
+}
+
+[data-gx-legend-control] .gx-legend--external[data-legend-position='right'] {
+  flex-direction: row;
+  align-items: center;
+}
+
+[data-gx-interaction-state] {
+  display: block;
+  margin-block-start: 28px;
+  font-variant-numeric: tabular-nums;
+}

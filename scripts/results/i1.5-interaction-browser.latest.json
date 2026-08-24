@@ -1,0 +1,81 @@
+{
+  "status": "pass",
+  "fixture": "apps/playground/src/interaction-fixture/",
+  "origin": "http://127.0.0.1:5185/",
+  "browser": "151.0.7922.34",
+  "playwrightFrom": "playwright",
+  "static": {
+    "interaction": false,
+    "controlLegend": false,
+    "pressedNodes": 0,
+    "staticLegend": true,
+    "svg": true
+  },
+  "panel": {
+    "keyboard": "Enter + ArrowRight + Home/End + Escape",
+    "focusRetention": "target retained after Escape",
+    "hover": "fixed + leave dismissal",
+    "stableEnd": {
+      "seriesId": "echo",
+      "pointIndex": "7"
+    }
+  },
+  "resize": {
+    "before": {
+      "mode": "fixed",
+      "seriesId": "alpha",
+      "pointIndex": "0"
+    },
+    "after": {
+      "mode": "fluid",
+      "seriesId": "alpha",
+      "pointIndex": "0"
+    },
+    "modeAfterResize": "fluid",
+    "identityPreserved": true
+  },
+  "legend": {
+    "entries": [
+      "alpha",
+      "bravo",
+      "charlie",
+      "delta",
+      "echo"
+    ],
+    "toggledSeriesId": "bravo",
+    "hiddenEntryRetained": true,
+    "focusRetained": true
+  },
+  "touch": {
+    "firstTap": "locked",
+    "secondTap": "closed",
+    "opened": {
+      "mode": "fixed",
+      "seriesId": "alpha",
+      "pointIndex": "3"
+    }
+  },
+  "reducedMotion": {
+    "media": true,
+    "forced": false,
+    "tooltipTransition": "0s",
+    "tooltipBorderStyle": "none",
+    "tooltipBoxShadow": "none",
+    "legendColor": "rgb(32, 34, 36)",
+    "legendBackground": "rgba(0, 0, 0, 0)"
+  },
+  "forcedColors": {
+    "media": false,
+    "forced": true,
+    "tooltipTransition": "0s",
+    "tooltipBorderStyle": "solid",
+    "tooltipBoxShadow": "none",
+    "legendColor": "rgb(255, 255, 255)",
+    "legendBackground": "rgba(5, 0, 73, 0.8)"
+  },
+  "runtimeErrors": {
+    "console": [],
+    "page": [],
+    "resizeObserver": []
+  }
+}
