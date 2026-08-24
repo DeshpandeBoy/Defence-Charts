@@ -1,10 +1,21 @@
 {
   "name": "@gx/tokens",
   "version": "0.0.0",
-  "private": true,
   "type": "module",
   "license": "MIT",
   "description": "CSS custom properties and their generated TypeScript types. Depends on nothing.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DeshpandeBoy/Defence-Charts.git",
+    "directory": "packages/tokens"
+  },
+  "homepage": "https://github.com/DeshpandeBoy/Defence-Charts",
+  "bugs": {
+    "url": "https://github.com/DeshpandeBoy/Defence-Charts/issues"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
   "sideEffects": [
     "**/*.css"
   ],
@@ -14,13 +25,16 @@
     "./theme.css": "./src/themes/theme.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsdown && node ../../scripts/emit-package-assets.mjs",
     "typecheck": "tsc --noEmit"
   },
   "publishConfig": {
+    "access": "public",
     "exports": {
       ".": "./dist/index.js",
       "./package.json": "./package.json",

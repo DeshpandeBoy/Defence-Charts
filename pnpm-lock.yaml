@@ -236,9 +236,6 @@ importers:
       '@gx/core':
         specifier: workspace:*
         version: link:../core
-      '@gx/react':
-        specifier: workspace:*
-        version: link:../react
       react:
         specifier: ^19.0.0
         version: 19.2.8
@@ -302,16 +299,13 @@ importers:
 
   packages/testing:
     dependencies:
-      '@gx/core':
-        specifier: workspace:*
-        version: link:../core
+      jsdom:
+        specifier: ^30.0.1
+        version: 30.0.1
     devDependencies:
       '@types/node':
         specifier: ^24.10.1
         version: 24.13.3
-      jsdom:
-        specifier: ^30.0.1
-        version: 30.0.1
       vitest:
         specifier: ^4.1.11
         version: 4.1.11(@types/node@24.13.3)(jsdom@30.0.1)(vite@8.2.2(@types/node@24.13.3)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))

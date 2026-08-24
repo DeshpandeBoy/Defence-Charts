@@ -1,31 +1,44 @@
 {
   "name": "@gx/testing",
   "version": "0.0.0",
-  "private": true,
   "type": "module",
   "license": "MIT",
-  "description": "Dev-facing. Plan snapshot helpers, FakeResizeObserver with an emit() driver, a11y matchers.",
+  "description": "Dev-facing markup assertions and a deterministic ResizeObserver test fake for @gx chart consumers.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DeshpandeBoy/Defence-Charts.git",
+    "directory": "packages/testing"
+  },
+  "homepage": "https://github.com/DeshpandeBoy/Defence-Charts",
+  "bugs": {
+    "url": "https://github.com/DeshpandeBoy/Defence-Charts/issues"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
   "sideEffects": false,
   "exports": {
     ".": "./src/index.ts",
     "./package.json": "./package.json"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsdown",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@gx/core": "workspace:*"
+    "jsdom": "^30.0.1"
   },
   "devDependencies": {
     "@types/node": "^24.10.1",
-    "jsdom": "^30.0.1",
     "vitest": "^4.1.11"
   },
   "publishConfig": {
+    "access": "public",
     "exports": {
       ".": "./dist/index.js",
       "./package.json": "./package.json"

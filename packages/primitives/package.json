@@ -1,10 +1,21 @@
 {
   "name": "@gx/primitives",
   "version": "0.0.0",
-  "private": true,
   "type": "module",
   "license": "MIT",
-  "description": "Hook-free SVG marks and axes. RSC-safe. <Chart plan={...}> lives here.",
+  "description": "Hook-free, RSC-safe SVG chart primitives and static line and area renderer.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DeshpandeBoy/Defence-Charts.git",
+    "directory": "packages/primitives"
+  },
+  "homepage": "https://github.com/DeshpandeBoy/Defence-Charts",
+  "bugs": {
+    "url": "https://github.com/DeshpandeBoy/Defence-Charts/issues"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
   "sideEffects": [
     "*.css"
   ],
@@ -14,7 +25,9 @@
     "./chart.css": "./src/chart.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsdown && node ../../scripts/emit-package-assets.mjs",
@@ -33,6 +46,7 @@
     "react-dom": "^19.2.8"
   },
   "publishConfig": {
+    "access": "public",
     "exports": {
       ".": "./dist/index.js",
       "./package.json": "./package.json",

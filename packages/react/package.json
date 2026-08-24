@@ -1,10 +1,21 @@
 {
   "name": "@gx/react",
   "version": "0.0.0",
-  "private": true,
   "type": "module",
   "license": "MIT",
-  "description": "The client boundary. <AutoChart>, useElementSize, tooltip, crosshair, brush, legend interaction.",
+  "description": "Client-side AutoChart measurement boundary and useElementSize hook for responsive line and area charts.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DeshpandeBoy/Defence-Charts.git",
+    "directory": "packages/react"
+  },
+  "homepage": "https://github.com/DeshpandeBoy/Defence-Charts",
+  "bugs": {
+    "url": "https://github.com/DeshpandeBoy/Defence-Charts/issues"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
   "sideEffects": [
     "*.css"
   ],
@@ -14,7 +25,9 @@
     "./auto-chart.css": "./src/auto-chart.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsdown && node ../../scripts/emit-package-assets.mjs",
@@ -36,6 +49,7 @@
     "react-dom": "^19.2.8"
   },
   "publishConfig": {
+    "access": "public",
     "exports": {
       ".": "./dist/index.js",
       "./package.json": "./package.json",

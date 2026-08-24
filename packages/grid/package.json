@@ -1,10 +1,21 @@
 {
   "name": "@gx/grid",
   "version": "0.0.0",
-  "private": true,
   "type": "module",
   "license": "MIT",
-  "description": "12-column widget grid shell. Reports box size to a widget; never decides what the widget shows.",
+  "description": "Client-side 12-column widget grid, shell, keyboard controls, interaction lifecycle, and stable layout adapters.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DeshpandeBoy/Defence-Charts.git",
+    "directory": "packages/grid"
+  },
+  "homepage": "https://github.com/DeshpandeBoy/Defence-Charts",
+  "bugs": {
+    "url": "https://github.com/DeshpandeBoy/Defence-Charts/issues"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
   "sideEffects": [
     "*.css"
   ],
@@ -16,7 +27,9 @@
     "./keyboard-grid.css": "./src/keyboard-grid.css"
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
   "scripts": {
     "build": "tsdown && node ../../scripts/emit-package-assets.mjs",
@@ -24,7 +37,6 @@
   },
   "dependencies": {
     "@gx/core": "workspace:*",
-    "@gx/react": "workspace:*",
     "react-grid-layout": "2.2.4"
   },
   "peerDependencies": {
@@ -36,6 +48,7 @@
     "@types/react-dom": "^19.2.4"
   },
   "publishConfig": {
+    "access": "public",
     "exports": {
       ".": "./dist/index.js",
       "./package.json": "./package.json",
