@@ -1,0 +1,88 @@
+@layer gx.theme {
+  .gx-widget-states {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    grid-template-areas: 'content';
+    box-sizing: border-box;
+    block-size: 100%;
+    min-inline-size: 0;
+    min-block-size: 0;
+    overflow: hidden;
+    color: var(--gx-surface-text-color);
+  }
+
+  .gx-widget-states__content,
+  .gx-widget-states__status {
+    grid-area: content;
+    min-inline-size: 0;
+    min-block-size: 0;
+  }
+
+  .gx-widget-states__content {
+    overflow: auto;
+  }
+
+  .gx-widget-states__status {
+    z-index: 1;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    gap: var(--gx-widget-gap);
+    box-sizing: border-box;
+    min-block-size: 100%;
+    padding: var(--gx-widget-padding);
+    background: var(--gx-surface-color);
+    text-align: center;
+  }
+
+  .gx-widget-states__message {
+    display: grid;
+    gap: var(--gx-widget-padding-tight);
+    min-inline-size: 0;
+    max-inline-size: 100%;
+  }
+
+  .gx-widget-states__label,
+  .gx-widget-states__description {
+    margin: 0;
+  }
+
+  .gx-widget-states__label {
+    font-size: var(--gx-subtitle-font-size);
+    font-weight: var(--gx-subtitle-font-weight);
+  }
+
+  .gx-widget-states__description {
+    color: var(--gx-axis-color);
+    font-size: var(--gx-label-font-size);
+    font-weight: var(--gx-label-font-weight);
+  }
+
+  .gx-widget-states__action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--gx-widget-padding-tight);
+    min-inline-size: 0;
+  }
+
+  .gx-widget-states[data-gx-widget-state='stale'] .gx-widget-states__status {
+    align-self: start;
+    justify-self: stretch;
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-block-size: auto;
+    padding-block: var(--gx-widget-padding-tight);
+    padding-inline: var(--gx-widget-padding);
+    text-align: start;
+  }
+
+  .gx-widget-states[data-gx-widget-state='stale'] .gx-widget-states__message {
+    align-content: center;
+  }
+
+  .gx-widget-states[data-gx-widget-state='stale'] .gx-widget-states__action {
+    justify-content: end;
+  }
+}

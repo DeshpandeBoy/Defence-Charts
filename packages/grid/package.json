@@ -8,7 +8,9 @@
   "sideEffects": ["*.css"],
   "exports": {
     ".": "./src/index.ts",
-    "./widget-shell.css": "./src/widget-shell.css"
+    "./widget-shell.css": "./src/widget-shell.css",
+    "./widget-states.css": "./src/widget-states.css",
+    "./keyboard-grid.css": "./src/keyboard-grid.css"
   },
   "files": ["dist"],
   "scripts": {
