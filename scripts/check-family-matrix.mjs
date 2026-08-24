@@ -94,6 +94,7 @@ async function openFixture(page) {
   await page.waitForSelector('[data-family-case="kpi-stage"] .gx-value')
   await page.waitForSelector('[data-family-case="progress-stage"] .gx-progress')
   await page.waitForSelector('[data-family-case="heatmap-stage"] .gx-heatmap-cell')
+  await page.waitForSelector('[data-family-case="funnel-stage"] .gx-funnel-stage')
   await page.waitForSelector('[data-family-resize-probe] .gx-auto-chart .gx-chart')
   await settle(page)
 }
@@ -128,6 +129,11 @@ async function runStaticMatrix(page) {
     heatmapCells: card.querySelectorAll('.gx-heatmap-cell').length,
     heatmapMissing: card.querySelectorAll('.gx-heatmap-cell[data-heatmap-state="missing"]').length,
     heatmapIntensity: card.querySelectorAll('.gx-heatmap-cell[data-heatmap-intensity]').length,
+    funnelStages: card.querySelectorAll('.gx-funnel-stage').length,
+    funnelLabels: card.querySelectorAll('.gx-funnel-stage__text').length,
+    funnelValues: card.querySelectorAll('[data-funnel-stage-value]').length,
+    funnelDropoffs: card.querySelectorAll('[data-funnel-stage-dropoff]').length,
+    funnelSummary: card.querySelectorAll('[data-funnel-part="summary"]').length,
     valueUnits: card.querySelectorAll('.gx-value__unit').length,
     valueTargets: card.querySelectorAll('.gx-value__target').length,
     valueStatuses: card.querySelectorAll('.gx-value__status').length,
@@ -138,8 +144,8 @@ async function runStaticMatrix(page) {
     seriesIds: [...card.querySelectorAll('.gx-series[data-series-id]')].map((series) => series.getAttribute('data-series-id')),
   })))
 
-  if (observed.length !== 54) throw new Error('expected 54 line/area/bar/timebar/scatter/donut/kpi/progress/heatmap cards, got ' + observed.length)
-  for (const type of ['line', 'area', 'bar', 'timebar', 'scatter', 'donut', 'kpi', 'progress', 'heatmap']) {
+  if (observed.length !== 60) throw new Error('expected 60 line/area/bar/timebar/scatter/donut/kpi/progress/heatmap/funnel cards, got ' + observed.length)
+  for (const type of ['line', 'area', 'bar', 'timebar', 'scatter', 'donut', 'kpi', 'progress', 'heatmap', 'funnel']) {
     const rows = observed.filter((card) => card.type === type)
     if (JSON.stringify(rows.map((card) => card.rung)) !== JSON.stringify(EXPECTED_RUNGS)) {
       throw new Error(type + ' ladder order changed: ' + JSON.stringify(rows.map((card) => card.rung)))
@@ -149,7 +155,7 @@ async function runStaticMatrix(page) {
     if (!card.svg || !card.title || card.interactionMarkup) {
       throw new Error('static accessibility/interaction contract failed: ' + JSON.stringify(card))
     }
-    const expectedSeriesIds = card.type === 'donut' ? ['donut'] : card.type === 'kpi' ? ['kpi'] : card.type === 'progress' ? ['progress'] : card.type === 'heatmap' ? ['heatmap-maintenance', 'heatmap-inspection'] : EXPECTED_IDS
+    const expectedSeriesIds = card.type === 'donut' ? ['donut'] : card.type === 'kpi' ? ['kpi'] : card.type === 'progress' ? ['progress'] : card.type === 'heatmap' ? ['heatmap-maintenance', 'heatmap-inspection'] : card.type === 'funnel' ? ['funnel'] : EXPECTED_IDS
     if (JSON.stringify(card.seriesIds) !== JSON.stringify(expectedSeriesIds)) {
       throw new Error('static series identity changed for ' + card.caseId + ': ' + JSON.stringify(card.seriesIds))
     }
@@ -216,6 +222,27 @@ async function runStaticMatrix(page) {
       }
       if (card.rung === 'panel' && card.heatmapMissing === 0) {
         throw new Error('heatmap missing-cell semantics missing for ' + card.caseId + ': ' + JSON.stringify(card))
+      }
+    }
+    if (card.type === 'funnel') {
+      const compact = card.rung === 'micro' || card.rung === 'tile'
+      if (card.mark !== (card.rung === 'micro' ? 'none' : 'funnel')) {
+        throw new Error('funnel mark substitution missing for ' + card.caseId + ': ' + JSON.stringify(card))
+      }
+      if (compact && card.funnelStages !== 0) {
+        throw new Error('funnel Micro should replace the plot with a summary: ' + JSON.stringify(card))
+      }
+      if (card.rung === 'tile' && card.funnelSummary !== 1) {
+        throw new Error('funnel Tile summary missing: ' + JSON.stringify(card))
+      }
+      if (!compact && (card.funnelStages === 0 || card.funnelLabels === 0 || card.funnelValues === 0)) {
+        throw new Error('funnel stage/value semantics missing for ' + card.caseId + ': ' + JSON.stringify(card))
+      }
+      if (card.rung === 'canvas' && card.funnelDropoffs === 0) {
+        throw new Error('funnel Canvas drop-off semantics missing for ' + card.caseId + ': ' + JSON.stringify(card))
+      }
+      if (card.rung === 'stage' && card.funnelDropoffs === 0) {
+        throw new Error('funnel Stage conversion semantics missing for ' + card.caseId + ': ' + JSON.stringify(card))
       }
     }
   }
@@ -396,7 +423,7 @@ try {
   const result = await runGate()
   await mkdir(new URL('./results/', import.meta.url), { recursive: true })
   await writeFile(RESULT_PATH, JSON.stringify(result, null, 2) + '\n')
-  console.log('D5.1 family matrix: Chromium passed — nine family rungs, static a11y, states, themes, media, resize identity, and screenshot evidence ' + RESULT_PATH)
+  console.log('D6.1 family matrix: Chromium passed — ten family rungs, static a11y, states, themes, media, resize identity, and screenshot evidence ' + RESULT_PATH)
 } catch (error) {
   console.error('D0.2 family matrix: FAILED — ' + (error instanceof Error ? error.message : String(error)))
   process.exitCode = 1

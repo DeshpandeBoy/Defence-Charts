@@ -7,7 +7,7 @@ import {
   type SizeContext,
 } from '@gx/core'
 
-export const FAMILY_TYPES = ['line', 'area', 'bar', 'timebar', 'scatter', 'donut', 'kpi', 'progress', 'heatmap'] as const
+export const FAMILY_TYPES = ['line', 'area', 'bar', 'timebar', 'scatter', 'donut', 'kpi', 'progress', 'heatmap', 'funnel'] as const
 export type FamilyType = (typeof FAMILY_TYPES)[number]
 
 export const MATRIX_SERIES_IDS = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot'] as const
@@ -96,8 +96,22 @@ export const HEATMAP_MATRIX_DATA: readonly Series[] = Object.freeze([
   },
 ])
 
+export const FUNNEL_MATRIX_DATA: readonly Series[] = Object.freeze([
+  {
+    id: 'funnel',
+    label: 'Readiness pipeline',
+    points: Object.freeze([
+      { x: 0, y: 100 },
+      { x: 1, y: 76 },
+      { x: 2, y: 54 },
+      { x: 3, y: 31 },
+      { x: 4, y: 12 },
+    ]),
+  },
+])
+
 export type ExpectedFamilyMetadata = {
-  readonly primary: 'none' | 'line' | 'bar' | 'point' | 'arc' | 'progress' | 'cell'
+  readonly primary: 'none' | 'line' | 'bar' | 'point' | 'arc' | 'progress' | 'cell' | 'funnel'
   readonly area: boolean | null
   readonly valueLegibility: 'single-value' | 'shape-only' | 'values'
   readonly interaction: 'none' | 'tap' | 'hover'
@@ -316,6 +330,7 @@ export function dataForType(type: FamilyType): readonly Series[] {
   if (type === 'kpi') return KPI_MATRIX_DATA
   if (type === 'progress') return PROGRESS_MATRIX_DATA
   if (type === 'heatmap') return HEATMAP_MATRIX_DATA
+  if (type === 'funnel') return FUNNEL_MATRIX_DATA
   return MATRIX_DATA
 }
 
@@ -332,7 +347,7 @@ export function metadataForPlan(plan: ChartPlan): ExpectedFamilyMetadata & {
     type: plan.type,
     sizeClass: plan.sizeClass,
     primary:
-      primary.kind === 'line' || primary.kind === 'none' || primary.kind === 'bar' || primary.kind === 'point' || primary.kind === 'arc' || primary.kind === 'progress' || primary.kind === 'cell'
+      primary.kind === 'line' || primary.kind === 'none' || primary.kind === 'bar' || primary.kind === 'point' || primary.kind === 'arc' || primary.kind === 'progress' || primary.kind === 'cell' || primary.kind === 'funnel'
         ? primary.kind
         : 'line',
     area: primary.kind === 'line' ? primary.area : null,

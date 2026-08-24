@@ -244,6 +244,7 @@ export function Chart({
             caption={title}
             progress={plan.type === 'progress'}
             heatmap={plan.type === 'heatmap'}
+            funnel={plan.type === 'funnel'}
           />
         </figcaption>
       ) : null}

@@ -399,6 +399,21 @@
     fill-opacity: 1;
   }
 
+  .gx-funnel-stage__mark {
+    fill: var(--gx-series-color);
+    stroke: var(--gx-series-color);
+    stroke-width: var(--gx-bar-border-width);
+  }
+
+  .gx-funnel-stage__text,
+  .gx-funnel__summary {
+    fill: currentColor;
+    font-size: var(--gx-legend-label-font-size);
+    font-weight: var(--gx-label-font-weight);
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+
   .gx-progress__state {
     fill: currentColor;
     font-weight: var(--gx-label-font-weight);
@@ -624,7 +639,8 @@
     .gx-band,
     .gx-progress__fill,
     .gx-progress__track,
-    .gx-heatmap-cell {
+    .gx-heatmap-cell,
+    .gx-funnel-stage__mark {
       transition:
         d var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
         x var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),

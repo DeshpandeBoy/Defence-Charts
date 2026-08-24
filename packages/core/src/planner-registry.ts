@@ -13,6 +13,7 @@ import { DONUT_CHART_TYPES, donutFamilyPlanner } from './families/donut/planner.
 import { KPI_CHART_TYPES, kpiFamilyPlanner } from './families/kpi/planner.ts'
 import { PROGRESS_CHART_TYPES, progressFamilyPlanner } from './families/progress/planner.ts'
 import { HEATMAP_CHART_TYPES, heatmapFamilyPlanner } from './families/heatmap/planner.ts'
+import { FUNNEL_CHART_TYPES, funnelFamilyPlanner } from './families/funnel/planner.ts'
 import { LINE_CHART_TYPES, lineFamilyPlanner } from './families/line/planner.ts'
 import { SCATTER_CHART_TYPES, scatterFamilyPlanner } from './families/scatter/planner.ts'
 import type { LineChartType } from './rungs/line.ts'
@@ -68,6 +69,13 @@ const HEATMAP_PLANNER: BuiltInPlanner = Object.freeze({
     heatmapFamilyPlanner({ type: type as 'heatmap', ctx, shape, policy }),
 })
 
+const FUNNEL_PLANNER: BuiltInPlanner = Object.freeze({
+  family: 'funnel',
+  chartTypes: FUNNEL_CHART_TYPES,
+  plan: ({ type, ctx, shape, policy }) =>
+    funnelFamilyPlanner({ type: type as 'funnel', ctx, shape, policy }),
+})
+
 /** The only built-in planner table. Every nested value is immutable. */
 export const BUILT_IN_PLANNER_REGISTRY: BuiltInPlannerRegistry<ChartType> = Object.freeze([
   LINE_PLANNER,
@@ -77,6 +85,7 @@ export const BUILT_IN_PLANNER_REGISTRY: BuiltInPlannerRegistry<ChartType> = Obje
   KPI_PLANNER,
   PROGRESS_PLANNER,
   HEATMAP_PLANNER,
+  FUNNEL_PLANNER,
 ])
 
 /** Find a built-in planner without constructing or mutating a registry at runtime. */

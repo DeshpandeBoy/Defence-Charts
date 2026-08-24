@@ -38,6 +38,14 @@ of activity cells. `y: null` remains an explicit missing cell. Dense temporal gr
 binning when the project-owned nominal cell floor cannot be maintained; the floor is Tier C, not a
 perception claim. The HTML data table is the non-colour equivalent of the cell intensity encoding.
 
+**Funnel:** the `funnel` chart type uses exactly one series of ordered, finite non-negative stage
+values. Stages are sorted by canonical `x`; `y: null` is omitted from geometry and retained as an
+explicit missing value in the table. The overall conversion is the final finite stage divided by
+the first finite stage; per-stage drop-off is the non-negative relative loss from the previous
+stage. Tile uses a text summary, Strip uses horizontal stage bars, Panel uses vertical stages,
+Canvas adds drop-off, and Stage adds relative conversion/breakdown text. A zero baseline yields
+an explicit unavailable conversion rather than division by zero.
+
 **`x`:** numeric or temporal. A series should not mix the two domains.
 
 **`y: null`:** a gap, not zero. The line breaks because no reading exists. Use `0` only when the

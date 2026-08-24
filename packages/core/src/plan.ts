@@ -184,6 +184,11 @@ export type MarkSpec =
   | { readonly kind: 'progress'; readonly orientation: 'horizontal' | 'radial' }
   | { readonly kind: 'point' }
   | { readonly kind: 'cell'; readonly bandStart: number; readonly bandEnd: number }
+  | {
+      readonly kind: 'funnel'
+      readonly orientation: 'horizontal' | 'vertical'
+      readonly detail: 'summary' | 'stages' | 'dropoff' | 'breakdown'
+    }
 
 export type PointPlan = { 
   readonly mode: 'none' | 'all' | 'extrema' 
@@ -388,6 +393,19 @@ export type HeatmapSemantics = {
   }
 }
 
+/** Funnel information state, promoted from D6.1's family-local contract. */
+export type FunnelSemantics = {
+  readonly summary: 'none' | 'conversion'
+  readonly stageLabels: 'none' | 'all'
+  readonly stageValues: 'none' | 'all'
+  readonly dropoff: 'none' | 'per-stage'
+  readonly conversion: 'none' | 'overall' | 'relative'
+  readonly accessibility: {
+    readonly stageText: 'summary' | 'table' | 'table-and-mark'
+    readonly keyboard: 'widget' | 'stages'
+  }
+}
+
 // --- 4.8 dataTable -------------------------------------------------------------------
 
 /**
@@ -505,6 +523,8 @@ export type ChartPlan = {
   readonly aggregate: AggregatePlan
   /** Present only for the registered heatmap family; null is reserved for explicit custom plans. */
   readonly heatmap?: HeatmapSemantics | null | undefined
+  /** Present only for the registered funnel family; null is reserved for explicit custom plans. */
+  readonly funnel?: FunnelSemantics | null | undefined
   readonly dataTable: DataTablePlan
   readonly motion: MotionPlan
 }

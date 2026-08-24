@@ -61,13 +61,13 @@ describe('D0.1 planner seam', () => {
     },
   )
 
-  it('resolves the registered bar family and keeps other types on the explicit failure path', () => {
+  it('resolves the registered bar family and keeps unsupported types on the explicit failure path', () => {
     const bar = planChart('bar', sizeContextFromPixels(900, 520), describeShape(DATA))
     expect(bar.type).toBe('bar')
     expect(bar.marks.primary.kind).toBe('bar')
-    expect(() => planChart('funnel', sizeContextFromPixels(900, 520), describeShape(DATA))).toThrow(
-      /chart type "funnel" has no rung set yet; it lands at milestone D/,
-    )
+    const funnel = planChart('funnel', sizeContextFromPixels(900, 520), describeShape(DATA))
+    expect(funnel.type).toBe('funnel')
+    expect(funnel.marks.primary.kind).toBe('funnel')
   })
 
   it('resolves the registered scatter family without falling back to a line', () => {

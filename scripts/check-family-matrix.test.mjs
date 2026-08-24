@@ -18,9 +18,9 @@ import {
   planForRow,
 } from '../apps/playground/src/family-matrix/matrix.ts'
 
-describe('shared line, area, bar, timebar, scatter, donut, KPI, progress, and heatmap family matrix', () => {
-  it('covers all nine registered families across all six information budgets', () => {
-    expect(FAMILY_TYPES).toEqual(['line', 'area', 'bar', 'timebar', 'scatter', 'donut', 'kpi', 'progress', 'heatmap'])
+describe('shared line, area, bar, timebar, scatter, donut, KPI, progress, heatmap, and funnel family matrix', () => {
+  it('covers all ten registered families across all six information budgets', () => {
+    expect(FAMILY_TYPES).toEqual(['line', 'area', 'bar', 'timebar', 'scatter', 'donut', 'kpi', 'progress', 'heatmap', 'funnel'])
     expect(FAMILY_MATRIX.map((row) => row.id)).toEqual([
       'micro',
       'tile',
@@ -56,11 +56,13 @@ describe('shared line, area, bar, timebar, scatter, donut, KPI, progress, and he
                       ? 'progress'
                       : type === 'heatmap'
                         ? ['micro', 'tile'].includes(row.id) ? 'none' : 'cell'
+                        : type === 'funnel'
+                          ? row.id === 'micro' ? 'none' : 'funnel'
                     : row.expected.primary,
           area:
             type === 'area' && row.expected.primary === 'line'
               ? true
-              : type === 'bar' || type === 'timebar' || type === 'scatter' || type === 'donut' || type === 'progress' || type === 'heatmap'
+              : type === 'bar' || type === 'timebar' || type === 'scatter' || type === 'donut' || type === 'progress' || type === 'heatmap' || type === 'funnel'
                 ? null
                 : row.expected.area,
           valueLegibility:
@@ -82,6 +84,10 @@ describe('shared line, area, bar, timebar, scatter, donut, KPI, progress, and he
                       : row.id === 'strip'
                         ? 'shape-only'
                         : 'values'
+                : type === 'funnel'
+                  ? row.id === 'micro'
+                    ? 'single-value'
+                    : 'shape-only'
                 : row.expected.valueLegibility,
           regions:
             type === 'donut'
@@ -104,6 +110,10 @@ describe('shared line, area, bar, timebar, scatter, donut, KPI, progress, and he
                     : row.id === 'canvas' || row.id === 'stage'
                       ? ['plot', 'legend', 'table']
                       : ['plot', 'table']
+                : type === 'funnel'
+                  ? row.id === 'micro'
+                    ? ['value', 'table']
+                    : ['plot', 'table']
                 : row.expected.regions,
           legend:
             type === 'donut'
@@ -120,8 +130,10 @@ describe('shared line, area, bar, timebar, scatter, donut, KPI, progress, and he
                 ? 'absent'
               : type === 'heatmap'
                 ? ['canvas', 'stage'].includes(row.id) ? 'external' : 'absent'
+              : type === 'funnel'
+                ? 'absent'
                 : row.expected.legend,
-          legendToggle: type === 'kpi' ? ['canvas', 'stage'].includes(row.id) : type === 'progress' || type === 'heatmap' ? false : row.expected.legendToggle,
+          legendToggle: type === 'kpi' ? ['canvas', 'stage'].includes(row.id) : type === 'progress' || type === 'heatmap' || type === 'funnel' ? false : row.expected.legendToggle,
           interaction:
             type === 'kpi'
               ? ['micro', 'tile', 'strip'].includes(row.id)
@@ -134,6 +146,12 @@ describe('shared line, area, bar, timebar, scatter, donut, KPI, progress, and he
                     ? 'tap'
                     : 'hover'
               : type === 'heatmap'
+                ? ['micro', 'tile'].includes(row.id)
+                  ? 'none'
+                  : row.id === 'strip'
+                    ? 'tap'
+                    : 'hover'
+              : type === 'funnel'
                 ? ['micro', 'tile'].includes(row.id)
                   ? 'none'
                   : row.id === 'strip'
@@ -159,12 +177,18 @@ describe('shared line, area, bar, timebar, scatter, donut, KPI, progress, and he
                   : ['strip', 'panel'].includes(row.id)
                     ? 'fix'
                     : 'fluid'
+              : type === 'funnel'
+                ? ['micro', 'tile'].includes(row.id)
+                  ? 'disabled'
+                  : ['strip', 'panel'].includes(row.id)
+                    ? 'fix'
+                    : 'fluid'
               : row.expected.tooltip,
-          crosshair: type === 'kpi' ? !['micro', 'tile', 'strip'].includes(row.id) : type === 'progress' ? false : type === 'heatmap' ? !['micro', 'tile', 'strip'].includes(row.id) : row.expected.crosshair,
-          motionStages: type === 'progress' ? 1 : type === 'heatmap' ? ['micro', 'tile'].includes(row.id) ? 1 : 2 : type === 'kpi' && ['micro', 'tile', 'strip'].includes(row.id) ? 1 : row.expected.motionStages,
-          persistGridlines: type === 'kpi' ? !['micro', 'tile', 'strip'].includes(row.id) : type === 'progress' ? false : type === 'heatmap' ? !['micro', 'tile'].includes(row.id) : row.expected.persistGridlines,
-          y2: type === 'donut' || type === 'kpi' || type === 'progress' || type === 'heatmap' ? false : row.expected.y2,
-          facet: type === 'donut' || type === 'kpi' || type === 'progress' || type === 'heatmap' ? 'none' : row.expected.facet,
+          crosshair: type === 'kpi' ? !['micro', 'tile', 'strip'].includes(row.id) : type === 'progress' ? false : type === 'funnel' ? !['micro', 'tile', 'strip'].includes(row.id) : type === 'heatmap' ? !['micro', 'tile', 'strip'].includes(row.id) : row.expected.crosshair,
+          motionStages: type === 'progress' ? 1 : type === 'funnel' ? ['micro', 'tile'].includes(row.id) ? 1 : 2 : type === 'heatmap' ? ['micro', 'tile'].includes(row.id) ? 1 : 2 : type === 'kpi' && ['micro', 'tile', 'strip'].includes(row.id) ? 1 : row.expected.motionStages,
+          persistGridlines: type === 'kpi' ? !['micro', 'tile', 'strip'].includes(row.id) : type === 'progress' || type === 'funnel' ? false : type === 'heatmap' ? !['micro', 'tile'].includes(row.id) : row.expected.persistGridlines,
+          y2: type === 'donut' || type === 'kpi' || type === 'progress' || type === 'heatmap' || type === 'funnel' ? false : row.expected.y2,
+          facet: type === 'donut' || type === 'kpi' || type === 'progress' || type === 'heatmap' || type === 'funnel' ? 'none' : row.expected.facet,
         }
         expect(metadataForPlan(plan), type + '/' + row.id).toMatchObject(expected)
         expect(JSON.parse(JSON.stringify(plan)), type + '/' + row.id + ' JSON').toEqual(plan)
@@ -199,7 +223,7 @@ describe('shared line, area, bar, timebar, scatter, donut, KPI, progress, and he
       for (const row of FAMILY_MATRIX) {
         expect(identitySignature(MATRIX_DATA)).toBe(identity)
         expect(planForRow(type, row).type).toBe(type)
-        expect(dataForType(type).length).toBe(['donut', 'kpi', 'progress'].includes(type) ? 1 : type === 'heatmap' ? 2 : MATRIX_DATA.length)
+        expect(dataForType(type).length).toBe(['donut', 'kpi', 'progress', 'funnel'].includes(type) ? 1 : type === 'heatmap' ? 2 : MATRIX_DATA.length)
       }
     }
   })

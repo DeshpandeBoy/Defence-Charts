@@ -39,11 +39,12 @@ and gridlines use CSS-settable rectangles instead of SVG `<line>` coordinates.
 
 ## Current renderer scope
 
-For the implemented line/area, bar/timebar, donut, scatter, KPI, progress, and heatmap families,
+For the implemented line/area, bar/timebar, donut, scatter, KPI, progress, heatmap, and funnel families,
 `<Chart>` renders the registered mark geometry, labels, axes, gridlines, target-aware value
-displays, heatmap cell intensity metadata, and optional HTML data tables. `funnel` remains a future
-family; `planChart()` and the renderer fail explicitly rather than silently drawing a line chart
-for another type.
+displays, heatmap cell intensity metadata, ordered funnel stage conversion/drop-off text, and
+optional HTML data tables. Funnel input is one series of ordered, finite non-negative stage values;
+invalid or ambiguous input fails explicitly rather than silently drawing a line chart for another
+type.
 
 At A6, ticks and gridlines are keyed by domain value so an existing guide can keep its identity
 when its pixel position or tick count changes. This is what makes the CSS transition meaningful;

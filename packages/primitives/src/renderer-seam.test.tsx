@@ -38,6 +38,8 @@ describe('D0.1 renderer seam', () => {
       'progress',
       'heatmap',
       'heatmap',
+      'funnel',
+      'funnel',
     ])
     expect(BUILT_IN_MARK_RENDERERS.flatMap((entry) => entry.markKinds)).toEqual([
       'none',
@@ -53,6 +55,8 @@ describe('D0.1 renderer seam', () => {
       'progress',
       'none',
       'cell',
+      'none',
+      'funnel',
     ])
   })
 
@@ -146,6 +150,25 @@ describe('D0.1 renderer seam', () => {
     )
     expect(html).toContain('class="gx-cell gx-heatmap-cell"')
     expect(html).toContain('data-heatmap-cell-id="activity:1767225600000"')
+    expect(html).not.toContain('gx-line')
+  })
+
+  it('renders registered funnel stages from the shared frame seam', () => {
+    const data = [{
+      id: 'funnel',
+      points: [{ x: 0, y: 100 }, { x: 1, y: 75 }, { x: 2, y: 40 }],
+    }]
+    const ctx = sizeContextFromPixels(900, 520)
+    const plan = planChart('funnel', ctx, describeShape(data))
+    const frame = resolveFrame(plan, data, ctx, resolvePolicy()).series[0]
+    expect(frame).toBeDefined()
+    const html = renderToStaticMarkup(
+      <svg>{renderBuiltInMark({ frame: frame!, plan, policy: resolvePolicy() })}</svg>,
+    )
+    expect(html).toContain('class="gx-funnel gx-funnel--vertical gx-funnel--dropoff"')
+    expect(html).toContain('data-funnel-stage-id="funnel:0"')
+    expect(html).toContain('data-funnel-stage-value="100"')
+    expect(html).toContain('data-funnel-stage-conversion="0.4"')
     expect(html).not.toContain('gx-line')
   })
 })

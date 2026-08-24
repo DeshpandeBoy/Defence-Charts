@@ -173,6 +173,27 @@ export type ProgressFrame = {
   readonly outerRadius: number | null
 }
 
+/** One ordered funnel stage, with the value semantics needed by every larger rung. */
+export type FunnelStageFrame = {
+  readonly id: string
+  readonly label: string
+  readonly index: number
+  readonly value: number
+  readonly share: number
+  readonly conversion: number | null
+  readonly dropoff: number | null
+  readonly x: number
+  readonly y: number
+  readonly width: number
+  readonly height: number
+}
+
+/** Funnel geometry and non-colour stage semantics resolved from the source series. */
+export type FunnelFrame = {
+  readonly stages: readonly FunnelStageFrame[]
+  readonly overallConversion: number | null
+}
+
 /**
  * One horizon band. `sign` is `1` for bands above the baseline and `-1` for the mirrored
  * negative bands; `band` is the 0-based index outward from the baseline, which is what drives
@@ -206,6 +227,8 @@ export type SeriesFrame = {
   readonly arcs: readonly ArcFrame[]
   /** Non-null only for the target-aware progress mark. */
   readonly progress: ProgressFrame | null
+  /** Non-null only for the ordered funnel mark. */
+  readonly funnel: FunnelFrame | null
   /**
    * ⚠ **Every** defined point, always — not only the ones `marks.points.mode` renders.
    * Geometry belongs to the frame and the decision to draw belongs to the plan, so
@@ -448,7 +471,9 @@ function yDomain(
   // A bar's length is read from zero. Include the baseline before the scale is built so a
   // positive-only or negative-only series cannot produce a truncated bar that exaggerates its
   // magnitude. Line/area keep the data-only domain described above.
-  return mark.kind === 'bar' || mark.kind === 'cell' ? [Math.min(0, lo), Math.max(0, hi)] : padDegenerate(lo, hi)
+  return mark.kind === 'bar' || mark.kind === 'cell' || mark.kind === 'funnel'
+    ? [Math.min(0, lo), Math.max(0, hi)]
+    : padDegenerate(lo, hi)
 }
 
 // --- Ticks -------------------------------------------------------------------------------
@@ -838,6 +863,9 @@ export function resolveFrame(
   // and tick offsets subtract them back off. Building them plot-relative instead would make
   // every mark position depend on remembering to add the origin exactly once.
   const mark = plan.marks.primary
+  if (mark.kind === 'funnel' && data.length > 1) {
+    throw new Error('@gx/core: funnel requires exactly one series of ordered stages.')
+  }
   const xd = xDomain(data, mark.kind === 'cell' ? plan.aggregate.temporalBin : 'none')
   const yd = yDomain(data, mark)
 
@@ -1019,6 +1047,7 @@ function seriesFrame(
   let cells: readonly CellFrame[] = []
   let arcs: readonly ArcFrame[] = []
   let progress: ProgressFrame | null = null
+  let funnel: FunnelFrame | null = null
 
   if (mark.kind === 'line') {
     // ⚠ `.defined()` is what makes `y: null` a gap rather than an interpolation. Without it
@@ -1076,6 +1105,8 @@ function seriesFrame(
     arcs = donutArcs(s, aggregate, plot)
   } else if (mark.kind === 'progress') {
     progress = progressFrame(s, mark.orientation, plot)
+  } else if (mark.kind === 'funnel') {
+    funnel = funnelFrame(s, mark.orientation, mark.detail, plot)
   }
 
   return Object.freeze({
@@ -1091,6 +1122,7 @@ function seriesFrame(
     cells,
     arcs,
     progress,
+    funnel,
     points: Object.freeze(points),
     extrema: extremaOf(points),
   })
@@ -1155,6 +1187,83 @@ function heatmapCells(
       })
     }),
   )
+}
+
+const FUNNEL_BAND_RATIO = 0.72
+
+/** Resolve ordered funnel stages into finite, stable geometry and relative semantics. */
+function funnelFrame(
+  series: Series,
+  orientation: 'horizontal' | 'vertical',
+  _detail: 'summary' | 'stages' | 'dropoff' | 'breakdown',
+  plot: Rect,
+): FunnelFrame {
+  const ordered = [...series.points]
+    .map((point, index) => {
+      const x = xValue(point)
+      if (!Number.isFinite(x)) {
+        throw new Error(`@gx/core: funnel stage ${index} requires a finite x value.`)
+      }
+      return { point, x, index }
+    })
+    .sort((a, b) => a.x - b.x)
+
+  const seen = new Set<number>()
+  for (const entry of ordered) {
+    if (seen.has(entry.x)) {
+      throw new Error(`@gx/core: funnel series '${series.id}' has duplicate stage '${entry.x}'.`)
+    }
+    seen.add(entry.x)
+    if (entry.point.y !== null && (!Number.isFinite(entry.point.y) || entry.point.y < 0)) {
+      throw new Error(`@gx/core: funnel stage '${entry.x}' requires a finite non-negative value.`)
+    }
+  }
+
+  const stages = ordered.filter(
+    (entry): entry is typeof entry & { point: DataPoint & { y: number } } =>
+      entry.point.y !== null && Number.isFinite(entry.point.y),
+  )
+  if (stages.length === 0) return Object.freeze({ stages: Object.freeze([]), overallConversion: null })
+
+  const first = stages[0]?.point.y ?? 0
+  const max = stages.reduce((value, entry) => Math.max(value, entry.point.y), 0)
+  const rowHeight = stages.length > 0 ? plot.height / stages.length : 0
+  const barHeight = Math.max(0, Math.min(rowHeight, rowHeight * FUNNEL_BAND_RATIO))
+  const output: FunnelStageFrame[] = []
+
+  stages.forEach((entry, index) => {
+    const value = entry.point.y
+    const share = max > 0 ? Math.max(0, Math.min(1, value / max)) : 0
+    const conversion = first > 0 ? Math.max(0, Math.min(1, value / first)) : null
+    const previous = stages[index - 1]?.point.y
+    const dropoff = previous === undefined || previous <= 0 ? null : Math.max(0, Math.min(1, (previous - value) / previous))
+    const width = orientation === 'vertical' ? plot.width * share : plot.width * share
+    const height = orientation === 'vertical' ? barHeight : barHeight * share
+    const x = orientation === 'vertical' ? plot.x + (plot.width - width) / 2 : plot.x
+    const y = plot.y + index * rowHeight + (rowHeight - height) / 2
+
+    output.push(
+      Object.freeze({
+        id: `${series.id}:${entry.x}`,
+        label: formatXLabel(entry.point.x),
+        index,
+        value,
+        share,
+        conversion,
+        dropoff,
+        x,
+        y,
+        width: Math.max(0, width),
+        height: Math.max(0, height),
+      }),
+    )
+  })
+
+  const last = output[output.length - 1]
+  return Object.freeze({
+    stages: Object.freeze(output),
+    overallConversion: last?.conversion ?? null,
+  })
 }
 
 /** Resolve one series into target-aware progress semantics and finite SVG geometry. */

@@ -39,14 +39,18 @@ export type DataTableProps = {
   readonly progress?: boolean | undefined
   /** Heatmap keeps the static value table as the non-colour equivalent. */
   readonly heatmap?: boolean | undefined
+  /** Funnel exposes ordered stage conversion and drop-off as text, not colour-only shape. */
+  readonly funnel?: boolean | undefined
   readonly className?: string
 }
 
-export function DataTable({ data, plan, caption, progress = false, heatmap = false, className }: DataTableProps) {
+export function DataTable({ data, plan, caption, progress = false, heatmap = false, funnel = false, className }: DataTableProps) {
   if (!plan.present) return null
 
   const table =
-    plan.columns === 'summary' || progress ? (
+    funnel ? (
+      <FunnelTable data={data} caption={caption} />
+    ) : plan.columns === 'summary' || progress ? (
       <SummaryTable data={data} caption={caption} progress={progress} heatmap={heatmap} />
     ) : (
       <FullTable data={data} caption={caption} />
@@ -191,6 +195,48 @@ function SummaryTable({
       </tbody>
     </table>
   )
+}
+
+function FunnelTable({ data, caption }: { readonly data: readonly Series[]; readonly caption: string }) {
+  const series = data[0]
+  const stages = [...(series?.points ?? [])].sort((a, b) => key(a.x) - key(b.x))
+  const first = stages.find((point) => point.y !== null && Number.isFinite(point.y))?.y ?? null
+
+  return (
+    <table className="gx-data-table__table">
+      <caption>{caption}</caption>
+      <thead>
+        <tr>
+          <th scope="col">Stage</th>
+          <th scope="col">Value</th>
+          <th scope="col">Conversion</th>
+          <th scope="col">Drop-off</th>
+        </tr>
+      </thead>
+      <tbody>
+        {stages.map((point, index) => {
+          const previous = stages[index - 1]?.y
+          const conversion = point.y !== null && first !== null && first > 0 ? point.y / first : null
+          const dropoff = point.y !== null && previous !== null && previous !== undefined && previous > 0
+            ? Math.max(0, (previous - point.y) / previous)
+            : null
+          return (
+            <tr key={`${key(point.x)}:${index}`}>
+              <th scope="row">{formatXLabel(point.x)}</th>
+              <td>{point.y === null ? '—' : formatYLabel(point.y)}</td>
+              <td>{conversion === null ? '—' : `${formatPercent(conversion)}`}</td>
+              <td>{dropoff === null ? '—' : `${formatPercent(dropoff)}`}</td>
+            </tr>
+          )
+        })}
+      </tbody>
+    </table>
+  )
+}
+
+function formatPercent(value: number): string {
+  if (!Number.isFinite(value)) return '—'
+  return `${Math.round(Math.max(0, Math.min(1, value)) * 100)}%`
 }
 
 function key(x: number | Date): number {
