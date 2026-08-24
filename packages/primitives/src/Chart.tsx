@@ -48,14 +48,12 @@ import {
 } from '@gx/core'
 import { useId, useMemo } from 'react'
 
-import { AreaPath } from './AreaPath.tsx'
 import { Axis } from './Axis.tsx'
 import { DataTable } from './DataTable.tsx'
 import { Grid } from './Grid.tsx'
-import { HorizonBands } from './HorizonBands.tsx'
 import { Labels } from './Labels.tsx'
-import { LinePath } from './LinePath.tsx'
 import { PointMarks } from './PointMarks.tsx'
+import { renderBuiltInMark } from './renderer-registry.ts'
 import { classes, roundCoord } from './svg.ts'
 import { ValueDisplay } from './ValueDisplay.tsx'
 import { Legend } from './Legend.tsx'
@@ -248,7 +246,7 @@ export function Chart({
 }
 
 /**
- * One series, in paint order: area, then bands, then line, then points, then text.
+ * One series, in paint order: registered family marks, then points, then text.
  *
  * ⚠ **Grouped per series rather than per mark type**, which costs a little paint-order
  * fidelity when series overlap and buys a `[data-series-id]` subtree that a test, a legend
@@ -269,19 +267,9 @@ function SeriesMarks({
   readonly plan: ChartPlan
   readonly policy: PlanPolicy
 }) {
-  const kind = plan.marks.primary.kind
-
-  if (kind === 'bar' || kind === 'arc' || kind === 'cell' || kind === 'point') {
-    throw new Error(
-      `@gx/primitives: mark kind '${kind}' is not implemented. A4 renders 'line', 'horizon' and 'none' only; bar and arc land in D chart breadth.`,
-    )
-  }
-
   return (
     <g className="gx-series" data-series-id={frame.id} data-series-index={frame.index}>
-      {kind === 'line' ? <AreaPath d={frame.area} /> : null}
-      {kind === 'horizon' ? <HorizonBands bands={frame.bands} /> : null}
-      {kind === 'line' ? <LinePath d={frame.line} /> : null}
+      {renderBuiltInMark({ frame, plan, policy })}
       <PointMarks
         points={frame.points}
         extrema={frame.extrema}

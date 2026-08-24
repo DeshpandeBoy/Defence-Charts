@@ -24,17 +24,12 @@
  */
 
 import type { DataShape, SizeContext } from './context.ts'
+import { findBuiltInPlanner } from './planner-registry.ts'
 import { applyOverrides } from './overrides.ts'
 import type { ChartPlan, ChartType } from './plan.ts'
 import type { PlanChartFn, PlanOverrides, PlanPolicy } from './policy.ts'
 import { resolvePolicy } from './policy.ts'
-import { LINE_RUNGS, type LineChartType } from './rungs/line.ts'
-
-/**
- * Chart types with a rung set today. `'line'` and `'area'` share one ladder and differ only
- * by `marks.primary.area` (§2).
- */
-const LINE_TYPES: ReadonlySet<ChartType> = new Set<ChartType>(['line', 'area'])
+import type { LineChartType } from './rungs/line.ts'
 
 /**
  * The milestone that adds each remaining type, quoted back in the error rather than kept in
@@ -75,7 +70,8 @@ export const planChart: PlanChartFn = (
   policy?: Partial<PlanPolicy>,
   overrides?: PlanOverrides,
 ): ChartPlan => {
-  if (!LINE_TYPES.has(type)) {
+  const planner = findBuiltInPlanner(type)
+  if (planner === undefined) {
     const milestone = TYPE_MILESTONE[type]
     throw new Error(
       milestone === undefined
@@ -86,7 +82,11 @@ export const planChart: PlanChartFn = (
   }
 
   const resolved = resolvePolicy(policy)
-  const rung = LINE_RUNGS[ctx.sizeClass]
-  const plan = rung({ type: type as LineChartType, ctx, shape, policy: resolved })
+  const plan = planner.plan({
+    type: type as LineChartType,
+    ctx,
+    shape,
+    policy: resolved,
+  })
   return applyOverrides(plan, overrides)
 }
