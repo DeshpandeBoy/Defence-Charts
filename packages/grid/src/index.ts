@@ -27,6 +27,19 @@ export type { GridLayoutOptions } from './adapter.ts'
 export type { GridLayoutProposal, GridProposalErrorCode } from './constraints.ts'
 export { GridProposalError, applyGridProposal } from './constraints.ts'
 export type {
+  GridInteractionEvent,
+  GridInteractionKind,
+  GridInteractionPhase,
+  GridInteractionState,
+} from './interaction.ts'
+export {
+  GridInteractionError,
+  beginGridInteraction,
+  cancelGridInteraction,
+  commitGridInteraction,
+  previewGridInteraction,
+} from './interaction.ts'
+export type {
   WidgetGridInteraction,
   WidgetGridInteractionHandler,
   WidgetGridMode,

@@ -15,6 +15,12 @@ type MockGridProps = {
   readonly resizeConfig?: { readonly enabled?: boolean }
   readonly children?: ReactNode
   readonly onLayoutChange?: (layout: RglLayout) => void
+  readonly onLayoutStart?: (snapshot: LayoutSnapshot) => void
+  readonly onLayoutPreview?: (snapshot: LayoutSnapshot) => void
+  readonly onLayoutCommit?: (snapshot: LayoutSnapshot) => void
+  readonly onLayoutCancel?: (snapshot: LayoutSnapshot) => void
+  readonly onDragStart?: MockEventCallback
+  readonly onDrag?: MockEventCallback
   readonly onDragStop?: (
     layout: RglLayout,
     oldItem: RglLayoutItem | null,
@@ -24,6 +30,15 @@ type MockGridProps = {
     element: HTMLElement | null,
   ) => void
 }
+
+type MockEventCallback = (
+  layout: RglLayout,
+  oldItem: RglLayoutItem | null,
+  newItem: RglLayoutItem | null,
+  placeholder: RglLayoutItem | null,
+  event: Event,
+  element: HTMLElement | null,
+) => void
 
 const mockGridProps: MockGridProps[] = []
 
@@ -165,5 +180,66 @@ describe('WidgetGrid controlled wrapper', () => {
     expect(emitted).toBeDefined()
     expect(Object.isFrozen(emitted)).toBe(true)
     expect(Object.isFrozen(emitted?.items)).toBe(true)
+  })
+
+  it('separates frequent previews from one committed layout callback', () => {
+    const onLayoutStart = vi.fn<(snapshot: LayoutSnapshot) => void>()
+    const onLayoutPreview = vi.fn<(snapshot: LayoutSnapshot) => void>()
+    const onLayoutCommit = vi.fn<(snapshot: LayoutSnapshot) => void>()
+    const onLayoutChange = vi.fn<(snapshot: LayoutSnapshot) => void>()
+    mount(INITIAL_LAYOUT, { onLayoutStart, onLayoutPreview, onLayoutCommit, onLayoutChange })
+
+    const initial = latest().layout ?? []
+    const preview: RglLayout = [
+      { i: 'sales', x: 0, y: 2, w: 4, h: 2, isResizable: false },
+      { i: 'margin', x: 4, y: 0, w: 4, h: 1 },
+    ]
+    act(() => {
+      latest().onDragStart?.(initial, null, initial[0] ?? null, null, new Event('dragstart'), null)
+      latest().onDrag?.(preview, initial[0] ?? null, preview[0] ?? null, null, new Event('drag'), null)
+      latest().onDrag?.(preview, initial[0] ?? null, preview[0] ?? null, null, new Event('drag'), null)
+      latest().onDragStop?.(preview, initial[0] ?? null, preview[0] ?? null, null, new Event('dragstop'), null)
+      // RGL may deliver the same final layout through its effect after the stop callback.
+      latest().onLayoutChange?.(preview)
+    })
+
+    expect(onLayoutStart).toHaveBeenCalledTimes(1)
+    expect(onLayoutPreview).toHaveBeenCalledTimes(2)
+    expect(onLayoutCommit).toHaveBeenCalledTimes(1)
+    expect(onLayoutChange).toHaveBeenCalledTimes(1)
+    expect(onLayoutCommit).toHaveBeenCalledWith(expect.objectContaining({ items: expect.arrayContaining([
+      expect.objectContaining({ id: 'sales', y: 2 }),
+    ]) }))
+  })
+
+  it('cancels an active interaction back to its initial snapshot', () => {
+    const onLayoutCancel = vi.fn<(snapshot: LayoutSnapshot) => void>()
+    const onLayoutCommit = vi.fn<(snapshot: LayoutSnapshot) => void>()
+    mount(INITIAL_LAYOUT, { onLayoutCancel, onLayoutCommit })
+
+    const initial = latest().layout ?? []
+    const preview: RglLayout = [
+      { i: 'sales', x: 0, y: 3, w: 4, h: 2, isResizable: false },
+      { i: 'margin', x: 4, y: 0, w: 4, h: 1 },
+    ]
+    act(() => {
+      latest().onDragStart?.(initial, null, initial[0] ?? null, null, new Event('dragstart'), null)
+      latest().onDrag?.(preview, initial[0] ?? null, preview[0] ?? null, null, new Event('drag'), null)
+      root.render(
+        <WidgetGrid
+          layout={INITIAL_LAYOUT}
+          width={960}
+          renderItem={renderItem}
+          cancelInteractionToken={1}
+          onLayoutCancel={onLayoutCancel}
+          onLayoutCommit={onLayoutCommit}
+        />,
+      )
+    })
+
+    expect(onLayoutCancel).toHaveBeenCalledWith(expect.objectContaining({
+      items: expect.arrayContaining([expect.objectContaining({ id: 'sales', y: 0 })]),
+    }))
+    expect(onLayoutCommit).not.toHaveBeenCalled()
   })
 })

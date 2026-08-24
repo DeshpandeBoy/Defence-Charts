@@ -1,13 +1,26 @@
 'use client'
 
-import { GRID_COLUMNS, createWidgetId, createWidgetLayout, createLayoutSnapshot } from '@gx/core'
+import {
+  GRID_COLUMNS,
+  createLayoutSnapshot,
+  createWidgetId,
+  createWidgetLayout,
+  serializeLayoutSnapshot,
+} from '@gx/core'
 import type {
   LayoutSnapshot,
   WidgetId,
   WidgetLayout,
   WidgetLayoutInput,
 } from '@gx/core'
-import { useMemo, useCallback, type CSSProperties, type ReactElement } from 'react'
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  type CSSProperties,
+  type ReactElement,
+} from 'react'
 import { GridLayout } from 'react-grid-layout/react'
 import type {
   EventCallback,
@@ -16,6 +29,13 @@ import type {
 } from 'react-grid-layout/react'
 
 import { normalizeGridLayout } from './adapter.ts'
+import {
+  beginGridInteraction,
+  cancelGridInteraction,
+  commitGridInteraction,
+  previewGridInteraction,
+} from './interaction.ts'
+import type { GridInteractionKind, GridInteractionState } from './interaction.ts'
 
 /** The only modes the first grid wrapper exposes. */
 export type WidgetGridMode = 'edit' | 'read-only'
@@ -40,7 +60,12 @@ export type WidgetGridProps = {
   readonly containerPadding?: readonly [number, number] | null
   readonly className?: string
   readonly style?: CSSProperties
+  readonly cancelInteractionToken?: number
   readonly onLayoutChange?: (snapshot: LayoutSnapshot) => void
+  readonly onLayoutStart?: (snapshot: LayoutSnapshot) => void
+  readonly onLayoutPreview?: (snapshot: LayoutSnapshot) => void
+  readonly onLayoutCommit?: (snapshot: LayoutSnapshot) => void
+  readonly onLayoutCancel?: (snapshot: LayoutSnapshot) => void
   readonly onDragStart?: WidgetGridInteractionHandler
   readonly onDrag?: WidgetGridInteractionHandler
   readonly onDragStop?: WidgetGridInteractionHandler
@@ -119,9 +144,10 @@ function emitInteraction(
 /**
  * Controlled, client-only widget placement shell.
  *
- * The host owns `layout` and persists `onLayoutChange` output. RGL is only responsible for the
- * pointer mechanics; every public callback is converted back to the serialisable core contract.
- * `renderItem` receives placement data, not chart data, so the grid cannot choose information.
+ * The host owns `layout`. RGL is only responsible for pointer mechanics; every public callback is
+ * converted back to the serialisable core contract. Preview callbacks can be frequent, while
+ * `onLayoutChange`/`onLayoutCommit` are deduplicated commit notifications. `renderItem` receives
+ * placement data, not chart data, so the grid cannot choose information.
  */
 export function WidgetGrid({
   layout,
@@ -133,7 +159,12 @@ export function WidgetGrid({
   containerPadding = DEFAULT_CONTAINER_PADDING,
   className,
   style,
+  cancelInteractionToken,
   onLayoutChange,
+  onLayoutStart,
+  onLayoutPreview,
+  onLayoutCommit,
+  onLayoutCancel,
   onDragStart,
   onDrag,
   onDragStop,
@@ -163,48 +194,116 @@ export function WidgetGrid({
   )
   const dragConfig = useMemo(() => ({ enabled: mode === 'edit' }), [mode])
   const resizeConfig = useMemo(() => ({ enabled: mode === 'edit' }), [mode])
+  const activeInteractionRef = useRef<GridInteractionState | null>(null)
+  const lastCommitSignatureRef = useRef<string | null>(null)
+  const cancelTokenRef = useRef<number | undefined>(cancelInteractionToken)
+
+  const emitCommittedLayout = useCallback(
+    (snapshot: LayoutSnapshot) => {
+      const signature = serializeLayoutSnapshot(snapshot)
+      if (lastCommitSignatureRef.current === signature) return
+      lastCommitSignatureRef.current = signature
+      onLayoutChange?.(snapshot)
+      onLayoutCommit?.(snapshot)
+    },
+    [onLayoutChange, onLayoutCommit],
+  )
+
+  const beginInteraction = useCallback(
+    (kind: GridInteractionKind, nextLayout: RglLayout, oldItem: RglLayoutItem | null, newItem: RglLayoutItem | null) => {
+      const item = newItem ?? oldItem
+      if (item === null) return
+      const snapshot = toSnapshot(nextLayout)
+      activeInteractionRef.current = beginGridInteraction(kind, item.i, snapshot)
+      onLayoutStart?.(snapshot)
+    },
+    [onLayoutStart],
+  )
+
+  const previewInteraction = useCallback(
+    (kind: GridInteractionKind, nextLayout: RglLayout) => {
+      const active = activeInteractionRef.current
+      if (active === null || active.kind !== kind) return
+      const preview = previewGridInteraction(active, toSnapshot(nextLayout))
+      activeInteractionRef.current = preview
+      onLayoutPreview?.(preview.preview)
+    },
+    [onLayoutPreview],
+  )
+
+  const finishInteraction = useCallback(
+    (kind: GridInteractionKind, nextLayout: RglLayout) => {
+      const active = activeInteractionRef.current
+      const snapshot = toSnapshot(nextLayout)
+      if (active === null || active.kind !== kind) {
+        emitCommittedLayout(snapshot)
+        return
+      }
+      const committed = commitGridInteraction(previewGridInteraction(active, snapshot))
+      activeInteractionRef.current = null
+      emitCommittedLayout(committed.snapshot)
+    },
+    [emitCommittedLayout],
+  )
+
+  useEffect(() => {
+    if (cancelInteractionToken === cancelTokenRef.current) return
+    cancelTokenRef.current = cancelInteractionToken
+    const active = activeInteractionRef.current
+    if (active === null) return
+    const cancelled = cancelGridInteraction(active)
+    activeInteractionRef.current = null
+    onLayoutCancel?.(cancelled.snapshot)
+  }, [cancelInteractionToken, onLayoutCancel])
 
   const handleLayoutChange = useCallback(
     (nextLayout: RglLayout) => {
-      onLayoutChange?.(toSnapshot(nextLayout))
+      if (activeInteractionRef.current !== null) return
+      emitCommittedLayout(toSnapshot(nextLayout))
     },
-    [onLayoutChange],
+    [emitCommittedLayout],
   )
   const handleDragStart: EventCallback = useCallback(
     (nextLayout, oldItem, newItem) => {
+      beginInteraction('drag', nextLayout, oldItem, newItem)
       emitInteraction(onDragStart, nextLayout, newItem ?? oldItem)
     },
-    [onDragStart],
+    [beginInteraction, onDragStart],
   )
   const handleDrag: EventCallback = useCallback(
     (nextLayout, oldItem, newItem) => {
+      previewInteraction('drag', nextLayout)
       emitInteraction(onDrag, nextLayout, newItem ?? oldItem)
     },
-    [onDrag],
+    [onDrag, previewInteraction],
   )
   const handleDragStop: EventCallback = useCallback(
     (nextLayout, oldItem, newItem) => {
       emitInteraction(onDragStop, nextLayout, newItem ?? oldItem)
+      finishInteraction('drag', nextLayout)
     },
-    [onDragStop],
+    [finishInteraction, onDragStop],
   )
   const handleResizeStart: EventCallback = useCallback(
     (nextLayout, oldItem, newItem) => {
+      beginInteraction('resize', nextLayout, oldItem, newItem)
       emitInteraction(onResizeStart, nextLayout, newItem ?? oldItem)
     },
-    [onResizeStart],
+    [beginInteraction, onResizeStart],
   )
   const handleResize: EventCallback = useCallback(
     (nextLayout, oldItem, newItem) => {
+      previewInteraction('resize', nextLayout)
       emitInteraction(onResize, nextLayout, newItem ?? oldItem)
     },
-    [onResize],
+    [onResize, previewInteraction],
   )
   const handleResizeStop: EventCallback = useCallback(
     (nextLayout, oldItem, newItem) => {
       emitInteraction(onResizeStop, nextLayout, newItem ?? oldItem)
+      finishInteraction('resize', nextLayout)
     },
-    [onResizeStop],
+    [finishInteraction, onResizeStop],
   )
 
   return (
