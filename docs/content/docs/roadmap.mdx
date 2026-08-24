@@ -8,6 +8,11 @@ description: What is implemented, what comes next, and which decisions still blo
 **A1-A3:** strict monorepo boundaries, ESM builds, token and determinism gates, `ChartPlan`, canonical
 data, text fitting, six line/area rungs, and pure `planChart`.
 
+**A2.1:** the default fitting model is now backed by a generated, content-pinned Roboto Flex
+metrics table. Available-face calibration produced a `1.57` fallback safety factor, and the
+planner's typography inputs and generated CSS are checked together. Windows' Segoe UI Variable
+fallback remains explicitly unverified; it is not presented as measured.
+
 **A4:** frame geometry, hook-free SVG primitives, `Chart`, accessible table output, semantic test
 helpers, public API and tree-shaking gates.
 
@@ -21,22 +26,20 @@ which is what lets them keep their identity through a tick-count change instead 
 a replaced element cannot animate at all. Motion is opt-in at the platform level: the rules live
 inside `@media (prefers-reduced-motion: no-preference)`, so an environment that expresses no
 preference gets a still chart, and the still chart is the baseline rather than a degraded version of
-the animated one.
+the animated one. A measured 0.50% boundary floor showed that transitions alone could not prevent
+new marks from appearing without a previous value, so `@gx/react` now keeps the last accepted size
+class and applies a 1% fractional deadband. `SizeContext` and `planChart()` remain pure and
+memory-free.
 
 **B1-B3:** the presentation token tree, Rail and Neutral themes, and the typed responsive-threshold
 surface are closed for the current line/area planner. Tick density, value-region height budgets,
 encoding substitution, point-renderer budgets, and standalone nominal-cell conversion are all
 serialisable `PlanPolicy` inputs. `PlanOverrides` remains a separate post-resolution escape hatch
 for forcing a decided `ChartPlan` field. Acceptance coverage protects the distinction and the
-default provenance tiers.
-
-Transitions turned out not to be enough on their own. A rung change adds and removes elements rather
-than only moving them — that is the point of the ladder — and a CSS transition needs a previous value
-to animate from, which an element that has just appeared does not have. So a container nudged back
-and forth across a rung boundary can still show marks blinking, however smoothly the axis slides
-underneath them. Decision 017 records the measured 0.50% candidate; choosing and implementing that
-stateful interaction follow-up remains separate from the completed B3 policy contract, while the
-planner itself stays pure.
+default provenance tiers. The generated source contains 198 presentation tokens, the 30-row
+granularity manifest has zero entries owed to B1 or B2, and gate G20 is part of the verification
+chain. Twelve declared token candidates are reserved for later chart-family renderers; their
+presence does not imply that line/area consumes them today.
 
 ## Next
 

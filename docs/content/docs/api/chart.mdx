@@ -36,3 +36,15 @@ figure.gx-chart
 
 The root SVG never uses `role="img"`; that role would make its descendants presentational. Ticks
 and gridlines use CSS-settable rectangles instead of SVG `<line>` coordinates.
+
+## Current renderer scope
+
+For the implemented line/area ladder, `<Chart>` renders line paths, area fills, horizon bands,
+point markers, labels, axes, gridlines, value displays, and optional HTML data tables. The
+`ChartType` union names future families, but `bar`, `timebar`, `donut`, `scatter`, `funnel`, `kpi`,
+`heatmap`, and `progress` are not implemented yet; `planChart()` and the renderer fail explicitly
+rather than silently drawing a line chart for another type.
+
+At A6, ticks and gridlines are keyed by domain value so an existing guide can keep its identity
+when its pixel position or tick count changes. This is what makes the CSS transition meaningful;
+newly mounted marks still rely on `AutoChart`'s deadband for resize stability.

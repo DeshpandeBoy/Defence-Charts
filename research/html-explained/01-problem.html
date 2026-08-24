@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="The problem statement and product thesis behind GX." />
+    <title>01 / The problem — GX explained</title>
+    <link rel="stylesheet" href="guide.css" />
+    <script src="guide.js" defer></script>
+  </head>
+  <body>
+    <header class="site-header"><div class="header-inner">
+      <a class="wordmark" href="index.html"><span class="rail-mark" aria-hidden="true"></span><span>GX / explainer</span></a>
+      <nav class="top-nav" aria-label="Explainer pages">
+        <a href="index.html">Map</a><a href="01-problem.html" aria-current="page">Problem</a><a href="02-architecture.html">Architecture</a><a href="03-package-tour.html">Packages</a><a href="04-planner.html">Planner</a><a href="05-themes-tokens.html">Themes</a><a href="06-fonts.html">Fonts</a><a href="07-chart-catalog.html">Charts</a><a href="08-consumer-guide.html">Use it</a><a href="09-data-case-study.html">Dataset</a><a href="10-roadmap.html">Roadmap</a>
+      </nav>
+      <button class="theme-toggle" type="button" data-theme-toggle>Light</button>
+    </div></header>
+    <main class="page">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">01 / Start here</p>
+          <h1>The box is small. The decision is not.</h1>
+          <p class="lede">GX is a chart and dashboard-grid library for interfaces where the same widget can be resized from a one-cell glance to a full analytical stage.</p>
+          <div class="hero-note"><strong>Problem statement.</strong> Given a chart, its data shape, and the measured box, decide what information can be shown honestly at that size, then render that decision consistently on server and client.</div>
+        </div>
+        <div class="hero-plate">
+          <div class="plate-title"><strong>Failure we are avoiding</strong><span>fixed chart → shrinking box</span></div>
+          <div class="mini-chart" style="margin-top:1rem">
+            <svg viewBox="0 0 520 190" role="img" aria-label="A chart becoming too dense as its box shrinks">
+              <path class="grid-line" d="M45 35H490M45 90H490M45 145H490" /><path class="series-a" d="M45 140L110 105L175 122L240 70L305 82L370 50L435 74L490 30" /><path class="series-b" d="M45 155L110 130L175 140L240 103L305 116L370 90L435 108L490 78" /><circle class="dot" cx="435" cy="74" r="5" />
+            </svg>
+          </div>
+          <p class="source">The fixed chart problem and the responsive ladder are specified in <a href="../10-responsive-ladder.md">research/10-responsive-ladder.md</a>.</p>
+        </div>
+      </section>
+
+      <section class="section"><div class="section-head"><div><p class="kicker">Why normal responsive charts fail</p><h2>Smaller is not a strategy.</h2></div><p>A dashboard can give the chart less width, less height, fewer pixels, and less attention. The right response is not always to scale every mark and label down.</p></div>
+        <div class="grid-3">
+          <article class="card card-accent red"><h3>Readability collapses</h3><p>Axes, labels, legends, and values compete for the same small plot. A chart can still be technically visible while making a false promise: “you can estimate values here.”</p></article>
+          <article class="card card-accent orange"><h3>Meaning disappears</h3><p>A dense chart may remove labels randomly or truncate the legend. The reader cannot tell whether missing information was intentionally aggregated, accidentally clipped, or never loaded.</p></article>
+          <article class="card card-accent green"><h3>Resize becomes unstable</h3><p>If content changes the measured box, ResizeObserver can feed a new size back into the chart. The chart then changes the size that caused the decision. That loop is an architectural failure.</p></article>
+        </div>
+      </section>
+
+      <section class="section"><div class="section-head"><div><p class="kicker">The product thesis</p><h2>What GX promises.</h2></div><p>Every promise becomes a type, a boundary, a test, or an explicit limitation. The library is small because each layer is narrow.</p></div>
+        <div class="grid-2">
+          <div class="rule"><span class="rule-mark">01</span><p><strong>The grid owns the box.</strong> It positions, drags, and resizes widgets. It does not decide which marks or labels appear.</p></div>
+          <div class="rule"><span class="rule-mark">02</span><p><strong>Core owns the meaning.</strong> A pure resolver turns size + data shape + policy into a complete serialisable <code>ChartPlan</code>.</p></div>
+          <div class="rule orange"><span class="rule-mark">03</span><p><strong>The renderer owns pixels.</strong> Hook-free primitives draw the plan into accessible SVG without re-deciding its semantics.</p></div>
+          <div class="rule orange"><span class="rule-mark">04</span><p><strong>Tokens own presentation.</strong> Themeable CSS custom properties change visual language without changing the plan’s meaning.</p></div>
+        </div>
+      </section>
+
+      <section class="section"><div class="section-head"><div><p class="kicker">The contract</p><h2>A chart is a decision, not a shape.</h2></div><p>The central object is a plan. It is deliberately complete at every rung, so “what happens when the box grows?” is data the tests can inspect.</p></div>
+        <div class="code-wrap"><button class="copy-button" type="button" data-copy="#problem-contract">Copy</button><pre id="problem-contract"><code>type DecisionInput = {
+  type: ChartType
+  size: SizeContext
+  shape: DataShape
+  policy?: Partial&lt;PlanPolicy&gt;
+}
+
+const plan = planChart(input.type, input.size, input.shape, input.policy)
+
+// plan is plain JSON: no DOM nodes, functions, Date, Map, or Set.
+// The renderer can now draw exactly what the resolver decided.</code></pre></div>
+        <div class="grid-3" style="margin-top:1rem">
+          <article class="card"><div class="stat"><strong>6</strong><span>size families</span></div><p>Micro, Tile, Strip, Panel, Canvas, Stage.</p></article>
+          <article class="card"><div class="stat"><strong>2</strong><span>shipped chart types</span></div><p>Line and area share the current implemented ladder.</p></article>
+          <article class="card"><div class="stat"><strong>0</strong><span>DOM reads in core</span></div><p>Text fit uses generated metrics, not browser measurement.</p></article>
+        </div>
+      </section>
+
+      <section class="section"><div class="section-head"><div><p class="kicker">Case-study lens</p><h2>How to explain this project honestly.</h2></div><p>The strongest case study is not “we made charts.” It is the sequence of constraints and decisions that make a responsive chart trustworthy.</p></div>
+        <div class="grid-3">
+          <article class="card card-accent blue"><h3>Evidence</h3><p>Small chart boxes create label collisions, value-estimation problems, and resize containment risk.</p></article>
+          <article class="card card-accent purple"><h3>Insight</h3><p>Responsive behavior needs a semantic ladder: replace, simplify, degrade, and only then add detail.</p></article>
+          <article class="card card-accent teal"><h3>Decision</h3><p>Make the ladder explicit in a serialisable plan and keep the grid, planner, renderer, and theme layers separate.</p></article>
+        </div>
+        <p class="source">Next: <a href="02-architecture.html">02 / Architecture</a> maps who owns each decision.</p>
+      </section>
+      <nav class="page-nav" aria-label="Page navigation"><a href="index.html"><span>Previous</span><strong>Map / how to use this guide</strong></a><a href="02-architecture.html"><span>Next</span><strong>Architecture / the package graph →</strong></a></nav>
+    </main>
+  </body>
+</html>

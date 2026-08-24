@@ -36,3 +36,49 @@ fallback.
 - Concealed content is removed from the render tree.
 
 Use [`describeShape`](/docs/api/series) to derive the third argument from canonical data.
+
+## Current line/area policy surface
+
+The completed B3 surface gives the line/area resolver typed inputs for the decisions that change
+what the plan contains. The main controls are:
+
+| Concern | `PlanPolicy` fields | Current effect |
+| --- | --- | --- |
+| Tick density and fitting | `tickTargetSpacingX`, `ticksMin`, `labelMinSpacing`, `yTickCount` | Chooses tick counts and label degradation budgets |
+| Plot and chrome budgets | `plotHeightOptimal`, `plotHeightMinValues`, `plotHeightSaturation`, `horizonMinHeight`, `valueRegionMaxShare` | Chooses line/horizon/value-legibility states within the ladder |
+| Series and marks | `directLabelMaxSeries`, `legendMaxEntries`, `pointBudget`, `pointAutoHideDensityThreshold`, `substitute` | Controls direct labels, point rendering, and encoding substitution |
+| Standalone sizing | `nominalCellSize` on `AutoChart` / `sizeContextFromPixels()` | Converts a pixel-only box to a virtual grid footprint; default `100px` is Tier C |
+| Text fitting | `typography` | Atomically supplies the fit-sensitive styles and measured glyph advances |
+
+Some policy fields are deliberately reserved for future chart families, such as radial category
+limits, aggregation, and heatmap cell floors. They are serialisable and typed, but line/area does
+not pretend to consume them.
+
+## Renderer controls delivered in B2
+
+The resolved plan also carries the current line/area renderer control surface. For example, these
+post-resolution overrides are typed and serialisable:
+
+```ts
+const plan = planChart('line', ctx, shape, undefined, {
+  axes: {
+    x: {
+      labelFlush: true,
+      labelBound: true,
+      tickBand: 'extent',
+      translate: 0.5,
+    },
+    y: {
+      labelBound: true,
+      strokeCap: 'round',
+      dashPhase: 3,
+    },
+  },
+  labels: { labelHalo: 'dark' },
+})
+```
+
+The control surface includes guide dash phase/cap, axis label flushing and bounds, tick-band
+placement, crisp translation, label halos, point density hiding, point budgets, and bounded axis
+extents. `PlanOverrides` forces a decided field after resolution; use `PlanPolicy` when the input
+should change the resolver's decision itself.

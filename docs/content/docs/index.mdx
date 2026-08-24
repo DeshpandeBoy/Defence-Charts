@@ -7,6 +7,9 @@ GX is a presentational React chart library built around a **responsive informati
 When a widget gets smaller, GX can remove an unreadable axis, replace a line with a horizon
 encoding, move a legend, or state one value directly. It does not merely squeeze the same chart.
 
+The current implementation is complete through A1–A6 and B1–B3 for the `line` and `area` chart
+families. The dashboard grid and additional chart families remain planned work.
+
 <Callout type="warn" title="Private workspace today">
   The implementation through B3 exists for the current line/area planner, but the packages are
   still private and `@gx/*` is a placeholder scope. Examples on this site compile inside this
@@ -46,15 +49,16 @@ needs; `resolveFrame(plan, data, ctx)` is where values become scales and coordin
 | Milestone | Status | Result |
 | --- | --- | --- |
 | A1-A3 | Implemented | Monorepo, token gates, data contract, pure line/area planning |
+| A2.1 | Implemented | Generated Roboto Flex metrics, deterministic text fitting, and synchronized typography tokens |
 | A4 | Implemented | Hook-free `<Chart>`, frame geometry, accessible SVG, semantic test helpers |
 | A5 | Implemented | `<AutoChart>`, `useElementSize`, containment checks, browser resize proof |
-| A6 | Implemented | CSS-only two-stage transitions, object-constant ticks/gridlines, reduced-motion baseline |
-| B1 | Implemented | Generated token tree, provenance census, and Neutral dark/light escape-hatch themes are green |
-| B2 | Implemented | Axis, guide, point, halo, and density-threshold controls are wired and browser-verified |
-| B3 | Implemented | Typed threshold policy/override split, provenance, and acceptance coverage |
+| A6 | Implemented | CSS-only two-stage transitions, object-constant ticks/gridlines, reduced-motion baseline, and a 1% client deadband |
+| B1 | Implemented | Generated 198-token tree, provenance census, and Neutral dark/light escape-hatch themes |
+| B2 | Implemented | Axis, guide, point, halo, and density-threshold controls; all 30 surveyed knobs are dispositioned |
+| B3 | Implemented | Typed threshold/override split, provenance, acceptance coverage, and G20 granularity verification |
 | C | Planned | Twelve-column dashboard grid and widget chrome |
 | D | Planned | Bar, donut, KPI, scatter, heatmap, funnel, progress, sparkline |
-| E | In progress | Documentation scaffold is built; naming, publishing, and release automation remain |
+| E | In progress | Fumadocs scaffold is built and being kept current; naming, publishing, and release automation remain |
 
 Continue with [installation](/docs/getting-started/installation), then build
 [your first chart](/docs/getting-started/first-chart).

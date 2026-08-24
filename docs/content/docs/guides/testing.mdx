@@ -12,10 +12,13 @@ import { FakeResizeObserver } from '@gx/testing'
 
 const observer = new FakeResizeObserver(callback)
 observer.observe(element)
-observer.emit(element, 320, 180)
+observer.emit(320, 180, { target: element })
 ```
 
 The fake is injected; tests do not patch a global observer and do not depend on browser timing.
+The common one-target call can omit `target` and simply use `observer.emit(320, 180)`. Pass
+`{ legacy: true }` when a test specifically needs to cover the `contentRect` fallback; the default
+emits both `contentBoxSize` and `contentRect`, matching the path real browsers use.
 
 ## Markup helpers
 
@@ -31,6 +34,10 @@ environment.
 - Repeated rendering produces character-identical path data.
 - Server rendering returns SVG without a DOM global.
 - The element set contains no token-controlled SVG `<line>` geometry.
+- A live resize wobble inside the 1% deadband keeps the previously accepted size family, then
+  changes once the boundary is cleared.
+- A `PlanPolicy` changes a decision before resolution, while a `PlanOverrides` patch changes only
+  the already-resolved plan.
 
 Avoid snapshots that only prove object key order or generated IDs. Prefer assertions that name the
 meaning a user would lose if the behavior regressed.

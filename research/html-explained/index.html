@@ -1559,6 +1559,7 @@
           <span>GX / Project map</span>
         </a>
         <nav class="site-nav" aria-label="Explainer sections">
+          <a href="01-problem.html">Study path</a>
           <a href="#idea">Core idea</a>
           <a href="#packages">Packages</a>
           <a href="#code-journey">Code path</a>
@@ -2826,7 +2827,7 @@ import { AutoChart } from '@gx/react'
         themeToggle.querySelector('i').className = `fa-solid fa-${isLight ? 'sun' : 'moon'}`
       })
 
-      const navLinks = [...document.querySelectorAll('.site-nav a')]
+      const navLinks = [...document.querySelectorAll('.site-nav a[href^="#"]')]
       const observedSections = navLinks
         .map((link) => document.querySelector(link.getAttribute('href')))
         .filter(Boolean)

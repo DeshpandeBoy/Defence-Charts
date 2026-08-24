@@ -37,3 +37,8 @@ IDs for future transitions.
 
 Both routes use the same planner and frame resolver. The client component owns measurement, not a
 second set of chart decisions.
+
+`planChart()` does not remember the last size family. For a live chart, `AutoChart` passes the
+measured pixels through the pure deadband classifier and owns the last accepted class at the client
+boundary. This keeps resize stability without making a server-renderable `SizeContext` or plan
+depend on call history.

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="description" content="How a consumer installs, renders, themes, and extends GX." /><title>08 / Consumer guide — GX explained</title><link rel="stylesheet" href="guide.css" /><script src="guide.js" defer></script></head>
+<body><header class="site-header"><div class="header-inner"><a class="wordmark" href="index.html"><span class="rail-mark" aria-hidden="true"></span><span>GX / explainer</span></a><nav class="top-nav" aria-label="Explainer pages"><a href="index.html">Map</a><a href="01-problem.html">Problem</a><a href="02-architecture.html">Architecture</a><a href="03-package-tour.html">Packages</a><a href="04-planner.html">Planner</a><a href="05-themes-tokens.html">Themes</a><a href="06-fonts.html">Fonts</a><a href="07-chart-catalog.html">Charts</a><a href="08-consumer-guide.html" aria-current="page">Use it</a><a href="09-data-case-study.html">Dataset</a><a href="10-roadmap.html">Roadmap</a></nav><button class="theme-toggle" type="button" data-theme-toggle>Light</button></div></header>
+<main class="page"><section class="hero"><div><p class="eyebrow">08 / Consumer guide</p><h1>Make it yours without breaking the contract.</h1><p class="lede">A consumer can use only the layers they need, apply a theme scope, supply a measured font contract, and still get the same responsive planning model.</p><div class="hero-note"><strong>Practical path:</strong> install the package set → import the token CSS → choose static or AutoChart → feed serialisable data → override scoped tokens → verify your own fonts and data shape.</div></div><div class="hero-plate"><div class="plate-title"><strong>Consumer control surface</strong><span>safe to change</span></div><div class="grid-2" style="margin-top:1rem"><div class="card"><div class="stat"><strong>CSS</strong><span>appearance</span></div><p>Colors, type, gaps, strokes, motion.</p></div><div class="card"><div class="stat"><strong>TS</strong><span>semantics</span></div><p>Policy, overrides, data shape, font metrics.</p></div></div></div></section>
+
+<section class="section"><div class="section-head"><div><p class="kicker">Install shape</p><h2>Choose the smallest package path.</h2></div><p>The workspace manifests are private and still <code>0.0.0</code>-versioned, so treat this as the intended consumer contract for the project rather than a published registry command today.</p></div><div class="code-wrap"><button class="copy-button" type="button" data-copy="#install-code">Copy</button><pre id="install-code"><code># static / server-safe chart
+pnpm add @gx/core @gx/primitives @gx/tokens
+
+# responsive React chart
+pnpm add @gx/core @gx/primitives @gx/react @gx/tokens
+
+# dashboard shell as well
+pnpm add @gx/grid</code></pre></div><div class="rule orange" style="margin-top:1rem"><span class="rule-mark">!</span><p><strong>Before publishing externally:</strong> package exports, generated CSS subpaths, tree-shaking, peer dependencies, and provenance still need the release gates described in the implementation plan.</p></div></section>
+
+<section class="section"><div class="section-head"><div><p class="kicker">Static rendering</p><h2>When the box is already known.</h2></div><p>Static rendering is the simplest mental model: your application owns the size, core makes the plan, and primitives render it.</p></div><div class="grid-2"><article class="card card-accent blue"><h3>React component</h3><div class="code-wrap"><button class="copy-button" type="button" data-copy="#static-code">Copy</button><pre id="static-code"><code>import '@gx/tokens/theme.css'
+import { Chart } from '@gx/primitives'
+import { planChart, sizeContextFromPixels } from '@gx/core'
+
+const size = sizeContextFromPixels(480, 280)
+const plan = planChart('line', size, shape)
+
+export function RevenueChart() {
+  return &lt;Chart plan={plan} data={series} /&gt;
+}</code></pre></div></article><article class="card card-accent green"><h3>What you control</h3><ul><li>Data fetching and data shape.</li><li>Known width and height.</li><li>Theme scope and token overrides.</li><li>Policy values, when you have evidence for a different default.</li></ul><p>You do not need to reimplement the rung logic or manually hide SVG elements.</p></article></div></section>
+
+<section class="section"><div class="section-head"><div><p class="kicker">AutoChart rendering</p><h2>When the box changes.</h2></div><p>Use <code>AutoChart</code> when the chart should respond to the actual element rather than a size known by the parent.</p></div><div class="grid-2"><article class="card card-accent orange"><h3>Client-aware component</h3><div class="code-wrap"><button class="copy-button" type="button" data-copy="#auto-code">Copy</button><pre id="auto-code"><code>import { AutoChart } from '@gx/react'
+import '@gx/react/auto-chart.css'
+
+&lt;AutoChart
+  type="line"
+  data={series}
+  initialSize={{ width: 320, height: 180 }}
+  dataShape={shape}
+/&gt;</code></pre></div></article><article class="card card-accent purple"><h3>What happens on resize</h3><ol><li>ResizeObserver reports the element.</li><li>Pixels become <code>SizeContext</code>.</li><li>Core resolves a new complete plan.</li><li>The same primitives rerender.</li><li>CSS transition handles allowed motion; reduced motion removes the enhancement.</li></ol></article></div></section>
+
+<section class="section"><div class="section-head"><div><p class="kicker">Theme your consumer</p><h2>Scope overrides around your application.</h2></div><p>Use a class or data attribute so the override is local. Keep the component’s CSS tokenized and keep plan-affecting changes in TypeScript policy.</p></div><div class="code-wrap"><button class="copy-button" type="button" data-copy="#consumer-theme">Copy</button><pre id="consumer-theme"><code>&lt;div class="defence-theme"&gt;
+  &lt;AutoChart type="line" data={series} /&gt;
+&lt;/div&gt;
+
+.defence-theme {
+  --gx-surface-color: #10181b;
+  --gx-surface-text-color: #e7f5f8;
+  --gx-series-1: #9ce7ff;
+  --gx-series-2: #ffc48f;
+  --gx-widget-radius: 4px;
+}
+
+/* For a built-in family: */
+&lt;div data-gx-theme="neutral-light"&gt;…&lt;/div&gt;</code></pre></div></section>
+
+<section class="section"><div class="section-head"><div><p class="kicker">Data contract</p><h2>Bring data in a plain shape.</h2></div><p>The library does not fetch, own, or mutate your dataset. It receives canonical serialisable series and a small shape description so planning can stay independent of application code.</p></div><div class="grid-3"><article class="card"><h3>Series</h3><p>Each series has an id/name and ordered data points. Values remain the source of truth; the frame computes coordinates.</p></article><article class="card"><h3>Shape</h3><p>Count series and points, note negative values, category density, and other facts the planner needs before it sees coordinates.</p></article><article class="card"><h3>Overrides</h3><p>Use deep partial plan overrides for an explicit consumer decision, but treat them as an escape hatch and test the resulting plan.</p></article></div><p class="source">Source: <a href="../../packages/core/src/data.ts">packages/core/src/data.ts</a> · <a href="../../packages/core/src/policy.ts">packages/core/src/policy.ts</a>.</p></section>
+
+<section class="section"><div class="section-head"><div><p class="kicker">Consumer checklist</p><h2>Before you call it integrated.</h2></div><p>A consumer integration is not complete when the import compiles. It is complete when its visual and data assumptions match the planner.</p></div><div class="grid-2"><div class="label-list"><div class="label-item"><b>1</b><span><strong>Load the token CSS.</strong> Confirm the chart has a theme scope and no unresolved <code>var(--gx-…)</code>.</span></div><div class="label-item"><b>2</b><span><strong>Choose server or client intentionally.</strong> Static charts should not inherit a resize loop accidentally.</span></div><div class="label-item"><b>3</b><span><strong>Verify real data.</strong> Empty arrays, negative values, long labels, many series, and missing periods must be part of your fixtures.</span></div><div class="label-item"><b>4</b><span><strong>Verify the actual font.</strong> If it differs from Roboto Flex, provide matching metrics instead of only overriding CSS.</span></div></div><div class="card card-accent red"><h3>Do not silently fork the resolver</h3><p>If the product needs a different threshold or a different rung, prefer a typed policy or a new chart-family decision record. A local CSS hack can change appearance, but it cannot change whether an axis is semantically justified.</p></div></div></section>
+<nav class="page-nav" aria-label="Page navigation"><a href="07-chart-catalog.html"><span>Previous</span><strong>Charts / catalog and planned families</strong></a><a href="09-data-case-study.html"><span>Next</span><strong>Dataset / turn the product into a case study →</strong></a></nav></main></body></html>
