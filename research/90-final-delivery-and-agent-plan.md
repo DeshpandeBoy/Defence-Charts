@@ -193,7 +193,7 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | C0.1 | Codex integration | **done** | P0.1, P0.2, P0.4 | Grid/widget/identity contract |
 | C0.2 | Codex integration | **handoff** | C0.1 | Pin and prove RGL adapter boundary |
 | C1.1 | Codex grid | **handoff** | C0.2 | Controlled grid wrapper |
-| C1.2 | Codex grid | **in progress** | C1.1 | Constraints, collision and compaction |
+| C1.2 | Codex grid | **handoff** | C1.1 | Constraints, collision and compaction |
 | C1.3 | Codex grid | backlog | C1.2 | Preview/commit callback contract |
 | C2.1 | Codex shell | backlog | C1.1 | Widget regions and drag handle |
 | C2.2 | Codex shell | backlog | C2.1 | Measured chart-content seam and containment |
