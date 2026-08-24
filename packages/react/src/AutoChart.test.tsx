@@ -170,6 +170,15 @@ describe('a measurement produces a chart at that measurement’s rung', () => {
     expect(wrapper().querySelector('svg')?.getAttribute('viewBox')).toBe('0 0 240 88')
   })
 
+  it('mounts the client interaction layer inside the chart figure without adding a wrapper child', () => {
+    mount(chart())
+    resize(700, 520)
+
+    expect(wrapper().children).toHaveLength(1)
+    expect(wrapper().firstElementChild?.tagName.toLowerCase()).toBe('figure')
+    expect(wrapper().querySelector('.gx-interaction')).not.toBeNull()
+  })
+
   it('keeps the chart as the wrapper’s only child', () => {
     // ⚠ Structural, not tidy. A sibling in normal flow contributes to the content box the
     // observer reports, so the chart would be planned for a height a caption had already

@@ -104,6 +104,10 @@ describe('with a declared size, the server emits a real chart at that rung', () 
     expect(html).toBe(direct)
   })
 
+  it('does not serialize the client interaction layer into the static path', () => {
+    expect(html).not.toContain('gx-interaction')
+  })
+
   it('honours nominalCellSize, so a standalone chart can be told what a cell is', () => {
     const big = renderToStaticMarkup(
       <AutoChart

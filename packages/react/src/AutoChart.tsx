@@ -66,6 +66,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 import type { Size } from './useElementSize.ts'
 import { useElementSize } from './useElementSize.ts'
+import { InteractionOverlay } from './InteractionOverlay.tsx'
 
 export type AutoChartProps = {
   readonly type: ChartType
@@ -206,15 +207,26 @@ export function AutoChart({
         it anyway would flash a Micro rung on load and then jump.
       */}
       {measured ? (
-        <Chart
-          plan={plan}
-          data={data}
-          ctx={ctx}
-          title={title}
-          description={description}
-          policy={policy}
-          id={id}
-        />
+        <>
+          <Chart
+            plan={plan}
+            data={data}
+            ctx={ctx}
+            title={title}
+            description={description}
+            policy={policy}
+            id={id}
+          />
+          <InteractionOverlay
+            containerRef={ref}
+            plan={plan}
+            data={data}
+            ctx={ctx}
+            title={title}
+            policy={policy}
+            id={id}
+          />
+        </>
       ) : null}
     </div>
   )
