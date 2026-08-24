@@ -291,11 +291,10 @@ const ALWAYS_LEGAL = new Set([
 ])
 
 /**
- * ⚠ A deny-list, not the full CSS colour keyword set — the narrower of the two options
- * `43-theming.md` §9 item 7 leaves open until B1. These are the ones that actually get
- * typed. The full set is more correct and risks colliding with future keywords; this
- * list is honest about what it catches, and the open question stays recorded rather than
- * quietly resolved here.
+ * ⚠ A deny-list, not the full CSS colour keyword set — the narrower option recorded in
+ * `43-theming.md` §9 item 7. These are the common authored values this gate catches. The full
+ * set is more correct and risks colliding with future keywords, so the broader keyword census
+ * remains deliberately out of scope rather than being silently treated as complete.
  */
 const NAMED_COLORS = new Set([
   'red', 'blue', 'green', 'white', 'black', 'grey', 'gray', 'yellow', 'orange',

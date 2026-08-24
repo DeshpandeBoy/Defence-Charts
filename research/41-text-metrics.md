@@ -421,7 +421,10 @@ function measureText(
   text: string,
   rank: TypeRank,            // 'A' | 'B' | 'C' | 'D' | 'E' — see 42-typography.md §2.1
   metrics: FontMetrics,
-  letterSpacing?: number,    // px; default 0
+  style?: {                  // partial rank style; omitted fields use the released defaults
+    fontSize?: number,       // px
+    letterSpacing?: number,  // px
+  },
 ): number;
 ```
 
@@ -436,7 +439,11 @@ Pure, deterministic, identical on server and client. Rules:
 3. Select `metrics.byRank[rank]` — total, so there is no fallback path and no "nearest size" guess.
 4. Sum advances; unknown code points take the banded fallback.
 5. Add `letterSpacing × (codePointCount − 1)` when non-zero.
-6. Multiply by the rank's font size, then by `safetyFactor`.
+6. Multiply by the supplied rank style's font size, then by `safetyFactor`.
+
+When `style` is omitted, `measureText()` uses the released `DEFAULT_TYPOGRAPHY.byRank[rank]`.
+The planner passes the matching `PlanPolicy.typography.byRank[rank]` object, including custom
+font size and letter spacing, so its width model and the rendered CSS stay on the same policy.
 
 ⚠ Rules 5 and 6 are stated in the order a reader expects, not the order the arithmetic takes. Applied
 literally as a sequence, rule 6 would scale `letterSpacing` by font size and by `safetyFactor`, and

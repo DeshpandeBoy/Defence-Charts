@@ -23,6 +23,17 @@
   .gx-chart {
     /* A <figure> carries a UA margin. Unitless 0 is not a length literal. */
     margin: 0;
+    /*
+     * The figure is the containing block for the HTML caption. The SVG keeps the exact box
+     * the planner resolved, while the collapsed/expanded data table sits in a positioned,
+     * scrollable layer inside that same measured box. A normal-flow caption would add its
+     * height after an SVG that already fills the wrapper and would be clipped below it.
+     */
+    position: relative;
+    display: block;
+    block-size: 100%;
+    min-block-size: 0;
+    line-height: var(--gx-label-line-height);
     /* Enable container queries for the chart */
     container-type: inline-size;
     container-name: gx-chart;
@@ -61,7 +72,13 @@
   }
 
   .gx-chart__caption {
-    margin-block-start: var(--gx-size-gap);
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: 0;
+    max-block-size: 100%;
+    margin: 0;
+    overflow: auto;
+    background-color: var(--gx-surface-color);
     font-size: var(--gx-legend-label-font-size);
   }
 

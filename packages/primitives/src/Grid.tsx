@@ -36,7 +36,7 @@
  * `scale.ticks()` can repeat a value when the domain span is tiny relative to its magnitude.
  */
 
-import { CHROME_METRICS, type ComputedTick, type Rect } from '@gx/core'
+import { DEFAULT_POLICY, type ComputedTick, type PlanPolicy, type Rect } from '@gx/core'
 import type { CSSProperties } from 'react'
 
 import { classes, roundCoord, translate } from './svg.ts'
@@ -54,6 +54,8 @@ export type GridProps = {
   readonly xStrokeCap?: 'butt' | 'round' | 'square'
   readonly yDashPhase?: number
   readonly yStrokeCap?: 'butt' | 'round' | 'square'
+  /** The same resolved policy used to produce the frame and plot box. */
+  readonly policy?: PlanPolicy
 }
 
 export function Grid({
@@ -66,8 +68,9 @@ export function Grid({
   xStrokeCap = 'butt',
   yDashPhase = 0,
   yStrokeCap = 'butt',
+  policy = DEFAULT_POLICY,
 }: GridProps) {
-  const { axisRuleWidth } = CHROME_METRICS
+  const { axisRuleWidth } = policy
   const width = roundCoord(plot.width)
   const height = roundCoord(plot.height)
   const xStyle = gridStyle(xDashPhase, xStrokeCap)

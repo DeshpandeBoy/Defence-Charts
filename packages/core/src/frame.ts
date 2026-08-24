@@ -53,7 +53,6 @@ import type { SizeContext } from './context.ts'
 import type { DataPoint, Series } from './data.ts'
 import { formatXLabel, formatYLabel } from './format.ts'
 import {
-  CHROME_METRICS,
   legendBands,
   resolvePlotBox,
   valueBand,
@@ -63,7 +62,7 @@ import {
 import type { ChartPlan, NarrativePlan, TickPlan } from './plan.ts'
 import type { PlanPolicy } from './policy.ts'
 import { resolvePolicy } from './policy.ts'
-import { measureText, RANK_FONT_SIZE } from './text.ts'
+import { measureText } from './text.ts'
 import type { TypeRank } from './text-types.ts'
 
 import { extent } from 'd3-array'
@@ -476,28 +475,23 @@ const VALUE_RANK: TypeRank = 'A'
 
 /**
  * ⚠ **The legibility floor, taken from core rather than from a token.** 10 px agrees
- * numerically with `--gx-label-font-size-min`, and it is read from `RANK_FONT_SIZE.E`
- * anyway, for the reason `CHROME_METRICS` states about tick length: this number is folded
- * into a layout decision — how many values are shown — so a theme that moved the token
- * would change what a reader sees while the frame went on reporting the old count. Numbers
- * the resolver subtracts against are core's; numbers only the painter reads are the theme's.
+ * numerically with `--gx-label-font-size-min`. It is read from the policy's E rank rather
+ * than a module constant, because this number is folded into a layout decision — how many
+ * values are shown — so a custom typography policy must change both the resolver and frame.
  */
-const VALUE_MIN_FONT_SIZE = RANK_FONT_SIZE.E
-
-/** Breathing room between adjacent value columns; the same gap that separates regions. */
-const VALUE_COLUMN_GUTTER = CHROME_METRICS.regionGap
-
 /**
  * Width of `text` per 1 px of font size.
  *
- * Exact, not an approximation: every rank's `letterSpacing` is `0`, so `measureText()`
- * reduces to `sum × fontSize × safetyFactor` and dividing by the rank's own font size
- * recovers `sum × safetyFactor` — a pure ratio. If a rank ever gains letter-spacing this
- * stops being exact in the *narrow* direction, so it would have to be reworked rather than
- * left; `./text.ts` §6 is the standing note on which direction is safe.
+ * Letter spacing is deliberately excluded here. The value display can fit to a dynamic
+ * font size, so glyph advances are solved as a ratio and CSS letter spacing is added as a
+ * fixed px cost at the final candidate size. This keeps custom `PlanPolicy.typography`
+ * values synchronized with both the planner and the painter.
  */
 function emAdvance(text: string, policy: PlanPolicy): number {
-  return measureText(text, VALUE_RANK, policy.typography.metrics) / RANK_FONT_SIZE[VALUE_RANK]
+  return measureText(text, VALUE_RANK, policy.typography.metrics, {
+    fontSize: 1,
+    letterSpacing: 0,
+  })
 }
 
 /**
@@ -554,7 +548,7 @@ function overflowText(hidden: number): string {
  * what `narrative.valueDisplay` asks for, but at Micro three columns of a 60 px box are 20 px
  * wide and a fitted value lands near 5 px — present, painted, and unreadable, which is the
  * exact species of failure this whole change exists to remove. So the fit is tried at every
- * count from all-of-them down to one, and the first that reaches `VALUE_MIN_FONT_SIZE` wins.
+ * count from all-of-them down to one, and the first that reaches the policy's E-rank floor wins.
  *
  * The values that lose are **not** dropped silently: they are replaced by a `+N` marker that
  * takes a column of its own, so the reader is told the count they cannot see, and every one
@@ -565,7 +559,7 @@ function overflowText(hidden: number): string {
  * is the house precedent this follows.
  *
  * ⚠ **The floor cannot force the count below one, and it is not allowed to fight the band.**
- * The effective floor is `min(VALUE_MIN_FONT_SIZE, verticalFit)`: when the band itself is
+ * The effective floor is `min(policy.typography.byRank.E.fontSize, verticalFit)`: when the band itself is
  * shorter than 10 px of type, no entry count helps, because the vertical fit does not depend
  * on the count. Reducing to one entry and rendering it as large as the resolver's own band
  * permits is then the honest outcome — the alternative is the empty band.
@@ -610,7 +604,15 @@ function fitValueDisplay(
   const v = policy.typography.metrics.vertical
   const emHeight = v.ascent + v.descent + v.lineGap
   const verticalFit = emHeight > 0 ? region.height / emHeight : 0
-  const floor = Math.min(VALUE_MIN_FONT_SIZE, verticalFit)
+  const floor = Math.min(policy.typography.byRank.E.fontSize, verticalFit)
+  const valueStyle = policy.typography.byRank[VALUE_RANK]
+  const widthAtOnePx = (text: string): number => emAdvance(text, policy)
+  const maxFontSizeFor = (text: string, budget: number): number => {
+    const spacing = valueStyle.letterSpacing * Math.max(0, Array.from(text).length - 1)
+    const glyphBudget = budget - spacing
+    const advance = widthAtOnePx(text)
+    return glyphBudget <= 0 || advance <= 0 ? 0 : glyphBudget / advance
+  }
 
   let shown = drafts.length
   let fontSize = 0
@@ -618,14 +620,15 @@ function fitValueDisplay(
     const hidden = drafts.length - count
     // The overflow marker is a column, not an annotation squeezed into one.
     const columns = hidden > 0 ? count + 1 : count
-    const budget = region.width / columns - VALUE_COLUMN_GUTTER
-    let widest = hidden > 0 ? emAdvance(overflowText(hidden), policy) : 0
+    const budget = region.width / columns - policy.regionGap
+    let fitting = verticalFit
+    if (hidden > 0) fitting = Math.min(fitting, maxFontSizeFor(overflowText(hidden), budget))
     for (let i = 0; i < count; i += 1) {
       const draft = drafts[i]
-      if (draft !== undefined) widest = Math.max(widest, emAdvance(painted(draft), policy))
+      if (draft !== undefined) fitting = Math.min(fitting, maxFontSizeFor(painted(draft), budget))
     }
     shown = count
-    fontSize = floorTo2(Math.min(verticalFit, widest > 0 ? budget / widest : verticalFit))
+    fontSize = floorTo2(fitting)
     if (fontSize >= floor) break
   }
 

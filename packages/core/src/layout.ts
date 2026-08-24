@@ -52,7 +52,7 @@
 import type { SizeContext } from './context.ts'
 import type { AxisPlan, DegradeStep, LegendPlan, NarrativePlan, TickPlan } from './plan.ts'
 import { type PlanPolicy, DEFAULT_POLICY } from './policy.ts'
-import { measureText, RANK_FONT_SIZE, type TypeRank } from './text.ts'
+import { measureText, type TypeRank } from './text.ts'
 
 /**
  * What the plot is left with, after chrome.
@@ -141,7 +141,7 @@ const LEGEND_RANK: TypeRank = 'C'
  */
 export function lineHeight(rank: TypeRank, policy: PlanPolicy): number {
   const v = policy.typography.metrics.vertical
-  return (v.ascent + v.descent + v.lineGap) * RANK_FONT_SIZE[rank]
+  return (v.ascent + v.descent + v.lineGap) * policy.typography.byRank[rank].fontSize
 }
 
 /**
@@ -175,10 +175,11 @@ export function yAxisGutter(axis: AxisPlan | null, policy: PlanPolicy): number {
 
   let gutter = axis.domainLine ? policy.axisRuleWidth : 0
   if (axis.ticks.mode !== 'none') {
+    const style = policy.typography.byRank[TICK_LABEL_RANK]
     gutter +=
       policy.tickLength +
       policy.tickLabelGap +
-      measureText(Y_TICK_LABEL_SAMPLE, TICK_LABEL_RANK, policy.typography.metrics)
+      measureText(Y_TICK_LABEL_SAMPLE, TICK_LABEL_RANK, policy.typography.metrics, style)
   }
   // A vertical axis title is rotated, so it costs its LINE HEIGHT in width, not its
   // text length. Getting this the wrong way round is a ~10× error in the safe-looking
@@ -219,11 +220,13 @@ export function legendBands(
     // Entries stack vertically in a column of fixed width. The width is a swatch plus a
     // label; the label is measured at the shape's own worst case rather than a sample,
     // because unlike a y tick label the resolver DOES know how long a series name is.
-    const swatch = RANK_FONT_SIZE[LEGEND_RANK]
+    const style = policy.typography.byRank[LEGEND_RANK]
+    const swatch = style.fontSize
     const label = measureText(
       'M'.repeat(policy.legendMaxEntries),
       LEGEND_RANK,
       policy.typography.metrics,
+      style,
     )
     return { width: policy.regionGap + swatch + policy.tickLabelGap + label, height: 0 }
   }
@@ -279,10 +282,9 @@ export function valueBand(
 /**
  * Height of the data-table affordance.
  *
- * ⚠ Only the *disclosure* is charged, never the table. §1.3: expansion scrolls within the
- * fixed box, so an expanded table costs the plot nothing it did not already cost.
- * `'widget-tap'` renders no separate control — §5.4's *"whole widget is one tap target"* —
- * so it is free, which is the same fact that lets Micro carry a table at all.
+ * ⚠ Only the one-line button disclosure is charged, never the expanded table. §1.3: expansion
+ * scrolls within the fixed box, so the table costs the plot nothing. `'widget-tap'` is the
+ * compact rung's whole-widget affordance; it deliberately contributes no separate layout band.
  */
 export function tableBand(spec: ChromeSpec, policy: PlanPolicy): number {
   if (!spec.tablePresent || spec.tableDisclosure !== 'button') return 0
@@ -405,8 +407,8 @@ export function degradeXLabels(
 
   // `labelMinSpacing` is in em, not px (Talbot 2010) — hence the multiply by the rank's
   // font size rather than a bare subtraction.
-  const budget =
-    plotWidth / slots - policy.labelMinSpacing * RANK_FONT_SIZE[TICK_LABEL_RANK]
+  const style = policy.typography.byRank[TICK_LABEL_RANK]
+  const budget = plotWidth / slots - policy.labelMinSpacing * style.fontSize
 
   const chars = Number.isFinite(labelMaxChars) ? Math.floor(labelMaxChars) : 0
   if (chars <= 0) return NO_DEGRADE
@@ -415,7 +417,7 @@ export function degradeXLabels(
   if (budget <= 0) return Object.freeze({ step: 'axis-transpose', maxChars: null })
 
   const width = (n: number): number =>
-    measureText('M'.repeat(n), TICK_LABEL_RANK, policy.typography.metrics)
+    measureText('M'.repeat(n), TICK_LABEL_RANK, policy.typography.metrics, style)
 
   if (width(chars) <= budget) return NO_DEGRADE
 

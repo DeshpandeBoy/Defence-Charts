@@ -24,7 +24,7 @@
  */
 
 import { ROBOTO_FLEX_METRICS } from './font-metrics.generated.ts'
-import type { FittingTypography, FontMetrics, TypeRank } from './text-types.ts'
+import type { FittingTypography, FontMetrics, FontRankStyle, TypeRank } from './text-types.ts'
 
 // The typography types live in `./text-types.ts` — a module that imports nothing, so the
 // generated table can `satisfies FontMetrics` without closing a cycle back through this
@@ -125,7 +125,7 @@ function isWide(codePoint: number): boolean {
  *   3. Select `metrics.byRank[rank]` — total, so no fallback path and no nearest-size guess.
  *   4. Sum advances; unknown code points take the banded fallback.
  *   5. Add `letterSpacing × (codePointCount − 1)` when non-zero.
- *   6. Multiply by the rank's font size, then by `safetyFactor`.
+ *   6. Multiply by the supplied rank style's font size, then by `safetyFactor`.
  *
  * ⚠ **Kerning and ligatures are ignored, and that is deliberate.** Both normally REDUCE
  * rendered width, so summing bare advances over-estimates — the safe direction. The
@@ -150,13 +150,14 @@ function isWide(codePoint: number): boolean {
  * @param text The string to measure.
  * @param rank Type rank, which pins font size, weight and feature settings together.
  * @param metrics The plan-input metrics table.
- * @param letterSpacing Additional px per gap. Defaults to `0`.
+ * @param style Optional plan-input font size and letter spacing for this rank. Missing fields
+ *   default to the released typography scale, preserving the standalone convenience API.
  */
 export function measureText(
   text: string,
   rank: TypeRank,
   metrics: FontMetrics,
-  letterSpacing = 0,
+  style: Partial<Pick<FontRankStyle, 'fontSize' | 'letterSpacing'>> = {},
 ): number {
   if (text === '') return 0
 
@@ -184,7 +185,9 @@ export function measureText(
     else sum += fallback.latin
   }
 
-  const fontSize = RANK_FONT_SIZE[rank]
+  const defaultStyle = DEFAULT_TYPOGRAPHY.byRank[rank]
+  const fontSize = style.fontSize ?? defaultStyle.fontSize
+  const letterSpacing = style.letterSpacing ?? defaultStyle.letterSpacing
   const spacing = letterSpacing === 0 ? 0 : letterSpacing * (codePointCount - 1)
 
   return sum * fontSize * metrics.safetyFactor + spacing

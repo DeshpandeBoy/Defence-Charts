@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A plain-English walkthrough of how the GX responsive chart library works." />
+    <title>00 / Start simple — GX explained</title>
+    <link rel="stylesheet" href="guide.css" />
+    <script src="guide.js" defer></script>
+    <style>
+      .simple-hero { min-height: auto; padding-bottom: 3rem; }
+      .simple-hero h1 { max-width: 15ch; }
+      .plain-example { display: grid; gap: 1rem; }
+      .plain-example .card { background: var(--surface-2); }
+      .plain-example .card p:last-child { margin-bottom: 0; }
+      .example-label { display: inline-flex; width: max-content; margin-bottom: .7rem; padding: .28rem .45rem; border: 1px solid var(--line-strong); color: var(--green); font-family: var(--mono); font-size: .7rem; text-transform: uppercase; }
+      .transition-stage { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .55rem; }
+      .transition-card { min-height: 16rem; padding: .85rem; border: 1px solid var(--line); background: var(--surface); }
+      .transition-card:nth-child(1) { border-top: 3px solid var(--purple); }
+      .transition-card:nth-child(2) { border-top: 3px solid var(--teal); }
+      .transition-card:nth-child(3) { border-top: 3px solid var(--green); }
+      .transition-card:nth-child(4) { border-top: 3px solid var(--orange); }
+      .transition-card:nth-child(5) { border-top: 3px solid var(--red); }
+      .transition-card h3 { margin-bottom: .25rem; }
+      .transition-card .size { color: var(--quiet); font-family: var(--mono); font-size: .68rem; }
+      .transition-card p { color: var(--muted); font-size: .78rem; }
+      .transition-card ul { margin: .6rem 0 0; padding-left: 1rem; color: var(--muted); font-size: .76rem; }
+      .fake-chart { position: relative; height: 5rem; margin: .9rem 0; border-bottom: 1px solid var(--line-strong); border-left: 1px solid var(--line-strong); }
+      .fake-chart::before, .fake-chart::after { position: absolute; right: 0; left: 0; height: 1px; content: ""; background: var(--line); }
+      .fake-chart::before { top: 1.4rem; } .fake-chart::after { top: 3rem; }
+      .fake-chart svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+      .fake-chart path { fill: none; stroke: var(--blue); stroke-width: 3; }
+      .fake-chart .area { fill: color-mix(in srgb, var(--blue) 18%, transparent); stroke: none; }
+      .fake-chart .orange-line { stroke: var(--orange); stroke-dasharray: 6 4; }
+      .one-number { display: grid; place-items: center; height: 5rem; margin: .9rem 0; border: 1px solid var(--line); background: var(--surface-2); text-align: center; }
+      .one-number strong { display: block; color: var(--ink); font-size: 1.7rem; }
+      .one-number span { color: var(--green); font-size: .7rem; }
+      .simple-arrow { display: grid; place-items: center; color: var(--quiet); font-family: var(--mono); font-size: .9rem; }
+      .story-step { display: grid; grid-template-columns: 2.5rem 1fr; gap: .8rem; padding: .95rem 0; border-bottom: 1px solid var(--line); }
+      .story-step:last-child { border-bottom: 0; }
+      .story-number { display: grid; place-items: center; width: 1.8rem; height: 1.8rem; border: 1px solid var(--blue); color: var(--blue); font-family: var(--mono); font-size: .72rem; }
+      .story-step strong { display: block; margin-bottom: .2rem; }
+      .story-step p { margin-bottom: 0; color: var(--muted); font-size: .88rem; }
+      .analogy { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .7rem; }
+      .analogy div { padding: .9rem; border: 1px solid var(--line); background: var(--surface); }
+      .analogy strong, .analogy span { display: block; }
+      .analogy strong { margin-bottom: .25rem; color: var(--blue); }
+      .analogy span { color: var(--muted); font-size: .84rem; }
+      @media (max-width: 900px) { .transition-stage { overflow-x: auto; grid-template-columns: repeat(5, 12rem); } }
+      @media (max-width: 640px) { .analogy { grid-template-columns: 1fr; } }
+    </style>
+  </head>
+  <body>
+    <header class="site-header"><div class="header-inner">
+      <a class="wordmark" href="index.html"><span class="rail-mark" aria-hidden="true"></span><span>GX / start simple</span></a>
+      <nav class="top-nav" aria-label="Explainer pages">
+        <a href="00-simple-guide.html" aria-current="page">Start simple</a><a href="index.html">Full map</a><a href="01-problem.html">Problem</a><a href="02-architecture.html">Architecture</a><a href="03-package-tour.html">Packages</a><a href="04-planner.html">Planner</a><a href="05-themes-tokens.html">Themes</a><a href="06-fonts.html">Fonts</a><a href="07-chart-catalog.html">Charts</a><a href="08-consumer-guide.html">Use it</a><a href="09-data-case-study.html">Dataset</a><a href="10-roadmap.html">Roadmap</a>
+      </nav>
+      <button class="theme-toggle" type="button" data-theme-toggle>Light</button>
+    </div></header>
+
+    <main class="page">
+      <section class="hero simple-hero">
+        <div>
+          <p class="eyebrow">00 / No jargon first</p>
+          <h1>Imagine one chart that knows how much room it has.</h1>
+          <p class="lede">That is the whole idea. When the chart has lots of room, it shows more detail. When it has very little room, it shows only the part that is still useful.</p>
+          <div class="hero-note"><strong>Simple version:</strong> the dashboard gives the chart a box, the chart looks at the box, the chart chooses what can fit, and then it draws that version.</div>
+        </div>
+        <div class="hero-plate">
+          <div class="plate-title"><strong>One sentence to remember</strong><span>box → choice → picture</span></div>
+          <div class="plain-example" style="margin-top:1rem">
+            <div class="card"><strong>1. The box changes</strong><p>Someone drags the dashboard card smaller.</p></div>
+            <div class="simple-arrow">↓</div>
+            <div class="card"><strong>2. The choice changes</strong><p>The chart removes detail that no longer fits.</p></div>
+            <div class="simple-arrow">↓</div>
+            <div class="card"><strong>3. The picture changes</strong><p>The reader still sees an honest answer.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><div><p class="kicker">A real-life example</p><h2>Let’s follow “equipment readiness.”</h2></div><p>Suppose an application shows the readiness of three defence programs over time. The data does not change when the card changes size. Only the amount of detail shown changes.</p></div>
+        <div class="grid-2">
+          <article class="card card-accent blue">
+            <span class="example-label">The same data</span>
+            <h3>What the application gives us</h3>
+            <ul><li>Program A: 72%, 76%, 79%, 84%</li><li>Program B: 64%, 68%, 67%, 73%</li><li>Program C: 88%, 86%, 91%, 93%</li><li>Target: 80%</li></ul>
+            <p style="margin-top:1rem"><strong>The reader’s question:</strong> “Are we getting closer to the target?”</p>
+          </article>
+          <article class="card card-accent orange">
+            <span class="example-label">The chart’s responsibility</span>
+            <h3>What GX decides</h3>
+            <ul><li>Is there enough room to show a readable axis?</li><li>Should the reader see all three programs or just the headline?</li><li>Can the labels fit without colliding?</li><li>Is there space for a legend or an explanation?</li></ul>
+            <p style="margin-top:1rem"><strong>Important:</strong> GX does not invent the readiness numbers. It only decides how to show them.</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><div><p class="kicker">Watch the transition</p><h2>What happens as the card gets smaller?</h2></div><p>Think of this as the same story being edited down. The chart does not randomly hide things. It follows a planned order.</p></div>
+        <div class="transition-stage">
+          <article class="transition-card"><div class="size">9×6+ cells</div><h3>Stage</h3><div class="fake-chart"><svg viewBox="0 0 200 80" aria-hidden="true"><path class="area" d="M0 60L30 45L60 50L90 24L120 36L150 12L200 22V80H0Z" /><path d="M0 60L30 45L60 50L90 24L120 36L150 12L200 22" /><path class="orange-line" d="M0 70L30 64L60 66L90 55L120 58L150 48L200 46" /></svg></div><p>Full chart: axes, legend, points, target, and notes.</p><ul><li>“Are we on target?”</li><li>“Which program changed?”</li></ul></article>
+          <div class="simple-arrow">→</div>
+          <article class="transition-card"><div class="size">3×3 – 6×4 cells</div><h3>Panel</h3><div class="fake-chart"><svg viewBox="0 0 200 80" aria-hidden="true"><path d="M0 60L30 45L60 50L90 24L120 36L150 12L200 22" /><path class="orange-line" d="M0 70L30 64L60 66L90 55L120 58L150 48L200 46" /></svg></div><p>Keep the readable chart. Remove extra notes and reduce decorations.</p><ul><li>Axes remain.</li><li>Values can be estimated.</li></ul></article>
+          <div class="simple-arrow">→</div>
+          <article class="transition-card"><div class="size">3×1 – 4×2 cells</div><h3>Strip</h3><div class="fake-chart"><svg viewBox="0 0 200 80" aria-hidden="true"><path d="M0 60L30 45L60 50L90 24L120 36L150 12L200 22" /></svg></div><p>Keep the trend shape, remove the y-axis because it is too short to read honestly.</p><ul><li>Shows direction.</li><li>Does not claim exact values.</li></ul></article>
+          <div class="simple-arrow">→</div>
+          <article class="transition-card"><div class="size">2×1 – 2×2 cells</div><h3>Tile</h3><div class="fake-chart"><svg viewBox="0 0 200 80" aria-hidden="true"><path d="M0 60L30 45L60 50L90 24L120 36L150 12L200 22" /></svg></div><p>Keep a tiny trend with the headline number and its change.</p><ul><li>“84%”</li><li>“↑ 5 points”</li></ul></article>
+          <div class="simple-arrow">→</div>
+          <article class="transition-card"><div class="size">1×1 cell</div><h3>Micro</h3><div class="one-number"><div><strong>84%</strong><span>↑ 5 points this month</span></div></div><p>Remove the plot. The number and short sentence are more useful than a tiny unreadable chart.</p><ul><li>One clear answer.</li><li>No pretending.</li></ul></article>
+        </div>
+        <div class="rule" style="margin-top:1rem"><span class="rule-mark">→</span><p><strong>This is the transition.</strong> The numbers stay the same. The chart moves from “full explanation” to “quick answer” as the available space gets smaller.</p></div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><div><p class="kicker">What happens in the code?</p><h2>Like a small team passing one note along.</h2></div><p>Each part has one simple job. The next part receives the result of the previous part.</p></div>
+        <div class="card">
+          <div class="story-step"><span class="story-number">1</span><div><strong>Your application brings the information.</strong><p>It says: “Here are the readiness numbers for these programs.” GX is not the database and does not fetch the numbers.</p></div></div>
+          <div class="story-step"><span class="story-number">2</span><div><strong>The dashboard gives the chart a box.</strong><p>The grid says: “You have 480 pixels wide and 280 pixels tall.” If the user drags the box, this number changes.</p></div></div>
+          <div class="story-step"><span class="story-number">3</span><div><strong>The measuring layer reports the new size.</strong><p>This is the small browser sensor. It watches the box, not the chart’s content.</p></div></div>
+          <div class="story-step"><span class="story-number">4</span><div><strong>The planner chooses a version.</strong><p>The planner says: “This is a Panel,” or “This is a Strip,” or “This is a Micro card.” It chooses what to keep and what to remove.</p></div></div>
+          <div class="story-step"><span class="story-number">5</span><div><strong>The drawing pieces draw that version.</strong><p>They draw the line, axis, number, label, or table the planner requested. They do not make a second secret decision.</p></div></div>
+          <div class="story-step"><span class="story-number">6</span><div><strong>The theme gives it a visual style.</strong><p>Colors, fonts, line thickness, spacing, and light/dark appearance are applied last.</p></div></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><div><p class="kicker">The packages in ordinary words</p><h2>Who is helping whom?</h2></div><p>These are the same packages described in the technical pages, translated into everyday jobs.</p></div>
+        <div class="analogy">
+          <div><strong>@gx/grid = the shelf</strong><span>It decides where the card sits and how big the card is.</span></div>
+          <div><strong>@gx/react = the small sensor</strong><span>It notices when the card gets bigger or smaller.</span></div>
+          <div><strong>@gx/core = the brain</strong><span>It decides what information can fit and returns a plan.</span></div>
+          <div><strong>@gx/primitives = the pencil</strong><span>It draws the plan as SVG: lines, axes, labels, and values.</span></div>
+          <div><strong>@gx/tokens = the style cupboard</strong><span>It stores the colors, fonts, spacing, strokes, and themes.</span></div>
+          <div><strong>@gx/testing = the checklist</strong><span>It checks that the chart does what we promised at every size.</span></div>
+        </div>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><div><p class="kicker">A simple consumer example</p><h2>What would a user give the package?</h2></div><p>The application gives ordinary data. The library gives back a chart that knows how to fit inside its box.</p></div>
+        <div class="code-wrap"><button class="copy-button" type="button" data-copy="#simple-code">Copy</button><pre id="simple-code"><code>const readiness = [
+  { month: 'Jan', value: 72 },
+  { month: 'Feb', value: 76 },
+  { month: 'Mar', value: 79 },
+  { month: 'Apr', value: 84 },
+]
+
+&lt;AutoChart
+  type="line"
+  data={readiness}
+  title="Equipment readiness"
+/&gt;</code></pre></div>
+        <p class="source">The technical version of this same journey is in <a href="04-planner.html">04 / Planner</a> and <a href="08-consumer-guide.html">08 / Consumer guide</a>.</p>
+      </section>
+
+      <section class="section">
+        <div class="section-head"><div><p class="kicker">Three things to remember</p><h2>If you remember only this.</h2></div><p>Everything else in the guide is detail underneath these three ideas.</p></div>
+        <div class="grid-3"><article class="card card-accent blue"><h3>1. Same data, different amount of detail.</h3><p>The chart changes its presentation when the box changes. It does not change the underlying truth.</p></article><article class="card card-accent orange"><h3>2. The planner chooses before drawing.</h3><p>One part decides what should be visible. Another part draws exactly that decision.</p></article><article class="card card-accent green"><h3>3. Small does not mean broken.</h3><p>A one-number card can be the correct version of a chart when a full plot would be too cramped to understand.</p></article></div>
+      </section>
+
+      <nav class="page-nav" aria-label="Page navigation"><a href="index.html"><span>Next</span><strong>Full map / see the project overview →</strong></a><a href="01-problem.html"><span>Technical follow-up</span><strong>Problem / why this needs a system →</strong></a></nav>
+    </main>
+  </body>
+</html>

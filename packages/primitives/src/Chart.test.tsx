@@ -26,6 +26,7 @@ import {
   type ChartPlan,
   describeShape,
   planChart,
+  type PlanPolicy,
   type Series,
   sizeContextFromPixels,
 } from '@gx/core'
@@ -57,11 +58,16 @@ const THREE: readonly Series[] = [
 
 const ONE: readonly Series[] = [series('alpha', [10, 14, 9, 22, 18, 30, 27])]
 
-function render(width: number, height: number, data: readonly Series[] = THREE): string {
+function render(
+  width: number,
+  height: number,
+  data: readonly Series[] = THREE,
+  policy?: Partial<PlanPolicy>,
+): string {
   const ctx = sizeContextFromPixels(width, height)
-  const plan = planChart('line', ctx, describeShape(data))
+  const plan = planChart('line', ctx, describeShape(data), policy)
   return renderToStaticMarkup(
-    <Chart plan={plan} data={data} ctx={ctx} title="Test chart" id="t" />,
+    <Chart plan={plan} data={data} ctx={ctx} title="Test chart" id="t" policy={policy} />,
   )
 }
 
@@ -175,6 +181,20 @@ describe('gate G14: no <line> carries tokened geometry', () => {
       expect(Number(t.attrs['width'])).toBeGreaterThan(0)
       expect(Number(t.attrs['height'])).toBeGreaterThan(0)
     }
+  })
+
+  it('passes the resolved policy geometry through to the primitives', () => {
+    const html = render(1000, 700, THREE, {
+      tickLength: 17,
+      tickLabelGap: 9,
+      axisRuleWidth: 3,
+    })
+    const ticks = parseElements(html).filter(
+      (el) => el.attrs['class'] === 'gx-axis__tick-mark',
+    )
+
+    expect(ticks.some((tick) => tick.attrs.width === '3' && tick.attrs.height === '17')).toBe(true)
+    expect(ticks.some((tick) => tick.attrs.width === '17' && tick.attrs.height === '3')).toBe(true)
   })
 
   /**

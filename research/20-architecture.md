@@ -172,6 +172,11 @@ Consequence for Milestone B3: the responsive-threshold tokens are **TS-side**, n
 properties. A consumer retunes them through `<GxConfig>`, which works identically on server and
 client.
 
+The renderer receives the same resolved `PlanPolicy` that the planner consumed. `layout.ts`,
+`frame.ts`, and the SVG `Axis`/`Grid`/`Labels` primitives therefore share one source for geometry,
+typography, and region gaps; a CSS-only override of a plan-input value is intentionally unsupported
+because it would move painted geometry without moving the space reserved for it.
+
 ### 3.3 Hysteresis — corrected and shipped
 
 An earlier version of this doc specified an 8 px deadband passed into the resolver as `prevClass`.

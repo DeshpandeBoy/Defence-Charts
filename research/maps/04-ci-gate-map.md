@@ -197,21 +197,17 @@ differs sharply and the register's one-line rows cannot carry that difference.
 They are also the three that need a real Chromium, which is why they share one CI job and stay out of
 `pnpm verify`. The reasoning is in `.github/workflows/ci.yml`, not repeated here.
 
-### G11 — green, in CI, and still not clean
+### G11 — green and clean for the current chart surface
 
 `scripts/check-containment.mjs` runs as **`pnpm lint:containment`** and is a step in the `browser` job.
 It is deliberately outside `pnpm verify`: it needs a browser binary, and a fresh clone should not open
 with a ~150 MB download.
 
 The recorded sweep covers **178 sizes across 13 rung changes** and reports **0 `ResizeObserver` loop
-errors** and **0 px unattributed overflow**.
-
-⚠ **"0 px unattributed" is not "0 px", and the difference is a real shortfall, not a rounding
-artefact.** Re-observed on 2026-08-24 at A6, unchanged. The same run reports a peak **21 px block-axis overflow** on `.gx-auto-chart`, *attributed*
-to `.gx-chart__caption` and therefore exempt: **the `<figcaption>` data table does not fit the box it
-is in.** The exemption exists so the gate can be green about the thing it gates — geometry the *plan*
-sizes — while still printing the number nobody has fixed. Read a passing G11 run as *"the plan contains
-itself; the caption does not,"* and do not cite it as evidence of a clean containment story.
+errors**, **0 px unattributed overflow**, and a **0 px peak block-axis overflow**. The chart now
+positions its caption inside the measured figure and scrolls an expanded table locally; G11 also
+asserts that the caption rectangle is visible and contained at every sample. Re-observed on
+2026-08-24 after the A/B closure patch.
 
 ⚠ **Assertion 3 has never actually executed anything.** The scrollbar-gutter check computes
 `offsetWidth - clientWidth - borderX`. macOS draws **overlay** scrollbars, which occupy zero layout

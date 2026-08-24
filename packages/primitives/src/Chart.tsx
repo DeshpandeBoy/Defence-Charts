@@ -42,6 +42,7 @@ import {
   type ChartFrame,
   type PlanPolicy,
   resolveFrame,
+  resolvePolicy,
   type Series,
   type SizeContext,
 } from '@gx/core'
@@ -115,9 +116,10 @@ export function Chart({
 }: ChartProps) {
   const generated = useId()
   const base = id ?? generated
+  const resolvedPolicy = useMemo(() => resolvePolicy(policy), [policy])
   const frame = useMemo(
-    () => resolveFrame(plan, data, ctx, policy),
-    [plan, data, ctx, policy],
+    () => resolveFrame(plan, data, ctx, resolvedPolicy),
+    [plan, data, ctx, resolvedPolicy],
   )
 
   const titleId = `${base}-title`
@@ -174,6 +176,7 @@ export function Chart({
             xStrokeCap={plan.axes.x.strokeCap}
             yDashPhase={plan.axes.y.dashPhase}
             yStrokeCap={plan.axes.y.strokeCap}
+            policy={resolvedPolicy}
           />
         ) : null}
 
@@ -183,7 +186,7 @@ export function Chart({
             groups are deliberately siblings so that neither inherits the other's frame of
             reference by accident. */}
         {frame.series.map((s) => (
-          <SeriesMarks key={s.id} frame={s} plan={plan} />
+          <SeriesMarks key={s.id} frame={s} plan={plan} policy={resolvedPolicy} />
         ))}
 
         {plan.axes.x.visible ? (
@@ -198,6 +201,7 @@ export function Chart({
             tickBand={plan.axes.x.tickBand}
             translateOffset={plan.axes.x.translate}
             clipId={`${base}-axis-x-bound`}
+            policy={resolvedPolicy}
           />
         ) : null}
         {plan.axes.y.visible ? (
@@ -212,6 +216,7 @@ export function Chart({
             tickBand={plan.axes.y.tickBand}
             translateOffset={plan.axes.y.translate}
             clipId={`${base}-axis-y-bound`}
+            policy={resolvedPolicy}
           />
         ) : null}
 
@@ -252,7 +257,15 @@ export function Chart({
  * the same contract `planChart()` holds. A silent fallback to a line would render bar data as
  * a line chart, which is the project's recurring failure species with a chart attached.
  */
-function SeriesMarks({ frame, plan }: { frame: ChartFrame['series'][number]; plan: ChartPlan }) {
+function SeriesMarks({
+  frame,
+  plan,
+  policy,
+}: {
+  readonly frame: ChartFrame['series'][number]
+  readonly plan: ChartPlan
+  readonly policy: PlanPolicy
+}) {
   const kind = plan.marks.primary.kind
 
   if (kind === 'bar' || kind === 'arc' || kind === 'cell' || kind === 'point') {
@@ -279,6 +292,7 @@ function SeriesMarks({ frame, plan }: { frame: ChartFrame['series'][number]; pla
         valueLabels={plan.labels.valueLabels}
         labelHalo={plan.labels.labelHalo}
         maxChars={plan.labels.maxChars}
+        policy={policy}
       />
     </g>
   )

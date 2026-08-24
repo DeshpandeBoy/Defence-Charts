@@ -12,11 +12,10 @@
  *
  * It looks like the exception to rule 2 — *everything visual comes from a class* — and it is
  * not, because tick length is not visual. `xAxisBand()` in `@gx/core`'s `layout.ts` folds
- * `TICK_LENGTH` into the vertical band it subtracts from the plot. A theme that set a tick
+ * `PlanPolicy.tickLength` into the vertical band it subtracts from the plot. A theme that set a tick
  * length in CSS would move the glyphs and leave the band where it was, and the chart would be
  * subtly, unfixably wrong in a way no stylesheet-parsing gate can see. So the numbers come
- * from `CHROME_METRICS`, which is the same constant the resolver subtracted, and `layout.ts`
- * carries the standing note that they must not be tokenised until `PlanPolicy` routes them.
+ * from the resolved `PlanPolicy`, which is the same policy the resolver subtracted against.
  *
  * Everything genuinely visual — colour, stroke, font, `text-anchor`, `dominant-baseline` — is
  * a class, as the rule requires.
@@ -28,7 +27,7 @@
  * having to re-derive an offset or re-read the plan. Absent, the default ticks render.
  */
 
-import { CHROME_METRICS, type ComputedTick, type Rect } from '@gx/core'
+import { DEFAULT_POLICY, type ComputedTick, type PlanPolicy, type Rect } from '@gx/core'
 import type { ReactNode } from 'react'
 
 import { classes, roundCoord, translate } from './svg.ts'
@@ -50,6 +49,8 @@ export type AxisProps = {
   readonly labelBound?: boolean | number
   readonly tickBand?: 'center' | 'extent'
   readonly translateOffset?: number
+  /** The same resolved policy used to produce the frame and plot box. */
+  readonly policy?: PlanPolicy
   /** Stable id supplied by `<Chart>` so multiple charts cannot share a clip path. */
   readonly clipId?: string
 }
@@ -68,9 +69,10 @@ export function Axis({
   tickBand = 'center',
   translateOffset = 0,
   clipId,
+  policy = DEFAULT_POLICY,
 }: AxisProps) {
   const horizontal = orientation === 'x'
-  const { tickLength, tickLabelGap, axisRuleWidth } = CHROME_METRICS
+  const { tickLength, tickLabelGap, axisRuleWidth } = policy
   const flushLabels = labelFlush === true || (typeof labelFlush === 'number' && labelFlush > 0)
   const boundLabels = labelBound === true || (typeof labelBound === 'number' && labelBound > 0)
   const axisClipId = clipId ?? `gx-axis-${orientation}-bound`

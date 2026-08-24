@@ -140,22 +140,13 @@
  * first. Both are shipped because neither platform covers the other, and saying so here is
  * cheaper than someone concluding from a green Mac run that the hazard is gone.
  *
- * ⚠ **THE ONE EXEMPTION, and why it is not an allowlist.** `<Chart>` puts the accessible
- * data table in a `<figcaption>` **outside** the `<svg>` — `packages/core/src/plan.ts:363`
- * and `packages/core/src/frame.ts:197` both state this as the design, and `frame.ts` is
- * explicit that the caption is *"laid out by the document"* and has no rectangle in the
- * plan's coordinate space. So the plan sizes the `<svg>` and the document sizes the
- * caption, and on this page the caption's ~21 px of margin box sits below a `<svg>` that
- * already fills the content box. Under `.gx-auto-chart`'s `overflow: hidden` it is clipped
- * and inert — and that clipping is exactly what hid it from a gate reading `.widget`, so the
- * exemption and the two-box split are the same finding seen from two sides. Rather than allowlist a number, the gate **measures the caption every step** and
- * requires every pixel of block-axis overflow to be attributable to it: one pixel more and
- * the gate fires, and if the caption ever stops rendering the budget is 0 automatically.
- * The inline axis has no exemption at all. The peak attributed overflow is printed on the
- * success line so the shortfall is stated on every run instead of being silently tolerated
- * — `research/decisions/015-token-gate-is-a-parser.md`'s point, that a gate which cries
- * wolf gets switched off, has a mirror image: a gate that swallows a known defect teaches
- * the reader the defect is not there.
+ * ⚠ **The caption is HTML, but it is still part of containment.** `<Chart>` puts the accessible
+ * data table in a `<figcaption>` **outside** the `<svg>` — `packages/core/src/plan.ts:363` and
+ * `packages/core/src/frame.ts:197` state this as the design. The primitive positions the
+ * caption inside the figure's measured box and scrolls its expanded table locally. This gate
+ * measures the caption rectangle every step and fails if it leaves the observed wrapper or
+ * collapses to zero height. The outer overflow check remains strict: current CSS should
+ * produce zero spill, not a named exemption for a known defect.
  *
  * ⚠ **A sweep that does not sweep must fail loudly.** The gate asserts that all six size
  * classes were observed and that at least one rung change happened. Without it the whole
@@ -540,6 +531,15 @@ function readWidget() {
   const figure = el.querySelector('.gx-chart')
   const svg = el.querySelector('.gx-chart__svg')
   const caption = el.querySelector('.gx-chart__caption')
+  const observedRect = el.getBoundingClientRect()
+  const captionRect = caption?.getBoundingClientRect() ?? null
+  const captionInside =
+    captionRect === null ||
+    (captionRect.left >= observedRect.left - 1 &&
+      captionRect.right <= observedRect.right + 1 &&
+      captionRect.top >= observedRect.top - 1 &&
+      captionRect.bottom <= observedRect.bottom + 1)
+  const captionVisible = captionRect === null || captionRect.height > 0
 
   let captionBudget = 0
   if (caption !== null) {
@@ -568,6 +568,8 @@ function readWidget() {
     overflowX: el.scrollWidth - el.clientWidth,
     overflowY: el.scrollHeight - el.clientHeight,
     captionBudget,
+    captionInside,
+    captionVisible,
     // ⚠ The plan's own claim about the box, checked against the box. `<svg>` width/height
     // come straight from `frame.box`, so this is the shortest path from a plan field to a
     // pixel and the one place a resolver bug shows up before any browser reacts to it.
@@ -652,7 +654,8 @@ export function hopsFor(from, to) {
  * @typedef {{ step: number, w: number, h: number, sizeClass: string | null,
  *   observedFound: boolean, scrollbarX: number, scrollbarY: number,
  *   overflowX: number, overflowY: number,
- *   captionBudget: number, svgWidth: number, svgHeight: number,
+ *   captionBudget: number, captionInside: boolean, captionVisible: boolean,
+ *   svgWidth: number, svgHeight: number,
  *   clientWidth: number, clientHeight: number }} Sample
  * @typedef {{ step: number, kind: string, detail: string }} Failure
  */
@@ -696,6 +699,15 @@ export function judge(s) {
       detail:
         `the plan sized its <svg> ${s.svgWidth}×${s.svgHeight} inside ${box}'s ` +
         `${s.clientWidth}×${s.clientHeight} content box — frame.box is no longer the box`,
+      })
+  }
+  if (!s.captionInside || !s.captionVisible) {
+    out.push({
+      step: s.step,
+      kind: 'caption-outside-box',
+      detail:
+        `the HTML data-table caption is ${s.captionInside ? 'inside but not visible' : 'outside'} ` +
+        `${box}'s ${s.w}×${s.h} content box — the accessible fallback is not contained`,
     })
   }
   return out
@@ -903,8 +915,7 @@ if (invokedDirectly) {
     // containment number above is read from `.gx-auto-chart` when it exists and from
     // `.widget` when it does not — and the fallback is a *strictly weaker* measurement,
     // taken outside a clipping boundary, that reports zero overflow for overflow that is
-    // really there. Falling back silently is exactly how this gate spent a run reporting
-    // `peak 0 px` for a caption 21 px too tall. If the playground ever stops rendering
+    // really there. If the playground ever stops rendering
     // `<AutoChart>` — a revert to hand-wiring, a renamed class — the gate says so instead
     // of quietly grading a different box.
     if (samples.length > 0 && !samples.some((s) => s.observedFound)) {
@@ -955,7 +966,7 @@ if (invokedDirectly) {
   console.log(
     `containment gate (G11): ${samples.length} sizes swept, ${changes} rung changes, ` +
       `0 loop errors, 0 px unattributed overflow ` +
-      `(peak ${peakOverflow} px block-axis on ${judgedBox}, attributed to ` +
-      `.gx-chart__caption; playwright from ${from}).`,
+      `(peak ${peakOverflow} px block-axis on ${judgedBox}; caption contained; ` +
+      `playwright from ${from}).`,
   )
 }

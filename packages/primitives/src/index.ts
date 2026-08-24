@@ -26,13 +26,11 @@
  *
  * ## The one exception, and why it is not one
  *
- * `<Axis>` takes tick length, tick-label gap and rule width from `@gx/core`'s
- * `CHROME_METRICS` and writes them as attributes. That looks like a rule-2 violation and is
- * not: `xAxisBand()` folds `TICK_LENGTH` into the vertical band it **subtracts from the
- * plot**, so a theme that set a tick length in CSS would move the glyphs and leave the band
- * where it was. The chart would be wrong in a way no stylesheet-parsing gate can see. The
- * standing note lives on `CHROME_METRICS` itself; the numbers become tokens only when
- * `PlanPolicy` routes the same values.
+ * `<Axis>` takes tick length, tick-label gap and rule width from the same resolved
+ * `PlanPolicy` that `xAxisBand()` used to subtract from the plot. They are written as
+ * attributes rather than presentation tokens: a CSS override would move the glyphs and
+ * leave the layout band where it was. `<Chart>` passes that policy to Axis, Grid and Labels
+ * so a custom policy cannot make the resolver and renderer disagree.
  *
  * Stroke width, point radius and the two mark opacities *are* tokens, because the resolver
  * never subtracted them — `packages/tokens/src/themes/theme.css` carries the dividing line.

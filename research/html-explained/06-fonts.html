@@ -7,7 +7,7 @@
 
 <section class="section"><div class="section-head"><div><p class="kicker">What the metrics table contains</p><h2>Not a font engine. A safe width model.</h2></div><p><code>measureText()</code> is intentionally simple and conservative. It is designed to make the resolver deterministic, not to reimplement browser shaping.</p></div><div class="grid-2"><article class="card card-accent blue"><h3>Known glyph advances</h3><p>The generated sparse table covers the common printable set, Latin-1 characters used in labels, currency symbols, punctuation, and the arrows used by compact summaries.</p><p>Width is calculated as normalized advance × rank font size × safety factor, plus letter spacing.</p></article><article class="card card-accent orange"><h3>Banded fallback</h3><p>Unknown code points use separate fallback bands for Latin, wide CJK/full-width characters, and combining marks. One fallback number would be wrong by roughly 2× for one of those groups.</p></article><article class="card card-accent green"><h3>Per-rank tables</h3><p>Optical sizing and weight change advances. The table is keyed by A–E rather than by one normalized size so a 10px label is not guessed from a 13px label.</p></article><article class="card card-accent purple"><h3>Safe-direction error</h3><p>The reference table can be wider than a fallback face, which leaves slack. A wider actual face is dangerous because it can collide; the safety factor is chosen to bias toward early degradation.</p></article></div></section>
 
-<section class="section"><div class="section-head"><div><p class="kicker">The calculation</p><h2>How a label gets measured.</h2></div><p>Follow this code path when investigating an overlap bug. The important detail is what the function refuses to do.</p></div><div class="code-wrap"><button class="copy-button" type="button" data-copy="#font-code">Copy</button><pre id="font-code"><code>function measureText(text, rank, metrics, letterSpacing = 0) {
+<section class="section"><div class="section-head"><div><p class="kicker">The calculation</p><h2>How a label gets measured.</h2></div><p>Follow this code path when investigating an overlap bug. The important detail is what the function refuses to do.</p></div><div class="code-wrap"><button class="copy-button" type="button" data-copy="#font-code">Copy</button><pre id="font-code"><code>function measureText(text, rank, metrics, style = {}) {
   let sum = 0
   let codePointCount = 0
 
@@ -17,8 +17,10 @@
       ?? fallbackBand(character) // latin / cjk / combining
   }
 
+  const fontSize = style.fontSize ?? DEFAULT_TYPOGRAPHY.byRank[rank].fontSize
+  const letterSpacing = style.letterSpacing ?? DEFAULT_TYPOGRAPHY.byRank[rank].letterSpacing
   const spacing = letterSpacing * Math.max(0, codePointCount - 1)
-  return sum * RANK_FONT_SIZE[rank] * metrics.safetyFactor + spacing
+  return sum * fontSize * metrics.safetyFactor + spacing
 }
 
 // No getBBox(), getComputedTextLength(), getTotalLength(),
@@ -26,7 +28,7 @@
 
 <section class="section"><div class="section-head"><div><p class="kicker">Capabilities and boundaries</p><h2>What fonts can do here.</h2></div><p>The system can support more fonts, but each one needs a deliberate metrics contract. This is the capability map to use before asking for a new family.</p></div><div class="table-wrap"><table><thead><tr><th>Capability</th><th>Supported now</th><th>What changes if you add a font</th></tr></thead><tbody><tr><td>Family selection</td><td>Roboto Flex reference + fallback stack.</td><td>Measure the new family; update typography input and CSS together.</td></tr><tr><td>Weight variation</td><td>Ranks cover 400, 500, and 700.</td><td>Weight can change glyph advances; it needs separate per-rank values.</td></tr><tr><td>Optical sizing</td><td><code>font-optical-sizing: auto</code>.</td><td>Advances are not a simple scale from one size; measure under the same opsz behavior.</td></tr><tr><td>Tabular numbers</td><td><code>'tnum' 1</code> is requested; Roboto Flex defaults are already tabular for the reference case.</td><td>Keep settings identical between measurement and CSS, especially for axis digits.</td></tr><tr><td>Latin labels</td><td>Strong coverage in the generated sparse table.</td><td>Unknown glyphs use fallback; verify scripts that are important to your product.</td></tr><tr><td>CJK / wide glyphs</td><td>Conservative banded fallback.</td><td>For high-fidelity CJK fit, add a measured table rather than relying on the band forever.</td></tr><tr><td>Kerning and ligatures</td><td>Not modelled.</td><td>That is intentional: ignoring reductions overestimates width and degrades early.</td></tr></tbody></table></div></section>
 
-<section class="section"><div class="section-head"><div><p class="kicker">Consumer contract</p><h2>Changing the font means changing the policy input.</h2></div><p>A consumer can theme the family, but a wider family should not be a silent CSS-only override. Typography lives in the planner’s policy because it affects layout decisions.</p></div><div class="code-wrap"><button class="copy-button" type="button" data-copy="#font-contract">Copy</button><pre id="font-contract"><code>const typography = {
+<section class="section"><div class="section-head"><div><p class="kicker">Consumer contract</p><h2>Changing the font means changing the policy input.</h2></div><p>A consumer can theme the family, but a wider family should not be a silent CSS-only override. Typography lives in the planner’s policy because it affects layout decisions, including the rank style used by <code>measureText()</code>.</p></div><div class="code-wrap"><button class="copy-button" type="button" data-copy="#font-contract">Copy</button><pre id="font-contract"><code>const typography = {
   ...DEFAULT_TYPOGRAPHY,
   family: "Your measured family, system-ui, sans-serif",
   metrics: YOUR_GENERATED_METRICS,

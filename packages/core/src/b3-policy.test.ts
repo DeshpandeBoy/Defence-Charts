@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
+import { resolveFrame } from './frame.ts'
+import { lineHeight, xAxisBand, yAxisGutter } from './layout.ts'
 import { planChart } from './plan-chart.ts'
 import type { PlanPolicy } from './policy.ts'
 import { DEFAULT_POLICY, resolvePolicy } from './policy.ts'
-import { CANVAS, PANEL, SHAPE, STAGE } from './rungs/fixtures.ts'
+import { CANVAS, MICRO, PANEL, SHAPE, STAGE } from './rungs/fixtures.ts'
 import { tickCountForWidth } from './ticks.ts'
 
 describe('B3 — planner thresholds are typed inputs', () => {
@@ -59,5 +61,42 @@ describe('B3 — planner thresholds are typed inputs', () => {
     expect(plan.marks.renderer).toBe('canvas')
     expect(plan.marks.pointBudget).toBe(10)
     expect(plan.marks.points).toEqual({ mode: 'all', autoHideDensityThreshold: 1 })
+  })
+
+  it('routes custom typography and region gaps through layout geometry', () => {
+    const typography = {
+      ...DEFAULT_POLICY.typography,
+      byRank: {
+        ...DEFAULT_POLICY.typography.byRank,
+        D: { ...DEFAULT_POLICY.typography.byRank.D, fontSize: 20, letterSpacing: 1 },
+      },
+    }
+    const policy = resolvePolicy({ typography, regionGap: 20 })
+    const defaultPlan = planChart('line', PANEL, SHAPE)
+
+    expect(lineHeight('D', policy)).toBeGreaterThan(lineHeight('D', DEFAULT_POLICY))
+    expect(xAxisBand(defaultPlan.axes.x, policy)).toBeGreaterThan(
+      xAxisBand(defaultPlan.axes.x, DEFAULT_POLICY),
+    )
+    expect(yAxisGutter(defaultPlan.axes.y, policy)).toBeGreaterThan(
+      yAxisGutter(defaultPlan.axes.y, DEFAULT_POLICY),
+    )
+  })
+
+  it('uses the policy value rank style when fitting the value frame', () => {
+    const typography = {
+      ...DEFAULT_POLICY.typography,
+      byRank: {
+        ...DEFAULT_POLICY.typography.byRank,
+        A: { ...DEFAULT_POLICY.typography.byRank.A, letterSpacing: 50 },
+      },
+    }
+    const policy = resolvePolicy({ typography })
+    const defaultPlan = planChart('line', MICRO, SHAPE)
+    const customPlan = planChart('line', MICRO, SHAPE, policy)
+    const defaultFrame = resolveFrame(defaultPlan, [{ id: 'a', points: [{ x: 0, y: 10 }] }], MICRO)
+    const customFrame = resolveFrame(customPlan, [{ id: 'a', points: [{ x: 0, y: 10 }] }], MICRO, policy)
+
+    expect(customFrame.value?.fontSize ?? 0).toBeLessThan(defaultFrame.value?.fontSize ?? 0)
   })
 })

@@ -159,8 +159,12 @@ and it binds at **A4**, when `@gx/primitives` is written.
   `font-weight`, `font-feature-settings`, `font-stretch`, `letter-spacing` — so all six are typed
   values on `PlanPolicy`, and `@gx/tokens` *generates* their CSS custom properties from those typed
   objects. One authored value, two emitted forms; a consumer cannot move one without the other.
-  Signature: `measureText(text, rank, metrics, letterSpacing?)`. The table is keyed **by type rank**
-  (A–E), not by font size, because the scale ships weights 400/500/700 and `wght` changes advances.
+  Signature: `measureText(text, rank, metrics, style?)`, where `style` may supply the rank's
+  `fontSize` and `letterSpacing`. Missing style fields use the released default scale, preserving
+  the standalone API; layout and frame callers pass `PlanPolicy.typography.byRank[rank]` so custom
+  policy typography cannot drift from the measurements that sized the chart. The table is keyed
+  **by type rank** (A–E), not by font size, because the scale ships weights 400/500/700 and `wght`
+  changes advances.
 - ⚠ **The available calibration is now complete** (`41-text-metrics.md` §4.1, §4.2): the released
   Roboto Flex has tabular default figures even though it does not advertise a `tnum` feature, and
   the checked fallback faces calibrate a `safetyFactor` of `1.57`. Segoe UI Variable remains an

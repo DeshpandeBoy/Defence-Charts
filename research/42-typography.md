@@ -277,7 +277,8 @@ together, and that tuple is exactly what determines advances:
 readonly byRank: Readonly<Record<TypeRank, GlyphAdvances>>;   // 'A' | 'B' | 'C' | 'D' | 'E'
 ```
 
-and correspondingly `measureText(text, rank, metrics, letterSpacing?)`. This is better than the
+and correspondingly `measureText(text, rank, metrics, style?)`, where the optional partial style
+supplies `fontSize` and `letterSpacing`. This is better than the
 size-keyed form on three counts: it makes an unmeasurable combination unrepresentable, it removes the
 `fallbackFontSize` guess, and it drops the table to exactly five entries.
 

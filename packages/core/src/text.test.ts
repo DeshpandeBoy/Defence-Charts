@@ -55,6 +55,11 @@ describe('measureText', () => {
     expect(measureText('iW0', 'C', TEST_METRICS)).toBeCloseTo(1.7 * 11, 10)
   })
 
+  it('uses an explicitly supplied rank style instead of the default size', () => {
+    expect(measureText('iW0', 'C', TEST_METRICS, { fontSize: 22, letterSpacing: 0 }))
+      .toBeCloseTo(1.7 * 22, 10)
+  })
+
   it('selects the table by rank, not by font size alone', () => {
     // ⚠ The two reasons a single normalised table cannot work are optical sizing and
     // weight, and both mean rank C and rank D have different advances *at the same 11 px*.
@@ -153,15 +158,17 @@ describe('measureText', () => {
     it('adds one gap per inter-character boundary, not per character', () => {
       // Three code points → two gaps. Charging three would over-report by a full gap on
       // every label; the `− 1` is the entire content of rule 5.
-      expect(measureText('iii', 'C', TEST_METRICS, 2)).toBeCloseTo(3 * 0.2 * 11 + 2 * 2, 10)
+      expect(measureText('iii', 'C', TEST_METRICS, { letterSpacing: 2 }))
+        .toBeCloseTo(3 * 0.2 * 11 + 2 * 2, 10)
     })
 
     it('adds nothing for a single character', () => {
-      expect(measureText('i', 'C', TEST_METRICS, 2)).toBeCloseTo(measureText('i', 'C', TEST_METRICS), 10)
+      expect(measureText('i', 'C', TEST_METRICS, { letterSpacing: 2 }))
+        .toBeCloseTo(measureText('i', 'C', TEST_METRICS), 10)
     })
 
     it('counts gaps by code point, so an astral character contributes one gap', () => {
-      expect(measureText('\u{1D11E}\u{1D11E}', 'C', TEST_METRICS, 3)).toBeCloseTo(
+      expect(measureText('\u{1D11E}\u{1D11E}', 'C', TEST_METRICS, { letterSpacing: 3 })).toBeCloseTo(
         2 * 0.5 * 11 + 1 * 3,
         10,
       )
@@ -174,25 +181,29 @@ describe('measureText', () => {
       // does not drift with the face. Pinned here so a later tidy-up cannot fold the
       // spacing back inside the multiplication without a failing test.
       const glyphs = 3 * 0.2 * 11
-      expect(measureText('iii', 'C', withSafetyFactor(2), 2)).toBeCloseTo(glyphs * 2 + 2 * 2, 10)
+      expect(measureText('iii', 'C', withSafetyFactor(2), { letterSpacing: 2 }))
+        .toBeCloseTo(glyphs * 2 + 2 * 2, 10)
     })
 
     it('defaults letterSpacing to 0', () => {
-      expect(measureText('iii', 'C', TEST_METRICS)).toBeCloseTo(measureText('iii', 'C', TEST_METRICS, 0), 10)
+      expect(measureText('iii', 'C', TEST_METRICS)).toBeCloseTo(
+        measureText('iii', 'C', TEST_METRICS, { letterSpacing: 0 }),
+        10,
+      )
     })
   })
 
   describe('purity', () => {
     it('is referentially transparent across repeated calls', () => {
-      const once = measureText('Revenue 2026', 'C', TEST_METRICS, 0.5)
+      const once = measureText('Revenue 2026', 'C', TEST_METRICS, { letterSpacing: 0.5 })
       for (let i = 0; i < 5; i += 1) {
-        expect(measureText('Revenue 2026', 'C', TEST_METRICS, 0.5)).toBe(once)
+        expect(measureText('Revenue 2026', 'C', TEST_METRICS, { letterSpacing: 0.5 })).toBe(once)
       }
     })
 
     it('does not mutate the metrics it is given', () => {
       const before = JSON.stringify(TEST_METRICS)
-      measureText('Revenue 2026', 'C', TEST_METRICS, 0.5)
+      measureText('Revenue 2026', 'C', TEST_METRICS, { letterSpacing: 0.5 })
       expect(JSON.stringify(TEST_METRICS)).toBe(before)
     })
 
@@ -201,8 +212,8 @@ describe('measureText', () => {
       // survive `JSON.stringify`, the two would silently disagree about label widths — the
       // hydration-mismatch failure mode, arriving through the metrics door.
       const revived = JSON.parse(JSON.stringify(TEST_METRICS)) as FontMetrics
-      expect(measureText('Revenue 2026', 'C', revived, 0.5)).toBe(
-        measureText('Revenue 2026', 'C', TEST_METRICS, 0.5),
+      expect(measureText('Revenue 2026', 'C', revived, { letterSpacing: 0.5 })).toBe(
+        measureText('Revenue 2026', 'C', TEST_METRICS, { letterSpacing: 0.5 }),
       )
     })
   })

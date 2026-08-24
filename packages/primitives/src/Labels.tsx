@@ -16,7 +16,7 @@
  * B-milestone change, not an A4 one.
  */
 
-import { CHROME_METRICS, formatYLabel, type LabelsPlan, type SeriesFrame } from '@gx/core'
+import { DEFAULT_POLICY, formatYLabel, type LabelsPlan, type PlanPolicy, type SeriesFrame } from '@gx/core'
 
 import { classes, roundCoord } from './svg.ts'
 
@@ -27,6 +27,8 @@ export type LabelsProps = {
   readonly labelHalo?: LabelsPlan['labelHalo']
   /** `LabelsPlan.maxChars`. `null` means no cap. */
   readonly maxChars?: number | null
+  /** The same resolved policy used to produce the frame and plot box. */
+  readonly policy?: PlanPolicy
   readonly className?: string
 }
 
@@ -37,6 +39,7 @@ export function Labels({
   labelHalo = 'none',
   maxChars = null,
   className,
+  policy = DEFAULT_POLICY,
 }: LabelsProps) {
   const last = series.points.at(-1)
   const indices = valueIndices(series, valueLabels)
@@ -47,7 +50,7 @@ export function Labels({
         <text
           className={classes('gx-label', className)}
           data-halo={labelHalo !== 'none' ? labelHalo : undefined}
-          x={roundCoord(last.x + CHROME_METRICS.regionGap)}
+          x={roundCoord(last.x + policy.regionGap)}
           y={roundCoord(last.y)}
         >
           {truncate(series.label, maxChars)}
@@ -64,10 +67,10 @@ export function Labels({
             key={i}
             data-index={i}
             x={roundCoord(p.x)}
-            // Above the mark. `CHROME_METRICS.regionGap` and not a new constant, because a
+            // Above the mark. `policy.regionGap` and not a new constant, because a
             // fifth Tier-C number would need its own argument and this one already means
             // "the smallest gap that reads as separation".
-            y={roundCoord(p.y - CHROME_METRICS.regionGap)}
+            y={roundCoord(p.y - policy.regionGap)}
           >
             {formatYLabel(p.value)}
           </text>
