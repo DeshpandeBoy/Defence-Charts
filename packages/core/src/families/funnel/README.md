@@ -8,16 +8,17 @@ raw values, touches the DOM, or computes pixel geometry.
 
 | Size | Plan state |
 | --- | --- |
-| Micro | Replace the plot with an overall-conversion summary and summary-table semantics. |
-| Tile | Keep the overall-conversion summary; the plot remains replaced. |
+| Micro | Replace the plot with an overall-conversion value summary and summary-table semantics. |
+| Tile | Replace the value region with an explicit vertical overall-conversion funnel summary mark. |
 | Strip | Transpose to horizontal stage bars; stage labels and the full table remain available. |
 | Panel | Use a vertical stage funnel with stage names and visible values. |
 | Canvas | Add per-stage drop-off semantics and fluid stage interaction. |
 | Stage | Add the overall summary, relative conversion, and per-stage breakdown semantics. |
 
-`valueLegibility: 'shape-only'` is intentional for the plotted rungs: numeric values are made
-explicit by the stage text/table seam, while the funnel silhouette does not claim an axis-based
-estimate. The data table is present at every rung; Micro and Tile use the widget-level disclosure.
+`valueLegibility: 'shape-only'` is intentional for Tile and the larger plotted rungs: numeric
+values are made explicit by the stage text/table seam, while the funnel silhouette does not claim
+an axis-based estimate. Micro alone uses the shared value region. The data table is present at
+every rung; Micro and Tile use the widget-level disclosure.
 
 ## Data contract and coordinator seams
 

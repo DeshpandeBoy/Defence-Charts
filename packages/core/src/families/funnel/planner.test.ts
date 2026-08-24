@@ -104,24 +104,40 @@ describe('funnel family planner', () => {
     }
   })
 
-  it('replaces Micro and Tile with the overall-conversion summary', () => {
-    for (const sizeClass of ['micro', 'tile'] as const) {
-      const current = plan(sizeClass)
-      expect(current.marks.primary).toEqual({ kind: 'none' })
-      expect(current.valueLegibility).toBe('single-value')
-      expect(current.narrative.valueDisplay).toBe('latest')
-      expect(current.regionOrder).toEqual(['value', 'table'])
-      expect(current.funnel).toMatchObject({
-        summary: 'conversion',
-        stageLabels: 'none',
-        stageValues: 'none',
-        dropoff: 'none',
-        conversion: 'overall',
-        accessibility: { stageText: 'summary', keyboard: 'widget' },
-      })
-      expect(current.dataTable).toMatchObject({ disclosure: 'widget-tap', columns: 'summary' })
-      expect(current.interaction.trigger).toBe('none')
-    }
+  it('keeps Micro as a value-only summary without a funnel mark', () => {
+    const current = plan('micro')
+    expect(current.marks.primary).toEqual({ kind: 'none' })
+    expect(current.valueLegibility).toBe('single-value')
+    expect(current.narrative.valueDisplay).toBe('latest')
+    expect(current.regionOrder).toEqual(['value', 'table'])
+    expect(current.funnel).toMatchObject({
+      summary: 'conversion',
+      stageLabels: 'none',
+      stageValues: 'none',
+      dropoff: 'none',
+      conversion: 'overall',
+      accessibility: { stageText: 'summary', keyboard: 'widget' },
+    })
+    expect(current.dataTable).toMatchObject({ disclosure: 'widget-tap', columns: 'summary' })
+    expect(current.interaction.trigger).toBe('none')
+  })
+
+  it('replaces Tile with an explicit vertical overall-conversion mark', () => {
+    const current = plan('tile')
+    expect(current.marks.primary).toEqual({ kind: 'funnel', orientation: 'vertical', detail: 'summary' })
+    expect(current.valueLegibility).toBe('shape-only')
+    expect(current.narrative.valueDisplay).toBe('none')
+    expect(current.regionOrder).toEqual(['plot', 'table'])
+    expect(current.funnel).toMatchObject({
+      summary: 'conversion',
+      stageLabels: 'none',
+      stageValues: 'none',
+      dropoff: 'none',
+      conversion: 'overall',
+      accessibility: { stageText: 'summary', keyboard: 'widget' },
+    })
+    expect(current.dataTable).toMatchObject({ disclosure: 'widget-tap', columns: 'summary' })
+    expect(current.interaction.trigger).toBe('none')
   })
 
   it('transposes Strip to horizontal stage bars without claiming plot value legibility', () => {

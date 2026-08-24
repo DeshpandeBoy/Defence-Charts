@@ -155,7 +155,10 @@ function rungFor(input: FamilyPlannerInput<FunnelChartType>): ChartPlan {
 }
 
 function markFor(sizeClass: SizeContext['sizeClass']): MarkSpec {
-  if (sizeClass === 'micro' || sizeClass === 'tile') return Object.freeze({ kind: 'none' })
+  if (sizeClass === 'micro') return Object.freeze({ kind: 'none' })
+  if (sizeClass === 'tile') {
+    return Object.freeze({ kind: 'funnel', orientation: 'vertical', detail: 'summary' })
+  }
   if (sizeClass === 'strip') {
     return Object.freeze({ kind: 'funnel', orientation: 'horizontal', detail: 'stages' })
   }
@@ -292,12 +295,12 @@ function semanticsFor(sizeClass: SizeContext['sizeClass']): FunnelSemantics {
 }
 
 function regionOrder(
-  sizeClass: SizeContext['sizeClass'],
+  narrative: ChartPlan['narrative'],
   mark: MarkSpec,
   table: DataTablePlan,
 ): readonly RegionName[] {
   const regions: RegionName[] = []
-  if (sizeClass === 'micro' || sizeClass === 'tile') regions.push('value')
+  if (narrative.valueDisplay !== 'none') regions.push('value')
   if (mark.kind !== 'none') regions.push('plot')
   if (table.present) regions.push('table')
   return Object.freeze(regions)
@@ -320,7 +323,9 @@ function planFunnel(input: FamilyPlannerInput<FunnelChartType>): FunnelPlan {
   const narrative = Object.freeze({
     ...seed.narrative,
     summaryPhrase: false,
-    valueDisplay: input.ctx.sizeClass === 'micro' || input.ctx.sizeClass === 'tile' ? 'latest' as const : 'none' as const,
+    // Micro has only the value region. Tile replaces that region with the explicit vertical
+    // summary mark, so its conversion is not painted a second time by the shared value renderer.
+    valueDisplay: input.ctx.sizeClass === 'micro' ? 'latest' as const : 'none' as const,
     deltaBasis: false,
     callouts: 'none' as const,
     annotations: input.ctx.sizeClass === 'stage',
@@ -332,7 +337,7 @@ function planFunnel(input: FamilyPlannerInput<FunnelChartType>): FunnelPlan {
     type: input.type,
     valueLegibility: mark.kind === 'none' ? 'single-value' : 'shape-only',
     orientation,
-    regionOrder: regionOrder(input.ctx.sizeClass, mark, table),
+    regionOrder: regionOrder(narrative, mark, table),
     axes: Object.freeze({ x: AXIS_OFF, y: AXIS_OFF, y2: null }),
     marks: Object.freeze({
       ...seed.marks,
