@@ -153,6 +153,24 @@ export {
   updateInteractionState,
 } from './interaction-state.ts'
 
+// Deterministic, DOM-free tooltip geometry. Rendering and event ownership stay outside core.
+export type {
+  FixedTooltipRail,
+  FluidTooltipSide,
+  TooltipAnchor,
+  TooltipBox,
+  TooltipPlacement,
+  TooltipPlacementInput,
+  TooltipPlacementMode,
+  TooltipPlacementSide,
+  TooltipPlacementStatus,
+  TooltipPlacementValidationCode,
+} from './tooltip-placement.ts'
+export {
+  TooltipPlacementValidationError,
+  placeTooltip,
+} from './tooltip-placement.ts'
+
 // The one place a value becomes a string, so that the resolver's `labelMaxChars` and the
 // renderer's glyphs cannot disagree.
 export { formatXLabel, formatYLabel } from './format.ts'

@@ -201,9 +201,9 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | C3.1 | Codex grid | done | C1.2 | Keyboard move/resize and focus |
 | C3.2 | Codex grid | backlog | C1.2 | Layout serialisation and migration |
 | C4.1 | Codex verification | done | C2.2, C3.1 | Grid browser gate |
-| C4.2 | Codex verification | backlog | C4.1 | 1/10/50/100/200-widget stress evidence |
+| C4.2 | Codex verification | done | C4.1 | 1/10/50/100/200-widget stress evidence |
 | I1.1 | Codex interaction | done | C2.2 | Datum identity and interaction state |
-| I1.2 | Codex interaction | backlog | I1.1 | Pure overlay placement |
+| I1.2 | Codex interaction | done | I1.1 | Pure overlay placement |
 | I1.3 | Codex interaction | backlog | I1.2 | Tooltip and crosshair layer |
 | I1.4 | Codex interaction | backlog | I1.1 | Static and interactive legends |
 | I1.5 | Codex interaction | backlog | I1.3, I1.4 | Keyboard/touch interaction matrix |
@@ -217,7 +217,7 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | D5.1 | Codex heatmap | backlog | D0.2, R2 | Heatmap family |
 | D6.1 | Codex funnel | backlog | D0.2, R2 | Funnel or evidence-backed deferral |
 | D7.1 | Codex integration | backlog | D1–D6 | Central registration and complete family matrix |
-| E1.1 | Codex release | backlog | C2.1 | Built exports and emitted CSS |
+| E1.1 | Codex release | done | C2.1 | Built exports and emitted CSS |
 | E1.2 | Codex release | backlog | E1.1 | Package metadata/licence/dependency corrections |
 | E1.3 | Codex release | backlog | E1.1 | Tarball Next/RSC and Vite consumers |
 | E1.4 | Codex release | backlog | E1.2, E1.3 | `publint`, `attw`, package-content and no-network gates |

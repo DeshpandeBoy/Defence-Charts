@@ -6,7 +6,7 @@
   "license": "MIT",
   "description": "The client boundary. <AutoChart>, useElementSize, tooltip, crosshair, brush, legend interaction.",
   "sideEffects": [
-    "**/*.css"
+    "*.css"
   ],
   "exports": {
     ".": "./src/index.ts",
