@@ -82,6 +82,159 @@
     font-size: var(--gx-legend-label-font-size);
   }
 
+  /* --- Legend --------------------------------------------------------------------- */
+  .gx-legend {
+    position: absolute;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--gx-legend-gap-row) var(--gx-legend-gap-column);
+    max-inline-size: 100%;
+    max-block-size: 100%;
+    margin: 0;
+    padding: var(--gx-legend-padding);
+    overflow: auto;
+    color: var(--gx-surface-text-color);
+    font-size: var(--gx-legend-label-font-size);
+    font-weight: var(--gx-legend-label-font-weight);
+    letter-spacing: var(--gx-legend-label-letter-spacing);
+    line-height: var(--gx-label-line-height);
+  }
+
+  .gx-legend--internal {
+    inset-block-start: var(--gx-size-gap);
+    inset-inline-start: var(--gx-size-gap);
+    flex-wrap: wrap;
+    pointer-events: none;
+  }
+
+  .gx-legend--external[data-legend-position='top'] {
+    inset-block-start: 0;
+    inset-inline: 0;
+    flex-wrap: wrap;
+  }
+
+  .gx-legend--external[data-legend-position='bottom'] {
+    inset-block-end: 0;
+    inset-inline: 0;
+    flex-wrap: wrap;
+  }
+
+  .gx-legend--external[data-legend-position='left'] {
+    inset-block: 0;
+    inset-inline-start: 0;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .gx-legend--external[data-legend-position='right'] {
+    inset-block: 0;
+    inset-inline-end: 0;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .gx-legend__item {
+    display: inline-flex;
+    flex: 0 0 auto;
+    min-inline-size: 0;
+    align-items: center;
+    gap: var(--gx-legend-symbol-gap);
+    max-inline-size: 100%;
+    color: inherit;
+    font: inherit;
+  }
+
+  .gx-legend__symbol {
+    display: inline-block;
+    flex: 0 0 auto;
+    inline-size: var(--gx-legend-symbol-size);
+    block-size: var(--gx-legend-symbol-size);
+    border: var(--gx-legend-symbol-stroke-width) solid var(--gx-series-color);
+    border-radius: 50%;
+    background-color: var(--gx-series-color);
+  }
+
+  .gx-legend__label {
+    min-inline-size: 0;
+    max-inline-size: var(--gx-legend-label-limit);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .gx-legend__detail {
+    flex: 0 0 auto;
+    color: currentColor;
+  }
+
+  .gx-legend__item[data-series-index='0'] {
+    --gx-series-color: var(--gx-series-1);
+  }
+  .gx-legend__item[data-series-index='1'] {
+    --gx-series-color: var(--gx-series-2);
+  }
+  .gx-legend__item[data-series-index='2'] {
+    --gx-series-color: var(--gx-series-3);
+  }
+  .gx-legend__item[data-series-index='3'] {
+    --gx-series-color: var(--gx-series-4);
+  }
+  .gx-legend__item[data-series-index='4'] {
+    --gx-series-color: var(--gx-series-5);
+  }
+  .gx-legend__item[data-series-index='5'] {
+    --gx-series-color: var(--gx-series-6);
+  }
+
+  .gx-legend--control .gx-legend__control {
+    appearance: none;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--gx-legend-symbol-gap);
+    max-inline-size: 100%;
+    padding: 0;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+  }
+
+  .gx-legend--control .gx-legend__control[aria-pressed='false'] {
+    opacity: var(--gx-motion-fade-factor);
+  }
+
+  .gx-legend--control .gx-legend__control:focus-visible {
+    outline: var(--gx-line-stroke-width) solid currentColor;
+    outline-offset: calc(var(--gx-line-stroke-width) * 2);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .gx-legend--control .gx-legend__control {
+      transition: opacity var(--gx-motion-duration-hover) var(--gx-motion-easing);
+    }
+  }
+
+  @media (forced-colors: active) {
+    .gx-legend__symbol {
+      border-color: ButtonText;
+      background-color: CanvasText;
+    }
+
+    .gx-legend--control .gx-legend__control {
+      background: Canvas;
+      color: ButtonText;
+    }
+
+    .gx-legend--control .gx-legend__control[aria-pressed='true'] {
+      background: Highlight;
+      color: HighlightText;
+    }
+  }
+
   /* --- Chrome ----------------------------------------------------------------------- */
 
   .gx-grid__line {

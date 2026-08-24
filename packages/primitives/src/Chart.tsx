@@ -58,6 +58,7 @@ import { LinePath } from './LinePath.tsx'
 import { PointMarks } from './PointMarks.tsx'
 import { classes, roundCoord } from './svg.ts'
 import { ValueDisplay } from './ValueDisplay.tsx'
+import { Legend } from './Legend.tsx'
 
 export type ChartProps = {
   readonly plan: ChartPlan
@@ -234,6 +235,8 @@ export function Chart({
             could disagree with the one that sized the band. */}
         <ValueDisplay value={frame.value} />
       </svg>
+
+      <Legend plan={plan.legend} series={data} />
 
       {plan.dataTable.present ? (
         <figcaption className="gx-chart__caption">
