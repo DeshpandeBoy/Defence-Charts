@@ -355,13 +355,13 @@ describe('the plan is obeyed, not approximated', () => {
     const ctx = sizeContextFromPixels(900, 520)
     const base = planChart('line', ctx, describeShape(ONE))
     const forced: ChartPlan = applyOverrides(base, {
-      marks: { primary: { kind: 'arc', donut: true } },
+      marks: { primary: { kind: 'cell', bandStart: 0, bandEnd: 1 } },
     })
     expect(() =>
       renderToStaticMarkup(
         <Chart plan={forced} data={ONE} ctx={ctx} title="Forced" id="t" />,
       ),
-    ).toThrow(/'arc' is not implemented.*later chart breadth/s)
+    ).toThrow(/'cell' is not implemented.*later chart breadth/s)
   })
 
   it('honours axes.x.visible', () => {

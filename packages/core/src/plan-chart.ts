@@ -52,7 +52,7 @@ const TYPE_MILESTONE: Readonly<Partial<Record<ChartType, string>>> = Object.free
  * policy/overrides split cannot drift from §5 — a function written first tends to become the
  * contract by default, and §5's contract predates this file deliberately.
  *
- * ⚠ **Unimplemented types throw.** A silent fallback — returning a line plan for a donut, or
+ * ⚠ **Unimplemented types throw.** A silent fallback — returning a line plan for a funnel, or
  * an empty plan — is worse than a crash: it is the same failure species as happy-dom's `0`,
  * a thing that looks like it works and quietly doesn't. The message names the milestone.
  *

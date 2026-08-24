@@ -7,7 +7,7 @@ import {
   type SizeContext,
 } from '@gx/core'
 
-export const FAMILY_TYPES = ['line', 'area', 'bar', 'timebar', 'scatter'] as const
+export const FAMILY_TYPES = ['line', 'area', 'bar', 'timebar', 'scatter', 'donut'] as const
 export type FamilyType = (typeof FAMILY_TYPES)[number]
 
 export const MATRIX_SERIES_IDS = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot'] as const
@@ -28,8 +28,27 @@ export const MATRIX_DATA: readonly Series[] = Object.freeze(
 export const EMPTY_DATA: readonly Series[] = Object.freeze([])
 export const ERROR_MESSAGE = 'Family fixture error: the host-owned state is announced here.'
 
+export const DONUT_MATRIX_DATA: readonly Series[] = Object.freeze([
+  {
+    id: 'donut',
+    label: 'Program mix',
+    points: Object.freeze([
+      { x: 0, y: 40 },
+      { x: 1, y: 24 },
+      { x: 2, y: 16 },
+      { x: 3, y: 10 },
+      { x: 4, y: 6 },
+      { x: 5, y: 4 },
+      { x: 6, y: 3 },
+      { x: 7, y: 2 },
+      { x: 8, y: 1 },
+      { x: 9, y: 1 },
+    ]),
+  },
+])
+
 export type ExpectedFamilyMetadata = {
-  readonly primary: 'none' | 'line' | 'bar' | 'point'
+  readonly primary: 'none' | 'line' | 'bar' | 'point' | 'arc'
   readonly area: boolean | null
   readonly valueLegibility: 'single-value' | 'shape-only' | 'values'
   readonly interaction: 'none' | 'tap' | 'hover'
@@ -243,7 +262,11 @@ export type FamilyState = (typeof FAMILY_STATES)[number]
 
 export const MATRIX_SHAPE = describeShape(MATRIX_DATA)
 
-export function planForRow(type: FamilyType, row: FamilyMatrixRow, data = MATRIX_DATA): ChartPlan {
+export function dataForType(type: FamilyType): readonly Series[] {
+  return type === 'donut' ? DONUT_MATRIX_DATA : MATRIX_DATA
+}
+
+export function planForRow(type: FamilyType, row: FamilyMatrixRow, data = dataForType(type)): ChartPlan {
   return planChart(type, row.ctx, describeShape(data))
 }
 
@@ -256,7 +279,7 @@ export function metadataForPlan(plan: ChartPlan): ExpectedFamilyMetadata & {
     type: plan.type,
     sizeClass: plan.sizeClass,
     primary:
-      primary.kind === 'line' || primary.kind === 'none' || primary.kind === 'bar' || primary.kind === 'point'
+      primary.kind === 'line' || primary.kind === 'none' || primary.kind === 'bar' || primary.kind === 'point' || primary.kind === 'arc'
         ? primary.kind
         : 'line',
     area: primary.kind === 'line' ? primary.area : null,

@@ -9,6 +9,7 @@ import {
   FAMILY_MATRIX,
   FAMILY_TYPES,
   MATRIX_DATA,
+  dataForType,
   metadataForPlan,
   planForRow,
   type FamilyState,
@@ -28,7 +29,7 @@ export function FamilyMatrixApp() {
       <header className="family-matrix__header">
         <div>
           <p className="family-matrix__eyebrow">D0.2 · shared family acceptance</p>
-          <h1>Line / area / bar / timebar / scatter family matrix</h1>
+          <h1>Line / area / bar / timebar / scatter / donut family matrix</h1>
           <p>
             One fixture exercises the six information budgets, the static accessibility surface,
             the host-owned states, and the measured resize boundary contract.
@@ -164,7 +165,7 @@ function StaticMatrixCard({ type, row }: { readonly type: FamilyType; readonly r
         <code>{metadata.primary}{metadata.area === true ? ' + fill' : ''}</code>
       </header>
       <div className="family-matrix__chart-frame">
-        <StaticChart type={type} row={row} data={MATRIX_DATA} id={'matrix-' + type + '-' + row.id} />
+        <StaticChart type={type} row={row} data={dataForType(type)} id={'matrix-' + type + '-' + row.id} />
       </div>
     </article>
   )

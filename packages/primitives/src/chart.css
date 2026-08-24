@@ -343,6 +343,18 @@
     stroke-width: var(--gx-bar-border-width);
   }
 
+  .gx-arc {
+    fill: var(--gx-series-color);
+    stroke: var(--gx-series-color);
+    stroke-width: var(--gx-bar-border-width);
+  }
+
+  /* `Other` remains distinguishable in forced-colors and without relying on hue alone. */
+  .gx-arc--other {
+    fill: currentColor;
+    fill-opacity: var(--gx-area-opacity);
+  }
+
   /*
    * ⚠ The horizon ramp. Band 0 sits nearest the baseline and is the faintest; each band
    * outward is more opaque, and that ordering is the entire read of a horizon chart. It

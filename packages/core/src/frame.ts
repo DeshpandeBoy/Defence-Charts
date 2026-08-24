@@ -67,7 +67,7 @@ import type { TypeRank } from './text-types.ts'
 
 import { extent } from 'd3-array'
 import { scaleLinear, scaleUtc, type ScaleLinear, type ScaleTime } from 'd3-scale'
-import { area as d3Area, line as d3Line } from 'd3-shape'
+import { arc as d3Arc, area as d3Area, line as d3Line } from 'd3-shape'
 
 /**
  * ⚠ **Spelled out rather than written `ReturnType<typeof scaleLinear>`, which silently gives
@@ -135,6 +135,23 @@ export type PointPos = {
   readonly value: number
 }
 
+/** One donut slice in absolute SVG geometry, with its stable data identity preserved. */
+export type ArcFrame = {
+  readonly id: string
+  readonly label: string
+  readonly value: number
+  readonly share: number
+  readonly startAngle: number
+  readonly endAngle: number
+  readonly cx: number
+  readonly cy: number
+  readonly innerRadius: number
+  readonly outerRadius: number
+  /** A local path around (0, 0); the renderer translates it to `cx, cy`. */
+  readonly d: string
+  readonly other: boolean
+}
+
 /**
  * One horizon band. `sign` is `1` for bands above the baseline and `-1` for the mirrored
  * negative bands; `band` is the 0-based index outward from the baseline, which is what drives
@@ -160,6 +177,8 @@ export type SeriesFrame = {
   readonly bands: readonly HorizonBand[]
   /** Empty unless the mark kind is `'bar'` or `'cell'`. */
   readonly cells: readonly CellFrame[]
+  /** Empty unless the mark kind is `'arc'`. */
+  readonly arcs: readonly ArcFrame[]
   /**
    * ⚠ **Every** defined point, always — not only the ones `marks.points.mode` renders.
    * Geometry belongs to the frame and the decision to draw belongs to the plan, so
@@ -763,7 +782,7 @@ export function resolveFrame(
   const nominalCategoryStep = Number.isFinite(categoryStep) && categoryStep > 0 ? categoryStep : plot.width
 
   const series = data.map((s, index) =>
-    seriesFrame(s, index, mark, plot, toX, yScale, data.length, nominalCategoryStep),
+    seriesFrame(s, index, mark, plan.aggregate, plot, toX, yScale, data.length, nominalCategoryStep),
   )
 
   // `'endpoints'` labels the first and last *data* point, so it needs the x values in order —
@@ -832,6 +851,7 @@ function seriesFrame(
   s: Series,
   index: number,
   mark: ChartPlan['marks']['primary'],
+  aggregate: ChartPlan['aggregate'],
   plot: Rect,
   toX: (v: number | Date) => number,
   yScale: LinearScale,
@@ -852,6 +872,7 @@ function seriesFrame(
   let area: string | null = null
   let bands: readonly HorizonBand[] = []
   let cells: readonly CellFrame[] = []
+  let arcs: readonly ArcFrame[] = []
 
   if (mark.kind === 'line') {
     // ⚠ `.defined()` is what makes `y: null` a gap rather than an interpolation. Without it
@@ -921,6 +942,8 @@ function seriesFrame(
       )
     }
     cells = Object.freeze(cellsArr)
+  } else if (mark.kind === 'arc') {
+    arcs = donutArcs(s, aggregate, plot)
   }
 
   return Object.freeze({
@@ -931,9 +954,106 @@ function seriesFrame(
     area,
     bands,
     cells,
+    arcs,
     points: Object.freeze(points),
     extrema: extremaOf(points),
   })
+}
+
+type DonutSlice = {
+  readonly key: string
+  readonly label: string
+  readonly value: number
+  readonly other: boolean
+}
+
+/**
+ * Resolve category values into stable donut geometry. This is frame work, not planner work:
+ * the plan decides whether/when aggregation is allowed, while the frame sees the values and
+ * preserves the named `Other` bucket instead of silently dropping a category.
+ */
+function donutArcs(
+  series: Series,
+  aggregate: ChartPlan['aggregate'],
+  plot: Rect,
+): readonly ArcFrame[] {
+  const byKey = new Map<string, { label: string; value: number; order: number }>()
+  for (const [order, point] of series.points.entries()) {
+    if (point.y === null) continue
+    if (!Number.isFinite(point.y) || point.y < 0) {
+      throw new Error(`@gx/core: donut series "${series.id}" requires finite non-negative values.`)
+    }
+    if (point.y === 0) continue
+    const key = point.x instanceof Date ? `date:${point.x.getTime()}` : `number:${point.x}`
+    const existing = byKey.get(key)
+    if (existing === undefined) {
+      byKey.set(key, { label: formatXLabel(point.x), value: point.y, order })
+    } else {
+      existing.value += point.y
+    }
+  }
+
+  const raw = [...byKey.entries()]
+    .sort(([, left], [, right]) => left.order - right.order)
+    .map(([key, item]) => ({ key, label: item.label, value: item.value, other: false }))
+  const total = raw.reduce((sum, slice) => sum + slice.value, 0)
+  if (total <= 0 || !Number.isFinite(total)) return Object.freeze([])
+
+  const limit = aggregate.after === null ? null : Math.max(1, Math.floor(aggregate.after))
+  const retained = new Set<string>()
+  if (limit !== null && raw.length > limit) {
+    for (const slice of [...raw].sort((left, right) => right.value - left.value).slice(0, limit)) {
+      retained.add(slice.key)
+    }
+  }
+
+  let otherValue = 0
+  const visible: DonutSlice[] = []
+  for (const slice of raw) {
+    const tiny = aggregate.minShare !== null && slice.value / total < aggregate.minShare
+    const overLimit = limit !== null && raw.length > limit && !retained.has(slice.key)
+    if (tiny || overLimit) otherValue += slice.value
+    else visible.push(slice)
+  }
+  if (otherValue > 0) {
+    visible.push({ key: 'other', label: 'Other', value: otherValue, other: true })
+  }
+
+  const cx = plot.x + plot.width / 2
+  const cy = plot.y + plot.height / 2
+  const outerRadius = Math.max(0, Math.min(plot.width, plot.height) / 2)
+  const innerRadius = outerRadius * 0.55
+  let angle = -Math.PI / 2
+  const result: ArcFrame[] = []
+  for (const slice of visible) {
+    const startAngle = angle
+    const endAngle = startAngle + (slice.value / total) * Math.PI * 2
+    angle = endAngle
+    const path = d3Arc<object>()
+      .innerRadius(innerRadius)
+      .outerRadius(outerRadius)
+      .startAngle(startAngle)
+      .endAngle(endAngle)
+      .digits(PATH_DIGITS)({})
+    if (path === null) continue
+    result.push(
+      Object.freeze({
+        id: `${series.id}:${slice.key}`,
+        label: slice.label,
+        value: slice.value,
+        share: slice.value / total,
+        startAngle,
+        endAngle,
+        cx,
+        cy,
+        innerRadius,
+        outerRadius,
+        d: path,
+        other: slice.other,
+      }),
+    )
+  }
+  return Object.freeze(result)
 }
 
 function extremaOf(points: readonly PointPos[]): SeriesFrame['extrema'] {

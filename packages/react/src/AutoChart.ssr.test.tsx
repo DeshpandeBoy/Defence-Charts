@@ -158,33 +158,24 @@ describe('with a declared size, the server emits a real chart at that rung', () 
 })
 
 describe('the contract the resolver holds is the contract this holds', () => {
-  it('throws for a chart type nobody has implemented, naming the milestone', () => {
-    expect(() =>
-      renderToStaticMarkup(
-        <AutoChart
-          type="donut"
-          data={DATA}
-          title="Revenue"
-          initialSize={{ width: 700, height: 520 }}
-          id="t"
-        />,
-      ),
-    ).toThrow(/donut/)
+  it('renders the registered donut type on the measured SSR path', () => {
+    const html = renderToStaticMarkup(
+      <AutoChart
+        type="donut"
+        data={DATA}
+        title="Revenue"
+        initialSize={{ width: 700, height: 520 }}
+        id="t"
+      />,
+    )
+    expect(html).toContain('data-chart-type="donut"')
+    expect(html).toContain('gx-arc')
   })
 
-  it('throws even with no size, because the plan is not conditional on being measured', () => {
-    // ⚠ **This is the loud failure, kept deliberately.** `planChart()` runs in a `useMemo`
-    // in the component body, and the Rules of Hooks mean that memo is evaluated on every
-    // render including the unmeasured one — only the *rendering* of `<Chart>` is gated on
-    // `measured`. So an unimplemented type takes the server down at the first render.
-    //
-    // It could be made lazy by returning `null` from the memo when unmeasured, and it is
-    // not, because the lazy version is the worse failure: the page would build fine, ship
-    // fine, render an empty div fine, and then throw inside a client render the instant a
-    // `ResizeObserver` delivered a box — surfacing as a blank widget in one breakpoint on
-    // someone else's machine. A build that stops is a build someone fixes.
-    expect(() =>
-      renderToStaticMarkup(<AutoChart type="donut" data={DATA} title="Revenue" id="t" />),
-    ).toThrow(/donut/)
+  it('renders the registered donut type even with no size', () => {
+    // `planChart()` still runs synchronously on the first render, before a ResizeObserver
+    // supplies a measured box; registered families must remain safe on this path.
+    const html = renderToStaticMarkup(<AutoChart type="donut" data={DATA} title="Revenue" id="t" />)
+    expect(html).toBe('<div class="gx-auto-chart"></div>')
   })
 })

@@ -458,7 +458,6 @@ describe('G9 — the renderer flips rather than sampling', () => {
 
 describe('G9 — unimplemented types throw rather than falling back', () => {
   it('names the milestone', () => {
-    expect(() => planChart('donut', PANEL, SHAPE)).toThrow(/milestone D/)
     expect(() => planChart('heatmap', PANEL, SHAPE)).toThrow(/milestone D/)
   })
 

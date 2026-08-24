@@ -9,6 +9,7 @@
 import type { ChartType } from './plan.ts'
 import type { BuiltInPlannerRegistry, PlannerRegistration } from './family-seam.ts'
 import { BAR_CHART_TYPES, barFamilyPlanner } from './families/bar/planner.ts'
+import { DONUT_CHART_TYPES, donutFamilyPlanner } from './families/donut/planner.ts'
 import { LINE_CHART_TYPES, lineFamilyPlanner } from './families/line/planner.ts'
 import { SCATTER_CHART_TYPES, scatterFamilyPlanner } from './families/scatter/planner.ts'
 import type { LineChartType } from './rungs/line.ts'
@@ -36,11 +37,19 @@ const SCATTER_PLANNER: BuiltInPlanner = Object.freeze({
     scatterFamilyPlanner({ type: type as 'scatter', ctx, shape, policy }),
 })
 
+const DONUT_PLANNER: BuiltInPlanner = Object.freeze({
+  family: 'donut',
+  chartTypes: DONUT_CHART_TYPES,
+  plan: ({ type, ctx, shape, policy }) =>
+    donutFamilyPlanner({ type: type as 'donut', ctx, shape, policy }),
+})
+
 /** The only built-in planner table. Every nested value is immutable. */
 export const BUILT_IN_PLANNER_REGISTRY: BuiltInPlannerRegistry<ChartType> = Object.freeze([
   LINE_PLANNER,
   BAR_PLANNER,
   SCATTER_PLANNER,
+  DONUT_PLANNER,
 ])
 
 /** Find a built-in planner without constructing or mutating a registry at runtime. */

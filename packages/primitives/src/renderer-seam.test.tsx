@@ -32,6 +32,8 @@ describe('D0.1 renderer seam', () => {
       'bar',
       'scatter',
       'scatter',
+      'donut',
+      'donut',
     ])
     expect(BUILT_IN_MARK_RENDERERS.flatMap((entry) => entry.markKinds)).toEqual([
       'none',
@@ -41,6 +43,8 @@ describe('D0.1 renderer seam', () => {
       'bar',
       'none',
       'point',
+      'none',
+      'arc',
     ])
   })
 
@@ -80,17 +84,29 @@ describe('D0.1 renderer seam', () => {
     expect(html).toContain('data-scatter-index="0"')
   })
 
+  it('renders registered donut arcs from the shared frame arc seam', () => {
+    const ctx = sizeContextFromPixels(900, 520)
+    const plan = planChart('donut', ctx, describeShape([{ id: 'sales', points: [{ x: 0, y: 3 }, { x: 1, y: 2 }] }]))
+    const frame = resolveFrame(plan, [{ id: 'sales', points: [{ x: 0, y: 3 }, { x: 1, y: 2 }] }], ctx, resolvePolicy()).series[0]
+    expect(frame).toBeDefined()
+    const html = renderToStaticMarkup(
+      <svg>{renderBuiltInMark({ frame: frame!, plan, policy: resolvePolicy() })}</svg>,
+    )
+    expect(html).toContain('class="gx-arc"')
+    expect(html).toContain('data-slice-id="sales:number:0"')
+  })
+
   it('preserves the explicit unsupported-mark failure path', () => {
     const ctx = sizeContextFromPixels(900, 520)
     const base = planChart('line', ctx, describeShape(DATA))
     const unsupported: ChartPlan = {
       ...base,
-      marks: { ...base.marks, primary: { kind: 'arc', donut: true } },
+      marks: { ...base.marks, primary: { kind: 'cell', bandStart: 0, bandEnd: 1 } },
     }
     const frame = frameFor(unsupported)
     expect(frame).toBeDefined()
     expect(() =>
       renderBuiltInMark({ frame: frame!, plan: unsupported, policy: resolvePolicy() }),
-    ).toThrow(/'arc' is not implemented.*later chart breadth/s)
+    ).toThrow(/'cell' is not implemented.*later chart breadth/s)
   })
 })

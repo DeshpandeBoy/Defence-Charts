@@ -40,6 +40,7 @@ describe('D0.1 planner seam', () => {
     expect(findBuiltInPlanner('bar')?.family).toBe('bar')
     expect(findBuiltInPlanner('timebar')?.family).toBe('bar')
     expect(findBuiltInPlanner('scatter')?.family).toBe('scatter')
+    expect(findBuiltInPlanner('donut')?.family).toBe('donut')
   })
 
   it.each(['line', 'area'] as const)(
@@ -61,8 +62,8 @@ describe('D0.1 planner seam', () => {
     const bar = planChart('bar', sizeContextFromPixels(900, 520), describeShape(DATA))
     expect(bar.type).toBe('bar')
     expect(bar.marks.primary.kind).toBe('bar')
-    expect(() => planChart('donut', sizeContextFromPixels(900, 520), describeShape(DATA))).toThrow(
-      /chart type "donut" has no rung set yet; it lands at milestone D/,
+    expect(() => planChart('funnel', sizeContextFromPixels(900, 520), describeShape(DATA))).toThrow(
+      /chart type "funnel" has no rung set yet; it lands at milestone D/,
     )
   })
 
@@ -70,5 +71,11 @@ describe('D0.1 planner seam', () => {
     const scatter = planChart('scatter', sizeContextFromPixels(900, 520), describeShape(DATA))
     expect(scatter.type).toBe('scatter')
     expect(scatter.marks.primary.kind).toBe('point')
+  })
+
+  it('resolves the registered donut family without falling back to a line', () => {
+    const donut = planChart('donut', sizeContextFromPixels(900, 520), describeShape(DATA))
+    expect(donut.type).toBe('donut')
+    expect(donut.marks.primary.kind).toBe('arc')
   })
 })

@@ -13,7 +13,8 @@
  *      them would pass tests forever. Text width comes from a character-advance model
  *      instead (`./text.ts`, `research/41-text-metrics.md`).
  *
- * ⚠ **The registered families are `'line'`, `'area'`, `'bar'`, `'timebar'`, and `'scatter'`.** The
+ * ⚠ **The registered families are `'line'`, `'area'`, `'bar'`, `'timebar'`, `'scatter'`, and
+ * `'donut'`.** The
  * `ChartPlan` contract, `PlanPolicy`, `measureText()`, size classification and `planChart()`
  * itself are all here, while every other `ChartType` throws with the D milestone that adds it.
  * A silent fallback plan would be the same failure species as happy-dom's `0`.
@@ -178,6 +179,7 @@ export { formatXLabel, formatYLabel } from './format.ts'
 // Plan + data + pixel box → coordinates. The only module in this package that sees values.
 export type {
   ChartFrame,
+  ArcFrame,
   ComputedTick,
   HorizonBand,
   PointPos,
