@@ -122,6 +122,22 @@ describe('with a declared size, the server emits a real chart at that rung', () 
     expect(big).toContain(`data-size-class="${resolveSizeClass(ctx.cols, ctx.rows)}"`)
   })
 
+  it('uses a supplied grid footprint instead of deriving cells from standalone pixels', () => {
+    const dashboard = renderToStaticMarkup(
+      <AutoChart
+        type="line"
+        data={DATA}
+        title="Revenue"
+        initialSize={{ width: 240, height: 88 }}
+        gridSize={{ cols: 6, rows: 5 }}
+        id="t-grid"
+      />,
+    )
+
+    expect(dashboard).toContain(`data-size-class="${resolveSizeClass(6, 5)}"`)
+    expect(dashboard).toContain('viewBox="0 0 240 88"')
+  })
+
   it('composes a consumer class alongside its own rather than replacing it', () => {
     const themed = renderToStaticMarkup(
       <AutoChart

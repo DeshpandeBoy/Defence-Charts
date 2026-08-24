@@ -54,7 +54,13 @@
  */
 
 import type { ChartType, PlanOverrides, PlanPolicy, Series, SizeClass, SizeContext } from '@gx/core'
-import { describeShape, planChart, resolveSizeClassWithDeadband, sizeContextFromPixels } from '@gx/core'
+import {
+  describeShape,
+  planChart,
+  resolveSizeClass,
+  resolveSizeClassWithDeadband,
+  sizeContextFromPixels,
+} from '@gx/core'
 import { Chart } from '@gx/primitives'
 import { useEffect, useMemo, useState } from 'react'
 
@@ -76,11 +82,23 @@ export type AutoChartProps = {
    * authoritative. `DEFAULT_NOMINAL_CELL_SIZE` is 100.
    */
   readonly nominalCellSize?: number | undefined
+  /**
+   * The authoritative dashboard footprint. Pixels still come from this component's content
+   * wrapper, but a grid widget must not reconstruct its information budget from pixels: the
+   * same pixel width can represent different column spans at different dashboard widths.
+   */
+  readonly gridSize?: ChartGridSize | undefined
   /** The declared size the server renders for. See the module docblock. */
   readonly initialSize?: Size | undefined
   readonly className?: string | undefined
   /** Forwarded to `<Chart>` to stabilise generated ids. Snapshot tests should pass it. */
   readonly id?: string | undefined
+}
+
+/** The serialisable grid footprint needed to resolve a dashboard chart's size family. */
+export type ChartGridSize = {
+  readonly cols: number
+  readonly rows: number
 }
 
 export function AutoChart({
@@ -91,11 +109,16 @@ export function AutoChart({
   policy,
   overrides,
   nominalCellSize,
+  gridSize,
   initialSize,
   className,
   id,
 }: AutoChartProps) {
   const [ref, size] = useElementSize<HTMLDivElement>({ initialSize })
+
+  const gridCols = gridSize?.cols
+  const gridRows = gridSize?.rows
+  const hasGridSize = gridCols !== undefined && gridRows !== undefined
 
   const [previousClass, setPreviousClass] = useState<SizeClass | undefined>(undefined)
 
@@ -103,20 +126,32 @@ export function AutoChart({
   // box does; the stabilised `ctx` changes when the box or accepted rung does; `shape` only
   // when the data does; `plan` when either input does. Fusing these would make an unrelated
   // parent/data identity change rebuild the measured context and the SVG frame.
-  const rawCtx: SizeContext = useMemo(
-    () => sizeContextFromPixels(size.width, size.height, nominalCellSize),
-    [size.width, size.height, nominalCellSize],
-  )
+  const rawCtx: SizeContext = useMemo(() => {
+    const measuredContext = sizeContextFromPixels(size.width, size.height, nominalCellSize)
+    if (!hasGridSize) return measuredContext
+
+    // Pixels remain the measured content box. Only the cell footprint changes here; resolving
+    // it from pixel width would make a 4-column widget mean different things when the dashboard
+    // container is squeezed.
+    return Object.freeze({
+      ...measuredContext,
+      cols: gridCols,
+      rows: gridRows,
+      sizeClass: resolveSizeClass(gridCols, gridRows),
+    })
+  }, [gridCols, gridRows, hasGridSize, nominalCellSize, size.height, size.width])
   const measured = size.width > 0 && size.height > 0
   const nextClass = useMemo(
     () =>
-      resolveSizeClassWithDeadband(
-        rawCtx.width,
-        rawCtx.height,
-        measured ? previousClass : undefined,
-        nominalCellSize,
-      ),
-    [measured, nominalCellSize, previousClass, rawCtx.height, rawCtx.width],
+      hasGridSize
+        ? rawCtx.sizeClass
+        : resolveSizeClassWithDeadband(
+            rawCtx.width,
+            rawCtx.height,
+            measured ? previousClass : undefined,
+            nominalCellSize,
+          ),
+    [hasGridSize, measured, nominalCellSize, previousClass, rawCtx.height, rawCtx.sizeClass, rawCtx.width],
   )
 
   // The state is updated after a measurement has been accepted. Until then, an existing class

@@ -157,6 +157,19 @@ describe('a measurement produces a chart at that measurement’s rung', () => {
     expect(wrapper().querySelector('svg')?.getAttribute('viewBox')).toBe('0 0 700 520')
   })
 
+  it('uses the authoritative grid footprint while retaining measured content pixels', () => {
+    mount(chart({ gridSize: { cols: 6, rows: 5 } }))
+    resize(240, 88)
+
+    // The same pixels are only a 2 × 1 virtual footprint under the standalone default. The
+    // dashboard footprint is authoritative for the information budget, while the SVG still
+    // receives the real content-box pixels.
+    expect(wrapper().querySelector('figure')?.getAttribute('data-size-class')).toBe(
+      resolveSizeClass(6, 5),
+    )
+    expect(wrapper().querySelector('svg')?.getAttribute('viewBox')).toBe('0 0 240 88')
+  })
+
   it('keeps the chart as the wrapper’s only child', () => {
     // ⚠ Structural, not tidy. A sibling in normal flow contributes to the content box the
     // observer reports, so the chart would be planned for a height a caption had already

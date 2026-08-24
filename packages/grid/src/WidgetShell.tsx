@@ -71,7 +71,11 @@ export function WidgetShell({
           <span aria-hidden="true">⋮⋮</span>
         </button>
       </header>
-      <div className="gx-widget-shell__content" data-gx-grid-cancel="true">
+      <div
+        className="gx-widget-shell__content"
+        data-gx-grid-cancel="true"
+        data-gx-widget-content="true"
+      >
         {children}
       </div>
       {footer === undefined ? null : (

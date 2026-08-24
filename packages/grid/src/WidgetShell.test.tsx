@@ -76,6 +76,9 @@ describe('WidgetShell', () => {
     )
 
     expect(container.querySelectorAll('[data-gx-grid-cancel]').length).toBe(4)
+    expect(container.querySelector('[data-gx-widget-content]')?.className).toBe(
+      'gx-widget-shell__content',
+    )
     expect(container.querySelector('[data-gx-drag-handle]')).not.toBeNull()
   })
 })

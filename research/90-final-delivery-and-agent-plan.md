@@ -196,7 +196,7 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | C1.2 | Codex grid | **done** | C1.1 | Constraints, collision and compaction |
 | C1.3 | Codex grid | **done** | C1.2 | Preview/commit callback contract |
 | C2.1 | Codex shell | **done** | C1.1 | Widget regions and drag handle |
-| C2.2 | Codex shell | backlog | C2.1 | Measured chart-content seam and containment |
+| C2.2 | Codex shell | **done** | C2.1 | Measured chart-content seam and containment |
 | C2.3 | Codex shell | backlog | C2.1 | Stable loading/empty/error/stale states |
 | C3.1 | Codex grid | backlog | C1.2 | Keyboard move/resize and focus |
 | C3.2 | Codex grid | backlog | C1.2 | Layout serialisation and migration |

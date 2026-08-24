@@ -41,7 +41,7 @@
  * `<AutoChart>` would have to spell it as an indexed access into someone else's props.
  */
 
-export type { AutoChartProps } from './AutoChart.tsx'
+export type { AutoChartProps, ChartGridSize } from './AutoChart.tsx'
 export { AutoChart } from './AutoChart.tsx'
 
 export type {

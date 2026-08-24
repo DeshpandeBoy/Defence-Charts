@@ -43,17 +43,13 @@
     overflow: hidden;
 
     /*
-     * ⚠ `block-size` is deliberately absent, and its absence is the contract. The wrapper
-     * must be sized by its container — a grid cell, an explicit height, a flex child. A
-     * library that set `block-size: 100%` here would be guessing at a parent it cannot see,
-     * and `100%` of an auto-height parent resolves to `auto`, so the guess would silently
-     * do nothing in exactly the case it was meant to protect.
-     *
-     * The exact CSS spelling of the rule is `contain: size`, and a consumer who has already
-     * committed to sizing the container should add it — it is the strongest guarantee
-     * available. It is not the default because on an auto-height parent it collapses the
-     * box to zero, and a chart that renders nothing is a worse failure than one gate G11
-     * can catch. `AutoChart.tsx`'s docblock carries the long version.
+     * The parent owns the height. On a dashboard this resolves to the shell's content row,
+     * which is itself sized by the RGL item; on an auto-height standalone parent, percentage
+     * sizing resolves back to `auto` and preserves the existing explicit-size contract. This
+     * is the structural seam that keeps header/footer chrome out of the measured box.
      */
+    block-size: 100%;
+    min-block-size: 0;
+    min-inline-size: 0;
   }
 }
