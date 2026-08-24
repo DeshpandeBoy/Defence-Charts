@@ -1,13 +1,344 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" /><meta name="description" content="GX implementation roadmap, verification gates, and next steps." /><title>10 / Roadmap — GX explained</title><link rel="stylesheet" href="guide.css" /><script src="guide.js" defer></script></head>
-<body><header class="site-header"><div class="header-inner"><a class="wordmark" href="index.html"><span class="rail-mark" aria-hidden="true"></span><span>GX / explainer</span></a><nav class="top-nav" aria-label="Explainer pages"><a href="index.html">Map</a><a href="01-problem.html">Problem</a><a href="02-architecture.html">Architecture</a><a href="03-package-tour.html">Packages</a><a href="04-planner.html">Planner</a><a href="05-themes-tokens.html">Themes</a><a href="06-fonts.html">Fonts</a><a href="07-chart-catalog.html">Charts</a><a href="08-consumer-guide.html">Use it</a><a href="09-data-case-study.html">Dataset</a><a href="10-roadmap.html" aria-current="page">Roadmap</a></nav><button class="theme-toggle" type="button" data-theme-toggle>Light</button></div></header>
-<main class="page"><section class="hero"><div><p class="eyebrow">10 / Roadmap</p><h1>Build the proof in the right order.</h1><p class="lede">The roadmap is not a feature wishlist. It is a sequence of contracts: first make the planner honest, then make the renderer safe, then add the client boundary, then widen the chart catalog.</p><div class="hero-note"><strong>Current status.</strong> A1–A6 and B1–B3 are closed for line/area. C0 contract freeze and the real twelve-column grid are next; interaction, chart breadth, and publication follow.</div></div><div class="hero-plate"><div class="plate-title"><strong>Implementation order</strong><span>foundations → breadth → release</span></div><div class="system-flow"><div class="flow-step"><span class="number">A</span><div><strong>Core contract</strong><span>Size, plan, layout, data, text.</span></div><code>complete</code></div><div class="flow-step"><span class="number">B</span><div><strong>Trust surfaces</strong><span>Tokens, typography, granularity, policy.</span></div><code>complete</code></div><div class="flow-step"><span class="number">C</span><div><strong>Grid + interaction</strong><span>Dashboard shell and client behavior.</span></div><code>next</code></div><div class="flow-step"><span class="number">D</span><div><strong>Chart breadth</strong><span>Each new family repeats the full proof.</span></div><code>planned</code></div><div class="flow-step"><span class="number">E</span><div><strong>Publication</strong><span>Packed consumers, Preview, then Free v1.</span></div><code>planned</code></div></div></div></section>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="A plain-English build status for the GX adaptive chart library: what works, what remains, and what must be proven before release." />
+  <title>10 / How we build it — GX explained</title>
+  <link rel="stylesheet" href="guide.css" />
+  <script src="guide.js" defer></script>
+  <style>
+    .build-hero { min-height: auto; padding-bottom: 4.5rem; }
+    .build-hero h1 { max-width: 11ch; }
+    .build-hero .lede { max-width: 48ch; }
+    .build-status-grid { align-items: stretch; }
+    .build-status-grid .card { min-height: 100%; }
+    .build-status-grid .status { margin-bottom: .85rem; }
+    .build-status-grid h3 { margin-bottom: .35rem; }
+    .build-status-grid p { margin-bottom: .7rem; }
+    .build-status-grid code { display: inline-block; margin-top: .2rem; }
+    .build-pipeline { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .75rem; }
+    .build-stage { position: relative; min-height: 12.5rem; padding: 1rem; border: 1px solid var(--line); background: var(--surface); }
+    .build-stage:not(:last-child)::after { position: absolute; top: 2.5rem; right: -.65rem; z-index: 1; width: .8rem; height: .8rem; border-top: 1px solid var(--line-strong); border-right: 1px solid var(--line-strong); content: ""; background: var(--surface); transform: rotate(45deg); }
+    .build-stage .stage-index { display: flex; align-items: center; justify-content: space-between; gap: .7rem; margin-bottom: 1.2rem; color: var(--quiet); font-family: var(--mono); font-size: .7rem; text-transform: uppercase; }
+    .build-stage .stage-index strong { color: var(--blue); font-size: 1.05rem; }
+    .build-stage:nth-child(2) .stage-index strong { color: var(--orange); }
+    .build-stage:nth-child(3) .stage-index strong { color: var(--green); }
+    .build-stage:nth-child(4) .stage-index strong { color: var(--purple); }
+    .build-stage:nth-child(5) .stage-index strong { color: var(--teal); }
+    .build-stage h3 { margin-bottom: .45rem; }
+    .build-stage p { margin-bottom: .8rem; color: var(--muted); font-size: .86rem; }
+    .build-stage small { display: block; color: var(--quiet); font-size: .72rem; }
+    .build-stage .status { margin-top: auto; }
+    .build-group { display: grid; grid-template-columns: 8.5rem 1fr; gap: 1.2rem; padding: 1.25rem 0; border-top: 1px solid var(--line); }
+    .build-group:first-child { border-top: 0; padding-top: 0; }
+    .build-group:last-child { padding-bottom: 0; }
+    .build-group-label { color: var(--quiet); font-family: var(--mono); font-size: .72rem; letter-spacing: .04em; text-transform: uppercase; }
+    .build-group h3 { margin-bottom: .35rem; }
+    .build-group p { max-width: 70ch; margin-bottom: .7rem; color: var(--muted); font-size: .9rem; }
+    .build-group ul { margin: 0; padding-left: 1.1rem; color: var(--muted); font-size: .86rem; }
+    .build-group li + li { margin-top: .35rem; }
+    .build-group li strong { color: var(--ink); }
+    .build-callout { margin-top: 1.4rem; padding: 1.1rem 1.2rem; border-left: 3px solid var(--orange); background: var(--surface); }
+    .build-callout p { margin: 0; color: var(--muted); }
+    .build-callout strong { color: var(--ink); }
+    .build-table td:first-child { width: 14rem; color: var(--ink); }
+    .build-table td:nth-child(2) { width: 22rem; }
+    .build-table .status { margin-bottom: .45rem; }
+    .build-checklist { display: grid; gap: .65rem; margin: 0; padding: 0; list-style: none; }
+    .build-checklist li { display: grid; grid-template-columns: 1.5rem 1fr; gap: .7rem; align-items: start; margin: 0; color: var(--muted); font-size: .9rem; }
+    .build-checklist li::before { display: grid; place-items: center; width: 1.2rem; height: 1.2rem; border: 1px solid var(--line-strong); content: ""; color: var(--green); font-family: var(--mono); font-size: .75rem; }
+    .build-checklist li.done::before { border-color: var(--green); content: "✓"; }
+    .build-checklist strong { color: var(--ink); }
+    .build-next { counter-reset: next-step; display: grid; gap: .7rem; margin: 0; padding: 0; list-style: none; }
+    .build-next li { counter-increment: next-step; display: grid; grid-template-columns: 2rem 1fr; gap: .8rem; align-items: start; padding: .85rem; border: 1px solid var(--line); background: var(--surface); }
+    .build-next li::before { display: grid; place-items: center; width: 1.5rem; height: 1.5rem; content: counter(next-step); border: 1px solid var(--orange); color: var(--orange); font-family: var(--mono); font-size: .72rem; }
+    .build-next strong { display: block; margin-bottom: .2rem; }
+    .build-next span { color: var(--muted); font-size: .86rem; }
+    .build-note-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+    .build-note-grid .card { min-height: 100%; }
+    .build-source { color: var(--muted); font-size: .82rem; }
+    .release-ladder { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); overflow: hidden; border: 1px solid var(--line); background: var(--surface); }
+    .release-step { position: relative; display: flex; min-height: 22rem; flex-direction: column; padding: 1.35rem; border-right: 1px solid var(--line); background: var(--surface); }
+    .release-step:last-child { border-right: 0; }
+    .release-step:nth-child(-n+2)::after { position: absolute; top: 2.15rem; right: -.55rem; z-index: 2; width: .72rem; height: .72rem; border-top: 1px solid var(--line-strong); border-right: 1px solid var(--line-strong); content: ""; background: var(--surface); transform: rotate(45deg); }
+    .release-step.preview { border-top: 4px solid var(--orange); }
+    .release-step.free { border-top: 4px solid var(--green); background: color-mix(in srgb, var(--surface) 94%, var(--green)); }
+    .release-step.pro { border-top: 4px solid var(--purple); background: color-mix(in srgb, var(--surface) 94%, var(--purple)); }
+    .release-step-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; margin-bottom: 2rem; }
+    .release-step-index { color: var(--quiet); font-family: var(--mono); font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; }
+    .release-step-index strong { display: block; margin-bottom: .25rem; color: var(--ink); font-size: 1.35rem; letter-spacing: -.04em; }
+    .release-step .status { margin-top: .1rem; }
+    .release-step h3 { max-width: 13ch; margin-bottom: .65rem; font-size: 1.45rem; line-height: 1.05; }
+    .release-step > p { max-width: 34ch; margin-bottom: 1.2rem; color: var(--muted); font-size: .9rem; }
+    .release-boundary { margin-top: auto; padding-top: .9rem; border-top: 1px solid var(--line); }
+    .release-boundary-label { display: block; margin-bottom: .3rem; color: var(--quiet); font-family: var(--mono); font-size: .68rem; letter-spacing: .08em; text-transform: uppercase; }
+    .release-boundary p { margin: 0; color: var(--muted); font-size: .82rem; }
+    .release-boundary strong { color: var(--ink); }
+    .release-rule { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line); background: var(--surface-2); }
+    .release-rule span { padding: .7rem 1rem; border-right: 1px solid var(--line); color: var(--quiet); font-family: var(--mono); font-size: .68rem; text-align: center; text-transform: uppercase; }
+    .release-rule span:last-child { border-right: 0; }
+    @media (max-width: 900px) {
+      .build-pipeline { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      .build-stage:nth-child(3)::after { display: none; }
+    }
+    @media (max-width: 700px) {
+      .build-pipeline, .build-note-grid, .release-ladder { grid-template-columns: 1fr; }
+      .build-stage { min-height: auto; }
+      .build-stage:not(:last-child)::after { top: auto; right: auto; bottom: -.65rem; left: 2rem; border-top: 0; border-right: 1px solid var(--line-strong); border-bottom: 1px solid var(--line-strong); transform: rotate(45deg); }
+      .build-group { grid-template-columns: 1fr; gap: .45rem; }
+      .build-table td:first-child, .build-table td:nth-child(2) { width: auto; }
+      .release-step { min-height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+      .release-step:last-of-type { border-bottom: 0; }
+      .release-step:nth-child(-n+2)::after { top: auto; right: auto; bottom: -.55rem; left: 1.4rem; border-top: 0; border-right: 1px solid var(--line-strong); border-bottom: 1px solid var(--line-strong); }
+      .release-rule { grid-template-columns: 1fr; }
+      .release-rule span { border-right: 0; border-bottom: 1px solid var(--line); text-align: left; }
+      .release-rule span:last-child { border-bottom: 0; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <a class="wordmark" href="index.html"><span class="rail-mark" aria-hidden="true"></span><span>GX / explainer</span></a>
+      <nav class="top-nav" aria-label="Explainer pages">
+        <a href="index.html">Map</a>
+        <a href="01-problem.html">Problem</a>
+        <a href="02-architecture.html">Architecture</a>
+        <a href="03-package-tour.html">Packages</a>
+        <a href="04-planner.html">Planner</a>
+        <a href="05-themes-tokens.html">Themes</a>
+        <a href="06-fonts.html">Fonts</a>
+        <a href="07-chart-catalog.html">Charts</a>
+        <a href="08-consumer-guide.html">Use it</a>
+        <a href="09-data-case-study.html">Dataset</a>
+        <a href="10-roadmap.html" aria-current="page">Build</a>
+      </nav>
+      <button class="theme-toggle" type="button" data-theme-toggle>Light</button>
+    </div>
+  </header>
 
-<section class="section"><div class="section-head"><div><p class="kicker">Milestone map</p><h2>What is done, what follows.</h2></div><p>Use the status tags as a reading aid, not as a release promise. “Complete” means the repository has the relevant implementation and tests; publishing and broader consumer proof are separate gates.</p></div><div class="timeline"><div class="timeline-item"><span></span><span class="timeline-code">A1 / foundation</span><div><span class="status live">complete</span><h3>Package boundaries and trust rules</h3><p>Dependency direction, DOM ban, token gate, client-directive survival, and deterministic test setup.</p></div></div><div class="timeline-item"><span></span><span class="timeline-code">A2–A3 / planner</span><div><span class="status live">complete</span><h3>Responsive ladder and ChartPlan</h3><p>Six size families, complete line/area rung specs, policy inputs, overrides, plot layout, label degradation, and invariants.</p></div></div><div class="timeline-item"><span></span><span class="timeline-code">A4 / renderer</span><div><span class="status live">complete</span><h3>Server-safe SVG and data frame</h3><p>Canonical data, scales, ticks, paths, points, axes, labels, values, tables, and RSC fixture proof.</p></div></div><div class="timeline-item"><span></span><span class="timeline-code">A5–A6 / client + motion</span><div><span class="status live">implemented / verify continuously</span><h3>AutoChart, resize, motion</h3><p>ResizeObserver seam, containment checks, transition contract, reduced-motion behavior, and real-browser gates.</p></div></div><div class="timeline-item"><span></span><span class="timeline-code">B1–B3 / trust surfaces</span><div><span class="status live">complete for current surface</span><h3>Tokens, typography, granularity, policy provenance</h3><p>Generated CSS, font metrics, token membership/naming, research-to-token dispositions, and typed thresholds.</p></div></div><div class="timeline-item"><span></span><span class="timeline-code">C / grid</span><div><span class="status next">next</span><h3>12-column dashboard shell</h3><p>Wire the grid’s drag/resize behavior to the AutoChart box contract without letting the grid make content decisions.</p></div></div><div class="timeline-item"><span></span><span class="timeline-code">D / catalog</span><div><span class="status next">next</span><h3>Bar, donut, scatter, funnel, KPI, heatmap, progress</h3><p>Each family needs its own ladder, plan semantics, renderer, data contract, accessibility, screenshots, and performance proof.</p></div></div><div class="timeline-item"><span></span><span class="timeline-code">E / release</span><div><span class="status next">next</span><h3>Consumer packaging and publication</h3><p>Build artefacts, exports, tree-shaking, peer dependencies, CSS subpaths, provenance, preview packages, and real consumer integrations.</p></div></div></div></section>
+  <main class="page">
+    <section class="hero build-hero" id="top">
+      <div>
+        <p class="eyebrow">10 / How we build it</p>
+        <h1>From one working chart to a real dashboard library.</h1>
+        <p class="lede">The engine can already make a line or area chart change its level of detail when its space changes. The build is not finished: we still need the dashboard grid, the interaction layer, more chart families, and release proof.</p>
+        <div class="hero-note"><strong>The honest snapshot.</strong> A1–A6 and B1–B3 are working for the current line/area surface. The Widget Layout contract is in handoff/review. The real 12-column grid is the next product-sized piece.</div>
+      </div>
+      <div class="hero-plate">
+        <div class="plate-title"><strong>The build in one picture</strong><span>working → next → publish</span></div>
+        <div class="system-flow">
+          <div class="flow-step"><span class="number">1</span><div><strong>Read the space</strong><span>Measure the widget, not the whole screen.</span></div><code>done</code></div>
+          <div class="flow-step"><span class="number">2</span><div><strong>Choose the answer</strong><span>Build a serialisable plan for that size.</span></div><code>done</code></div>
+          <div class="flow-step"><span class="number">3</span><div><strong>Place the widget</strong><span>Make a real 12-column dashboard shell.</span></div><code>next</code></div>
+          <div class="flow-step"><span class="number">4</span><div><strong>Let people explore</strong><span>Tooltip, legend, keyboard, touch, and tables.</span></div><code>after grid</code></div>
+          <div class="flow-step"><span class="number">5</span><div><strong>Prove the package</strong><span>Install the built tarball in a real app.</span></div><code>release gate</code></div>
+        </div>
+      </div>
+    </section>
 
-<section class="section"><div class="section-head"><div><p class="kicker">Two agent lanes, one truth</p><h2>Parallel work without losing the handoff.</h2></div><p>Codex owns implementation and reproducible verification. Claude owns bounded research and independent review. The coordinator owns shared integration files and final task status.</p></div><div class="grid-3"><article class="card card-accent blue"><span class="tag">Codex / build</span><h3 style="margin-top:.8rem">One task, one write set</h3><p>Grid, interaction, chart-family, packaging, and release agents work in separate modules and worktrees. Central exports and unions are integrated once.</p></article><article class="card card-accent purple"><span class="tag">Claude / research</span><h3 style="margin-top:.8rem">One question, one proposal</h3><p>Research lands in unique evidence files. It labels primary facts, official implementation, artifact observations, inference, and product proposals.</p></article><article class="card card-accent green"><span class="tag">Handoff / resume</span><h3 style="margin-top:.8rem">Git and files carry context</h3><p>Every task records its commit, changed paths, exact test results, blockers, remaining work, and resume command. Chat history is optional.</p></article></div></section>
+    <section class="section" id="today">
+      <div class="section-head">
+        <div><p class="kicker">Start here</p><h2>What is real today?</h2></div>
+        <p>This is the difference between “the code exists” and “the product is ready.” The first three cards are working foundations. The last two are visible gaps, not hidden promises.</p>
+      </div>
+      <div class="grid-4 build-status-grid">
+        <article class="card card-accent green">
+          <span class="status live">implemented</span>
+          <h3>Line + area engine</h3>
+          <p>Plain data goes into a planner. The planner returns a size-aware answer. SVG and a data table can render that answer without needing the browser.</p>
+          <code>@gx/core + @gx/primitives</code>
+        </article>
+        <article class="card card-accent teal">
+          <span class="status live">implemented</span>
+          <h3>Trust surfaces</h3>
+          <p>Tokens, typography, motion, containment, policy, and client/server boundaries have gates around them so the chart does not quietly break.</p>
+          <code>tokens + tests + RSC proof</code>
+        </article>
+        <article class="card card-accent orange">
+          <span class="status next">handoff / review</span>
+          <h3>Widget Layout contract</h3>
+          <p>Stable widget identity, 12-column coordinates, min/max constraints, and a versioned serialisable snapshot now exist. The coordinator still has to promote the handoff.</p>
+          <code>C0.1 / 15 focused tests</code>
+        </article>
+        <article class="card card-accent red">
+          <span class="status limit">not built yet</span>
+          <h3>Real dashboard grid</h3>
+          <p><code>@gx/grid</code> currently exposes a boundary constant, not a usable drag-and-resize dashboard. That is why the project is not a dashboard product yet.</p>
+          <code>C0.2 → C4</code>
+        </article>
+      </div>
+      <div class="build-callout"><p><strong>Simple example.</strong> Today, “make a chart” is proven. Next, “put six charts on a page, move one, resize it, save the layout, and open it again” must become proven.</p></div>
+    </section>
 
-<section class="section"><div class="section-head"><div><p class="kicker">Immediate execution waves</p><h2>What happens next.</h2></div><p>The work is split only after shared contracts are frozen. That keeps parallel agents fast without making their changes incompatible.</p></div><div class="grid-3"><article class="card card-accent blue"><span class="tag">1 / reconcile</span><h3 style="margin-top:.8rem">Close stale decisions</h3><p>Classify every open item from research 80–83 against locked decisions and the verified A/B baseline.</p></article><article class="card card-accent orange"><span class="tag">2 / freeze</span><h3 style="margin-top:.8rem">Define C0 contracts</h3><p>Lock stable widget identity, layout serialization, the RGL adapter, and the grid-to-chart measurement seam.</p></article><article class="card card-accent green"><span class="tag">3 / build</span><h3 style="margin-top:.8rem">Finish the real grid</h3><p>Implement controlled drag/resize, compaction, widget chrome, keyboard access, persistence callbacks, and browser stress proof.</p></article><article class="card card-accent purple"><span class="tag">4 / preview</span><h3 style="margin-top:.8rem">Prove packed consumers</h3><p>Ship line/area plus grid from real tarballs after CSS, exports, RSC, Vite, metadata, and release automation pass.</p></article><article class="card card-accent teal"><span class="tag">5 / expand</span><h3 style="margin-top:.8rem">Add complete families</h3><p>Bar/timebar, donut, KPI/progress, scatter, heatmap, and funnel each repeat the planner, renderer, access, and browser proof.</p></article><article class="card card-accent red"><span class="tag">6 / launch</span><h3 style="margin-top:.8rem">Audit every public claim</h3><p>Install the release candidate from packed artifacts, run the full matrix, update all derived docs once, then publish Free v1.</p></article></div></section>
+    <section class="section" id="pipeline">
+      <div class="section-head">
+        <div><p class="kicker">The dependency order</p><h2>Five stages, one direction.</h2></div>
+        <p>Later work depends on earlier contracts. A donut chart cannot be called complete if the grid cannot place it, its tooltip is not usable, or a consumer cannot install the package that contains it.</p>
+      </div>
+      <div class="build-pipeline" aria-label="Build stages from foundation to release">
+        <article class="build-stage"><div class="stage-index"><strong>A</strong><span>foundation</span></div><h3>Make the chart answer honestly</h3><p>Size, plan, data, text, and SVG agree. The current line/area surface lives here.</p><small>Completed for current surface</small><span class="status live">working</span></article>
+        <article class="build-stage"><div class="stage-index"><strong>B</strong><span>trust</span></div><h3>Make it safe to reuse</h3><p>Tokens, fonts, motion, RSC, containment, and policy stay predictable across apps.</p><small>Completed for current surface</small><span class="status live">working</span></article>
+        <article class="build-stage"><div class="stage-index"><strong>C</strong><span>dashboard</span></div><h3>Give widgets a home</h3><p>Build the actual 12-column grid, widget chrome, controlled layout, and persistence seam.</p><small>Immediate build focus</small><span class="status next">next</span></article>
+        <article class="build-stage"><div class="stage-index"><strong>D</strong><span>breadth</span></div><h3>Teach more chart families</h3><p>Bar, donut, KPI, scatter, heatmap, funnel, and progress each need their own proof.</p><small>Free v1 scope</small><span class="status">planned</span></article>
+        <article class="build-stage"><div class="stage-index"><strong>E</strong><span>release</span></div><h3>Let someone else install it</h3><p>Exports, CSS, tarballs, metadata, a11y, and browser matrices must pass outside this repo.</p><small>Publication gate</small><span class="status">planned</span></article>
+      </div>
+    </section>
 
-<section class="section"><div class="section-head"><div><p class="kicker">The finish line</p><h2>Understandable, extendable, honest.</h2></div><p>The project is successful when a new contributor can answer: where does this decision live, what data does it consume, what does the consumer control, and what proof says it works?</p></div><div class="grid-3"><article class="card"><div class="stat"><strong>Where?</strong></div><p>One package and one source file owns the decision.</p></article><article class="card"><div class="stat"><strong>What?</strong></div><p>Plain data enters; a complete plan and accessible SVG leave.</p></article><article class="card"><div class="stat"><strong>Proof?</strong></div><p>Tests, generated-output checks, and browser evidence distinguish implemented, planned, and unresolved.</p></article></div><p class="source">Authoritative planning documents: <a href="../90-final-delivery-and-agent-plan.md">master delivery plan</a> · <a href="../91-codex-build-workstream.md">Codex build workstream</a> · <a href="../92-claude-research-workstream.md">Claude research workstream</a> · <a href="../handoffs/README.md">handoff protocol</a>.</p></section>
-<nav class="page-nav" aria-label="Page navigation"><a href="09-data-case-study.html"><span>Previous</span><strong>Dataset / case-study and fixture planning</strong></a><a href="index.html"><span>Back to start</span><strong>Map / choose your next page →</strong></a></nav></main></body></html>
+    <section class="section" id="remaining">
+      <div class="section-head">
+        <div><p class="kicker">The remaining build</p><h2>What still has to be completed?</h2></div>
+        <p>Read this from top to bottom. The first group unlocks the next. “Planned” means it is in the product roadmap; it does not mean implementation has started.</p>
+      </div>
+      <div class="card">
+        <div class="build-group">
+          <div class="build-group-label">C0 / contract</div>
+          <div><span class="status next">review, then next</span><h3>Finish the grid seam</h3><p>Turn the layout contract into the adapter that a real grid can use.</p><ul><li><strong>C0.1:</strong> review and promote stable <code>WidgetId</code>, <code>WidgetLayout</code>, 12-column coordinates, constraints, and snapshot versioning.</li><li><strong>C0.2:</strong> map that contract to the pinned <code>react-grid-layout@2.2.4</code> API without leaking the dependency into pure core code.</li></ul></div>
+        </div>
+        <div class="build-group">
+          <div class="build-group-label">C1–C4 / grid</div>
+          <div><span class="status next">immediate build</span><h3>Build the dashboard people can actually use</h3><p>The grid owns outer geometry. The chart only explains its own data inside the box it receives.</p><ul><li><strong>C1:</strong> controlled 12-column layout, compaction, push-down, min/max constraints, and resize measurement.</li><li><strong>C2:</strong> widget shell with header, title, actions, loading/empty/error states, and drag-from-header behavior.</li><li><strong>C3:</strong> keyboard and touch behavior, focus order, visible focus, and chart-content drag cancellation.</li><li><strong>C4:</strong> stable layout persistence callbacks, migration/versioning, stress tests, and real browser proof.</li></ul></div>
+        </div>
+        <div class="build-group">
+          <div class="build-group-label">I1 / explore</div>
+          <div><span class="status">planned after grid seam</span><h3>Make the chart answer questions</h3><p>Interaction is useful only when it remains understandable at every size.</p><ul><li><strong>I1.1:</strong> stable datum and series identity.</li><li><strong>I1.2:</strong> tooltip and crosshair with size-aware degradation.</li><li><strong>I1.3:</strong> legend behavior that can collapse or move without hiding meaning.</li><li><strong>I1.4:</strong> keyboard, pointer, touch, and reduced-motion behavior.</li><li><strong>I1.5:</strong> accessible table fallback and screen-reader evidence.</li></ul></div>
+        </div>
+        <div class="build-group">
+          <div class="build-group-label">D0–D7 / breadth</div>
+          <div><span class="status">planned Free v1</span><h3>Repeat the complete proof for every family</h3><p>Adding a chart name to a registry is not enough. Each family needs data semantics, size rungs, rendering, labels, access, and browser evidence.</p><ul><li><strong>D0:</strong> freeze the chart-family union and family registration seam.</li><li><strong>D1:</strong> bar and time-bar; <strong>D2:</strong> donut; <strong>D3:</strong> KPI and progress.</li><li><strong>D4:</strong> scatter; <strong>D5:</strong> heatmap; <strong>D6:</strong> funnel.</li><li><strong>D7:</strong> catalogue registry, chart matrix, visual/a11y/performance evidence. A sparkline remains a line-chart composition, not a separate family.</li></ul></div>
+        </div>
+        <div class="build-group">
+          <div class="build-group-label">E1–E3 / release</div>
+          <div><span class="status limit">not started</span><h3>Prove that a stranger can consume it</h3><p>The repository passing its own tests is only one part of a release.</p><ul><li><strong>E1:</strong> preview package with line/area plus the real grid from packed artefacts.</li><li><strong>E2:</strong> Free v1 packages, public docs, npm metadata, CSS subpaths, RSC/Vite fixtures, and a11y/browser matrices.</li><li><strong>E3:</strong> publish only after tarball consumers, tree-shaking, provenance, release automation, and claim audit pass.</li></ul></div>
+        </div>
+      </div>
+      <div class="build-callout"><p><strong>Known blocker.</strong> The public package name/npm scope and licence are not yet final. Until that is chosen, the package names are placeholders and publication cannot honestly be marked complete.</p></div>
+    </section>
+
+    <section class="section" id="decisions">
+      <div class="section-head">
+        <div><p class="kicker">Product analysis translated into code</p><h2>What changed in the way we build?</h2></div>
+        <p>The research was useful because it changed ownership decisions. These are the rules that keep the library understandable as it grows.</p>
+      </div>
+      <div class="grid-3">
+        <article class="card card-accent blue"><span class="tag">shadcn lesson</span><h3 style="margin-top:.8rem">Compose the surface</h3><p>Use a chart shell plus optional pieces: config, tooltip, legend, loading, empty, error, and table. The shell organizes the experience; the planner still owns the chart answer.</p></article>
+        <article class="card card-accent orange"><span class="tag">Basedash lesson</span><h3 style="margin-top:.8rem">Give the dashboard context</h3><p>Quiet card chrome, generous space, a shared filter row above the grid, drag from the header, 12px gaps/padding, and a narrow one-column policy make the page feel like a dashboard rather than a pile of charts.</p></article>
+        <article class="card card-accent green"><span class="tag">ownership rule</span><h3 style="margin-top:.8rem">Keep three states separate</h3><p><code>layoutState</code> says where a widget lives. <code>filterState</code> says what the user is asking. <code>dataState</code> says what arrived. The host app owns fetching, filters, and persistence.</p></article>
+        <article class="card card-accent purple"><span class="tag">coordinate rule</span><h3 style="margin-top:.8rem">Each layer owns one box</h3><p>Dashboard → widget → plot → overlay. The grid owns the widget box. The chart divides that box. Tooltips and crosshairs sit out of normal flow. A chart never makes the dashboard grow by surprise.</p></article>
+        <article class="card card-accent teal"><span class="tag">open-source boundary</span><h3 style="margin-top:.8rem">Free first, Pro later</h3><p>Free means core, grid, basic interactions, and standard chart families. Advanced filters, linked views, brush/zoom, and one validated Pro capability come only after the public contracts are stable.</p></article>
+        <article class="card card-accent red"><span class="tag">evidence rule</span><h3 style="margin-top:.8rem">Research is not runtime proof</h3><p>A proposal, a screenshot, and an upstream API note help us decide. They do not prove our package works. Every claim must eventually point to code, tests, packed consumers, or real-browser evidence.</p></article>
+      </div>
+    </section>
+
+    <section class="section" id="components">
+      <div class="section-head">
+        <div><p class="kicker">Who does what?</p><h2>Package responsibilities and unfinished work.</h2></div>
+        <p>This is the simplest way to know where a future change belongs. If a package needs the browser to decide a pure chart answer, the boundary is probably in the wrong place.</p>
+      </div>
+      <div class="table-wrap build-table">
+        <table>
+          <thead><tr><th>Package</th><th>Its job</th><th>Working now</th><th>Still to complete</th></tr></thead>
+          <tbody>
+            <tr><td><strong><code>@gx/core</code></strong></td><td>Pure, serialisable decisions: sizes, plans, scales, layout, identities, and chart data contracts.</td><td><span class="status live">strong foundation</span><br />Line/area planning and layout contracts are tested without the DOM.</td><td>Identity and interaction contracts for every new family; no React or browser APIs may enter.</td></tr>
+            <tr><td><strong><code>@gx/primitives</code></strong></td><td>Small SVG/table renderers that can be used by server-safe consumers.</td><td><span class="status live">current line/area</span><br />SVG, labels, values, and table fallback.</td><td>Renderers for the new families and their accessible equivalents.</td></tr>
+            <tr><td><strong><code>@gx/react</code></strong></td><td>Browser boundary: measure the widget, call the planner, render, and animate safely.</td><td><span class="status live">AutoChart seam</span><br />ResizeObserver, size context, motion, and RSC-safe split.</td><td>Tooltip, crosshair, legend, keyboard/touch behavior, and the widget-shell seam.</td></tr>
+            <tr><td><strong><code>@gx/grid</code></strong></td><td>Outer dashboard geometry: placement, drag, resize, compaction, constraints, and persistence callbacks.</td><td><span class="status limit">boundary stub</span><br />The 12-column constant and the pure layout contract exist.</td><td>Real adapter, controlled layout, stable identity, widget chrome, access, and stress proof.</td></tr>
+            <tr><td><strong><code>@gx/tokens</code></strong></td><td>Theme values for color, type, spacing, strokes, gaps, ticks, and policy-related presentation.</td><td><span class="status live">current surface</span><br />Typed/generated token system and font metrics.</td><td>Family-specific tokens, public CSS subpaths, and release artefacts.</td></tr>
+            <tr><td><strong><code>@gx/testing</code></strong></td><td>Proof helpers for pure Node, fake resize, browser, RSC, and consumer fixtures.</td><td><span class="status next">gates exist</span><br />The current A/B baseline is heavily tested.</td><td>Grid stress, full chart matrix, accessibility evidence, and packed-tarball consumers.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="section" id="milestones">
+      <div class="section-head">
+        <div><p class="kicker">Release shape</p><h2>What each milestone promises.</h2></div>
+        <p>These are deliberately smaller promises. A release is useful when its boundary is clear, not when every possible chart is named.</p>
+      </div>
+      <div class="release-ladder" aria-label="Release milestones">
+        <article class="release-step preview">
+          <div class="release-step-head"><div class="release-step-index"><strong>01</strong>preview</div><span class="status next">next release</span></div>
+          <h3>A real dashboard slice</h3>
+          <p>Line/area, the 12-column grid, widget shell, basic interaction, and a packed consumer fixture.</p>
+          <div class="release-boundary"><span class="release-boundary-label">Not included yet</span><p><strong>Full chart catalogue</strong> and commercial Pro features.</p></div>
+        </article>
+        <article class="release-step free">
+          <div class="release-step-head"><div class="release-step-index"><strong>02</strong>free v1</div><span class="status">planned</span></div>
+          <h3>The reusable open library</h3>
+          <p>Preview plus bar/time-bar, donut, KPI/progress, scatter, heatmap, funnel, public docs, and a11y/browser matrices.</p>
+          <div class="release-boundary"><span class="release-boundary-label">Not included yet</span><p><strong>Advanced filters</strong>, linked views, and Pro-only interaction.</p></div>
+        </article>
+        <article class="release-step pro">
+          <div class="release-step-head"><div class="release-step-index"><strong>03</strong>v1.1 / commercial</div><span class="status limit">later</span></div>
+          <h3>One proven paid extension</h3>
+          <p>Advanced filters, brush/zoom/annotations where justified, and one validated Pro capability with an explicit package boundary.</p>
+          <div class="release-boundary"><span class="release-boundary-label">Boundary rule</span><p><strong>Not started.</strong> Never imply this is in the Free package today.</p></div>
+        </article>
+        <div class="release-rule" aria-hidden="true"><span>build the smallest useful proof</span><span>expand only after contracts hold</span><span>charge only for a validated boundary</span></div>
+      </div>
+    </section>
+
+    <section class="section" id="done">
+      <div class="section-head">
+        <div><p class="kicker">Definition of done</p><h2>When can we say “this is built”?</h2></div>
+        <p>All of these must be true for the corresponding surface. A green card in the repository is not a green release by itself.</p>
+      </div>
+      <div class="build-note-grid">
+        <article class="card card-accent green">
+          <h3>For a chart family</h3>
+          <ul class="build-checklist">
+            <li class="done"><span><strong>Plan:</strong> its data meaning and size ladder are explicit.</span></li>
+            <li class="done"><span><strong>Render:</strong> SVG and table/fallback output agree with the plan.</span></li>
+            <li><span><strong>Explore:</strong> tooltip, legend, keyboard, touch, and reduced-motion behavior are proven.</span></li>
+            <li><span><strong>Evidence:</strong> unit, browser, accessibility, visual, and performance checks pass.</span></li>
+          </ul>
+        </article>
+        <article class="card card-accent orange">
+          <h3>For the library release</h3>
+          <ul class="build-checklist">
+            <li><span><strong>Install:</strong> a fresh app can use the packed artefacts, not just source files.</span></li>
+            <li><span><strong>Import:</strong> public exports, CSS, ESM, RSC, Vite, peer dependencies, and tree-shaking work.</span></li>
+            <li><span><strong>Operate:</strong> layout, filters, data, and persistence boundaries are documented.</span></li>
+            <li><span><strong>Claim:</strong> docs describe what is shipped, what is experimental, and what is still planned.</span></li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section" id="next">
+      <div class="section-head">
+        <div><p class="kicker">The next exact sequence</p><h2>What should happen next?</h2></div>
+        <p>This order keeps the work small enough to review and strong enough to unlock the next step.</p>
+      </div>
+      <ol class="build-next">
+        <li><div><strong>Promote C0.1 after coordinator review.</strong><span>Make the Widget Layout contract the accepted source of truth. Do not add React behavior to it.</span></div></li>
+        <li><div><strong>Complete C0.2 with the pinned grid adapter.</strong><span>Keep the pure <code>./core</code> and browser-facing <code>./react</code> split clear, then prove one controlled 12-column layout.</span></div></li>
+        <li><div><strong>Build C1–C4 as one dependable dashboard seam.</strong><span>Placement, compaction, widget chrome, keyboard/touch access, measurement, persistence, and browser stress belong before chart expansion.</span></div></li>
+        <li><div><strong>Build I1 and D0 together at the contract level.</strong><span>Stable datum identity, tooltip/legend/accessibility contracts, and the chart-family union prevent every later family from inventing a different interaction model.</span></div></li>
+        <li><div><strong>Cut Preview from packed artefacts.</strong><span>Line/area plus the real grid must work in a fresh consumer before the project calls itself reusable.</span></div></li>
+        <li><div><strong>Expand through D1–D7, then publish Free v1.</strong><span>Each family repeats the same proof. Publication research can prepare the path, but it cannot replace runtime and consumer evidence.</span></div></li>
+      </ol>
+      <div class="build-callout"><p><strong>In one sentence:</strong> we are not just adding charts; we are building a dependable chain from data → plan → widget box → interaction → package → consumer proof.</p></div>
+    </section>
+
+    <section class="section" id="sources">
+      <div class="section-head">
+        <div><p class="kicker">Keep reading</p><h2>Where the detail lives.</h2></div>
+        <p>This page is the plain-English build map. Use the other pages for deeper explanations and the repository research files for the authoritative decision record.</p>
+      </div>
+      <div class="grid-3">
+        <article class="card"><h3><a href="02-architecture.html">Architecture</a></h3><p>How data, sizing, planning, rendering, and the browser boundary connect.</p></article>
+        <article class="card"><h3><a href="03-package-tour.html">Packages</a></h3><p>What each package is meant to own and how a consumer enters the system.</p></article>
+        <article class="card"><h3><a href="08-consumer-guide.html">Use it</a></h3><p>How an app supplies data, themes, fonts, filters, layout, and host-owned state.</p></article>
+      </div>
+      <p class="build-source">Authoritative repo records: <code>research/00-decisions.md</code>, <code>research/90-final-delivery-and-agent-plan.md</code>, <code>research/91-codex-build-workstream.md</code>, product analysis <code>80–83</code>, and the task handoffs under <code>research/handoffs/</code>.</p>
+    </section>
+
+    <nav class="page-nav" aria-label="Page navigation">
+      <a href="09-data-case-study.html"><span>Previous</span><strong>Dataset / case-study and fixture planning</strong></a>
+      <a href="index.html"><span>Back to start</span><strong>Map / choose your next page →</strong></a>
+    </nav>
+  </main>
+</body>
+</html>
