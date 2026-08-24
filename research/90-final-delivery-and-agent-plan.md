@@ -189,7 +189,7 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | P0.1 | Coordinator | **done** | — | Final agent plan and continuity system; committed and verified |
 | P0.2 | Claude research | **claimed** | P0.1 | Decision-conflict register |
 | P0.3 | User/coordinator | blocked on decision | — | Final public name and npm scope |
-| P0.4 | Codex integration | ready | P0.2 | Record RGL `./core` + `./react` boundary and widget-shell owner |
+| P0.4 | Codex integration | **done** | P0.2 | Record RGL `./core` + `./react` boundary and widget-shell owner |
 | C0.1 | Codex integration | ready | P0.1, P0.2, P0.4 | Grid/widget/identity contract |
 | C0.2 | Codex integration | ready | C0.1 | Pin and prove RGL adapter boundary |
 | C1.1 | Codex grid | backlog | C0.2 | Controlled grid wrapper |
@@ -223,9 +223,9 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | E1.4 | Codex release | backlog | E1.2, E1.3 | `publint`, `attw`, package-content and no-network gates |
 | E2.1 | Codex release | backlog | P0.3, E1.4 | Rename, Changesets and trusted Preview publish |
 | E3.1 | Coordinator | backlog | D7.1, E2.1 | Free-v1 claim and release audit |
-| R1 | Claude research | **claimed** | P0.1 | RGL/grid current evidence |
-| R2 | Claude research | **claimed** | P0.1 | Chart-family evidence gaps |
-| R3 | Claude research | **claimed** | P0.1 | Interaction/a11y/i18n evidence |
+| R1 | Claude research | ready | P0.1 | RGL/grid current evidence |
+| R2 | Claude research | ready | P0.1 | Chart-family evidence gaps |
+| R3 | Claude research | ready | P0.1 | Interaction/a11y/i18n evidence |
 | R4 | Claude research | ready | P0.1 | Publication and competitor refresh |
 | R5 | Claude/user research | optional | Preview | User-validation protocol and findings |
 
