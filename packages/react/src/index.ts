@@ -43,6 +43,8 @@
 
 export type { AutoChartProps, ChartGridSize } from './AutoChart.tsx'
 export { AutoChart } from './AutoChart.tsx'
+export type { LegendControlProps } from './LegendControl.tsx'
+export { LegendControl } from './LegendControl.tsx'
 
 export type {
   CreateObserver,
