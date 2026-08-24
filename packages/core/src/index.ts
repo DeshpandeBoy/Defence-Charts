@@ -13,7 +13,7 @@
  *      them would pass tests forever. Text width comes from a character-advance model
  *      instead (`./text.ts`, `research/41-text-metrics.md`).
  *
- * ⚠ **The registered families are `'line'`, `'area'`, `'bar'`, and `'timebar'`.** The
+ * ⚠ **The registered families are `'line'`, `'area'`, `'bar'`, `'timebar'`, and `'scatter'`.** The
  * `ChartPlan` contract, `PlanPolicy`, `measureText()`, size classification and `planChart()`
  * itself are all here, while every other `ChartType` throws with the D milestone that adds it.
  * A silent fallback plan would be the same failure species as happy-dom's `0`.

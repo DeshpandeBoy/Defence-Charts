@@ -30,6 +30,8 @@ describe('D0.1 renderer seam', () => {
       'line',
       'bar',
       'bar',
+      'scatter',
+      'scatter',
     ])
     expect(BUILT_IN_MARK_RENDERERS.flatMap((entry) => entry.markKinds)).toEqual([
       'none',
@@ -37,6 +39,8 @@ describe('D0.1 renderer seam', () => {
       'horizon',
       'none',
       'bar',
+      'none',
+      'point',
     ])
   })
 
@@ -62,6 +66,18 @@ describe('D0.1 renderer seam', () => {
     )
     expect(html).toContain('class="gx-bar"')
     expect(html).not.toContain('class="gx-line"')
+  })
+
+  it('renders registered scatter points from the shared frame point seam', () => {
+    const ctx = sizeContextFromPixels(900, 520)
+    const plan = planChart('scatter', ctx, describeShape(DATA))
+    const frame = resolveFrame(plan, DATA, ctx, resolvePolicy()).series[0]
+    expect(frame).toBeDefined()
+    const html = renderToStaticMarkup(
+      <svg>{renderBuiltInMark({ frame: frame!, plan, policy: resolvePolicy() })}</svg>,
+    )
+    expect(html).toContain('class="gx-point gx-scatter-point"')
+    expect(html).toContain('data-scatter-index="0"')
   })
 
   it('preserves the explicit unsupported-mark failure path', () => {

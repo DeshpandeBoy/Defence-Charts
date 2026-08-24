@@ -46,8 +46,8 @@
  * tree-shaking and is not pulled in by a component import. Importing `Chart` and not the
  * stylesheet renders a correct, unstyled, invisible chart — which is why it is said here.
  *
- * ⚠ **Current scope.** Mark kinds `'line'`, `'horizon'`, `'none'`, and D1.1's `'bar'` render.
- * `'arc'`, `'point'` and `'cell'` throw, naming the later milestone that adds them — the same
+ * ⚠ **Current scope.** Mark kinds `'line'`, `'horizon'`, `'none'`, D1.1's `'bar'`, and D4.1's
+ * `'point'` render. `'arc'` and `'cell'` throw, naming the later milestone that adds them — the same
  * contract `planChart()` holds, and for the same reason: a silent fallback to a line would
  * render another family's data as a line chart.
  */

@@ -17,9 +17,9 @@ import {
   planForRow,
 } from '../apps/playground/src/family-matrix/matrix.ts'
 
-describe('shared line, area, bar, and timebar family matrix', () => {
-  it('covers all four registered families across all six information budgets', () => {
-    expect(FAMILY_TYPES).toEqual(['line', 'area', 'bar', 'timebar'])
+describe('shared line, area, bar, timebar, and scatter family matrix', () => {
+  it('covers all five registered families across all six information budgets', () => {
+    expect(FAMILY_TYPES).toEqual(['line', 'area', 'bar', 'timebar', 'scatter'])
     expect(FAMILY_MATRIX.map((row) => row.id)).toEqual([
       'micro',
       'tile',
@@ -39,11 +39,15 @@ describe('shared line, area, bar, and timebar family matrix', () => {
               ? row.id === 'micro'
                 ? 'none'
                 : 'bar'
+              : type === 'scatter'
+                ? row.id === 'micro'
+                  ? 'none'
+                  : 'point'
               : row.expected.primary,
           area:
             type === 'area' && row.expected.primary === 'line'
               ? true
-              : type === 'bar' || type === 'timebar'
+              : type === 'bar' || type === 'timebar' || type === 'scatter'
                 ? null
                 : row.expected.area,
         }

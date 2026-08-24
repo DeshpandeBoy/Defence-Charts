@@ -7,7 +7,7 @@ import {
   type SizeContext,
 } from '@gx/core'
 
-export const FAMILY_TYPES = ['line', 'area', 'bar', 'timebar'] as const
+export const FAMILY_TYPES = ['line', 'area', 'bar', 'timebar', 'scatter'] as const
 export type FamilyType = (typeof FAMILY_TYPES)[number]
 
 export const MATRIX_SERIES_IDS = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot'] as const
@@ -29,7 +29,7 @@ export const EMPTY_DATA: readonly Series[] = Object.freeze([])
 export const ERROR_MESSAGE = 'Family fixture error: the host-owned state is announced here.'
 
 export type ExpectedFamilyMetadata = {
-  readonly primary: 'none' | 'line' | 'bar'
+  readonly primary: 'none' | 'line' | 'bar' | 'point'
   readonly area: boolean | null
   readonly valueLegibility: 'single-value' | 'shape-only' | 'values'
   readonly interaction: 'none' | 'tap' | 'hover'
@@ -256,7 +256,7 @@ export function metadataForPlan(plan: ChartPlan): ExpectedFamilyMetadata & {
     type: plan.type,
     sizeClass: plan.sizeClass,
     primary:
-      primary.kind === 'line' || primary.kind === 'none' || primary.kind === 'bar'
+      primary.kind === 'line' || primary.kind === 'none' || primary.kind === 'bar' || primary.kind === 'point'
         ? primary.kind
         : 'line',
     area: primary.kind === 'line' ? primary.area : null,
