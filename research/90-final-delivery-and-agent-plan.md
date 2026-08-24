@@ -206,7 +206,7 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | I1.2 | Codex interaction | done | I1.1 | Pure overlay placement |
 | I1.3 | Codex interaction | done | I1.2 | Tooltip and crosshair layer |
 | I1.4 | Codex interaction | done | I1.1 | Static and interactive legends |
-| I1.5 | Codex interaction | backlog | I1.3, I1.4 | Keyboard/touch interaction matrix |
+| I1.5 | Codex interaction | in progress | I1.3, I1.4 | Keyboard/touch interaction matrix |
 | D0.1 | Codex integration | in progress | C0.1 | Parallel chart-family module seam |
 | D0.2 | Codex verification | backlog | D0.1 | Shared family acceptance/visual fixture |
 | D1.1 | Codex bar | backlog | D0.2, R2 | Bar/timebar family |
