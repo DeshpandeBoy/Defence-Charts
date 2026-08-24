@@ -191,11 +191,11 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | P0.3 | User/coordinator | blocked on decision | — | Final public name and npm scope |
 | P0.4 | Codex integration | **done** | P0.2 | Record RGL `./core` + `./react` boundary and widget-shell owner |
 | C0.1 | Codex integration | **done** | P0.1, P0.2, P0.4 | Grid/widget/identity contract |
-| C0.2 | Codex integration | **handoff** | C0.1 | Pin and prove RGL adapter boundary |
-| C1.1 | Codex grid | **handoff** | C0.2 | Controlled grid wrapper |
-| C1.2 | Codex grid | **handoff** | C1.1 | Constraints, collision and compaction |
-| C1.3 | Codex grid | **handoff** | C1.2 | Preview/commit callback contract |
-| C2.1 | Codex shell | **handoff** | C1.1 | Widget regions and drag handle |
+| C0.2 | Codex integration | **done** | C0.1 | Pin and prove RGL adapter boundary |
+| C1.1 | Codex grid | **done** | C0.2 | Controlled grid wrapper |
+| C1.2 | Codex grid | **done** | C1.1 | Constraints, collision and compaction |
+| C1.3 | Codex grid | **done** | C1.2 | Preview/commit callback contract |
+| C2.1 | Codex shell | **done** | C1.1 | Widget regions and drag handle |
 | C2.2 | Codex shell | backlog | C2.1 | Measured chart-content seam and containment |
 | C2.3 | Codex shell | backlog | C2.1 | Stable loading/empty/error/stale states |
 | C3.1 | Codex grid | backlog | C1.2 | Keyboard move/resize and focus |
