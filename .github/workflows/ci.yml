@@ -256,6 +256,10 @@ jobs:
         if: '!cancelled()'
         run: pnpm lint:containment
 
+      - name: Gate C4.1 — complete WidgetGrid browser matrix
+        if: '!cancelled()'
+        run: pnpm lint:grid
+
       # ⚠ The only gate in the repo that can observe A6 at all. A transition is not a property
       # of markup — it is an engine interpolating between two computed values over time — so
       # jsdom cannot see one, and the entire node suite stays green with `chart.css`'s motion

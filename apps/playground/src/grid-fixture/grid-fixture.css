@@ -1,0 +1,148 @@
+:root {
+  color-scheme: light;
+  font-family: system-ui, sans-serif;
+  background: #f5f6f8;
+  color: #20242b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-inline-size: 1100px;
+}
+
+button {
+  font: inherit;
+}
+
+.grid-fixture {
+  min-block-size: 1800px;
+  padding: 24px;
+}
+
+.grid-fixture__header {
+  max-inline-size: 900px;
+}
+
+.grid-fixture__header h1 {
+  margin: 0;
+}
+
+.grid-fixture__controls {
+  display: grid;
+  gap: 12px;
+  margin-block: 20px;
+  max-inline-size: 960px;
+}
+
+.grid-fixture__controls fieldset,
+.grid-fixture__button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 8px;
+}
+
+.grid-fixture__controls button {
+  min-block-size: 32px;
+  padding-inline: 10px;
+}
+
+.grid-fixture__ancestor {
+  min-block-size: 900px;
+  max-inline-size: 980px;
+  padding: 8px;
+  border: 2px solid #646d78;
+  background: #e6e9ed;
+}
+
+.grid-fixture__ancestor--grid {
+  display: grid;
+}
+
+.grid-fixture__ancestor--flex {
+  display: flex;
+}
+
+.grid-fixture__grid-host {
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.grid-fixture__slot {
+  position: relative;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+.grid-fixture__pointer-handle {
+  position: absolute;
+  inset-block-start: 4px;
+  inset-inline-start: 4px;
+  z-index: 3;
+  min-inline-size: 40px;
+  min-block-size: 24px;
+  padding: 2px 6px;
+  border: 1px dashed #2f5d91;
+  border-radius: 4px;
+  background: #d9eaff;
+  color: #173657;
+  cursor: grab;
+  user-select: none;
+}
+
+.grid-fixture__pointer-handle:active {
+  cursor: grabbing;
+}
+
+.grid-fixture[data-gx-mode='read-only'] [data-gx-pointer-handle] {
+  display: none;
+}
+
+.react-grid-item > .react-resizable-handle {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-end: 0;
+  display: block;
+  z-index: 4;
+  inline-size: 28px;
+  block-size: 28px;
+  cursor: nwse-resize;
+}
+
+.grid-fixture__tab--hidden {
+  display: none;
+}
+
+.grid-fixture__status {
+  display: block;
+  margin-block-start: 16px;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-gx-widget-id] {
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition: none !important;
+  }
+}
+
+@media (forced-colors: active) {
+  .grid-fixture__pointer-handle {
+    border-color: ButtonText;
+    background: Canvas;
+    color: ButtonText;
+  }
+}

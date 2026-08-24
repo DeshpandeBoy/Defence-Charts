@@ -31,6 +31,7 @@
     "lint:treeshake": "node scripts/check-treeshake.mjs",
     "lint:boundary": "node scripts/check-boundary.mjs",
     "lint:containment": "node scripts/check-containment.mjs",
+    "lint:grid": "node scripts/check-grid-browser.mjs",
     "lint:rsc": "node scripts/check-rsc.mjs",
     "lint:motion": "node scripts/check-motion.mjs",
     "probe:motion": "node scripts/probe-motion.mjs",
