@@ -15,8 +15,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@gx/core": "workspace:*",
     "@gx/react": "workspace:*",
-    "react-grid-layout": "^2.2.4"
+    "react-grid-layout": "2.2.4"
   },
   "peerDependencies": {
     "react": "^19.0.0",

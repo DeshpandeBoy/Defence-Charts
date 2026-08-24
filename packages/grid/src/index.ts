@@ -16,4 +16,11 @@
  * Basedash lacks — land with the shell itself.
  */
 
-export const GRID_COLUMNS = 12
+export { GRID_COLUMNS } from '@gx/core'
+export type { LayoutSnapshot, WidgetLayout, WidgetLayoutInput } from '@gx/core'
+export {
+  normalizeGridLayout,
+  normalizeLayoutSnapshot,
+  RGL_VERSION,
+} from './adapter.ts'
+export type { GridLayoutOptions } from './adapter.ts'
