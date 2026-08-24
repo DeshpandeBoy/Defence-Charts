@@ -23,6 +23,9 @@
   .gx-chart {
     /* A <figure> carries a UA margin. Unitless 0 is not a length literal. */
     margin: 0;
+    /* Enable container queries for the chart */
+    container-type: inline-size;
+    container-name: gx-chart;
     /*
      * ⚠ `--gx-surface-text-color`, not a ramp index. Every mark in this file that is not a series colour
      * inherits from here — tick labels, the axis rule, the tick marks, the gridlines (all
@@ -204,6 +207,17 @@
     font-weight: var(--gx-value-label-font-weight);
     letter-spacing: var(--gx-value-label-letter-spacing);
     text-anchor: middle;
+  }
+
+  .gx-label[data-halo='light'],
+  .gx-label[data-halo='dark'],
+  .gx-value-label[data-halo='light'],
+  .gx-value-label[data-halo='dark'] {
+    paint-order: stroke fill;
+    stroke: var(--gx-value-label-halo-color);
+    stroke-width: var(--gx-value-label-halo-width);
+    stroke-opacity: var(--gx-value-label-halo-opacity);
+    stroke-linejoin: round;
   }
 
   /* --- Data table ------------------------------------------------------------------- */

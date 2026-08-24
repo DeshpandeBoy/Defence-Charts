@@ -32,11 +32,31 @@ export type PointMarksProps = {
    * a decision the resolver already took.
    */
   readonly budget?: number
+  /** Point density threshold in px. If average point spacing is below this, points are hidden. */
+  readonly autoHideDensityThreshold?: number | null
   readonly className?: string
 }
 
-export function PointMarks({ points, extrema, mode, budget, className }: PointMarksProps) {
+export function PointMarks({
+  points,
+  extrema,
+  mode,
+  budget,
+  autoHideDensityThreshold = null,
+  className,
+}: PointMarksProps) {
   if (mode === 'none') return null
+  if (points.length < 2) return null // Can't calculate density for < 2 points, but also they don't overlap
+
+  if (autoHideDensityThreshold !== null) {
+    const first = points[0]
+    const last = points[points.length - 1]
+    if (first !== undefined && last !== undefined) {
+      const span = last.x - first.x
+      const density = span / (points.length - 1)
+      if (density < autoHideDensityThreshold) return null
+    }
+  }
 
   const visible = selectIndices(points, extrema, mode)
   if (budget !== undefined && visible.length > budget) return null

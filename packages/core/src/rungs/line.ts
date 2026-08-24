@@ -213,7 +213,7 @@ export const microRung: Rung = ({ type, ctx, shape, policy }) =>
     axes: Object.freeze({ x: AXIS_OFF, y: AXIS_OFF, y2: null }),
     marks: Object.freeze({
       primary: Object.freeze({ kind: 'none' }) as MarkSpec,
-      points: Object.freeze({ mode: 'none' }),
+      points: Object.freeze({ mode: 'none', autoHideDensityThreshold: null }),
       pointBudget: policy.pointBudget,
       renderer: renderer(shape, policy),
       facet: NO_FACET,
@@ -223,6 +223,7 @@ export const microRung: Rung = ({ type, ctx, shape, policy }) =>
       valueLabels: 'none',
       axisLabelDegrade: 'none',
       maxChars: null,
+      labelHalo: 'none',
     }),
     legend: Object.freeze({ placement: 'absent' }) as LegendPlan,
     interaction: Object.freeze({
@@ -322,7 +323,7 @@ export const tileRung: Rung = ({ type, ctx, shape, policy }) => {
     axes: Object.freeze({ x: AXIS_OFF, y: AXIS_OFF, y2: null }),
     marks: Object.freeze({
       primary,
-      points: Object.freeze({ mode: 'none' }),
+      points: Object.freeze({ mode: 'none', autoHideDensityThreshold: null }),
       pointBudget: policy.pointBudget,
       renderer: renderer(shape, policy),
       facet: NO_FACET,
@@ -332,6 +333,7 @@ export const tileRung: Rung = ({ type, ctx, shape, policy }) => {
       valueLabels: 'none',
       axisLabelDegrade: 'none',
       maxChars: null,
+      labelHalo: 'none',
     }),
     legend,
     interaction: Object.freeze({
@@ -402,6 +404,15 @@ export const stripRung: Rung = ({ type, ctx, shape, policy }) => {
     ticks: Object.freeze({ mode: 'endpoints' }) as TickPlan,
     title: false,
     gridlines: false,
+    labelFlush: false,
+    labelBound: false,
+    tickBand: 'center',
+    tickExtra: false,
+    minExtent: 0,
+    maxExtent: 0,
+    translate: 0,
+    strokeCap: 'butt',
+    dashPhase: 0,
   })
 
   const legend: LegendPlan = Object.freeze({ placement: 'absent' })
@@ -437,7 +448,7 @@ export const stripRung: Rung = ({ type, ctx, shape, policy }) => {
     axes: Object.freeze({ x, y: AXIS_OFF, y2: null }),
     marks: Object.freeze({
       primary,
-      points: Object.freeze({ mode: 'none' }),
+      points: Object.freeze({ mode: 'none', autoHideDensityThreshold: null }),
       pointBudget: policy.pointBudget,
       renderer: renderer(shape, policy),
       facet: NO_FACET,
@@ -447,6 +458,7 @@ export const stripRung: Rung = ({ type, ctx, shape, policy }) => {
       valueLabels: 'none',
       axisLabelDegrade: degrade.step,
       maxChars: degrade.maxChars,
+      labelHalo: 'none',
     }),
     legend,
     interaction: Object.freeze({
@@ -567,6 +579,15 @@ function valueLegibleRung(
     // The axis title arrives at Canvas, where there is finally room for it.
     title: atLeastCanvas,
     gridlines: true,
+    labelFlush: false,
+    labelBound: false,
+    tickBand: 'center',
+    tickExtra: false,
+    minExtent: 0,
+    maxExtent: 0,
+    translate: 0,
+    strokeCap: 'butt',
+    dashPhase: 0,
   })
 
   // See the `stageRung` docblock: Tier C, and deliberately not `shape.series > 4`.
@@ -578,6 +599,15 @@ function valueLegibleRung(
           ticks: yTicks,
           title: true,
           gridlines: false,
+          labelFlush: false,
+          labelBound: false,
+          tickBand: 'center',
+          tickExtra: false,
+          minExtent: 0,
+          maxExtent: 0,
+          translate: 0,
+          strokeCap: 'butt',
+          dashPhase: 0,
         })
       : null
 
@@ -606,6 +636,15 @@ function valueLegibleRung(
     ticks: Object.freeze({ mode: 'count', count: policy.ticksMin }) as TickPlan,
     title: false,
     gridlines: false,
+    labelFlush: false,
+    labelBound: false,
+    tickBand: 'center',
+    tickExtra: false,
+    minExtent: 0,
+    maxExtent: 0,
+    translate: 0,
+    strokeCap: 'butt',
+    dashPhase: 0,
   })
 
   const chrome: ChromeSpec = {
@@ -642,7 +681,10 @@ function valueLegibleRung(
     marks: Object.freeze({
       primary,
       // Points appear at Canvas: below it they are noise, at it they are readable targets.
-      points: Object.freeze({ mode: atLeastCanvas ? 'all' : 'none' }),
+      points: Object.freeze({ 
+        mode: atLeastCanvas ? 'all' : 'none',
+        autoHideDensityThreshold: null 
+      }),
       pointBudget: policy.pointBudget,
       renderer: renderer(shape, policy),
       facet,
@@ -652,6 +694,7 @@ function valueLegibleRung(
       valueLabels: isStage ? 'extrema' : 'none',
       axisLabelDegrade: degrade.step,
       maxChars: degrade.maxChars,
+      labelHalo: 'none',
     }),
     legend,
     interaction: Object.freeze({

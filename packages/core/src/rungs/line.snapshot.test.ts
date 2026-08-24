@@ -58,7 +58,7 @@ const MICRO_PLAN: ChartPlan = {
   axes: { x: OFF, y: OFF, y2: null },
   marks: {
     primary: { kind: 'none' },
-    points: { mode: 'none' },
+    points: { mode: 'none', autoHideDensityThreshold: null },
     pointBudget: 2000,
     renderer: 'svg',
     facet: { mode: 'none' },
@@ -68,6 +68,7 @@ const MICRO_PLAN: ChartPlan = {
     valueLabels: 'none',
     axisLabelDegrade: 'none',
     maxChars: null,
+    labelHalo: 'none',
   },
   legend: { placement: 'absent' },
   interaction: {
@@ -136,13 +137,13 @@ const STRIP_PLAN: ChartPlan = {
     // ⚠ `'endpoints'` is a distinct state from `{ mode: 'count', count: 2 }`. Endpoints
     // label the extent of the data; two Talbot ticks label a readable scale. Collapsing
     // them would silently upgrade this rung to value-legible.
-    x: { visible: true, domainLine: true, ticks: { mode: 'endpoints' }, title: false, gridlines: false },
+    x: { visible: true, domainLine: true, ticks: { mode: 'endpoints' }, title: false, gridlines: false, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
     y: OFF,
     y2: null,
   },
   marks: {
     primary: { kind: 'line', area: false },
-    points: { mode: 'none' },
+    points: { mode: 'none', autoHideDensityThreshold: null },
     pointBudget: 2000,
     renderer: 'svg',
     facet: { mode: 'none' },
@@ -152,6 +153,7 @@ const STRIP_PLAN: ChartPlan = {
     valueLabels: 'none',
     axisLabelDegrade: 'none',
     maxChars: null,
+    labelHalo: 'none',
   },
   legend: { placement: 'absent' },
   interaction: {
@@ -191,10 +193,10 @@ const PANEL_PLAN: ChartPlan = {
     // §6's comment derives this from width: `max(2, round(420 / 100))`. The fixture is
     // 500 px wide and this rung's y axis carries no title, so the gutter is 87.96 px and
     // the plot is 412.04 px — `round(4.12)` = 4, the same count §6 reaches from 420.
-    x: { visible: true, domainLine: true, ticks: { mode: 'count', count: 4 }, title: false, gridlines: false },
+    x: { visible: true, domainLine: true, ticks: { mode: 'count', count: 4 }, title: false, gridlines: false, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
     // ⚠ `domainLine: false` with `gridlines: true`. Gridlines are the landmarks a reader
     // traces to a label; a rule beside them is ink that adds nothing.
-    y: { visible: true, domainLine: false, ticks: { mode: 'count', count: 4 }, title: false, gridlines: true },
+    y: { visible: true, domainLine: false, ticks: { mode: 'count', count: 4 }, title: false, gridlines: true, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
     y2: null,
   },
   labels: { ...STRIP_PLAN.labels, seriesLabels: 'direct-end' },
@@ -228,8 +230,8 @@ const CANVAS_PLAN: ChartPlan = {
     // plot, so `round(451.64 / 100)` = 5. §6 elides `axes.x` here, which means "same as
     // Panel" — and "same as Panel" means the same FORMULA, not the same number at a
     // different width.
-    x: { visible: true, domainLine: true, ticks: { mode: 'count', count: 5 }, title: false, gridlines: false },
-    y: { visible: true, domainLine: false, ticks: { mode: 'count', count: 4 }, title: true, gridlines: true },
+    x: { visible: true, domainLine: true, ticks: { mode: 'count', count: 5 }, title: false, gridlines: false, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
+    y: { visible: true, domainLine: false, ticks: { mode: 'count', count: 4 }, title: true, gridlines: true, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
     y2: null,
   },
   /**
@@ -255,7 +257,7 @@ const CANVAS_PLAN: ChartPlan = {
    * recoverable direction; colliding is not.
    */
   labels: { ...PANEL_PLAN.labels, axisLabelDegrade: 'abbreviate', maxChars: 4 },
-  marks: { ...PANEL_PLAN.marks, points: { mode: 'all' } },
+  marks: { ...PANEL_PLAN.marks, points: { mode: 'all', autoHideDensityThreshold: null } },
   // ⚠ Conditional on `shape.series > 4`. At ≤ 4 this rung keeps `'direct'` — §4.4's
   // non-monotonic rule. Canvas does not automatically have MORE legend than Panel.
   legend: {
@@ -282,9 +284,9 @@ const STAGE_PLAN: ChartPlan = {
   sizeClass: 'stage',
   axes: {
     // 1000 − 106.03 − 106.03 (y2) − 142.33 = 645.62 px plot → 6 ticks.
-    x: { visible: true, domainLine: true, ticks: { mode: 'count', count: 6 }, title: false, gridlines: false },
-    y: { visible: true, domainLine: false, ticks: { mode: 'count', count: 4 }, title: true, gridlines: true },
-    y2: { visible: true, domainLine: false, ticks: { mode: 'count', count: 4 }, title: true, gridlines: false },
+    x: { visible: true, domainLine: true, ticks: { mode: 'count', count: 6 }, title: false, gridlines: false, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
+    y: { visible: true, domainLine: false, ticks: { mode: 'count', count: 4 }, title: true, gridlines: true, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
+    y2: { visible: true, domainLine: false, ticks: { mode: 'count', count: 4 }, title: true, gridlines: false, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
   },
   marks: {
     ...CANVAS_PLAN.marks,

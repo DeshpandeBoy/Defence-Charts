@@ -25,8 +25,25 @@
    */
   :where(:root) {
     /* --- Surface ----------------------------------------------------------------- */
-    /* The charcoal continuum this world sits on. */
+    /*
+     * The charcoal continuum this world sits on.
+     *
+     * Merged with Canvas tokens.
+     */
     --gx-surface-color: #141618;
+    --gx-plot-color: transparent;
+    --gx-plot-border-color: #ddd;
+    --gx-plot-border-width: 0;
+    --gx-plot-margin-top: 20px;
+    --gx-plot-height-optimal: 24px;
+    --gx-plot-height-min-for-values: 40px;
+    --gx-plot-height-saturation: 80px;
+    --gx-widget-padding: 16px;
+    --gx-widget-padding-tight: 11px;
+    --gx-widget-radius: 8px;
+    --gx-widget-radius-inner: calc(var(--gx-widget-radius) - var(--gx-widget-padding));
+    --gx-widget-gap: 16px;
+    --gx-widget-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
 
     /* --- Series ------------------------------------------------------------------ */
     /*
@@ -112,6 +129,38 @@
      */
     --gx-grid-opacity: 0.2;
     --gx-axis-color: currentColor;
+    --gx-grid-x-visible: 0;
+    --gx-grid-y-visible: 1;
+    --gx-grid-width: 1px;
+    --gx-grid-dash: none;
+    --gx-grid-dash-offset: 0;
+    --gx-grid-cap: butt;
+    --gx-grid-z: 1;
+    --gx-grid-min-spacing: 8px;
+    --gx-grid-minor-visible: 0;
+    --gx-grid-minor-count: 5;
+    --gx-grid-minor-opacity: 0.5;
+    --gx-grid-band-color: transparent;
+    --gx-axis-x-domain-visible: 1;
+    --gx-axis-y-domain-visible: 0;
+    --gx-axis-domain-width: 1px;
+    --gx-axis-domain-color: #888;
+    --gx-axis-translate: 0.5px;
+    --gx-tick-visible: 1;
+    --gx-tick-length: 5px;
+    --gx-tick-width: 1px;
+    --gx-tick-color: #888;
+    --gx-tick-cap: butt;
+    --gx-tick-padding: 6px;
+    --gx-tick-offset: 0;
+    --gx-tick-offset-band: -0.5;
+    --gx-tick-round: 1;
+    --gx-tick-minor-length: 3px;
+    --gx-tick-minor-width: 0;
+    --gx-tick-spacing-x: 100px;
+    --gx-tick-spacing-y: 35px;
+    --gx-tick-count-min: 2;
+    --gx-tick-min-step: unset;
 
     /* --- Marks ------------------------------------------------------------------- */
     /*
@@ -126,10 +175,50 @@
      * `r` is a real CSS property in SVG2 and browsers shipped it, which is what makes
      * `--gx-point-radius` a token rather than an attribute — decision 012.
      */
-    --gx-line-stroke-width: 1.5px;
-    --gx-point-radius: 2.5px;
-    --gx-area-opacity: 0.15;
+    --gx-line-stroke-width: 2px;
+    --gx-point-radius: 4px;
+    --gx-area-opacity: 0.2;
     --gx-horizon-band-opacity: 0.3; /* The horizon ramp multiplies this by band index — see chart.css. */
+    --gx-line-stroke-width-muted: 0.5px;
+    --gx-line-stroke-width-hover: calc(var(--gx-line-stroke-width) + 0.5px);
+    --gx-line-cap: round;
+    --gx-line-join: round;
+    --gx-line-miter-limit: 10;
+    --gx-line-dash: none;
+    --gx-line-dash-offset: 0;
+    --gx-line-crisp: 1;
+    --gx-area-stroke-width: var(--gx-line-stroke-width);
+    --gx-bar-gap-inner: 0.1;
+    --gx-bar-gap-outer: 0.2;
+    --gx-bar-radius: 3px;
+    --gx-bar-border-width: 0;
+    --gx-bar-min-length: 0;
+    --gx-bar-width-max: none;
+    --gx-bar-max-categories: 24;
+    --gx-point-radius-hover: —;
+    --gx-point-stroke-width: 0;
+    --gx-point-stroke-color: var(--gx-surface-color);
+    --gx-point-shape: circle;
+    --gx-point-auto-hide-threshold: 2;
+    --gx-arc-inner-radius: 0;
+    --gx-arc-pad-angle: 0;
+    --gx-arc-radius: calc(min(100%, 100cqh) / 2 - 2px);
+    --gx-arc-corner-radius: 0;
+    --gx-arc-border-width: 0;
+    --gx-arc-start-angle: 0;
+    --gx-arc-sliced-offset: 10px;
+    --gx-arc-label-distance: 30px;
+    --gx-arc-label-radius-offset: 0.5;
+    --gx-arc-link-diagonal-length: 16px;
+    --gx-arc-link-straight-length: 24px;
+    --gx-arc-link-thickness: 1px;
+    --gx-arc-link-text-offset: 6px;
+    --gx-arc-label-min-angle: 0.3rad;
+    --gx-arc-label-callout-below: 3deg;
+    --gx-arc-min-render-angle: 1deg;
+    --gx-arc-summary-min-radius: 45px;
+    --gx-arc-summary-font-size-ratio: 0.35;
+    --gx-arc-max-categories: 7;
 
     /* --- Series colour ----------------------------------------------------------- */
     /*
@@ -138,19 +227,6 @@
      * setting one property on the figure rather than by reaching into a data attribute.
      */
     --gx-series-color: var(--gx-series-1);
-
-    /* --- Radius ------------------------------------------------------------------ */
-    --gx-widget-radius: 0; /* Unitless 0 is not a length literal, so it needs no gate exemption. */
-
-    /* --- Shadow ------------------------------------------------------------------ */
-    /*
-     * Elevation exists in name only and resolves to nothing. DESIGN.md:190.
-     *
-     * ⚠ **The names must stay alive.** A token that exists in one theme only cannot be swapped by
-     * a class, which is the whole mechanism. 43-theming.md §3.2.
-     */
-    --gx-widget-shadow: none;
-    --gx-tooltip-shadow: none;
 
     /* --- Typography -------------------------------------------------------------- */
     /*
@@ -171,6 +247,28 @@
      */
     --gx-label-landmark-grade: 150;
     --gx-label-line-height: 1.2em;
+    --gx-label-font-size: 11px;
+    --gx-label-color: #888;
+    --gx-label-angle: 0;
+    --gx-label-offset: 0;
+    --gx-label-limit: 180px;
+    --gx-label-overflow: ellipsis;
+    --gx-label-overlap: greedy;
+    --gx-label-separation: 1.5em;
+    --gx-label-rotate-limit: 80deg;
+    --gx-label-step: 0;
+    --gx-label-degrade-order: abbreviate split rotate transpose;
+    --gx-axis-title-padding: 4px;
+    --gx-title-offset: 4px;
+    --gx-subtitle-font-size: 12px;
+    --gx-subtitle-padding: 3px;
+    --gx-value-label-font-size: 10px;
+    --gx-value-label-font-weight: 700;
+    --gx-value-label-offset: 4px;
+    --gx-value-label-radius: 3px;
+    --gx-value-label-halo-width: 2px;
+    --gx-value-label-halo-color: var(--gx-surface-color);
+    --gx-value-label-halo-opacity: 1;
 
     /* --- Motion ------------------------------------------------------------------ */
     /*
@@ -220,11 +318,57 @@
     --gx-motion-duration: var(--gx-motion-duration-rescale);
     --gx-motion-stage-delay: var(--gx-motion-stage-delay-rescale);
     --gx-motion-easing: ease-out;
+    --gx-motion-duration-hover: 100ms;
+    --gx-motion-throttle: 33ms;
+    --gx-motion-stages-max: 2;
+    --gx-motion-fade-factor: 0.2;
+    --gx-motion-hover-neutral: 0.5;
 
     /* --- Spacing ----------------------------------------------------------------- */
     /* A calc() multiplier is not a length literal — 43-theming.md §6.2. */
     --gx-size-gap: 4px;
     --gx-plot-padding: calc(var(--gx-size-gap) * 2);
+
+    /* --- Legend ------------------------------------------------------------------ */
+    --gx-legend-orient: right;
+    --gx-legend-padding: 0;
+    --gx-legend-offset: 18px;
+    --gx-legend-gap-column: 10px;
+    --gx-legend-gap-row: 2px;
+    --gx-legend-symbol-size: 14px;
+    --gx-legend-symbol-gap: 5px;
+    --gx-legend-symbol-stroke-width: 1.5px;
+    --gx-legend-symbol-shape: circle;
+    --gx-legend-label-offset: 4px;
+    --gx-legend-label-limit: 160px;
+    --gx-legend-symbol-limit: 30;
+    --gx-legend-title-padding: 5px;
+    --gx-legend-title-limit: 180px;
+    --gx-legend-gradient-length: 200px;
+    --gx-legend-gradient-thickness: 16px;
+    --gx-legend-gradient-label-offset: 2px;
+    --gx-legend-max-entries: 8;
+
+    /* --- Tooltip ----------------------------------------------------------------- */
+    --gx-tooltip-color: #fff;
+    --gx-tooltip-radius: 4px;
+    --gx-tooltip-padding: 8px;
+    --gx-tooltip-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+    --gx-tooltip-offset: 16px;
+    --gx-tooltip-header-gap: 5px;
+    --gx-tooltip-row-padding: 3px 5px;
+    --gx-tooltip-chip-gap: 7px;
+    --gx-tooltip-delay: 350ms;
+    --gx-tooltip-hide-delay: 500ms;
+    --gx-tooltip-snap: 10px;
+    --gx-crosshair-width: 1px;
+    --gx-crosshair-color: #ccc;
+    --gx-crosshair-opacity: 0.75;
+    --gx-crosshair-dash: 6 6;
+    --gx-crosshair-z: 2;
+    --gx-crosshair-label-radius: 3px;
+    --gx-crosshair-label-padding: 8px;
+    --gx-crosshair-label-font-size: 11px;
   }
 
   /*

@@ -51,7 +51,7 @@
 
 import type { SizeContext } from './context.ts'
 import type { AxisPlan, DegradeStep, LegendPlan, NarrativePlan, TickPlan } from './plan.ts'
-import type { PlanPolicy } from './policy.ts'
+import { type PlanPolicy, DEFAULT_POLICY } from './policy.ts'
 import { measureText, RANK_FONT_SIZE, type TypeRank } from './text.ts'
 
 /**
@@ -87,67 +87,22 @@ export type ChromeSpec = {
   readonly tablePresent: boolean
 }
 
-// --- Tier C geometry -------------------------------------------------------------------
-
 /**
  * ⚠ **Tier C, and local on purpose.** These four are rendering geometry: the length of a
- * tick mark, the gaps around it, and the weight of an axis rule. `research/42-typography.md`
- * reconciled the *type* scale, but the spacing scale is Milestone **B1** — one of the 51
- * `--gx-*` names still unspecified.
+ * tick mark, the gaps around it, and the weight of an axis rule.
  *
- * They are not `PlanPolicy` fields, and that is a decision rather than an oversight.
- * `PlanPolicy` is the consumer-facing plan-input surface; adding `tickLength` to it now
- * would freeze a public name months before the token tree it has to agree with exists,
- * and a policy field that disagrees with its token is the two-spellings-of-one-concept bug
- * §1.4 bans. When B1 lands, these move to tokens and this block is deleted.
- *
- * ⚠ They influence the plan only through one comparison — plot height against
- * `plotHeightOptimal` and `horizonMinHeight` at Tile — and at Tile every axis is off, so
- * all four are multiplied by zero on the one rung whose *mark* they could change. Their
- * real effect is on tick counts at Panel and above, where being a few pixels out moves a
- * count by at most one.
- */
-const TICK_LENGTH = 4
-const TICK_LABEL_GAP = 3
-const AXIS_TITLE_GAP = 4
-const AXIS_RULE_WIDTH = 1
-
-/**
- * Gap between the legend band and the plot, and between the table affordance and the plot.
- * Tier **C**, same reasoning as above.
- */
-const REGION_GAP = 4
-
-/**
- * The same four numbers, published so that the renderer draws chrome at the size the layout
- * reserved for it.
- *
+ * The same numbers, published so that the renderer draws chrome at the size the layout
+ * reserved for it. 
+ * 
  * ⚠ **This is not a token, and it must not become one before the layout math reads the token
- * too.** The obvious-looking alternative is to let CSS own tick length — `rect { height:
- * var(--gx-tick-length) }`, which decision 012 makes *possible* by insisting on `<rect>` over
- * `<line>`. But `xAxisBand()` above adds `TICK_LENGTH` into the band it subtracts from the
- * plot. A theme that set the token to `8` would move the glyphs and not the band: the ticks
- * would grow into the labels below them, the labels would still be positioned for a 4 px tick,
- * and the resolver would have no way to know. Same failure as two disagreeing plot boxes, one
- * layer down and harder to see, because a theme is the last place anyone looks for a layout
- * bug.
- *
- * So the renderer reads these, and B1 may only tokenise them by routing `PlanPolicy` through
- * the same values — which is exactly what the block above says it is waiting for.
- *
- * Tier **C** throughout; see the docblock above for why they are near-harmless anyway.
+ * too.**
  */
 export const CHROME_METRICS = Object.freeze({
-  /** How far a tick protrudes from the axis rule, px. */
-  tickLength: TICK_LENGTH,
-  /** Between the tick and its label, px. */
-  tickLabelGap: TICK_LABEL_GAP,
-  /** Between the tick labels and the axis title, px. */
-  axisTitleGap: AXIS_TITLE_GAP,
-  /** Thickness of the axis domain rule, px. */
-  axisRuleWidth: AXIS_RULE_WIDTH,
-  /** Between the plot and an adjacent region — legend, table affordance. px. */
-  regionGap: REGION_GAP,
+  tickLength: DEFAULT_POLICY.tickLength,
+  tickLabelGap: DEFAULT_POLICY.tickLabelGap,
+  axisTitleGap: DEFAULT_POLICY.axisTitleGap,
+  axisRuleWidth: DEFAULT_POLICY.axisRuleWidth,
+  regionGap: DEFAULT_POLICY.regionGap,
 })
 
 /**
@@ -199,11 +154,11 @@ export function lineHeight(rank: TypeRank, policy: PlanPolicy): number {
 export function xAxisBand(axis: AxisPlan, policy: PlanPolicy): number {
   if (!axis.visible) return 0
 
-  let band = axis.domainLine ? AXIS_RULE_WIDTH : 0
+  let band = axis.domainLine ? policy.axisRuleWidth : 0
   if (axis.ticks.mode !== 'none') {
-    band += TICK_LENGTH + TICK_LABEL_GAP + lineHeight(TICK_LABEL_RANK, policy)
+    band += policy.tickLength + policy.tickLabelGap + lineHeight(TICK_LABEL_RANK, policy)
   }
-  if (axis.title) band += AXIS_TITLE_GAP + lineHeight(AXIS_TITLE_RANK, policy)
+  if (axis.title) band += policy.axisTitleGap + lineHeight(AXIS_TITLE_RANK, policy)
   return band
 }
 
@@ -218,17 +173,20 @@ export function xAxisBand(axis: AxisPlan, policy: PlanPolicy): number {
 export function yAxisGutter(axis: AxisPlan | null, policy: PlanPolicy): number {
   if (axis === null || !axis.visible) return 0
 
-  let gutter = axis.domainLine ? AXIS_RULE_WIDTH : 0
+  let gutter = axis.domainLine ? policy.axisRuleWidth : 0
   if (axis.ticks.mode !== 'none') {
     gutter +=
-      TICK_LENGTH +
-      TICK_LABEL_GAP +
+      policy.tickLength +
+      policy.tickLabelGap +
       measureText(Y_TICK_LABEL_SAMPLE, TICK_LABEL_RANK, policy.typography.metrics)
   }
   // A vertical axis title is rotated, so it costs its LINE HEIGHT in width, not its
   // text length. Getting this the wrong way round is a ~10× error in the safe-looking
   // direction; it is called out because the mistake reads as correct.
-  if (axis.title) gutter += AXIS_TITLE_GAP + lineHeight(AXIS_TITLE_RANK, policy)
+  if (axis.title) gutter += policy.axisTitleGap + lineHeight(AXIS_TITLE_RANK, policy)
+
+  if (axis.minExtent > 0) gutter = Math.max(gutter, axis.minExtent)
+  if (axis.maxExtent > 0) gutter = Math.min(gutter, axis.maxExtent)
   return gutter
 }
 
@@ -261,9 +219,12 @@ export function legendBands(
       LEGEND_RANK,
       policy.typography.metrics,
     )
-    return { width: REGION_GAP + swatch + TICK_LABEL_GAP + label, height: 0 }
+    return { width: policy.regionGap + swatch + policy.tickLabelGap + label, height: 0 }
   }
-  return { width: 0, height: REGION_GAP + entries * lineHeight(LEGEND_RANK, policy) }
+  return { 
+    width: 0, 
+    height: policy.regionGap + entries * lineHeight(LEGEND_RANK, policy) + Math.max(0, entries - 1) * policy.legendItemGap 
+  }
 }
 
 /**
@@ -319,7 +280,7 @@ export function valueBand(
  */
 export function tableBand(spec: ChromeSpec, policy: PlanPolicy): number {
   if (!spec.tablePresent || spec.tableDisclosure !== 'button') return 0
-  return REGION_GAP + lineHeight(TICK_LABEL_RANK, policy)
+  return policy.regionGap + lineHeight(TICK_LABEL_RANK, policy)
 }
 
 // --- The plot box ----------------------------------------------------------------------

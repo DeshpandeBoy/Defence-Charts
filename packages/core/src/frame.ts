@@ -159,6 +159,8 @@ export type SeriesFrame = {
   readonly area: string | null
   /** Empty unless the mark kind is `'horizon'`. */
   readonly bands: readonly HorizonBand[]
+  /** Empty unless the mark kind is `'cell'`. */
+  readonly cells: readonly CellFrame[]
   /**
    * ⚠ **Every** defined point, always — not only the ones `marks.points.mode` renders.
    * Geometry belongs to the frame and the decision to draw belongs to the plan, so
@@ -247,6 +249,13 @@ export type ChartFrame = {
       readonly y: number
     } | null
   } | null
+}
+
+export type CellFrame = {
+  readonly x: number
+  readonly y: number
+  readonly width: number
+  readonly height: number
 }
 
 /**
@@ -385,6 +394,7 @@ function computeTicks(
   label: (value: number) => string,
   temporal: boolean,
   origin: number,
+  tickExtra: boolean = false,
 ): readonly ComputedTick[] {
   if (plan.mode === 'none') return []
 
@@ -429,6 +439,26 @@ function computeTicks(
     seen.add(tick.value)
     ticks.push(tick)
   }
+
+  // Support tickExtra: Vega-Lite concept to add an extra tick past the strict domain
+  if (tickExtra && count > 0 && ticks.length > 0) {
+    const step = ticks.length > 1 ? (ticks[1]!.offset - ticks[0]!.offset) : 0
+    if (step > 0) {
+      const lastTick = ticks[ticks.length - 1]!
+      const extraOffset = lastTick.offset + step
+      // Infer the value space step by taking the difference in values.
+      // For linear numeric scales, this is straightforward. For temporal, it's an approximation.
+      const valStep = ticks.length > 1 
+        ? (Number(ticks[1]!.value instanceof Date ? ticks[1]!.value.getTime() : ticks[1]!.value) - 
+           Number(ticks[0]!.value instanceof Date ? ticks[0]!.value.getTime() : ticks[0]!.value))
+        : 0;
+      
+      const extraValueRaw = Number(lastTick.value instanceof Date ? lastTick.value.getTime() : lastTick.value) + valStep;
+      const extraTick = toTick(extraValueRaw)
+      ticks.push(extraTick)
+    }
+  }
+
   return Object.freeze(ticks)
 }
 
@@ -750,6 +780,7 @@ export function resolveFrame(
       (v) => formatXLabel(temporal ? new Date(v) : v),
       temporal,
       plot.x,
+      plan.axes.x.tickExtra,
     ),
     yTicks: computeTicks(
       plan.axes.y.ticks,
@@ -758,6 +789,7 @@ export function resolveFrame(
       formatYLabel,
       false,
       plot.y,
+      plan.axes.y.tickExtra,
     ),
     series: Object.freeze(series),
     zeroLine: (ylo ?? 0) <= 0 && (yhi ?? 0) >= 0 ? yScale(0) : null,
@@ -799,6 +831,7 @@ function seriesFrame(
   let line: string | null = null
   let area: string | null = null
   let bands: readonly HorizonBand[] = []
+  let cells: readonly CellFrame[] = []
 
   if (mark.kind === 'line') {
     // ⚠ `.defined()` is what makes `y: null` a gap rather than an interpolation. Without it
@@ -821,6 +854,32 @@ function seriesFrame(
     }
   } else if (mark.kind === 'horizon') {
     bands = horizonBands(s.points, mark.bands, plot, toX, defined)
+  } else if (mark.kind === 'cell') {
+    // A cell is a rectangle (like a bar) defined by the band coordinates and the Y value.
+    // toX() gives the start of the category band, but wait — for categorical data, toX might give the centre.
+    // If it gives the centre, we'd need the bandWidth to calculate start/end.
+    // Assuming toX gives the band's start or centre, we can compute the width if we know the point spacing.
+    // Since we don't have the explicit bandWidth here, we calculate it from the distance between points.
+    const bandWidth = points.length > 1 ? points[1]!.x - points[0]!.x : plot.width
+    const cellsArr: CellFrame[] = []
+    
+    for (const p of points) {
+      // If toX(p.x) returns the centre of the band, the band starts at toX(p.x) - bandWidth/2.
+      // ECharts/amCharts logic: `bandStart` and `bandEnd` are fractions (0..1) of the bandWidth.
+      const startX = (p.x - bandWidth / 2) + bandWidth * mark.bandStart
+      const endX = (p.x - bandWidth / 2) + bandWidth * mark.bandEnd
+      
+      const yHi = p.y
+      const yLo = yScale(0) // Bars typically start at 0
+      
+      cellsArr.push(Object.freeze({
+        x: startX,
+        y: Math.min(yHi, yLo),
+        width: Math.max(0, endX - startX),
+        height: Math.abs(yLo - yHi),
+      }))
+    }
+    cells = Object.freeze(cellsArr)
   }
 
   return Object.freeze({
@@ -830,6 +889,7 @@ function seriesFrame(
     line,
     area,
     bands,
+    cells,
     points: Object.freeze(points),
     extrema: extremaOf(points),
   })

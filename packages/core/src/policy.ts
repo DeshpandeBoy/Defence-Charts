@@ -35,12 +35,28 @@ import { DEFAULT_TYPOGRAPHY } from './text.ts'
  * evidence.
  */
 export type PlanPolicy = {
-  /** px between ticks. **A-lit** — Talbot 2010. */
-  readonly tickTargetSpacing: number
+  /** px between X-axis ticks. **A-lit** — Talbot 2010 / Plot. */
+  readonly tickTargetSpacingX: number
+  /** px between Y-axis ticks. **A-lit** — Talbot 2010 / Plot. */
+  readonly tickTargetSpacingY: number
   /** **A-lit** — Talbot 2010. */
   readonly ticksMin: number
   /** In `em`, not px. **A-lit** — Talbot 2010. */
   readonly labelMinSpacing: number
+  /** Series count threshold to adjust bar gaps (ECharts behavior). **C**. */
+  readonly barGapSeriesThreshold: number
+  /** px. Legend item gap. **C**. */
+  readonly legendItemGap: number
+  /** px. Tick mark length. **C**. */
+  readonly tickLength: number
+  /** px. Gap between tick and label. **C**. */
+  readonly tickLabelGap: number
+  /** px. Gap between labels and axis title. **C**. */
+  readonly axisTitleGap: number
+  /** px. Width of the axis rule itself. **C**. */
+  readonly axisRuleWidth: number
+  /** px. Gap between the legend/table band and the plot. **C**. */
+  readonly regionGap: number
 
   /** px. Optimal plot height for a line; below it, change encoding. **A-lit** — Heer 2009. */
   readonly plotHeightOptimal: number
@@ -208,9 +224,17 @@ export type PlanChartFn = (
  * label-degradation behaviour observed against this default is provisional.
  */
 export const DEFAULT_POLICY: PlanPolicy = Object.freeze({
-  tickTargetSpacing: 100,
+  tickTargetSpacingX: 100,
+  tickTargetSpacingY: 100,
   ticksMin: 2,
   labelMinSpacing: 1.5,
+  barGapSeriesThreshold: 4,
+  legendItemGap: 16,
+  tickLength: 4,
+  tickLabelGap: 3,
+  axisTitleGap: 4,
+  axisRuleWidth: 1,
+  regionGap: 4,
   plotHeightOptimal: 24,
   plotHeightMinValues: 40,
   plotHeightSaturation: 80,

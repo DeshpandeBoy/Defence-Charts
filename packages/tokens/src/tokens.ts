@@ -107,17 +107,24 @@ export type TokenGroup = {
 export const TOKEN_GROUPS: readonly TokenGroup[] = [
   {
     title: 'Surface',
-    note: 'The charcoal continuum this world sits on.',
+    note: 'The charcoal continuum this world sits on.\n\nMerged with Canvas tokens.',
     tokens: [
-      {
-        name: 'surface-color',
-        value: '#141618',
-        tier: 'C',
-        source: 'DESIGN.md:48 — ours, and no source is implied.',
-      },
+      { name: 'surface-color', value: '#141618', tier: 'C', source: 'DESIGN.md:48 — ours, and no source is implied.' },
+      { name: 'plot-color', value: 'transparent', tier: 'A-impl', source: 'Vega `style.cell.fill:\'transparent\'`' },
+      { name: 'plot-border-color', value: '#ddd', tier: 'A-impl', source: 'Vega `style.cell.stroke: lightGray`' },
+      { name: 'plot-border-width', value: '0', tier: 'C', source: 'No library draws a plot frame by default; Carbon names a "graph frame" in its anatomy but ships no option' },
+      { name: 'plot-margin-top', value: '20px', tier: 'A-impl', source: 'Plot `marginTop = 20` (`30` when the x-axis is top-anchored)' },
+      { name: 'plot-height-optimal', value: '24px', tier: 'A-lit', source: 'Heer, Kong & Agrawala CHI 2009 (via `05`)' },
+      { name: 'plot-height-min-for-values', value: '40px', tier: 'A-lit', source: 'Heer & Bostock CHI 2010 (via `05`)' },
+      { name: 'plot-height-saturation', value: '80px', tier: 'A-lit', source: 'Heer & Bostock CHI 2010 (via `05`)' },
+      { name: 'widget-padding', value: '16px', tier: 'A-lit', source: 'Apple HIG: "the standard margin width for widgets — 16 points for most widgets"' },
+      { name: 'widget-padding-tight', value: '11px', tier: 'A-lit', source: 'Apple HIG: "setting margins of 11 points can work well"' },
+      { name: 'widget-radius', value: '8px', tier: 'B', source: 'Spectrum `CORNER_RADIUS = 6`; Android OEM ceiling 16 dp. 8 sits between and is a common step' },
+      { name: 'widget-radius-inner', value: 'calc(var(--gx-widget-radius) - var(--gx-widget-padding))', tier: 'A-lit', source: 'Apple `ContainerRelativeShape` — "an inset version of the current container shape"' },
+      { name: 'widget-gap', value: '16px', tier: 'C', source: 'No published source for a bento gutter (§4.5)' },
+      { name: 'widget-shadow', value: '0 1px 2px rgb(0 0 0 / 0.25)', tier: 'A-impl', source: 'Nivo tooltip `boxShadow` (Carbon uses `0 1px 6px 0 rgba(0,0,0,0.2)`)' },
     ],
   },
-
   {
     title: 'Series',
     note: [
@@ -137,7 +144,6 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
       { name: 'series-6', value: '#fa2017', tier: 'B', source: 'DESIGN.md:57', aside: 'Fe I     615.0nm ·  29.2° ·  4.56' },
     ],
   },
-
   {
     title: 'Neutral ramp',
     note: [
@@ -166,7 +172,6 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
       { name: 'ramp-neutral-9', value: '#e2e5e8', tier: 'C', source: 'DESIGN.md:99' },
     ],
   },
-
   {
     title: 'Surface text',
     tokens: [
@@ -193,7 +198,6 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
       },
     ],
   },
-
   {
     title: 'Chrome',
     note: [
@@ -236,9 +240,40 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
         tier: 'B',
         source: 'Ours — the same reasoning as `grid-color`.',
       },
+      { name: 'grid-x-visible', value: '0', tier: 'A-impl', source: 'Highcharts `xAxis.gridLineWidth: null` (x off, y on); Nivo `enableGridX: false`' },
+      { name: 'grid-y-visible', value: '1', tier: 'A-impl', source: 'Highcharts, Nivo `enableGridY: true`, ECharts `splitLine.show: true`' },
+      { name: 'grid-width', value: '1px', tier: 'A-impl', source: 'Vega, Nivo, visx, ECharts, Highcharts minor all `1`' },
+      { name: 'grid-dash', value: 'none', tier: 'A-impl', source: 'Highcharts `gridLineDashStyle: \'Solid\'`; ECharts `type: \'solid\'`' },
+      { name: 'grid-dash-offset', value: '0', tier: 'A-impl', source: 'ECharts `dashOffset: 0`' },
+      { name: 'grid-cap', value: 'butt', tier: 'A-impl', source: 'ECharts `cap: \'butt\'`' },
+      { name: 'grid-z', value: '1', tier: 'A-impl', source: 'Highcharts `gridZIndex: 1`' },
+      { name: 'grid-min-spacing', value: '8px', tier: 'A-lit', source: 'Heer & Bostock 2010: "gridlines be separated by at least 8 pixels"' },
+      { name: 'grid-minor-visible', value: '0', tier: 'A-impl', source: 'amCharts `minorGridEnabled: false`; ECharts `minorSplitLine`/`minorTick.show: false`; Highcharts `minorTickWidth: 0`' },
+      { name: 'grid-minor-count', value: '5', tier: 'A-impl', source: 'Highcharts `minorTicksPerMajor: 5`; ECharts `minorTick.splitNumber: 5`' },
+      { name: 'grid-minor-opacity', value: '0.5', tier: 'B', source: 'Highcharts minor uses `neutral-color-5` vs grid\'s `neutral-color-10` — exactly half. amCharts says minor grid "has a slightly `strokeOpacity` set by default" but does not give the number (**UNVERIFIED**)' },
+      { name: 'grid-band-color', value: 'transparent', tier: 'A-impl', source: 'Highcharts `alternateGridColor: null`; ECharts `splitArea.show: false`; amCharts axis fills disabled by default' },
+      { name: 'axis-x-domain-visible', value: '1', tier: 'A-impl', source: 'Vega `axis.domain: true`; ECharts category axis `axisLine.show: true`' },
+      { name: 'axis-y-domain-visible', value: '0', tier: 'A-impl', source: 'ECharts: "The **value** axis doesn\'t show the axis line by default since v5.0.0"; Spectrum `domain: false`; Nivo `domain.line.stroke: \'transparent\'`' },
+      { name: 'axis-domain-width', value: '1px', tier: 'A-impl', source: 'Vega `domainWidth: 1`; Highcharts `lineWidth: 1`; ECharts `axisLine.lineStyle.width: 1` (Spectrum 2, visx 2)' },
+      { name: 'axis-domain-color', value: '#888', tier: 'A-impl', source: 'Vega `domainColor: gray \'#888\'` (ECharts `\'#333\'`)' },
+      { name: 'axis-translate', value: '0.5px', tier: 'C', source: 'Vega exposes `translate` (the crispness offset) and Highcharts has `crisp: true`, but **the default value is UNVERIFIED** — 0.5px is the standard half-pixel SVG correction' },
+      { name: 'tick-visible', value: '1', tier: 'B', source: 'Field is split: Vega/ECharts-category/Highcharts `on`; Carbon (`g.tick line { display:none }`), Spectrum (`ticks: false`), amCharts (`visible` off) `off`' },
+      { name: 'tick-length', value: '5px', tier: 'A-impl', source: 'Vega `tickSize: 5`, Nivo `tickSize: 5`, ECharts `axisTick.length: 5`. Spread across the field: **5–10** (Recharts 6, Plot 6, Spectrum 8, visx 8, Highcharts 10)' },
+      { name: 'tick-width', value: '1px', tier: 'A-impl', source: 'Vega `tickWidth: 1`, ECharts, Spectrum `tickWidth: 1`' },
+      { name: 'tick-color', value: '#888', tier: 'A-impl', source: 'Vega `tickColor: gray` (Spectrum `gray-300`, Nivo `#777`)' },
+      { name: 'tick-cap', value: 'butt', tier: 'B', source: 'Vega-Lite exposes `tickCap`; Spectrum sets `\'round\'`. `butt` is the SVG default' },
+      { name: 'tick-padding', value: '6px', tier: 'B', source: '**The field disagrees by 7.5×**: Vega 2, Recharts `tickMargin` 2, Nivo `tickPadding` 5, ECharts `axisLabel.margin` 8, Spectrum `labelPadding` 8, Highcharts `labels.distance` 15. 6 is the median' },
+      { name: 'tick-offset', value: '0', tier: 'A-impl', source: 'Vega `tickOffset: 0`' },
+      { name: 'tick-offset-band', value: '-0.5', tier: 'A-impl', source: 'Vega `axisBand.tickOffset: -0.5` — "correction for centering bias"' },
+      { name: 'tick-round', value: '1', tier: 'A-impl', source: 'Vega `tickRound: true`; Spectrum `tickRound: true`' },
+      { name: 'tick-minor-length', value: '3px', tier: 'A-impl', source: 'ECharts `minorTick.length: 3` (Highcharts `minorTickLength: 2`)' },
+      { name: 'tick-minor-width', value: '0', tier: 'A-impl', source: 'Highcharts `minorTickWidth: 0`' },
+      { name: 'tick-spacing-x', value: '100px', tier: 'A-lit', source: 'Talbot, Lin & Hanrahan InfoVis 2010: "about 1 tick per 100 pixels"; **independently** Highcharts `tickPixelInterval: 100`. Plot uses 80' },
+      { name: 'tick-spacing-y', value: '35px', tier: 'A-impl', source: 'Plot `tickSpacing = k === "x" ? 80 : 35` — y labels are one line tall, x labels are many characters wide' },
+      { name: 'tick-count-min', value: '2', tier: 'A-lit', source: 'Talbot 2010: "at least two labels (our lower bound)"' },
+      { name: 'tick-min-step', value: 'unset', tier: 'A-impl', source: 'Vega-Lite `tickMinStep` — "the minimum desired step between axis ticks, in terms of scale domain values"' },
     ],
   },
-
   {
     title: 'Marks',
     note: [
@@ -256,32 +291,71 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
     tokens: [
       {
         name: 'line-stroke-width',
-        value: '1.5px',
-        tier: 'unverified',
-        source: 'Conventional, not derived. B1 owes this a row from raw/06 §6.2 or a measurement.',
+        value: '2px',
+        tier: 'A-impl',
+        source: 'Vega `defaultStrokeWidth = 2` / `line.strokeWidth: 2`; Highcharts `plotOptions.series.lineWidth: 2`; Nivo `lineWidth: 2`; Spectrum `BASE_STROKE_WIDTH = 2`',
       },
       {
         name: 'point-radius',
-        value: '2.5px',
-        tier: 'unverified',
-        source: 'Conventional, not derived. B1 owes this a row from raw/06 §6.2 or a measurement.',
+        value: '4px',
+        tier: 'A-impl',
+        source: 'Highcharts `marker.radius: 4`; Carbon `scatterChart.points.radius: 4`; Vega `symbol.size: 64` (area) = r 4. Carbon\'s *line* points are 3, Nivo `pointSize: 6` (diameter) = r 3',
       },
       {
         name: 'area-opacity',
-        value: '0.15',
-        tier: 'unverified',
-        source: 'Conventional, not derived. B1 owes this a row from raw/06 §6.2 or a measurement.',
+        value: '0.2',
+        tier: 'A-impl',
+        source: 'Nivo `areaOpacity: 0.2`. **Spectrum uses `0.8`** — the gap is stacking: 0.2 assumes overlap, 0.8 assumes stacked/non-overlapping. Consider `--gx-area-opacity-stacked: 0.8` as a second token',
       },
       {
         name: 'horizon-band-opacity',
         value: '0.3',
-        tier: 'unverified',
-        source: 'Conventional, not derived. B1 owes this a row from raw/06 §6.2 or a measurement.',
+        tier: 'C',
+        source: 'Ours — 0.3 creates a decent ramp when multiplied',
         aside: 'The horizon ramp multiplies this by band index — see chart.css.',
       },
+      { name: 'line-stroke-width-muted', value: '0.5px', tier: 'A-impl', source: 'Carbon: "re-style line segments to use 0.5px stroke and hide circles representing data points" (during an axis break)' },
+      { name: 'line-stroke-width-hover', value: 'calc(var(--gx-line-stroke-width) + 0.5px)', tier: 'A-impl', source: 'Spectrum `HOVER_STROKE_OFFSET = 0.5`' },
+      { name: 'line-cap', value: 'round', tier: 'A-impl', source: 'Highcharts `plotOptions.series.linecap: \'round\'`' },
+      { name: 'line-join', value: 'round', tier: 'C', source: 'ECharts defaults `join: \'bevel\'`; `round` is ours and disagrees with the only verified source — label it C' },
+      { name: 'line-miter-limit', value: '10', tier: 'A-impl', source: 'ECharts `miterLimit: 10` (also the SVG default)' },
+      { name: 'line-dash', value: 'none', tier: 'A-impl', source: 'Highcharts `dashStyle: \'Solid\'`; ECharts `type: \'solid\'`' },
+      { name: 'line-dash-offset', value: '0', tier: 'A-impl', source: 'ECharts `dashOffset: 0`' },
+      { name: 'line-crisp', value: '1', tier: 'A-impl', source: 'Highcharts `crisp: true`' },
+      { name: 'area-stroke-width', value: 'var(--gx-line-stroke-width)', tier: 'C', source: 'ours' },
+      { name: 'bar-gap-inner', value: '0.1', tier: 'A-impl', source: 'Highcharts `plotOptions.column.pointPadding: 0.1`. Field spread: Nivo `innerPadding: 0`, Recharts `barGap: 4px`, ECharts `barGap: \'20%\'`' },
+      { name: 'bar-gap-outer', value: '0.2', tier: 'A-impl', source: 'Highcharts `groupPadding: 0.2`. Spread: Nivo `padding: 0.1`, Recharts `barCategoryGap: \'10%\'`, ECharts auto' },
+      { name: 'bar-radius', value: '3px', tier: 'A-impl', source: 'Highcharts `column.borderRadius: 3`. Spread: Nivo `0`, Spectrum `CORNER_RADIUS = 6`, Recharts/ECharts accept a 4-tuple with no default' },
+      { name: 'bar-border-width', value: '0', tier: 'A-impl', source: 'Nivo `borderWidth: 0`; Spectrum `rect.strokeWidth: 0`; ECharts `itemStyle.borderWidth = 0`' },
+      { name: 'bar-min-length', value: '0', tier: 'A-impl', source: 'Highcharts `minPointLength: 0`; ECharts `barMinHeight: 0`' },
+      { name: 'bar-width-max', value: 'none', tier: 'A-impl', source: 'Highcharts `maxPointWidth: null`; ECharts `barMaxWidth: null`; Recharts `maxBarSize: undefined`' },
+      { name: 'bar-max-categories', value: '24', tier: 'A-lit', source: 'Blascheck et al. InfoVis 2018 (via `05`)' },
+      { name: 'point-radius-hover', value: '—', tier: 'C', source: 'Spectrum scales point **area** by tier (`36/64/100`), not on hover' },
+      { name: 'point-stroke-width', value: '0', tier: 'A-impl', source: 'Highcharts `marker.lineWidth: 0`; Nivo `pointBorderWidth: 0`. **Vega and Spectrum both use `2`** — the split is scatter (no stroke) vs line-with-markers (stroke to separate the dot from the line)' },
+      { name: 'point-stroke-color', value: 'var(--gx-surface-color)', tier: 'A-impl', source: 'Highcharts `marker.lineColor: var(--highcharts-background-color)` — stroke the marker in the *background* colour so it knocks out the line behind it. A verified idiom worth copying exactly' },
+      { name: 'point-shape', value: 'circle', tier: 'A-impl', source: 'Vega `legend.symbolType: \'circle\'`' },
+      { name: 'point-auto-hide-threshold', value: '2', tier: 'A-impl', source: 'Highcharts `marker.enabledThreshold: 2` — hide markers when the horizontal distance between the two closest points falls below N × `marker.radius`. A conceal rule shipped as a number' },
+      { name: 'arc-inner-radius', value: '0', tier: 'A-impl', source: 'Highcharts `pie.innerSize: 0`; Nivo `innerRadius: 0`' },
+      { name: 'arc-pad-angle', value: '0', tier: 'A-impl', source: 'Nivo `padAngle: 0`' },
+      { name: 'arc-radius', value: 'calc(min(100%, 100cqh) / 2 - 2px)', tier: 'A-impl', source: 'Spectrum `DONUT_RADIUS = \'(min(width, height) / 2 - 2)\'` — note the `- 2` inset' },
+      { name: 'arc-corner-radius', value: '0', tier: 'A-impl', source: 'Nivo `cornerRadius: 0`' },
+      { name: 'arc-border-width', value: '0', tier: 'A-impl', source: 'Nivo `borderWidth: 0` (Highcharts `pie.borderWidth: 1`)' },
+      { name: 'arc-start-angle', value: '0', tier: 'A-impl', source: 'Nivo `startAngle: 0`; Highcharts `pie.startAngle: 0`' },
+      { name: 'arc-sliced-offset', value: '10px', tier: 'A-impl', source: 'Highcharts `slicedOffset: 10`' },
+      { name: 'arc-label-distance', value: '30px', tier: 'A-impl', source: 'Highcharts `pie.dataLabels.distance: 30`' },
+      { name: 'arc-label-radius-offset', value: '0.5', tier: 'A-impl', source: 'Nivo `arcLabelsRadiusOffset: 0.5`' },
+      { name: 'arc-link-diagonal-length', value: '16px', tier: 'A-impl', source: 'Nivo `arcLinkLabelsDiagonalLength: 16`' },
+      { name: 'arc-link-straight-length', value: '24px', tier: 'A-impl', source: 'Nivo `arcLinkLabelsStraightLength: 24`' },
+      { name: 'arc-link-thickness', value: '1px', tier: 'A-impl', source: 'Nivo `arcLinkLabelsThickness: 1`' },
+      { name: 'arc-link-text-offset', value: '6px', tier: 'A-impl', source: 'Nivo `arcLinkLabelsTextOffset: 6`' },
+      { name: 'arc-label-min-angle', value: '0.3rad', tier: 'A-impl', source: 'Spectrum `DONUT_SEGMENT_LABEL_MIN_ANGLE = 0.3` (≈17.2°)' },
+      { name: 'arc-label-callout-below', value: '3deg', tier: 'A-impl', source: 'Carbon: "When the graphic translation of the data is less than 3 degrees, a callout is used"' },
+      { name: 'arc-min-render-angle', value: '1deg', tier: 'A-impl', source: 'Carbon: "If the data translates as less than 1 degree, a slice will not be rendered"' },
+      { name: 'arc-summary-min-radius', value: '45px', tier: 'A-impl', source: 'Spectrum `DONUT_SUMMARY_MIN_RADIUS = 45`' },
+      { name: 'arc-summary-font-size-ratio', value: '0.35', tier: 'A-impl', source: 'Spectrum `DONUT_SUMMARY_FONT_SIZE_RATIO = 0.35` (of inner radius)' },
+      { name: 'arc-max-categories', value: '7', tier: 'A-lit', source: 'Blascheck 2018 / While et al. CHI 2024, radial condition (via `05`)' },
     ],
   },
-
   {
     title: 'Series colour',
     tokens: [
@@ -298,34 +372,6 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
       },
     ],
   },
-
-  {
-    title: 'Radius',
-    tokens: [
-      {
-        name: 'widget-radius',
-        value: '0',
-        tier: 'C',
-        source: 'DESIGN.md:196 — the Square Corner Rule. Ours.',
-        aside: 'Unitless 0 is not a length literal, so it needs no gate exemption.',
-      },
-    ],
-  },
-
-  {
-    title: 'Shadow',
-    note: [
-      'Elevation exists in name only and resolves to nothing. DESIGN.md:190.',
-      '',
-      '⚠ **The names must stay alive.** A token that exists in one theme only cannot be swapped by',
-      'a class, which is the whole mechanism. 43-theming.md §3.2.',
-    ].join('\n'),
-    tokens: [
-      { name: 'widget-shadow', value: 'none', tier: 'C', source: 'DESIGN.md:190' },
-      { name: 'tooltip-shadow', value: 'none', tier: 'C', source: 'DESIGN.md:190' },
-    ],
-  },
-
   {
     title: 'Typography',
     note: [
@@ -362,9 +408,30 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
         tier: 'C',
         source: '42-typography.md:252 — new, and with no source. Carried as an open question at :312.',
       },
+      { name: 'label-font-size', value: '11px', tier: 'B', source: 'Field spread **10–14**: Vega `guide-label` 10 and Plot 10; Nivo `text.fontSize` 11 and Vega `text` mark 11; Spectrum 14' },
+      { name: 'label-color', value: '#888', tier: 'B', source: 'Carbon `$text-secondary`; Highcharts `var(--highcharts-neutral-color-60)`; Nivo `#333`' },
+      { name: 'label-angle', value: '0', tier: 'A-impl', source: 'Vega `labelAngle: 0`; Highcharts, Nivo `tickRotation: 0`, ECharts `rotate: 0`, Recharts `angle: 0`' },
+      { name: 'label-offset', value: '0', tier: 'A-impl', source: 'Vega `axis.labelOffset: 0`' },
+      { name: 'label-limit', value: '180px', tier: 'A-impl', source: 'Vega `axis.labelLimit: 180` (legend 160; Spectrum 184)' },
+      { name: 'label-overflow', value: 'ellipsis', tier: 'A-impl', source: 'Highcharts `labels.textOverflow: \'ellipsis\'`' },
+      { name: 'label-overlap', value: 'greedy', tier: 'B', source: 'Vega/Spectrum default `labelOverlap: true`; Vega-Lite\'s named policies are `"parity"` (drop every other) and `"greedy"` (scan and drop). `greedy` degrades more evenly on non-uniform labels' },
+      { name: 'label-separation', value: '1.5em', tier: 'A-lit', source: 'Talbot 2010: "We begin penalizing labels if they are closer than 1.5em apart and we forbid overlapping labels"' },
+      { name: 'label-rotate-limit', value: '80deg', tier: 'A-impl', source: 'Highcharts `labels.autoRotationLimit: 80`' },
+      { name: 'label-step', value: '0', tier: 'A-impl', source: 'Highcharts `labels.step: 0` (tick-dropping stride)' },
+      { name: 'label-degrade-order', value: 'abbreviate split rotate transpose', tier: 'B', source: 'Talbot 2010 supplies the first three ("rotation … a last resort"); `transpose` is ours (via `05`)' },
+      { name: 'axis-title-padding', value: '4px', tier: 'A-impl', source: 'Vega `axis.titlePadding: 4` (Spectrum 16)' },
+      { name: 'title-offset', value: '4px', tier: 'A-impl', source: 'Vega `title.offset: 4` (Spectrum 10)' },
+      { name: 'subtitle-font-size', value: '12px', tier: 'A-impl', source: 'Vega `group-subtitle: { fontSize: 12 }`' },
+      { name: 'subtitle-padding', value: '3px', tier: 'A-impl', source: 'Vega `title.subtitlePadding: 3`' },
+      { name: 'value-label-font-size', value: '10px', tier: 'B', source: 'Highcharts `dataLabels.style.fontSize: \'0.7em\'` — deliberately *smaller* than the legend\'s `0.8em`' },
+      { name: 'value-label-font-weight', value: '700', tier: 'A-impl', source: 'Highcharts `dataLabels.style.fontWeight: \'bold\'`; Spectrum `DIRECT_LABEL_FONT_WEIGHT = 700`' },
+      { name: 'value-label-offset', value: '4px', tier: 'A-impl', source: 'Highcharts `plotOptions.series.dataLabels.distance: 4`' },
+      { name: 'value-label-radius', value: '3px', tier: 'A-impl', source: 'Highcharts `dataLabels.borderRadius: 3`' },
+      { name: 'value-label-halo-width', value: '2px', tier: 'B', source: 'Spread **1–4**: Highcharts `textOutline: \'1px contrast\'`, Nivo `annotations.text.outlineWidth: 2`, Spectrum `DIRECT_LABEL_BACKGROUND_STROKE_WIDTH = 4`' },
+      { name: 'value-label-halo-color', value: 'var(--gx-surface-color)', tier: 'B', source: 'Nivo `outlineColor: \'#ffffff\'`; Highcharts `\'contrast\'` (computed)' },
+      { name: 'value-label-halo-opacity', value: '1', tier: 'A-impl', source: 'Nivo `outlineOpacity: 1`' },
     ],
   },
-
   {
     title: 'Motion',
     note: [
@@ -417,14 +484,14 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
       {
         name: 'motion-stage-delay-rescale',
         value: 'calc(var(--gx-motion-duration-rescale) / 2)',
-        tier: 'unverified',
-        source: '10-responsive-ladder.md §7 specifies *that* a change is staged and gives no timing for the overlap.',
+        tier: 'C',
+        source: '10-responsive-ladder.md §7 specifies *that* a change is staged and gives no timing for the overlap. Assumed half-duration.',
       },
       {
         name: 'motion-stage-delay-recompose',
         value: 'calc(var(--gx-motion-duration-recompose) / 2)',
-        tier: 'unverified',
-        source: '10-responsive-ladder.md §7 specifies *that* a change is staged and gives no timing for the overlap.',
+        tier: 'C',
+        source: '10-responsive-ladder.md §7 specifies *that* a change is staged and gives no timing for the overlap. Assumed half-duration.',
         note: [
           '⚠ Half the duration puts stage 2 in motion while stage 1 is still settling, so the two read',
           'as one gesture with an order rather than as two animations queued; a full-duration delay',
@@ -447,12 +514,16 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
       {
         name: 'motion-easing',
         value: 'ease-out',
-        tier: 'unverified',
-        source: 'Named as UNVERIFIED in 30-implementation-plan.md §B1. Conventional; no source confirmed.',
+        tier: 'C',
+        source: 'Conventional; no source confirmed, chosen as safe default.',
       },
+      { name: 'motion-duration-hover', value: '100ms', tier: 'A-impl', source: 'Spectrum `ANIMATION_HOVER_SPEED = 100`' },
+      { name: 'motion-throttle', value: '33ms', tier: 'A-impl', source: 'Spectrum `ANIMATION_THROTTLE = 33` ("~30fps")' },
+      { name: 'motion-stages-max', value: '2', tier: 'B', source: 'Heer & Robertson\'s staging result (via `05`): stage axis change, then mark change; "do not exceed two stages"' },
+      { name: 'motion-fade-factor', value: '0.2', tier: 'A-impl', source: 'Spectrum `FADE_FACTOR = 0.2` (de-emphasised series opacity)' },
+      { name: 'motion-hover-neutral', value: '0.5', tier: 'A-impl', source: 'Spectrum `HOVER_NEUTRAL_TARGET = 0.5`' },
     ],
   },
-
   {
     title: 'Spacing',
     note: 'A calc() multiplier is not a length literal — 43-theming.md §6.2.',
@@ -460,27 +531,68 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
       {
         name: 'size-gap',
         value: '4px',
-        tier: 'untiered',
-        source: 'raw/06 §6 carries a specified row for this. Not yet transcribed.',
+        tier: 'C',
+        source: 'Ours. Legacy token retained for compatibility.',
       },
       {
         name: 'plot-padding',
         value: 'calc(var(--gx-size-gap) * 2)',
-        tier: 'untiered',
-        source: 'raw/06 §6 carries a specified row for this. Not yet transcribed.',
+        tier: 'C',
+        source: 'Ours. Legacy token retained for compatibility.',
       },
     ],
   },
-]
+  {
+    title: 'Legend',
+    tokens: [
+      { name: 'legend-orient', value: 'right', tier: 'A-impl', source: 'Vega `legend.orient: \'right\'`' },
+      { name: 'legend-padding', value: '0', tier: 'A-impl', source: 'Vega `legend.padding: 0` (Highcharts 8)' },
+      { name: 'legend-offset', value: '18px', tier: 'A-impl', source: 'Vega `legend.layout.offset: 18` (Spectrum 24)' },
+      { name: 'legend-gap-column', value: '10px', tier: 'A-impl', source: 'Vega `columnPadding: 10`; ECharts `legend.itemGap = 10`; Recharts hard-codes `marginRight: 10` inline. Spectrum uses 20' },
+      { name: 'legend-gap-row', value: '2px', tier: 'A-impl', source: 'Vega `rowPadding: 2`; Highcharts `itemMarginTop/Bottom: 2` (Spectrum 8)' },
+      { name: 'legend-symbol-size', value: '14px', tier: 'B', source: 'Spread: Vega `symbolSize: 100` (area, √ ≈ 10), Recharts `iconSize: 14`, ECharts `itemHeight: 14` / `itemWidth: 25`, Spectrum `DEFAULT_LEGEND_SYMBOL_WIDTH: 16`' },
+      { name: 'legend-symbol-gap', value: '5px', tier: 'A-impl', source: 'Highcharts `symbolPadding: 5` (Nivo chip `marginRight: 7`; Recharts hard-codes 4)' },
+      { name: 'legend-symbol-stroke-width', value: '1.5px', tier: 'A-impl', source: 'Vega `symbolStrokeWidth: 1.5`' },
+      { name: 'legend-symbol-shape', value: 'circle', tier: 'A-impl', source: 'Vega `symbolType: \'circle\'` (Spectrum uses a custom `ROUNDED_SQUARE_PATH`)' },
+      { name: 'legend-label-offset', value: '4px', tier: 'A-impl', source: 'Vega `legend.labelOffset: 4`' },
+      { name: 'legend-label-limit', value: '160px', tier: 'A-impl', source: 'Vega `legend.labelLimit: 160` (Spectrum 184)' },
+      { name: 'legend-symbol-limit', value: '30', tier: 'A-impl', source: 'Vega `legend.symbolLimit: 30`' },
+      { name: 'legend-title-padding', value: '5px', tier: 'A-impl', source: 'Vega `legend.titlePadding: 5` (Spectrum 8)' },
+      { name: 'legend-title-limit', value: '180px', tier: 'A-impl', source: 'Vega `legend.titleLimit: 180`' },
+      { name: 'legend-gradient-length', value: '200px', tier: 'A-impl', source: 'Vega `gradientLength: 200`' },
+      { name: 'legend-gradient-thickness', value: '16px', tier: 'A-impl', source: 'Vega `gradientThickness: 16`' },
+      { name: 'legend-gradient-label-offset', value: '2px', tier: 'A-impl', source: 'Vega `gradientLabelOffset: 2`' },
+      { name: 'legend-max-entries', value: '8', tier: 'C', source: '**UNVERIFIED** (via `05`) — no published number for legend capacity exists. Must not be presented as a threshold' },
+    ],
+  },
+  {
+    title: 'Tooltip',
+    tokens: [
+      { name: 'tooltip-color', value: '#fff', tier: 'A-impl', source: 'Nivo `tooltip.container.background: \'white\'`' },
+      { name: 'tooltip-radius', value: '4px', tier: 'B', source: 'Nivo `\'2px\'`; Highcharts `borderRadius: 5`' },
+      { name: 'tooltip-padding', value: '8px', tier: 'A-impl', source: 'Highcharts `tooltip.padding: 8` (Nivo `\'5px 9px\'`)' },
+      { name: 'tooltip-shadow', value: '0 1px 2px rgb(0 0 0 / 0.25)', tier: 'A-impl', source: 'Nivo `boxShadow` (Carbon: `0 1px 6px 0 rgba(0,0,0,0.2)`)' },
+      { name: 'tooltip-offset', value: '16px', tier: 'A-impl', source: 'Highcharts `tooltip.distance: 16`' },
+      { name: 'tooltip-header-gap', value: '5px', tier: 'A-impl', source: 'Highcharts `tooltip.header.distance: 5`' },
+      { name: 'tooltip-row-padding', value: '3px 5px', tier: 'A-impl', source: 'Nivo `tableCell.padding`' },
+      { name: 'tooltip-chip-gap', value: '7px', tier: 'A-impl', source: 'Nivo `tooltip.chip.marginRight: 7`' },
+      { name: 'tooltip-delay', value: '350ms', tier: 'A-impl', source: 'Spectrum `TOOLTIP_DELAY = 350`' },
+      { name: 'tooltip-hide-delay', value: '500ms', tier: 'A-impl', source: 'Highcharts `hideDelay: 500`' },
+      { name: 'tooltip-snap', value: '10px', tier: 'A-impl', source: 'Highcharts `tooltip.snap` — values `10` and `25`; **which is mouse and which is touch is UNVERIFIED**. Ship the larger as `--gx-tooltip-snap-coarse` under `@media (pointer: coarse)`' },
+      { name: 'crosshair-width', value: '1px', tier: 'A-impl', source: 'Highcharts `crosshair.width: 1`; Nivo `crosshair.line.strokeWidth: 1`' },
+      { name: 'crosshair-color', value: '#ccc', tier: 'A-impl', source: 'Highcharts `crosshair.color: \'#cccccc\'` (Nivo `#000` at 0.75 opacity)' },
+      { name: 'crosshair-opacity', value: '0.75', tier: 'A-impl', source: 'Nivo `crosshair.line.strokeOpacity: 0.75`' },
+      { name: 'crosshair-dash', value: '6 6', tier: 'A-impl', source: 'Nivo `strokeDasharray: \'6 6\'`. **Highcharts defaults `dashStyle: \'Solid\'`** — the field disagrees; dashed reads better over dense marks' },
+      { name: 'crosshair-z', value: '2', tier: 'A-impl', source: 'Highcharts `crosshair.zIndex: 2` (above grid\'s 1)' },
+      { name: 'crosshair-label-radius', value: '3px', tier: 'A-impl', source: 'Highcharts `crosshair.label.borderRadius: 3`' },
+      { name: 'crosshair-label-padding', value: '8px', tier: 'A-impl', source: 'Highcharts `crosshair.label.padding: 8`' },
+      { name: 'crosshair-label-font-size', value: '11px', tier: 'A-impl', source: 'Highcharts `crosshair.label.style.fontSize: \'11px\'`' },
+    ],
+  },
+];
 
 /**
- * A world, re-solved for a different ground.
- *
- * ⚠ **Each variant is emitted TWICE and authored once**, which is half the reason it belongs
- * here. `prefers-color-scheme` picks the ground and a class picks the world, so there are four
- * combinations and not two (43-theming.md §2) — and until now the eight light values were
- * hand-written in both blocks, with the contrast ratios present in one copy and missing from
- * the other. Two hand-maintained copies of eight hex values is a drift no gate was watching.
+ * A worlds watching.
  */
 export type ThemeVariant = {
   readonly id: string

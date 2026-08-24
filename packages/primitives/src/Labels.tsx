@@ -24,6 +24,7 @@ export type LabelsProps = {
   readonly series: SeriesFrame
   readonly seriesLabels: LabelsPlan['seriesLabels']
   readonly valueLabels: LabelsPlan['valueLabels']
+  readonly labelHalo?: LabelsPlan['labelHalo']
   /** `LabelsPlan.maxChars`. `null` means no cap. */
   readonly maxChars?: number | null
   readonly className?: string
@@ -33,6 +34,7 @@ export function Labels({
   series,
   seriesLabels,
   valueLabels,
+  labelHalo = 'none',
   maxChars = null,
   className,
 }: LabelsProps) {
@@ -44,6 +46,7 @@ export function Labels({
       {seriesLabels === 'direct-end' && last !== undefined ? (
         <text
           className={classes('gx-label', className)}
+          data-halo={labelHalo !== 'none' ? labelHalo : undefined}
           x={roundCoord(last.x + CHROME_METRICS.regionGap)}
           y={roundCoord(last.y)}
         >
@@ -57,6 +60,7 @@ export function Labels({
         return (
           <text
             className={classes('gx-value-label', className)}
+            data-halo={labelHalo !== 'none' ? labelHalo : undefined}
             key={i}
             data-index={i}
             x={roundCoord(p.x)}

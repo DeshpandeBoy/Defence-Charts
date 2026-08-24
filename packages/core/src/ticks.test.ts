@@ -51,14 +51,14 @@ describe('tickCountForWidth', () => {
     expect(tickCountForWidth(width)).toBe(2)
   })
 
-  it('agrees with the policy constants it currently hardcodes', () => {
+  it('uses tickTargetSpacingX from policy', () => {
     // ⚠ This is a **failing-later** test on purpose. `tickCountForWidth` predates
-    // `planChart()` and bakes in `tickTargetSpacing` and `ticksMin` as literals. A3 must
+    // `planChart()` and bakes in `tickTargetSpacingX` and `ticksMin` as literals. A3 must
     // route them through `PlanPolicy` instead — until then, a consumer who moves
-    // `tickTargetSpacing` finds it silently ignored on the one axis that uses it. This
+    // `tickTargetSpacingX` finds it silently ignored on the one axis that uses it. This
     // asserts the two are still in sync so the drift cannot happen unnoticed in the
     // meantime.
-    expect(tickCountForWidth(DEFAULT_POLICY.tickTargetSpacing * 7)).toBe(7)
+    expect(tickCountForWidth(DEFAULT_POLICY.tickTargetSpacingX * 7)).toBe(7)
     expect(tickCountForWidth(1)).toBe(DEFAULT_POLICY.ticksMin)
   })
 })

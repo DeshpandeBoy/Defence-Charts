@@ -49,9 +49,23 @@ export type GridProps = {
   /** `ChartFrame.zeroLine`, in absolute SVG coordinates. `null` when 0 is outside the domain. */
   readonly zeroLine?: number | null
   readonly className?: string
+  readonly xDashPhase?: number
+  readonly xStrokeCap?: 'butt' | 'round' | 'square'
+  readonly yDashPhase?: number
+  readonly yStrokeCap?: 'butt' | 'round' | 'square'
 }
 
-export function Grid({ plot, xTicks = [], yTicks = [], zeroLine = null, className }: GridProps) {
+export function Grid({
+  plot,
+  xTicks = [],
+  yTicks = [],
+  zeroLine = null,
+  className,
+  xDashPhase = 0,
+  xStrokeCap = 'butt',
+  yDashPhase = 0,
+  yStrokeCap = 'butt',
+}: GridProps) {
   const { axisRuleWidth } = CHROME_METRICS
   const width = roundCoord(plot.width)
   const height = roundCoord(plot.height)
@@ -63,6 +77,8 @@ export function Grid({ plot, xTicks = [], yTicks = [], zeroLine = null, classNam
           className="gx-grid__line"
           data-axis="y"
           key={`y-${tick.value}`}
+          data-dash-phase={yDashPhase}
+          data-stroke-cap={yStrokeCap}
           x={0}
           y={roundCoord(tick.offset)}
           width={width}
@@ -74,6 +90,8 @@ export function Grid({ plot, xTicks = [], yTicks = [], zeroLine = null, classNam
           className="gx-grid__line"
           data-axis="x"
           key={`x-${tick.value}`}
+          data-dash-phase={xDashPhase}
+          data-stroke-cap={xStrokeCap}
           x={roundCoord(tick.offset)}
           y={0}
           width={axisRuleWidth}

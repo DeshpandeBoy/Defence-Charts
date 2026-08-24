@@ -141,6 +141,7 @@ export type {
   PointPos,
   Rect,
   SeriesFrame,
+  CellFrame,
   ValueDelta,
   ValueEntry,
   ValueFrame,

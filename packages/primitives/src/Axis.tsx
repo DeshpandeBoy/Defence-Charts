@@ -45,6 +45,9 @@ export type AxisProps = {
   readonly labels?: boolean
   readonly className?: string
   readonly children?: (ticks: readonly ComputedTick[]) => ReactNode
+  readonly labelFlush?: boolean
+  readonly tickBand?: 'center' | 'extent'
+  readonly translateOffset?: number
 }
 
 export function Axis({
@@ -56,6 +59,9 @@ export function Axis({
   labels = true,
   className,
   children,
+  labelFlush = false,
+  tickBand = 'center',
+  translateOffset = 0,
 }: AxisProps) {
   const horizontal = orientation === 'x'
   const { tickLength, tickLabelGap, axisRuleWidth } = CHROME_METRICS
@@ -64,7 +70,9 @@ export function Axis({
   // only the x translate carries the plot height. Tick offsets are already plot-relative
   // (`ComputedTick.offset` — "px along the axis from the plot's origin"), which is what lets
   // the group move as a unit and the ticks travel with it.
-  const origin = horizontal ? translate(plot.x, plot.y + plot.height) : translate(plot.x, plot.y)
+  const origin = horizontal
+    ? translate(plot.x + translateOffset, plot.y + plot.height + translateOffset)
+    : translate(plot.x - translateOffset, plot.y + translateOffset)
 
   // The label sits past the tick on the far side from the plot. Its alignment is a class,
   // because alignment is visual; its distance is an attribute, because the resolver already
@@ -132,9 +140,9 @@ export function Axis({
                   // width, and the y gutter was never sized for it.
                   data-anchor={
                     horizontal
-                      ? i === 0
+                      ? (labelFlush && i === 0)
                         ? 'start'
-                        : i === ticks.length - 1
+                        : (labelFlush && i === ticks.length - 1)
                           ? 'end'
                           : 'middle'
                       : 'end'

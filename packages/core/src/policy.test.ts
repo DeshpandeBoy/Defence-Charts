@@ -11,8 +11,8 @@ describe('DEFAULT_POLICY', () => {
     // and by value so that a diff which changes one is a diff which changes a test with a
     // citation in it — not a silent edit to an object literal.
 
-    it('tickTargetSpacing is 100 px — Talbot 2010', () => {
-      expect(DEFAULT_POLICY.tickTargetSpacing).toBe(100)
+    it('tickTargetSpacingX is 100 px — Talbot 2010', () => {
+      expect(DEFAULT_POLICY.tickTargetSpacingX).toBe(100)
     })
 
     it('ticksMin is 2 — Talbot 2010', () => {
@@ -120,7 +120,7 @@ describe('resolvePolicy', () => {
   it('overlays only the fields supplied', () => {
     const resolved = resolvePolicy({ pointBudget: 500 })
     expect(resolved.pointBudget).toBe(500)
-    expect(resolved.tickTargetSpacing).toBe(DEFAULT_POLICY.tickTargetSpacing)
+    expect(resolved.tickTargetSpacingX).toBe(DEFAULT_POLICY.tickTargetSpacingX)
     expect(resolved.typography).toBe(DEFAULT_POLICY.typography)
   })
 

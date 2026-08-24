@@ -168,6 +168,15 @@ describe('§1.1 — an override cannot produce a partial plan', () => {
       ticks: { mode: 'none' },
       title: false,
       gridlines: false,
+      labelFlush: false,
+      labelBound: false,
+      tickBand: 'center',
+      tickExtra: false,
+      minExtent: 0,
+      maxExtent: 0,
+      translate: 0,
+      strokeCap: 'butt',
+      dashPhase: 0,
     })
   })
 

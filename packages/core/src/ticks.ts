@@ -37,14 +37,14 @@ import { DEFAULT_POLICY } from './policy.ts'
  */
 export function tickCountForWidth(
   width: number,
-  policy: Pick<PlanPolicy, 'tickTargetSpacing' | 'ticksMin'> = DEFAULT_POLICY,
+  policy: Pick<PlanPolicy, 'tickTargetSpacingX' | 'ticksMin'> = DEFAULT_POLICY,
 ): number {
   const min = Number.isFinite(policy.ticksMin) ? Math.max(0, Math.floor(policy.ticksMin)) : 2
   if (!Number.isFinite(width) || width <= 0) return min
 
   // A non-positive target spacing would divide by zero or invert the density; fall back to
   // the floor rather than emitting `Infinity`, which §1.4 forbids from ever reaching a plan.
-  const spacing = policy.tickTargetSpacing
+  const spacing = policy.tickTargetSpacingX
   if (!Number.isFinite(spacing) || spacing <= 0) return min
 
   return Math.max(min, Math.round(width / spacing))

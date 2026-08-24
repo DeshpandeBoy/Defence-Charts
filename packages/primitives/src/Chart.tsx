@@ -170,6 +170,10 @@ export function Chart({
             xTicks={plan.axes.x.gridlines ? frame.xTicks : []}
             yTicks={plan.axes.y.gridlines ? frame.yTicks : []}
             zeroLine={frame.zeroLine}
+            xDashPhase={plan.axes.x.dashPhase}
+            xStrokeCap={plan.axes.x.strokeCap}
+            yDashPhase={plan.axes.y.dashPhase}
+            yStrokeCap={plan.axes.y.strokeCap}
           />
         ) : null}
 
@@ -189,6 +193,9 @@ export function Chart({
             plot={frame.plot}
             rule={plan.axes.x.domainLine}
             labels={plan.axes.x.ticks.mode !== 'none'}
+            labelFlush={plan.axes.x.labelFlush}
+            tickBand={plan.axes.x.tickBand}
+            translateOffset={plan.axes.x.translate}
           />
         ) : null}
         {plan.axes.y.visible ? (
@@ -198,6 +205,9 @@ export function Chart({
             plot={frame.plot}
             rule={plan.axes.y.domainLine}
             labels={plan.axes.y.ticks.mode !== 'none'}
+            labelFlush={plan.axes.y.labelFlush}
+            tickBand={plan.axes.y.tickBand}
+            translateOffset={plan.axes.y.translate}
           />
         ) : null}
 
@@ -257,11 +267,13 @@ function SeriesMarks({ frame, plan }: { frame: ChartFrame['series'][number]; pla
         extrema={frame.extrema}
         mode={plan.marks.points.mode}
         budget={plan.marks.pointBudget}
+        autoHideDensityThreshold={plan.marks.points.autoHideDensityThreshold}
       />
       <Labels
         series={frame}
         seriesLabels={plan.labels.seriesLabels}
         valueLabels={plan.labels.valueLabels}
+        labelHalo={plan.labels.labelHalo}
         maxChars={plan.labels.maxChars}
       />
     </g>

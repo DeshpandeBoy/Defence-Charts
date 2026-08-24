@@ -142,6 +142,17 @@ export type AxisPlan = {
   readonly ticks: TickPlan
   readonly title: boolean
   readonly gridlines: boolean
+
+  // Milestone B2: Granular control (Vega-Lite / Best-of)
+  readonly labelFlush: boolean | number
+  readonly labelBound: boolean | number
+  readonly tickBand: 'center' | 'extent'
+  readonly tickExtra: boolean
+  readonly minExtent: number
+  readonly maxExtent: number
+  readonly translate: number
+  readonly strokeCap: 'butt' | 'round' | 'square'
+  readonly dashPhase: number
 }
 
 export type AxesPlan = {
@@ -171,9 +182,12 @@ export type MarkSpec =
   | { readonly kind: 'bar'; readonly stacked: boolean; readonly grouped: boolean }
   | { readonly kind: 'arc'; readonly donut: boolean }
   | { readonly kind: 'point' }
-  | { readonly kind: 'cell' }
+  | { readonly kind: 'cell'; readonly bandStart: number; readonly bandEnd: number }
 
-export type PointPlan = { readonly mode: 'none' | 'all' | 'extrema' }
+export type PointPlan = { 
+  readonly mode: 'none' | 'all' | 'extrema' 
+  readonly autoHideDensityThreshold: number | null
+}
 
 /**
  * Small multiples — Kim et al.'s `serialize` action.
@@ -228,6 +242,7 @@ export type LabelsPlan = {
   readonly axisLabelDegrade: DegradeStep
   /** Abbreviation budget in characters. `null` = no abbreviation (§1.4: spelled, not absent). */
   readonly maxChars: number | null
+  readonly labelHalo: 'none' | 'light' | 'dark'
 }
 
 // --- 4.4 legend ----------------------------------------------------------------------
@@ -488,4 +503,13 @@ export const AXIS_OFF: AxisPlan = Object.freeze({
   ticks: Object.freeze({ mode: 'none' }) as TickPlan,
   title: false,
   gridlines: false,
+  labelFlush: false,
+  labelBound: false,
+  tickBand: 'center',
+  tickExtra: false,
+  minExtent: 0,
+  maxExtent: 0,
+  translate: 0,
+  strokeCap: 'butt',
+  dashPhase: 0,
 })
