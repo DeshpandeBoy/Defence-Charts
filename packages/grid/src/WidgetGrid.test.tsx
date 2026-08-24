@@ -97,6 +97,12 @@ function latest(): MockGridProps {
   return props
 }
 
+function press(element: HTMLElement, key: string): void {
+  act(() => {
+    element.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }))
+  })
+}
+
 describe('WidgetGrid controlled wrapper', () => {
   it('passes initial project layout with stable widget keys and no chart knowledge', () => {
     mount()
@@ -142,6 +148,55 @@ describe('WidgetGrid controlled wrapper', () => {
     mount(INITIAL_LAYOUT, { mode: 'read-only' })
     expect(latest().dragConfig).toMatchObject({ enabled: false })
     expect(latest().resizeConfig).toEqual({ enabled: false })
+  })
+
+  it('routes keyboard proposals through the public controlled commit path', () => {
+    const onLayoutCommit = vi.fn<(snapshot: LayoutSnapshot) => void>()
+    const onLayoutChange = vi.fn<(snapshot: LayoutSnapshot) => void>()
+    mount(INITIAL_LAYOUT, { onLayoutCommit, onLayoutChange })
+    const move = container.querySelector<HTMLButtonElement>('[data-gx-keyboard-control="move"]')
+    if (move === null) throw new Error('missing keyboard move control')
+
+    act(() => move.focus())
+    press(move, 'Enter')
+    press(move, 'ArrowRight')
+    press(move, 'Enter')
+
+    expect(onLayoutChange).toHaveBeenCalledTimes(1)
+    expect(onLayoutCommit).toHaveBeenCalledTimes(1)
+    expect(onLayoutCommit).toHaveBeenCalledWith(expect.objectContaining({
+      items: expect.arrayContaining([
+        expect.objectContaining({ id: 'sales', x: 1 }),
+        expect.objectContaining({ id: 'margin' }),
+      ]),
+    }))
+    expect(document.activeElement).toBe(move)
+  })
+
+  it('restores the initial public snapshot and initiating focus on keyboard cancel', () => {
+    const onLayoutCancel = vi.fn<(snapshot: LayoutSnapshot) => void>()
+    mount(INITIAL_LAYOUT, { onLayoutCancel })
+    const move = container.querySelector<HTMLButtonElement>('[data-gx-keyboard-control="move"]')
+    if (move === null) throw new Error('missing keyboard move control')
+
+    act(() => move.focus())
+    press(move, 'Enter')
+    press(move, 'ArrowRight')
+    press(move, 'Escape')
+
+    expect(onLayoutCancel).toHaveBeenCalledWith(expect.objectContaining({
+      items: expect.arrayContaining([
+        expect.objectContaining({ id: 'sales', x: 0, y: 0, w: 4, h: 2 }),
+      ]),
+    }))
+    expect(document.activeElement).toBe(move)
+  })
+
+  it('removes keyboard editing affordances in read-only mode', () => {
+    mount(INITIAL_LAYOUT, { mode: 'read-only' })
+
+    expect(container.querySelector('[data-gx-keyboard-control]')).toBeNull()
+    expect(container.querySelector('[aria-live]')).toBeNull()
   })
 
   it('configures the explicit shell handle and content/control cancel scope', () => {

@@ -18,6 +18,7 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
   type CSSProperties,
   type ReactElement,
 } from 'react'
@@ -36,6 +37,7 @@ import {
   previewGridInteraction,
 } from './interaction.ts'
 import type { GridInteractionKind, GridInteractionState } from './interaction.ts'
+import { KeyboardGrid } from './KeyboardGrid.tsx'
 
 /** The only modes the first grid wrapper exposes. */
 export type WidgetGridMode = 'edit' | 'read-only'
@@ -173,15 +175,57 @@ export function WidgetGrid({
   onResizeStop,
 }: WidgetGridProps): ReactElement {
   const normalizedLayout = useMemo(() => normalizeGridLayout(layout), [layout])
-  const engineLayout = useMemo(() => toRglLayout(normalizedLayout), [normalizedLayout])
+  const [keyboardLayout, setKeyboardLayout] = useState<readonly WidgetLayout[] | null>(null)
+  const keyboardInteractionRef = useRef(false)
+  const activeInteractionRef = useRef<GridInteractionState | null>(null)
+  const lastCommitSignatureRef = useRef<string | null>(null)
+  const cancelTokenRef = useRef<number | undefined>(cancelInteractionToken)
+
+  const emitCommittedLayout = useCallback(
+    (snapshot: LayoutSnapshot) => {
+      const signature = serializeLayoutSnapshot(snapshot)
+      if (lastCommitSignatureRef.current === signature) return
+      lastCommitSignatureRef.current = signature
+      onLayoutChange?.(snapshot)
+      onLayoutCommit?.(snapshot)
+    },
+    [onLayoutChange, onLayoutCommit],
+  )
+
+  const displayLayout = keyboardLayout ?? normalizedLayout
+  const engineLayout = useMemo(() => toRglLayout(displayLayout), [displayLayout])
   const children = useMemo(
     () =>
-      normalizedLayout.map((item) => (
+      displayLayout.map((item) => (
         <div key={item.id} data-gx-widget-id={item.id}>
-          {renderItem(item)}
+          <KeyboardGrid
+            item={item}
+            layout={displayLayout}
+            mode={mode}
+            onLayoutStart={(nextLayout) => {
+              keyboardInteractionRef.current = true
+              onLayoutStart?.(createLayoutSnapshot(nextLayout))
+            }}
+            onLayoutPreview={(nextLayout) => {
+              setKeyboardLayout(nextLayout)
+              onLayoutPreview?.(createLayoutSnapshot(nextLayout))
+            }}
+            onLayoutCommit={(nextLayout) => {
+              keyboardInteractionRef.current = false
+              setKeyboardLayout(null)
+              emitCommittedLayout(createLayoutSnapshot(nextLayout))
+            }}
+            onLayoutCancel={(nextLayout) => {
+              keyboardInteractionRef.current = false
+              setKeyboardLayout(null)
+              onLayoutCancel?.(createLayoutSnapshot(nextLayout))
+            }}
+          >
+            {renderItem(item)}
+          </KeyboardGrid>
         </div>
       )),
-    [normalizedLayout, renderItem],
+    [displayLayout, emitCommittedLayout, mode, onLayoutCancel, onLayoutPreview, onLayoutStart, renderItem],
   )
   const gridConfig = useMemo(
     () => ({
@@ -201,20 +245,6 @@ export function WidgetGrid({
     [mode],
   )
   const resizeConfig = useMemo(() => ({ enabled: mode === 'edit' }), [mode])
-  const activeInteractionRef = useRef<GridInteractionState | null>(null)
-  const lastCommitSignatureRef = useRef<string | null>(null)
-  const cancelTokenRef = useRef<number | undefined>(cancelInteractionToken)
-
-  const emitCommittedLayout = useCallback(
-    (snapshot: LayoutSnapshot) => {
-      const signature = serializeLayoutSnapshot(snapshot)
-      if (lastCommitSignatureRef.current === signature) return
-      lastCommitSignatureRef.current = signature
-      onLayoutChange?.(snapshot)
-      onLayoutCommit?.(snapshot)
-    },
-    [onLayoutChange, onLayoutCommit],
-  )
 
   const beginInteraction = useCallback(
     (kind: GridInteractionKind, nextLayout: RglLayout, oldItem: RglLayoutItem | null, newItem: RglLayoutItem | null) => {
@@ -265,7 +295,7 @@ export function WidgetGrid({
 
   const handleLayoutChange = useCallback(
     (nextLayout: RglLayout) => {
-      if (activeInteractionRef.current !== null) return
+      if (activeInteractionRef.current !== null || keyboardInteractionRef.current) return
       emitCommittedLayout(toSnapshot(nextLayout))
     },
     [emitCommittedLayout],

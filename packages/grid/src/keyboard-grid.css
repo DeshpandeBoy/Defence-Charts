@@ -1,0 +1,84 @@
+@layer gx.theme {
+  .gx-keyboard-grid {
+    position: relative;
+    block-size: 100%;
+    min-inline-size: 0;
+    min-block-size: 0;
+  }
+
+  .gx-keyboard-grid__content {
+    block-size: 100%;
+    min-inline-size: 0;
+    min-block-size: 0;
+  }
+
+  .gx-keyboard-grid[data-gx-keyboard-mode="read-only"] [data-gx-drag-handle] {
+    display: none;
+  }
+
+  .gx-keyboard-grid__controls {
+    position: absolute;
+    z-index: 1;
+    inset-block-start: 0;
+    inset-inline-end: 0;
+    display: flex;
+    gap: var(--gx-widget-padding-tight);
+    padding: var(--gx-widget-padding-tight);
+    border-radius: var(--gx-widget-radius-inner);
+    background: var(--gx-surface-color);
+    color: var(--gx-surface-text-color);
+  }
+
+  .gx-keyboard-grid__control {
+    min-inline-size: calc(var(--gx-widget-padding-tight) * 4);
+    min-block-size: calc(var(--gx-widget-padding-tight) * 2);
+    padding: var(--gx-widget-padding-tight);
+    border: var(--gx-line-stroke-width) solid var(--gx-axis-color);
+    border-radius: var(--gx-widget-radius-inner);
+    background: var(--gx-surface-color);
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .gx-keyboard-grid__control:hover,
+  .gx-keyboard-grid__control[aria-pressed="true"] {
+    background: var(--gx-surface-text-color);
+    color: var(--gx-surface-color);
+  }
+
+  .gx-keyboard-grid__control:focus-visible {
+    outline: var(--gx-line-stroke-width) solid currentColor;
+    outline-offset: calc(var(--gx-line-stroke-width) * 2);
+  }
+
+  .gx-keyboard-grid__instructions,
+  .gx-keyboard-grid__live {
+    position: absolute;
+    inline-size: 0;
+    block-size: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gx-keyboard-grid__control {
+      transition: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .gx-keyboard-grid__controls,
+    .gx-keyboard-grid__control {
+      border-color: ButtonText;
+      background: Canvas;
+      color: ButtonText;
+    }
+
+    .gx-keyboard-grid__control[aria-pressed="true"] {
+      background: Highlight;
+      color: HighlightText;
+    }
+  }
+}
