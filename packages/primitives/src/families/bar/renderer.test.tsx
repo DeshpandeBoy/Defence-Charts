@@ -1,0 +1,43 @@
+import { renderToStaticMarkup } from 'react-dom/server'
+import { describe, expect, it } from 'vitest'
+
+import type { MarkRendererInput } from '../../renderer-seam.ts'
+import { BAR_MARK_RENDERERS, renderBar } from './renderer.tsx'
+
+const input = {
+  frame: {
+    id: 'north',
+    label: 'North',
+    index: 0,
+    line: null,
+    area: null,
+    bands: [],
+    cells: [{ x: 10, y: 20, width: 18, height: 40 }],
+    points: [],
+    extrema: null,
+  },
+  plan: {
+    type: 'bar',
+    marks: { primary: { kind: 'bar', stacked: false, grouped: false } },
+  },
+  policy: {},
+} as unknown as MarkRendererInput
+
+describe('bar family renderer', () => {
+  it('registers only explicit none and bar marks', () => {
+    expect(BAR_MARK_RENDERERS.map((entry) => entry.markKinds)).toEqual([['none'], ['bar']])
+  })
+
+  it('renders stable keyed rectangles from frame cells', () => {
+    const html = renderToStaticMarkup(renderBar(input))
+    expect(html).toContain('class="gx-bar"')
+    expect(html).toContain('data-bar-index="0"')
+    expect(html).toContain('x="10"')
+    expect(html).toContain('width="18"')
+  })
+
+  it('returns no geometry when the shared frame has not populated cells', () => {
+    const empty = { ...input, frame: { ...input.frame, cells: [] } } as MarkRendererInput
+    expect(renderToStaticMarkup(renderBar(empty))).toBe('')
+  })
+})
