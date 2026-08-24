@@ -172,32 +172,25 @@ Consequence for Milestone B3: the responsive-threshold tokens are **TS-side**, n
 properties. A consumer retunes them through `<GxConfig>`, which works identically on server and
 client.
 
-### 3.3 Hysteresis — ⚠ corrected against the literature
+### 3.3 Hysteresis — corrected and shipped
 
 An earlier version of this doc specified an 8 px deadband passed into the resolver as `prevClass`.
 `raw/05-theory-responsive-viz.md` shows that is the wrong primary mechanism. No visualization paper
-studies hysteresis at all, and the web platform solves the underlying problem two other ways:
+studies hysteresis at all, and the web platform solves the underlying loop structurally: the
+measured element must be grid-determined, never content-determined, and a plan may only affect
+descendants of the measured box. Gate G11 protects that rule.
 
-1. **Prevent the cycle structurally.** CSS refuses sibling-size queries because "it would introduce
-   layout cycles"; `ResizeObserver` responds to an unresolved cycle by **throwing an error**, not by
-   damping. Rule: *the measured element's size must be grid-determined, never content-determined,
-   and a plan may only affect descendants of the measured box.*
-2. **Mask the switch with animation.** A ~1 s eased transition means a boundary crossed twice inside
-   a second reads as one continuous motion. Animation converts flicker into smear.
+A6's transition remains the polish for geometry changes, but decision [017] measured that it cannot
+prevent flicker when a rung mounts new marks. The shipped answer is a **fractional classifier
+deadband**, not a fixed pixel value. `resolveSizeClassWithDeadband()` in `@gx/core` is pure and
+accepts the previous class explicitly; `AutoChart` owns that live state and applies the 1% Tier-C
+fraction. The measured 0.50% floor at Panel → Canvas is recorded in [017], and the extra margin is
+an implementation choice rather than a research claim.
 
-Order of attack: containment first (it prevents a true infinite loop, which a deadband cannot),
-animation second, deadband only if flicker is still observable in practice. If we do ship one, it
-must be a **fraction of the boundary width (~2–3%)**, not an absolute — 8 px means very different
-things at a 120 px boundary and a 1200 px one.
-
-**Consequence for the contract — settled:** `planChart()` **is** a pure function of size alone, with
-no `prevClass`. `ChartPlan` has no such field and `SizeContext` gains none. Containment prevents the
-true loop (a deadband only slows one), animation converts flicker into smear, and §6a makes purity
-load-bearing for testability as well as for the server path. Revisit only if flicker is still
-observable at A5 — and then as `PlanPolicy`, so the resolver stays pure. `40-chart-plan.md` §9.
-
-**Test that protects this:** drag every chart type across every rung boundary and assert the
-`ResizeObserver` loop error never fires.
+**Consequence for the contract — settled:** `planChart()` is still a pure function of its explicit
+inputs. `ChartPlan` has no `prevClass`, and `SizeContext` gains none. The client boundary owns only
+the interaction state needed to keep a live measurement from re-crossing a mount boundary inside
+the deadband. G10 continues to assert that the pure resolver has no direction memory.
 
 ---
 
@@ -714,9 +707,9 @@ query never matches, so there is no transition to remove.
 1. **Name and npm scope.** Everything above says `@gx/*` as a placeholder. Needs deciding before
    any package is published, and the npm scope must be checked for availability.
 2. **Token prefix.** `--gx-*` placeholder; pending `raw/06-design-tokens-widgets.md` §6.
-3. ~~Hysteresis validation~~ — ✅ resolved in §3.3 against `raw/05`. Containment first, animation
-   second, deadband only if flicker survives both.
+3. ~~Hysteresis validation~~ — ✅ resolved in §3.3 against `raw/05` and decision 017. Containment
+   first, animation second, then the shipped 1% fractional deadband for mounted rung content.
 4. ~~Whether `prevClass` in the resolver is worth the purity cost~~ — ✅ **resolved: no.** Settled in
-   §3.3 and `40-chart-plan.md` §9. `planChart()` ships pure. Revisit only if A5 shows flicker, and
-   then via `PlanPolicy` rather than resolver state.
+   §3.3 and `40-chart-plan.md` §9. `planChart()` ships pure; `AutoChart` passes previous state only
+   to the separate deadband classifier.
 5. ✅ Build stack — resolved in §5. ✅ Test stack — resolved in §6.

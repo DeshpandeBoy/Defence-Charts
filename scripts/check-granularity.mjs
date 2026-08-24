@@ -1,6 +1,5 @@
 /**
- * Gate **G20** (proposed, not yet wired into `pnpm verify` or CI — see
- * `research/44-granularity.md` for the hand-off) — the granularity coverage manifest.
+ * Gate **G20** — the granularity coverage manifest.
  *
  * `research/30-implementation-plan.md` states B2's mandate in one sentence: *"`raw/06` §7
  * produced the granularity table across ten libraries. Every ● in that table becomes a token or
@@ -10,9 +9,10 @@
  * plan path doesn't resolve against `ChartPlan`, or a declined row's cited source doesn't exist.
  *
  * ⚠ THIS GATE AUDITS A CLAIM, NOT AN IMPLEMENTATION. A knob can be "dispositioned" while its
- * tokens are still undeclared — that's the `owedToB1` count, not a failure. What *is* a hard
- * failure: a disposition that names a token or plan path and gets the name wrong. Coverage may
- * be incomplete; citations may not lie.
+ * tokens are still undeclared — that is reported as `owedToB1` for diagnosis. The shipped
+ * manifest currently clears that count; a future addition must either declare its token or
+ * explain why it is not part of the surface. What *is* a hard failure: a disposition that names
+ * a token or plan path and gets the name wrong. Coverage may be incomplete; citations may not lie.
  *
  * ⚠ UNION TYPES BREAK A NAIVE DOTTED-PATH WALK. `axes.x.ticks.count` only exists inside one
  * member of `TickPlan`'s three-way union (`{mode:'count', count}`); `axes.x.domainLine` exists

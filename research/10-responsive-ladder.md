@@ -508,10 +508,10 @@ for a reason the design argument had no way to reach — the boundary *mounts* r
    cannot transition. The instruction below stands and is now the live one — express it as a
    **fraction of the boundary width**, not an absolute. The guessed ~2–3% has margin: the measured
    *floor*, the smallest deadband that suppresses a ±6 px wobble at the Panel → Canvas edge, is
-3 px on 600 px — **0.50%**. ⚠ Still open as a post-B3 interaction follow-up: the shipped fraction, whether the
-   right denominator at the Micro and Tile edges is the boundary or the cell size, and where a
-   stateful previous-rung may live given decisions 8 and 10. ⚠ Corrects the architecture doc, which
-   specified an absolute 8 px.
+3 px on 600 px — **0.50%**. ✅ The shipped classifier uses a 1% fractional band against each
+   family's minimum footprint, with the previous class held at the `@gx/react` boundary and passed
+   explicitly into the pure classifier. ⚠ Corrects the architecture doc, which specified an
+   absolute 8 px.
 2. ~~Does `prevClass` still belong in the resolver?~~ — ✅ **resolved: no.** `planChart()` ships as a
    pure function of size alone. See `40-chart-plan.md` §9 and `20-architecture.md` §3.3.
 3. **Bar geometry has no published numbers.** Talbot, Setlur & Agrawala 2014, *Four Experiments on

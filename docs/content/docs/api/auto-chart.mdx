@@ -8,7 +8,8 @@ import { AutoChart } from '@gx/react'
 ```
 
 `AutoChart` carries the package's `"use client"` boundary. It observes one wrapper, derives
-`SizeContext` and `DataShape`, calls `planChart`, and passes the result to `Chart`.
+`SizeContext` and `DataShape`, applies the pure size classifier's fractional deadband, calls
+`planChart`, and passes the result to `Chart`.
 
 ## Props
 
@@ -29,6 +30,13 @@ import { AutoChart } from '@gx/react'
 
 Without `initialSize`, server output contains the wrapper and no guessed chart. With `initialSize`,
 the server emits a real first chart. After hydration, the observer supplies the real dimensions.
+
+## Rung stability
+
+The pure `planChart()` contract has no direction memory. A live `AutoChart` keeps the last accepted
+size class at the client boundary and uses a 1% fractional deadband around rung minimums, so a
+slow resize wobble does not repeatedly mount and unmount a rung's marks. The first real measurement
+is accepted immediately; a server-declared `initialSize` remains deterministic.
 
 ## Threshold policy and overrides
 

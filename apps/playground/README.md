@@ -14,7 +14,7 @@ Then open <http://localhost:5173>.
 ## Current status
 
 Milestones A1-A6 and B1-B3 are implemented and verified for the line/area proof. The playground
-exercises the generated 186-token presentation surface, Rail/Neutral themes, renderer controls and
+exercises the generated 198-token presentation surface, Rail/Neutral themes, renderer controls and
 typed `PlanPolicy` thresholds. C1-C2 grid work is next; bar/timebar and the remaining chart families
 are on the D track.
 
@@ -49,15 +49,15 @@ published work fixes only the horizontal order. Drag until a threshold flips and
 above it changes in the same frame.
 
 **The fingerprint returns.** Drag out past a boundary and back in: the hash beside the plan
-must land on exactly the value it had before. A plan is a pure function of size and shape
-with no memory of approach direction — gate **G10** asserts it in CI, and this is the same
-claim with your hand on the handle. Hysteresis is deliberately absent (§9); if it ever
-creeps back in as a "small fix", this is where you would see it first.
+must land on exactly the value it had before. `planChart()` remains a pure function of size and
+shape — gate **G10** asserts that — while the live `AutoChart` boundary now holds a 1% fractional
+deadband around rung mounts so a slow resize wobble does not blink new marks on and off. The panel
+uses the same classifier and previous-rung rule as the chart beside it.
 
 ## What is deliberately missing
 
 **The line chart is real now.** The playground exercises the delivered A4–A6 renderer,
-`AutoChart`, B1-B3 control surface and CSS transition path beside the resolver's JSON output. What is still absent
+`AutoChart`, B1-B3 control surface, fractional rung deadband and CSS transition path beside the resolver's JSON output. What is still absent
 is breadth: chart types other than line and area are missing for the same reason —
 `planChart()` **throws** for them rather than falling back to a plan it cannot justify.
 

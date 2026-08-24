@@ -153,14 +153,15 @@ Two fields look like violations and are not:
 
 ## What absorbs a rung change
 
-Not a deadband. `prevClass` is settled **out** of the resolver (`../40-chart-plan.md` §9), so three
-other mechanisms carry the load, in this order:
+The plan remains pure and `prevClass` is settled **out** of the resolver (`../40-chart-plan.md` §9).
+The live client boundary now passes the previous class into a pure 1% fractional deadband
+classifier, after containment has ruled out true layout cycles:
 
 ```mermaid
 flowchart LR
     x["Widget dragged across<br/>a rung boundary"] --> c1["<b>1. Containment</b><br/>prevents the true loop —<br/>a deadband only slows one"]
     c1 --> c2["<b>2. Animation</b><br/>~300ms rescale · ~1000ms when marks move<br/>converts flicker into smear"]
-    c2 --> c3["<b>3. Deadband</b><br/><i>only if flicker survives both</i><br/>as a % of boundary width, never px"]
+    c2 --> c3["<b>3. Deadband</b><br/><i>shipped at 1%</i><br/>as a % of boundary width, never px"]
 
     classDef a fill:#123a2a,stroke:#4ade80,color:#eafff3
     classDef b fill:#3d2a0b,stroke:#fbbf24,color:#fff8e6

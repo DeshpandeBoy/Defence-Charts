@@ -388,7 +388,7 @@ The moments most likely to make someone give up, and what each does:
 | Empty data | A designed empty state at every rung — not a blank box, not a zero-height axis. |
 | One data point, one category | A designed rung, not a degenerate chart. Micro and Tile already are single-value states. |
 | An override the size cannot honour | The override wins — it is a hard override by definition — and the honesty invariant is what CI holds, so an override that would make the chart claim unreadable values fails the gate rather than shipping quietly. |
-| A boundary crossed repeatedly while dragging | Absorbed in order: containment prevents a true loop, animation converts flicker into smear, and a deadband is added only if flicker survives both — expressed as a fraction of boundary width, never a pixel count. |
+| A boundary crossed repeatedly while dragging | Absorbed in order: containment prevents a true loop, animation smooths geometry, and the live classifier's shipped 1% fractional deadband prevents mounted rung content from blinking — never a fixed pixel count. |
 
 ### 5.6 And then the docs page, which has exactly one job
 

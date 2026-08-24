@@ -10,8 +10,8 @@
  *
  * ## The question, stated precisely
  *
- * `10-responsive-ladder.md` §8 item 1 holds a deadband open as a *possible* future addition and
- * is explicit that the transition is the primary defence: a rung change that animates over
+ * `10-responsive-ladder.md` §8 item 1 recorded the measured need for a deadband and
+ * is explicit that the transition is only the polish: a rung change that animates over
  * ~1000 ms is supposed to read as one gesture rather than as a flash, even when the container
  * wobbles across a boundary. That is a claim about what a user sees, and it decomposes:
  *
@@ -217,7 +217,8 @@ async function probeMount(page, centre) {
 
 /**
  * Replay a width trace through a hysteresis of `deadband` px and return the sample indices at
- * which the column count changed. `deadband` 0 is the shipped behaviour.
+ * which the column count changed. This raw-width helper is retained to compare the measured
+ * 0.50% floor with the shipped 1% fractional classifier; it is not the app's source of truth.
  *
  * ⚠ Counted on **columns**, not on rung names. The rung is a function of columns and rows, rows
  * are held fixed here, and counting columns keeps the replay honest about what changed rather

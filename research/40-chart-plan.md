@@ -823,12 +823,10 @@ Three reasons, in order of weight:
    `20-architecture.md` §6a makes it load-bearing for *testability* — the ladder is tested in bare
    Node with no DOM at all. A resolver with memory is a resolver with a setup step in every test.
 
-⚠ Left open honestly, per §8: if flicker is still observable after containment and animation ship at
-Milestone A5, a deadband follows — expressed as a **fraction of the boundary width (~2–3%)**, never
-absolute pixels, since 8 px means very different things at a 120 px boundary and a 1200 px one. If
-that happens it will be threaded as `PlanPolicy`, not as resolver state, keeping `planChart()` pure.
-`20-architecture.md` should be updated from *"decide empirically during Milestone A"* to *"decided
-out; revisit only if A5 shows flicker."*
+✅ Decision 017 measured that flicker survives containment and animation. The shipped follow-up is
+`resolveSizeClassWithDeadband()` in `@gx/core`, expressed as a **1% fraction of each family
+minimum**, never absolute pixels. `AutoChart` owns the previous class and passes it into this pure
+classifier; `PlanPolicy`, `ChartPlan` and `SizeContext` remain free of resolver state.
 
 ---
 

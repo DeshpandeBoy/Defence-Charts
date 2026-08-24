@@ -27,7 +27,7 @@ the one above it. That progression is what we call **the ladder**, and it is the
 
 The second half of the product is control. Every stroke width, every gap, every tick length, every
 colour is something you can change from CSS — for one chart on the page, without touching the others.
-The shipped presentation surface currently declares 186 of those knobs, all named consistently.
+The shipped presentation surface currently declares 198 of those knobs, all named consistently.
 
 ---
 
@@ -513,7 +513,7 @@ everything after it is wasted work. That is exactly why it is first and why it i
 
 **Milestone B — the control surface.** B1-B3 deliver the generated presentation tree, Rail and
 Neutral dark/light themes, renderer controls, and typed threshold policy for the current line/area
-proof. The shipped source declares 186 presentation tokens and the policy gate keeps research tiers
+proof. The shipped source declares 198 presentation tokens and the policy gate keeps research tiers
 separate from implementation choices.
 
 **Milestone C — the grid.** Next: widgets, drag, resize, per-widget minimums, the widget frame itself.
@@ -555,9 +555,10 @@ solves the problem with text descriptions and a data-table export instead. So we
 the correct floor and the visible data table as the thing that actually delivers the information.
 
 **Whether animation alone smooths out the size boundaries** is an open empirical question. If dragging
-still flickers after we ship transitions, we add a small deadband — but expressed as a percentage of
-the boundary, never a fixed pixel count, because 8 px means very different things at a 120 px boundary
-and a 1200 px one.
+still flickers after we ship transitions, the live classifier uses a small deadband — expressed as a
+percentage of the boundary, never a fixed pixel count, because 8 px means very different things at a
+120 px boundary and a 1200 px one. The shipped `AutoChart` boundary uses a 1% fractional band while
+`planChart()` remains pure.
 
 ---
 

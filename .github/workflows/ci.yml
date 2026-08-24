@@ -78,6 +78,10 @@ jobs:
         if: '!cancelled()'
         run: pnpm lint:tokens
 
+      - name: Gate G20 — granularity coverage manifest
+        if: '!cancelled()'
+        run: pnpm lint:granularity
+
       # ⚠ **The same gate as G17 below, pointed at the second generator**, not a new one: both
       # regenerate a committed stylesheet from its typed source and compare. It is a separate
       # step only because the two scripts fail for different reasons and the step name should

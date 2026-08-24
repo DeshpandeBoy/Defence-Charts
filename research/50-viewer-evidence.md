@@ -174,9 +174,10 @@ not evidence that a viewer succeeds with them.
    product, and the literature is silent.
 2. **Does animation actually absorb boundary flicker?** The claim that a ~1 s eased transition turns
    a boundary crossed twice into one continuous motion is flagged in `raw/05` §6 as *"this inference
-   is mine — no paper I retrieved makes this claim. It is a design argument, not a citation."* It is
-   also the reason `prevClass` was settled out of the resolver and the deadband demoted to a fallback.
-   The architecture rests on it.
+   is mine — no paper I retrieved makes this claim. It is a design argument, not a citation."* The
+   browser probe showed that mounted rung content still flickers, so the implementation now keeps
+   `prevClass` out of the resolver and uses a 1% fractional deadband at the live client boundary.
+   The number remains a project-owned interaction policy, not viewer evidence.
 3. **What does the level-of-detail literature already know?** Real-time 3D graphics has used
    hysteresis in LOD switching as standard practice for decades. `raw/05` §5.4 says the literature is
    believed to exist but was **not retrieved**, so it is not cited. This is the cheapest remaining

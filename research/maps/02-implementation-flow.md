@@ -16,7 +16,7 @@ flowchart TD
     A5["<b>A5</b> @gx/react &lt;AutoChart&gt;<br/><i>useElementSize · ResizeObserver</i>"]
     A6["<b>A6</b> Transitions<br/><i>rescale ~300ms · replace ~1000ms</i>"]
 
-    B1["<b>B1</b> Token tree<br/><i>186 declarations · generated CSS + TS</i>"]
+    B1["<b>B1</b> Token tree<br/><i>198 declarations · generated CSS + TS</i>"]
     B2["<b>B2</b> Prove-we-exceed<br/><i>the restyle demo</i>"]
     B3["<b>B3</b> Threshold policy<br/><i>typed inputs · provenance + consumption gate</i>"]
 
@@ -67,7 +67,7 @@ integration and release preparation; none of it requires reopening the B3 policy
 ```mermaid
 flowchart LR
     o1["<b>Open</b><br/>Project name + npm scope"] --> t1["blocks <b>E3 publish</b>"]
-    o2["<b>Calibration</b><br/>Roboto Flex tnum?<br/>safetyFactor"] --> t2["blocks final metrics calibration<br/><i>not B3 planning</i>"]
+    o2["<b>Calibration</b><br/>Windows fallback face"] --> t2["blocks final fallback calibration<br/><i>not B3 planning</i>"]
     o3["<b>Next C1-C2</b><br/>Grid + widget chrome"] --> t3["blocks <b>dashboard integration</b>"]
     o4["<b>Next D</b><br/>Chart breadth"] --> t4["blocks <b>additional chart families</b>"]
 

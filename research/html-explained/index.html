@@ -1721,7 +1721,7 @@
               <div class="package-detail" id="tokens-detail">
                 <p>
                   Tokens name colours, type sizes, gaps, strokes and motion. TypeScript is the source
-                  of truth for 186 declared presentation tokens; the Rail stylesheet, Neutral dark/light
+                  of truth for 198 declared presentation tokens; the Rail stylesheet, Neutral dark/light
                   themes and token-name types are generated from that data, and CI rejects drift or
                   unresolved variables. B3 keeps plan-changing thresholds in typed <code>PlanPolicy</code>
                   inputs, with explicit <code>@future</code> markers for later chart families.
@@ -2512,8 +2512,9 @@ import { AutoChart } from '@gx/react'
             </div>
             <p>
               The six-rung line and area proof now runs end to end: plan, accessible SVG, live measurement,
-              server rendering and motion. B1-B3 are complete: generated tokens/themes and typed threshold
-              policy now protect the line/area proof. Next is the C1 grid and widget shell, followed by chart breadth.
+              server rendering, motion and a fractional rung deadband. B1-B3 are complete: 198 generated
+              tokens/themes, the G20 granularity audit and typed threshold policy now protect the line/area
+              proof. Next is the C1 grid and widget shell, followed by chart breadth.
             </p>
           </div>
 
@@ -2525,10 +2526,10 @@ import { AutoChart } from '@gx/react'
                 <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Core contracts:</strong> ChartPlan, sizing, layout, policy, atomic typography and measured Roboto Flex advances.</span></li>
                 <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Line and area planning:</strong> Micro through Stage, including label degradation, overrides and plot-height decisions.</span></li>
                 <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Accessible renderer:</strong> hook-free Chart primitives, semantic test helpers, data-table output and deterministic frame geometry.</span></li>
-                <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Adaptive client:</strong> AutoChart, animation-frame-batched ResizeObserver measurement and an honest SSR initial size.</span></li>
+                <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Adaptive client:</strong> AutoChart, animation-frame-batched ResizeObserver measurement, an honest SSR initial size and a 1% fractional rung deadband.</span></li>
                 <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Browser proof:</strong> CI drives Chromium through zero-client-JS RSC rendering, fixed-box containment and reduced-motion-aware transitions.</span></li>
                 <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>Documentation:</strong> the Fumadocs application, 15 authored pages and an interactive ResizeLab are implemented.</span></li>
-                <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>B1-B3 control surface:</strong> 186 generated presentation tokens, Rail + Neutral themes, renderer controls, typed threshold policy, provenance/consumption gate, and a green full verify chain.</span></li>
+                <li><i class="fa-solid fa-circle-check" aria-hidden="true"></i><span><strong>B1-B3 control surface:</strong> 198 generated presentation tokens, Rail + Neutral themes, renderer controls, typed threshold policy, G20 granularity coverage, provenance/consumption gates, and a green full verify chain.</span></li>
               </ul>
             </section>
 
@@ -2537,7 +2538,7 @@ import { AutoChart } from '@gx/react'
               <ul class="progress-list">
                 <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>C1-C2:</strong> build the twelve-column grid, per-widget minimums, resize/compaction behavior and widget chrome.</span></li>
                 <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>D:</strong> add chart breadth, starting with bar/timebar and donut, then KPI, scatter, heatmap, funnel, progress and sparkline.</span></li>
-                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>Validation follow-up:</strong> finish the Roboto Flex <code>tnum</code>/safety-factor calibration and keep the measured rung-deadband question separate from the completed B3 policy contract.</span></li>
+                <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>Validation follow-up:</strong> measure the Windows-only Segoe UI Variable fallback when that environment is available; the released Roboto Flex behavior and available-face <code>safetyFactor: 1.57</code> are already committed.</span></li>
                 <li><i class="fa-solid fa-arrow-right" aria-hidden="true"></i><span><strong>E:</strong> choose the name and npm scope, add Changesets and trusted publishing, finish public examples, then publish.</span></li>
               </ul>
             </section>
@@ -2570,7 +2571,7 @@ import { AutoChart } from '@gx/react'
             </div>
             <div class="milestone" data-status="done">
               <div class="milestone-code"><i class="fa-solid fa-circle-check" aria-hidden="true"></i>B1-B3</div>
-              <div class="milestone-body"><strong>Visual control and typed threshold policy</strong><span>186 generated presentation tokens, Rail + Neutral themes, renderer controls, typed <code>PlanPolicy</code> inputs, provenance/consumption gate, and a green 666-test verify run.</span></div>
+              <div class="milestone-body"><strong>Visual control and typed threshold policy</strong><span>198 generated presentation tokens, Rail + Neutral themes, renderer controls, typed <code>PlanPolicy</code> inputs, G20 granularity coverage, provenance/consumption gates, and a green verify run.</span></div>
             </div>
             <div class="milestone" data-status="active">
               <div class="milestone-code"><i class="fa-solid fa-circle-half-stroke" aria-hidden="true"></i>C1-C2</div>

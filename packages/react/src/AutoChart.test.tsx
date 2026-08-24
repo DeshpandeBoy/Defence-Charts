@@ -188,6 +188,24 @@ describe('a measurement produces a chart at that measurement’s rung', () => {
     }
   })
 
+  it('holds a rung while a boundary wobble stays inside the deadband', () => {
+    mount(chart())
+    resize(599, 520)
+    expect(wrapper().querySelector('figure')?.getAttribute('data-size-class')).toBe('panel')
+
+    resize(605, 520)
+    expect(wrapper().querySelector('figure')?.getAttribute('data-size-class')).toBe('panel')
+
+    resize(607, 520)
+    expect(wrapper().querySelector('figure')?.getAttribute('data-size-class')).toBe('canvas')
+
+    resize(599, 520)
+    expect(wrapper().querySelector('figure')?.getAttribute('data-size-class')).toBe('canvas')
+
+    resize(593, 520)
+    expect(wrapper().querySelector('figure')?.getAttribute('data-size-class')).toBe('panel')
+  })
+
   it('changes the encoding, not just the chrome, at the rung that does', () => {
     // Tile substitutes horizon bands for a line between `horizonMinHeight` and
     // `plotHeightOptimal`. It is the one rung where the *mark* changes, so it is the one

@@ -15,10 +15,10 @@ import type { SizeClass } from './plan.ts'
  * *"which is why `sizeClass` alone is not sufficient input to the resolver, and why
  * `SizeContext` carries raw px."*
  *
- * ⚠ There is no `prevClass`, and there will not be one (`research/40-chart-plan.md` §9).
- * Hysteresis is handled by animation at A6, not by memory in the resolver: a resolver that
- * remembers is a resolver whose output depends on the direction you approached from, which
- * gate **G10** exists to catch.
+ * ⚠ There is no `prevClass` on this value (`research/40-chart-plan.md` §9). The context stays
+ * a serialisable snapshot. The optional deadband classifier accepts a previous class as an
+ * explicit argument, so the stateful client boundary can stabilise a live measurement without
+ * making `planChart()` or this data object remember how the box was approached.
  */
 export type SizeContext = {
   /** px, content box. */
@@ -122,6 +122,79 @@ export function resolveSizeClass(cols: number, rows: number): SizeClass {
     if (c >= family.cols && r >= family.rows) return family.sizeClass
   }
   return 'micro'
+}
+
+const SIZE_CLASS_RANK: Readonly<Record<SizeClass, number>> = {
+  micro: 0,
+  tile: 1,
+  strip: 2,
+  panel: 3,
+  canvas: 4,
+  stage: 5,
+}
+
+const FAMILY_MINIMUM_BY_CLASS: Readonly<Record<SizeClass, { cols: number; rows: number }>> = {
+  micro: { cols: 1, rows: 1 },
+  tile: { cols: 2, rows: 1 },
+  strip: { cols: 3, rows: 1 },
+  panel: { cols: 3, rows: 3 },
+  canvas: { cols: 6, rows: 5 },
+  stage: { cols: 9, rows: 6 },
+}
+
+/**
+ * The measured floor from decision 017 was 0.50% at the Panel → Canvas boundary. A small
+ * margin above that floor is the shipped Tier-C interaction policy; it is expressed as a
+ * fraction so the same classifier behaves sensibly at the Micro and Tile edges.
+ */
+export const DEFAULT_SIZE_DEADBAND_FRACTION = 0.01
+
+function safeDeadbandFraction(fraction: number): number {
+  return Number.isFinite(fraction) && fraction >= 0 ? fraction : DEFAULT_SIZE_DEADBAND_FRACTION
+}
+
+/**
+ * Classify a live pixel box with an explicit previous class and a fractional deadband.
+ *
+ * This function is pure: the caller owns `previousClass`, and the returned class depends only
+ * on the arguments. Upward transitions must clear the target family's minimum footprint plus
+ * the band. Downward transitions only apply the band to dimensions that have actually fallen
+ * below the previous family's minimum, so a wide-but-short chart can leave Canvas on its height
+ * edge without waiting for its width to shrink too.
+ */
+export function resolveSizeClassWithDeadband(
+  width: number,
+  height: number,
+  previousClass: SizeClass | undefined,
+  nominalCellSize = DEFAULT_NOMINAL_CELL_SIZE,
+  fraction = DEFAULT_SIZE_DEADBAND_FRACTION,
+): SizeClass {
+  const nextClass = sizeContextFromPixels(width, height, nominalCellSize).sizeClass
+  if (previousClass === undefined || previousClass === nextClass) return nextClass
+
+  const previousRank = SIZE_CLASS_RANK[previousClass]
+  const nextRank = SIZE_CLASS_RANK[nextClass]
+  const band = safeDeadbandFraction(fraction)
+  const cell = Number.isFinite(nominalCellSize) && nominalCellSize > 0 ? nominalCellSize : DEFAULT_NOMINAL_CELL_SIZE
+
+  if (nextRank > previousRank) {
+    const minimum = FAMILY_MINIMUM_BY_CLASS[nextClass]
+    const widthBoundary = minimum.cols * cell
+    const heightBoundary = minimum.rows * cell
+    return width >= widthBoundary * (1 + band) && height >= heightBoundary * (1 + band)
+      ? nextClass
+      : previousClass
+  }
+
+  const minimum = FAMILY_MINIMUM_BY_CLASS[previousClass]
+  const widthBoundary = minimum.cols * cell
+  const heightBoundary = minimum.rows * cell
+  const widthIsLimiting = width < widthBoundary
+  const heightIsLimiting = height < heightBoundary
+  const widthSettled = !widthIsLimiting || width <= widthBoundary * (1 - band)
+  const heightSettled = !heightIsLimiting || height <= heightBoundary * (1 - band)
+
+  return widthSettled && heightSettled ? nextClass : previousClass
 }
 
 /**

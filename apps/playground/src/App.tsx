@@ -1,12 +1,13 @@
-import type { SizeContext } from '@gx/core'
+import type { SizeClass, SizeContext } from '@gx/core'
 import {
   DEFAULT_POLICY,
   DEFAULT_NOMINAL_CELL_SIZE,
+  resolveSizeClassWithDeadband,
   sizeContextFromPixels,
   tickCountForWidth,
 } from '@gx/core'
 import { AutoChart, useElementSize } from '@gx/react'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import { LadderStrip } from './LadderStrip.tsx'
 import type { PlaygroundChartType } from './PlanPanel.tsx'
@@ -62,7 +63,29 @@ export function App() {
   // inputs — same data, same default nominal cell size, same box. If the fingerprint in
   // `PlanPanel` ever stops matching the chart beside it, that agreement has broken and the
   // `block-size: 100%` rule above is the first thing to check.
-  const ctx: SizeContext = sizeContextFromPixels(size.width, size.height)
+  const rawCtx: SizeContext = useMemo(
+    () => sizeContextFromPixels(size.width, size.height),
+    [size.height, size.width],
+  )
+  const [previousClass, setPreviousClass] = useState<SizeClass | undefined>(undefined)
+  const measured = size.width > 0 && size.height > 0
+  const nextClass = useMemo(
+    () =>
+      resolveSizeClassWithDeadband(
+        rawCtx.width,
+        rawCtx.height,
+        measured ? previousClass : undefined,
+      ),
+    [measured, previousClass, rawCtx.height, rawCtx.width],
+  )
+  useEffect(() => {
+    if (measured && previousClass !== nextClass) setPreviousClass(nextClass)
+  }, [measured, nextClass, previousClass])
+  const ctx: SizeContext = useMemo(() => {
+    const sizeClass = nextClass
+    if (sizeClass === rawCtx.sizeClass) return rawCtx
+    return Object.freeze({ ...rawCtx, sizeClass })
+  }, [nextClass, rawCtx])
   const resolved = resolveForPlayground(ctx, type, series)
 
   return (

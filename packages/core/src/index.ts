@@ -56,9 +56,11 @@ export { AXIS_OFF } from './plan.ts'
 // The resolver's two inputs, and the size classification they carry.
 export type { DataShape, SizeContext } from './context.ts'
 export {
+  DEFAULT_SIZE_DEADBAND_FRACTION,
   DEFAULT_NOMINAL_CELL_SIZE,
   resolveAspect,
   resolveSizeClass,
+  resolveSizeClassWithDeadband,
   sizeContextFromPixels,
 } from './context.ts'
 

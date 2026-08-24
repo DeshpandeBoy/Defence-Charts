@@ -62,15 +62,9 @@ describe('the disposition manifest', () => {
     expect(report.owedToB2).toBeLessThanOrEqual(0)
   })
 
-  /**
-   * ⚠ A ratchet, not a target. `owedToB1` clears by declaring the named tokens in
-   * `packages/tokens/src/tokens.ts` — B1's work, not this gate's. It is allowed to fall as B1
-   * lands and to fall further as more of B2 gets dispositioned; it is never allowed to grow,
-   * because that is a disposition citing a token name nobody intends to declare.
-   */
-  it('owes no more to B1 than it did when the manifest was written', () => {
+  it('declares every token named by the shipped B2 manifest', () => {
     const report = auditGranularity({ rows, dispositions: DISPOSITIONS, declaredTokens, project })
-    expect(report.owedToB1).toBeLessThanOrEqual(63)
+    expect(report.owedToB1).toBe(0)
   })
 })
 

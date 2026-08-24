@@ -1,9 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  DEFAULT_SIZE_DEADBAND_FRACTION,
   DEFAULT_NOMINAL_CELL_SIZE,
   resolveAspect,
   resolveSizeClass,
+  resolveSizeClassWithDeadband,
   sizeContextFromPixels,
 } from './context.ts'
 import type { SizeClass } from './plan.ts'
@@ -137,9 +139,9 @@ describe('resolveSizeClass', () => {
   })
 
   it('is pure — same input, same output, no accumulated state', () => {
-    // ⚠ There is no `prevClass` and there will not be one
-    // (`research/40-chart-plan.md` §9). Hysteresis is animation's job at A6. This asserts
-    // the absence observably: walking up the ladder and back down must retrace exactly.
+    // ⚠ There is no stored `prevClass` (`research/40-chart-plan.md` §9). The optional deadband
+    // classifier receives previous state explicitly at the client boundary; this resolver stays
+    // memory-free. Walking up the ladder and back down must retrace exactly.
     const up = Array.from({ length: 12 }, (_, i) => resolveSizeClass(i + 1, i + 1))
     const down = Array.from({ length: 12 }, (_, i) => resolveSizeClass(12 - i, 12 - i))
     expect(down).toStrictEqual([...up].reverse())
@@ -176,6 +178,30 @@ describe('resolveAspect', () => {
     // `square` specifically because it is the band that triggers no special handling.
     // Falling back to `ultrawide` would make a 0-height widget try to facet.
     expect(resolveAspect(width, height)).toBe('square')
+  })
+})
+
+describe('resolveSizeClassWithDeadband', () => {
+  it('holds an upward transition until it clears the fractional boundary', () => {
+    expect(DEFAULT_SIZE_DEADBAND_FRACTION).toBe(0.01)
+    expect(resolveSizeClassWithDeadband(600, 500, 'panel')).toBe('panel')
+    expect(resolveSizeClassWithDeadband(605, 505, 'panel')).toBe('panel')
+    expect(resolveSizeClassWithDeadband(606, 506, 'panel')).toBe('canvas')
+  })
+
+  it('holds a downward transition until the limiting dimension clears the band', () => {
+    expect(resolveSizeClassWithDeadband(599, 520, 'canvas')).toBe('canvas')
+    expect(resolveSizeClassWithDeadband(595, 520, 'canvas')).toBe('canvas')
+    expect(resolveSizeClassWithDeadband(593, 520, 'canvas')).toBe('panel')
+  })
+
+  it('does not make a wide-but-short chart wait for its width to shrink', () => {
+    expect(resolveSizeClassWithDeadband(700, 500, 'canvas')).toBe('canvas')
+    expect(resolveSizeClassWithDeadband(700, 494, 'canvas')).toBe('panel')
+  })
+
+  it('accepts the first measured class without a previous state', () => {
+    expect(resolveSizeClassWithDeadband(606, 506, undefined)).toBe('canvas')
   })
 })
 

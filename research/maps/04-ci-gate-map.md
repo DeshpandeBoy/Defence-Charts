@@ -1,6 +1,6 @@
 # Map 04 — CI gate map
 
-Source: `../20-architecture.md` §6a–§6g, §7; `../30-implementation-plan.md` A1, A3–A5, B1, B3, E3.
+Source: `../20-architecture.md` §6a–§6g, §7; `../30-implementation-plan.md` A1, A3–A5, B1–B3, E3.
 
 Every gate here exists because a specific decision would otherwise be **unfalsifiable**. That is the
 selection criterion: a check that cannot fail in a way that teaches you something is not on this list.
@@ -39,6 +39,7 @@ flowchart LR
         G16["env directive in the header,<br/>not in the prose"]
         G17["generated CSS matches<br/>its typed source"]
         G19["motion: transitions run,<br/>stage, and stop when asked"]
+        G20["granularity manifest:<br/>every research knob dispositioned"]
     end
 
     G1 --> D8
@@ -62,11 +63,12 @@ flowchart LR
     G17 --> DT
     G19 --> DL
     G19 --> D7
+    G20 --> DT
 
     classDef dd fill:#2f1b3d,stroke:#c084fc,color:#f6ecff
     classDef gg fill:#0b3d4a,stroke:#22d3ee,color:#e6fbff
     class D5,D7,D8,DT,DL,DA dd
-    class G1,G2,G3,G4,G5,G6,G7,G8,G9,G10,G11,G12,G13,G14,G15,G16,G17,G19 gg
+    class G1,G2,G3,G4,G5,G6,G7,G8,G9,G10,G11,G12,G13,G14,G15,G16,G17,G19,G20 gg
 ```
 
 Two decisions carry three gates each. That is not redundancy — each gate catches the failure at a
@@ -104,6 +106,7 @@ exactly why the motion gate is **G19** and not G18
 | G17 | Each committed generated stylesheet is regenerated and compared byte-for-byte against its typed source — `typography.css` from `FittingTypography`, and `theme.css` + `tokens.generated.ts` from the token tree | **A4** (typography), **B1** (tokens) | theming | The generated stylesheet and the source it is generated from drift apart |
 | G18 | *Proposed, unimplemented* — no network APIs in any published package | — (`../60-commercial-model.md` §7) | trust | "This library never phones home" becomes a claim nobody checks |
 | G19 | Drive the real playground in Chromium across a rung change and sample every frame: chrome interpolates, marks interpolate **and lag it by the delay the stylesheet declares**, `prefers-reduced-motion: reduce` suppresses all of it, and the resting state is identical either way | **A6** | 7, ladder | Motion silently stops — a re-key, a collapsed delay, or an inverted media query, none of which any node test can see |
+| G20 | Parse `raw/06` §7.1, require every research knob to have a real token, plan path, or cited decline, and assert every named token exists in the typed source | **B2** (wired after B1) | granularity | A surveyed control is claimed but neither implemented nor explicitly declined, or the manifest drifts from the research table |
 | — | `publint --strict` + `attw`, with the §5.5 CSS-subpath exclusions | **E3** | packaging | The published artefact is broken in a way the repo never is |
 
 **G17 covers two generators and is deliberately not two gates.** The token drift check added at B1

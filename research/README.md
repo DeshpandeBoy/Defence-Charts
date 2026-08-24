@@ -45,7 +45,7 @@ SVG tree), grid engine (`react-grid-layout@2/core`), render boundary (RSC-safe `
 client `<AutoChart>`), plan-as-data, **build stack** (tsdown + `unbundle: true`, ESM-only, TS 6.0.3
 pinned), **test stack** (bare Node for the ladder, injected fake `ResizeObserver`, Vitest browser
 mode with the Playwright provider), **accessibility markup** (`role="graphics-document"`, never
-`role="img"`), the **`--gx-*` token tree** (186 declared presentation tokens, four-tier provenance), and the
+`role="img"`), the **`--gx-*` token tree** (198 declared presentation tokens, four-tier provenance), and the
 **docs stack** (Fumadocs + Shiki + StackBlitz, no playground library).
 
 **Design written:** the responsive ladder, the package graph, the milestone plan, and — closing the
@@ -63,7 +63,8 @@ older files:
   corrected in place.
 - **`--gx-label-landmark-grade` supersedes both `landmark-weight` spellings**, and retargets Carbon's
   semibold to `GRAD` — because `wght` changes glyph advances and would invalidate the metrics table.
-- **`prevClass` is settled out of the resolver**, not deferred.
+- **`prevClass` is settled out of the resolver**; the live 1% deadband now lives in the client
+  boundary and passes previous state into a pure classifier.
 
 **Three decisions were written up after a verification pass on 2026-08-23 and are now ✅ applied.**
 They live in `decisions/`: **012** — never emit `<line>` for tokened geometry, because `x1`/`y1`/`x2`/`y2`
@@ -92,21 +93,20 @@ structurally cannot tell that a `var()` landed on a property that does not exist
    now enforced rather than verified once.** B1 slice 2 added G7's `token-name` rule, which rejects
    any `--gx-*` declaration where the prefix recurs mid-name — so the property the cheap rename
    depends on cannot quietly stop being true between now and the rename.
-2. **Whether Roboto Flex ships `tnum`** (`41-text-metrics.md` §4.1) and the **`safetyFactor`**
-   calibration (§4.2). The metrics artefact exists; this remains a final font-feature/calibration
-   check, not a blocker for the B3 planner contract.
-3. **Fourteen granularity candidates** remain undeclared in the B2 audit; they have no current CSS
-   consumer and need a deliberate keep/add decision before being treated as public surface.
-4. **C1-C2:** the twelve-column grid, per-widget sizing/compaction, and widget chrome.
-5. **D:** chart breadth, starting with bar/timebar and donut before the remaining families.
-6. **E:** project name/npm scope, release automation, public examples, and publishing.
+2. **Windows fallback measurement** remains explicitly unverified. The released Roboto Flex digit
+   behavior and the available-face `safetyFactor: 1.57` calibration are now committed; Segoe UI
+   Variable is not guessed.
+3. **C1-C2:** the twelve-column grid, per-widget sizing/compaction, and widget chrome.
+4. **D:** chart breadth, starting with bar/timebar and donut before the remaining families.
+5. **E:** project name/npm scope, release automation, public examples, and publishing.
 
 **Next:** Milestone **C1** — the twelve-column grid and per-widget sizing/containment. Milestone A is
 closed (A1-A6), and B1-B3 are closed for the current line/area planner. B1 generated the token tree
 and Rail + Neutral themes, B2 wired the renderer control surface, and B3 added typed threshold policy
 with the provenance/consumption gate. The six previously unverified implementation defaults remain
 explicitly non-research claims; B3 records that distinction in their provenance rather than silently
-promoting them.
+promoting them. B2's G20 audit is wired into `verify` and CI, and its 30 research knobs now name 0
+undeclared tokens.
 
 B1 **slice 1** reversed the token direction — the tree is authored in `packages/tokens/src/tokens.ts`
 and `theme.css` is generated from it, so a tier and a source are now fields rather than comments.

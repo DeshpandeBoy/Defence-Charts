@@ -3,12 +3,13 @@
 /**
  * `<AutoChart>` — measure, plan, render. Nothing else.
  *
- * ⚠ **The entire adaptive thesis is four lines of this component**, and it is worth naming
- * how little it does: it observes a box, converts two pixel numbers into a `SizeContext`,
- * hands that to `planChart()`, and passes the result to `<Chart>`. There is no breakpoint
- * table, no media query, no debounce, no hysteresis and no special case. Every decision about
- * what a chart at this size should contain was made in `@gx/core` by a module that has
- * never seen the DOM, and this component's only privilege is knowing the size.
+ * ⚠ **The entire adaptive thesis is still four stages of this component**, and it is worth
+ * naming how little it does: it observes a box, converts two pixel numbers into a
+ * `SizeContext`, applies the pure classifier's explicit deadband with the last live class,
+ * hands that to `planChart()`, and passes the result to `<Chart>`. The previous class lives
+ * here because a live measurement is stateful; `planChart()` and `SizeContext` remain pure and
+ * serialisable. Every decision about what a chart at this size should contain was made in
+ * `@gx/core` by modules that have never seen the DOM.
  *
  * That is also the design constraint. Anything this component *decides* is a decision made
  * on the client, in a package that ships JavaScript, outside every test that runs without a
@@ -52,10 +53,10 @@
  * than nothing.
  */
 
-import type { ChartType, PlanOverrides, PlanPolicy, Series, SizeContext } from '@gx/core'
-import { describeShape, planChart, sizeContextFromPixels } from '@gx/core'
+import type { ChartType, PlanOverrides, PlanPolicy, Series, SizeClass, SizeContext } from '@gx/core'
+import { describeShape, planChart, resolveSizeClassWithDeadband, sizeContextFromPixels } from '@gx/core'
 import { Chart } from '@gx/primitives'
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import type { Size } from './useElementSize.ts'
 import { useElementSize } from './useElementSize.ts'
@@ -96,16 +97,44 @@ export function AutoChart({
 }: AutoChartProps) {
   const [ref, size] = useElementSize<HTMLDivElement>({ initialSize })
 
-  // ⚠ Three memos rather than one, and the split is the dependency graph rather than
-  // taste. `ctx` changes only when the box does; `shape` only when the data does; `plan`
-  // when either does. Fused into one memo, a parent re-rendering with an unchanged box but
-  // a new `data` array identity would re-derive the size context too — cheap, but it would
-  // also produce a new `ctx` *object*, and `<Chart>` memoises its frame on `ctx` identity.
-  // The plan would be equal and the frame would be rebuilt anyway.
-  const ctx: SizeContext = useMemo(
+  const [previousClass, setPreviousClass] = useState<SizeClass | undefined>(undefined)
+
+  // ⚠ The split is the dependency graph rather than taste. `rawCtx` changes only when the
+  // box does; the stabilised `ctx` changes when the box or accepted rung does; `shape` only
+  // when the data does; `plan` when either input does. Fusing these would make an unrelated
+  // parent/data identity change rebuild the measured context and the SVG frame.
+  const rawCtx: SizeContext = useMemo(
     () => sizeContextFromPixels(size.width, size.height, nominalCellSize),
     [size.width, size.height, nominalCellSize],
   )
+  const measured = size.width > 0 && size.height > 0
+  const nextClass = useMemo(
+    () =>
+      resolveSizeClassWithDeadband(
+        rawCtx.width,
+        rawCtx.height,
+        measured ? previousClass : undefined,
+        nominalCellSize,
+      ),
+    [measured, nominalCellSize, previousClass, rawCtx.height, rawCtx.width],
+  )
+
+  // The state is updated after a measurement has been accepted. Until then, an existing class
+  // remains visible, which is what prevents a slow wobble around a rung from mounting and
+  // unmounting the content on every crossing. The first real measurement has no prior class and
+  // is accepted immediately, so SSR/initial-size and first-observer delivery do not flash Micro.
+  useEffect(() => {
+    if (measured && previousClass !== nextClass) setPreviousClass(nextClass)
+  }, [measured, nextClass, previousClass])
+
+  const ctx: SizeContext = useMemo(() => {
+    // `nextClass` is either the held previous class (inside the band) or the newly accepted
+    // class (past it). Using it directly avoids a one-render intermediate plan when reduced
+    // motion is active; the effect below only records the accepted class for the next sample.
+    const sizeClass = nextClass
+    if (sizeClass === rawCtx.sizeClass) return rawCtx
+    return Object.freeze({ ...rawCtx, sizeClass })
+  }, [nextClass, rawCtx])
   const shape = useMemo(() => describeShape(data), [data])
   const plan = useMemo(
     () => planChart(type, ctx, shape, policy, overrides),
@@ -122,8 +151,6 @@ export function AutoChart({
   // `ResizeObserver` delivers a box — a blank widget at one breakpoint on someone else's
   // machine. The cost of being eager is one pure call on a meaningless box; the cost of
   // being lazy is paid by whoever has to reproduce that.
-  const measured = size.width > 0 && size.height > 0
-
   return (
     <div
       ref={ref}

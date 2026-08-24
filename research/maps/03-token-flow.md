@@ -149,7 +149,7 @@ it claims to enforce.
 
 ## Current state of this track
 
-B1 is closed for the shipped presentation surface: the generated source reports 186 declarations,
+B1 is closed for the shipped presentation surface: the generated source reports 198 declarations,
 the Rail and Neutral dark/light themes are emitted from it, and membership, naming, provenance,
 and drift gates are green. The earlier 43-name, six-default, and neutral-theme entries were B1
 implementation work; they are no longer token-tree blockers. Any remaining research uncertainty is
@@ -159,8 +159,9 @@ B3 is also closed: the responsive threshold surface is a typed `PlanPolicy`, sep
 `PlanOverrides`, and the policy gate checks serialisability, provenance, planner consumption, and
 the explicit `@future` marker on thresholds reserved for later chart families.
 
-The next dependency is C1's grid and per-widget sizing. Roboto Flex `tnum`/`safetyFactor` remains a
-final metrics-calibration follow-up, not a blocker for the B3 planner contract.
+The next dependency is C1's grid and per-widget sizing. Windows-only Segoe UI Variable measurement
+remains a bounded calibration follow-up; the released Roboto Flex behavior and available-face
+`safetyFactor: 1.57` are committed, and neither blocks the B3 planner contract.
 
 Roboto Flex was chosen over Inter on two grounds: `opsz` spans 8–144 against Inter's 14–32 — and the
 Micro rung lives below 14 — and Inter has no `GRAD` axis at all, which would force the landmark

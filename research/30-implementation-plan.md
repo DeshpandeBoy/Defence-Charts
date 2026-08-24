@@ -161,24 +161,26 @@ and it binds at **A4**, when `@gx/primitives` is written.
   objects. One authored value, two emitted forms; a consumer cannot move one without the other.
   Signature: `measureText(text, rank, metrics, letterSpacing?)`. The table is keyed **by type rank**
   (A–E), not by font size, because the scale ships weights 400/500/700 and `wght` changes advances.
-- ⚠ **Two things block table generation, not merely documentation** (`41-text-metrics.md` §4.1, §4.2):
-  whether Roboto Flex actually ships `tnum` (inspect `GSUB` on the released TTF — `fonttools ttx -t GSUB`),
-  and the `safetyFactor`, which must be calibrated against the fallback stack the library will
-  actually hit (SF, Segoe UI Variable, Roboto, DejaVu Sans) because the library must not ship the font.
-  Where `measureText()` is inexact it must err **wide**.
+- ⚠ **The available calibration is now complete** (`41-text-metrics.md` §4.1, §4.2): the released
+  Roboto Flex has tabular default figures even though it does not advertise a `tnum` feature, and
+  the checked fallback faces calibrate a `safetyFactor` of `1.57`. Segoe UI Variable remains an
+  explicitly unverified Windows-only arm; it must not be guessed or silently promoted. Where
+  `measureText()` is inexact it must err **wide**.
 - No React anywhere. Enforced by a dependency-boundary lint rule, not by convention.
 
 ### A2.1. Contract closure — ✅ complete 2026-08-23
 - The six fit-sensitive typography values and `FontMetrics` now travel as one atomic
   `PlanPolicy.typography` object. `@gx/tokens` typography CSS is generated from that typed default,
   and gate **G17** rejects a stale generated file byte-for-byte.
-- Until `tnum` and the real table are verified, both provisional metrics and generated CSS use
-  `normal`; the browser can no longer silently render wider tabular digits than the planner models.
+- The released font's digit behavior and the real metrics table are now recorded in
+  `font-metrics.generated.ts`; the planner and generated typography CSS are synchronized by G17.
+  The table does not claim to have measured Segoe UI Variable on Windows.
 - Standalone charts use pure `sizeContextFromPixels()`, with an exported, overridable 100 px nominal
   square cell. The default is **Tier C**, not a published finding. Grid-owned charts continue to use
   their real columns and rows and never consult this value.
-- The real Roboto Flex table and fallback `safetyFactor` remain calibration work. A2.1 closes source
-  synchronization and standalone conversion; it does not relabel provisional numbers as measured.
+- Available-face calibration is closed. The remaining A2.1 note is the bounded Windows fallback
+  measurement, plus the documented U+2212 fallback-coverage improvement; neither blocks the line/
+  area planner or C1.
 
 ### A3. `planChart()` for line/area only
 - Implement the ladder rungs from `10-responsive-ladder.md` for one type. **Per-rung complete specs,
@@ -318,9 +320,10 @@ At the end of A3 the core thesis is testable with zero UI. That is the point.
   179 `<circle>` elements appear at the Panel → Canvas edge, at full opacity on frame one, in all
   84 sampled frames. A transition needs a previous value and a mounted node has none — 016 case 12,
   one level up. So a deadband is **required**, not optional. Floor measured at 3px on a 600px
-  boundary, **0.50% of the boundary width**; the shipped value and the question of where a stateful
-  previous-rung is allowed to live are a post-B3 interaction follow-up, not part of the pure policy
-  contract.
+  boundary, **0.50% of the boundary width**. ✅ The shipped classifier uses a 1% Tier-C fraction,
+  accepts the previous class as an explicit argument, and keeps that state in `@gx/react`; the
+  pure `SizeContext` and `planChart()` contracts remain memory-free. Core tests pin both directions
+  and the wide-but-short limiting edge.
 
 ⚠ **The load-bearing finding is that none of this was primarily about CSS.** Decision
 [016](decisions/016-what-svg-geometry-actually-transitions.md) drove Chromium and measured that a
@@ -355,8 +358,9 @@ The second half of the thesis: *granular control over every stroke, gap, and tic
 > **Current status (2026-08-24): B1-B3 are closed for the current line/area planner.** B1 ships
 > the generated presentation tree and Rail + Neutral themes; B2 ships the renderer control surface;
 > B3 ships typed `PlanPolicy` thresholds, the separate `PlanOverrides` contract, and the provenance /
-> consumption gate. The generated source reports 186 presentation declarations and the full verify
-> chain is green. C1-C2 grid work, D chart breadth, and E release remain.
+> consumption gate. The generated source reports 198 presentation declarations, G20 covers the
+> granularity manifest, and the full verify chain is green. C1-C2 grid work, D chart breadth, and E
+> release remain.
 
 ### B1. Full token tree
 
@@ -437,7 +441,7 @@ The second half of the thesis: *granular control over every stroke, gap, and tic
 
 `raw/06` §6 delivered **183 fully specified research rows** — each with a default, a provenance tier
 and a named primary source — across **234 distinct `--gx-*` names** appearing in the document. The
-shipped implementation reports 186 declared presentation tokens after the B1 transcription and
+shipped implementation reports 198 declared presentation tokens after the B1 transcription and
 theme-generation pass. The membership and naming gates now distinguish real stylesheet declarations
 from prose, fallback examples, and deliberately absent counterexamples; authored CSS is membership-
 clean, so the old 51-name discrepancy is no longer an implementation blocker.
@@ -638,7 +642,10 @@ the site. The VRT baseline set (one screenshot per chart type per rung) *is* thi
    `raw/06` §6.0 verified the prefix appears *only* as the first path segment (0 hits elsewhere), so
    the rename is one regex, one generator constant, and one template-literal type. Still blocking for
    publish, not for code.
-5. **Start A1.** Nothing is blocked any more.
-6. Optional, later: retrieve Talbot, Setlur & Agrawala 2014 *Four Experiments on the Perception of Bar
+5. ✅ **Close A1–A6 and B1–B3.** The line/area proof, generated control surface, typed policy
+   thresholds, G20 granularity audit and A6 deadband classifier are implemented and verified.
+6. **Start C1.** Build the twelve-column grid and per-widget sizing/containment; the grid will own
+   real `cols`/`rows` so standalone nominal-cell conversion remains a Tier-C fallback only.
+7. Optional, later: retrieve Talbot, Setlur & Agrawala 2014 *Four Experiments on the Perception of Bar
    Charts* from ACM DL — the most likely published home for a minimum bar width, which is currently
    Tier C.

@@ -144,6 +144,9 @@
     --gx-axis-y-domain-visible: 0;
     --gx-axis-domain-width: 1px;
     --gx-axis-domain-color: #888;
+    --gx-axis-domain-dash: none;
+    --gx-axis-domain-dash-offset: 0;
+    --gx-axis-domain-cap: butt;
     --gx-axis-translate: 0.5px;
     --gx-tick-visible: 1;
     --gx-tick-length: 5px;
@@ -256,6 +259,8 @@
     --gx-label-separation: 1.5em;
     --gx-label-rotate-limit: 80deg;
     --gx-label-step: 0;
+    --gx-label-stagger-lines: 0;
+    --gx-label-stagger-max: 5;
     --gx-label-degrade-order: abbreviate split rotate transpose;
     --gx-axis-title-padding: 4px;
     --gx-title-offset: 4px;
@@ -266,6 +271,8 @@
     --gx-value-label-offset: 4px;
     --gx-value-label-radius: 3px;
     --gx-value-label-halo-width: 2px;
+    --gx-value-label-skip-width: 0;
+    --gx-value-label-skip-height: 0;
     --gx-value-label-halo-color: var(--gx-surface-color);
     --gx-value-label-halo-opacity: 1;
 
@@ -327,6 +334,11 @@
     /* A calc() multiplier is not a length literal — 43-theming.md §6.2. */
     --gx-size-gap: 4px;
     --gx-plot-padding: calc(var(--gx-size-gap) * 2);
+    --gx-scale-ratio-s: 0.75;
+    --gx-scale-ratio-m: 1;
+    --gx-scale-ratio-l: 1.25;
+    --gx-size-breakpoint-m: 400px;
+    --gx-size-breakpoint-l: 800px;
 
     /* --- Legend ------------------------------------------------------------------ */
     --gx-legend-orient: right;

@@ -29,11 +29,11 @@ has to actually exist). `scripts/check-granularity.test.mjs` enforces it, includ
 and planted-violation cases proving each hard failure can actually fire.
 
 **Current status:** B2's delivered control surface covers the implemented line/area renderer, and
-the audit is clean: all 30 research knobs are dispositioned and 0 are owed to B2. Fourteen named
-token candidates remain undeclared (`axis-domain-dash-offset`, `axis-domain-cap`, the two label-
-stagger fields, the two value-label skip fields, the domain-line dash/cap fields, and the six
-scale/breakpoint fields); they have no current CSS consumer and are an explicit breadth/follow-up
-queue, not a B3 blocker. The G20 audit is still not wired into `pnpm verify` or CI; see §4.
+the audit is clean: all 30 research knobs are dispositioned and 0 are owed to B2. The 12 named
+token candidates that had no current CSS consumer are now declared in the typed B1 source with
+their research values and provenance, so the shipped audit reports 0 owed to B1 as well. They are
+available for later chart-family renderers without inventing names at D. Gate G20 is wired into
+`pnpm verify` and CI.
 
 ---
 
@@ -121,41 +121,22 @@ some presentation properties) rather than geometry; Carbon ships exactly two, bo
 
 ---
 
-## 4. Gate G20 — reserved, not yet wired
+## 4. Gate G20 — wired
 
 `research/maps/04-ci-gate-map.md`'s register runs G1–G17, with G18 reserved for a proposed,
-unimplemented network-API-ban gate and G19 taken by motion. **G20 is next.**
+unimplemented network-API-ban gate and G19 taken by motion. G20 is the granularity audit.
 
-`pnpm lint:granularity` (running `check-granularity.mjs`) is written and passes clean against the
-current tree (`node scripts/check-granularity.test.mjs` — 11 assertions, all green; run directly:
-`node scripts/check-granularity.mjs`). It is **deliberately not wired into**:
-
-- `package.json`'s `scripts` / the `verify` chain,
-- `.github/workflows/ci.yml`'s CI steps,
-- `research/maps/04-ci-gate-map.md`'s register and mermaid diagram.
-
-This is a scope decision, not an oversight: this slice was built alongside a second, concurrent
-B1 slice already editing those exact shared files (`package.json`, `ci.yml`, the gate map), and
-wiring this gate into them here would have collided with that work rather than added to it. The
-test file needs no such wiring to run — `vitest.config.ts`'s `include` already covers
-`scripts/**/*.test.mjs`, so `pnpm test` (part of `pnpm verify` already) picks up
-`check-granularity.test.mjs` with zero config changes.
-
-**Hand-off, for whoever wires G20 in:**
-
-1. Add `"lint:granularity": "node scripts/check-granularity.mjs"` to `package.json`, and fold it
-   into whatever composes `verify`'s lint step alongside `lint:tokens`.
-2. Add a `pnpm lint:granularity` step to `ci.yml`, next to the existing `lint:tokens` step.
-3. Add G20's row to `research/maps/04-ci-gate-map.md`'s register and mermaid diagram, using G14's
-   entry as the shape to match (gate → decision/mandate → failure mode it catches).
+`pnpm lint:granularity` runs `check-granularity.mjs` and passes against the current tree. It is
+wired into `package.json`'s `verify` chain and `.github/workflows/ci.yml` beside the token gate.
+The Vitest suite also asserts that the manifest has no undeclared named tokens.
 
 ---
 
 ## 5. What's still open
 
-- Decide whether the 14 undeclared candidates belong in the public presentation surface or remain
-  research-only. They have no current stylesheet consumer and do not block the line/area proof.
-- The G20 wiring in §4 remains optional hardening: add the script to `package.json`, CI, and the gate
-  register when the next shared-file pass can absorb it safely.
+- The newly declared candidates still need consumers as each later chart family lands; declaration
+  closes the naming/provenance gap, but does not claim that the line/area renderer currently uses
+  every one.
+- Keep the G20 manifest in step with the renderer as C/D add plan fields and chart families.
 - Chart breadth is now the D track; each new family gets its own ladder, snapshots, renderer, and
   disposition pass.
