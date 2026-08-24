@@ -550,7 +550,9 @@ disagrees materially, publish the spread rather than hiding it behind one number
 
 ## Milestone C — the grid
 
-### C1. `@gx/grid` on `react-grid-layout@2/core`
+### C1. `@gx/grid` on pinned `react-grid-layout@2`
+- Import pure algorithms/types from `./core`; verify the client component/hook boundary exposed by
+  `./react` before implementation. The package split is part of C0, not a reason to reopen the engine.
 - 12 columns, four-corner resize handles, vertical compaction.
 - **Per-widget minimum sizes** — the gap in the reference implementation.
 - Each widget receives its own `SizeContext`. The grid does not decide chart content; it only reports

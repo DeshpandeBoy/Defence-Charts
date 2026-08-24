@@ -201,7 +201,10 @@ the deadband. G10 continues to assert that the pure resolver has no direction me
 
 ## 4. `@gx/grid`
 
-Adopts `react-grid-layout@2`'s `./core` for collision, compaction, and constraints. We supply:
+Adopts `react-grid-layout@2`. The installed 2.2.4 package exposes collision, compaction, constraints,
+and types under `./core`, while React components and hooks live under `./react`. C0 must pin and
+verify the exact client wrapper boundary rather than implying that `./core` alone renders the UI.
+We supply:
 
 - the 12-column geometry and the widget size families;
 - resize handles on all four corners, matching the reference implementation;

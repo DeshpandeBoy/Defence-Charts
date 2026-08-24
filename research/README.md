@@ -21,6 +21,14 @@ Working research for the new project in `Defence/`. Everything here is input to 
 | `../DESIGN.md` | The visual world ("The Emission-Line Rail"). Palette derivation, type ranks, layout and elevation rules. |
 | `../UX.md` | **Who it is for and what hurts.** The user problems, the use cases, and how the product is handed over so it is understood. The half `01-plain-english.md` deliberately leaves out. |
 | `60-commercial-model.md` | **If there is ever a Pro or Enterprise tier.** Why runtime API keys are the wrong mechanism here, where enforcement actually works, and the one architectural seam that has a deadline at A4. Analysis, not a decision. |
+| `80-shadcn-basedash-library-strategy.md` | Shadcn-style composition, Basedash-informed dashboard hierarchy, and the grid/widget seam. |
+| `81-deep-evidence-audit.md` | Evidence-strength audit, reliability gaps, and implementation priorities after A/B. |
+| `82-package-ecosystem-benchmark.md` | Free/Pro package boundaries, ecosystem comparison, and publication-contract gaps. |
+| `83-visual-interaction-architecture.md` | Future interaction, overlay, filter, and visual-verification architecture. Research input, not shipped behavior. |
+| **`90-final-delivery-and-agent-plan.md`** | **Live execution source of truth:** release scope, dependencies, ownership, task state, and restart protocol. |
+| `91-codex-build-workstream.md` | Atomic Codex implementation, verification, integration, and release task contracts. |
+| `92-claude-research-workstream.md` | Atomic Claude research/review contracts and evidence requirements. |
+| `handoffs/` | Per-task committed checkpoints. A fresh agent resumes from these files instead of chat history. |
 | `maps/` | **Five flow maps** — package graph, runtime flow, milestone DAG, token flow, CI gates. Derived from the files above; they hold no values of their own. Read these when you need *"if I change X, what else moves?"* |
 | `decisions/` | **Decision register.** Decisions 1–11 are indexed from `00-decisions.md`, not copied; 012 onward get their own file with evidence and amendment lists. |
 | `html-explained/` | **The whole project, for someone who does not read this folder.** A single self-contained `index.html` — open it in a browser, no build step. It is a *rendering* of the files above, not a source: nothing is decided here, and when it disagrees with a file above, the file above wins. |
@@ -37,11 +45,20 @@ workflow runs; agents launched directly write to `raw/` themselves.
 
 ## Status
 
-**All research streams are closed.** `raw/01`–`raw/07` are complete; every finding has been folded
-into the design documents (`10`, `20`, `30`, `40`–`43`, and `../DESIGN.md`). Nothing is in flight.
+**The original foundation research streams are closed.** `raw/01`–`raw/07` are complete and their
+accepted findings were folded into the design documents (`10`, `20`, `30`, `40`–`43`, and
+`../DESIGN.md`). Research 80–83 added product, interaction, commercial, and ecosystem analysis after
+that closure. They contain proposals and empirical gaps that must be reconciled before agents treat
+them as build contracts.
+
+The live multi-agent queue now starts with `CR-000`, a status/contradiction reconciliation, followed
+by contract-changing grid research and parallel chart/accessibility/publication research. Outputs are
+written to unique files under `agent-work/claude/` and promoted only after coordinator review. See
+[`90-final-delivery-and-agent-plan.md`](90-final-delivery-and-agent-plan.md).
 
 **Settled:** distribution, library boundary, grid model, theming, chart core (d3 primitives, own
-SVG tree), grid engine (`react-grid-layout@2/core`), render boundary (RSC-safe `<Chart>` +
+SVG tree), grid engine (`react-grid-layout@2`; core algorithms plus a client React wrapper to be
+verified in C0), render boundary (RSC-safe `<Chart>` +
 client `<AutoChart>`), plan-as-data, **build stack** (tsdown + `unbundle: true`, ESM-only, TS 6.0.3
 pinned), **test stack** (bare Node for the ladder, injected fake `ResizeObserver`, Vitest browser
 mode with the Playwright provider), **accessibility markup** (`role="graphics-document"`, never
@@ -100,7 +117,8 @@ structurally cannot tell that a `var()` landed on a property that does not exist
 4. **D:** chart breadth, starting with bar/timebar and donut before the remaining families.
 5. **E:** project name/npm scope, release automation, public examples, and publishing.
 
-**Next:** Milestone **C1** — the twelve-column grid and per-widget sizing/containment. Milestone A is
+**Next:** close P0/CR-000, freeze the C0 grid/widget/identity contract, then implement Milestone
+**C1** — the twelve-column grid and per-widget sizing/containment. Milestone A is
 closed (A1-A6), and B1-B3 are closed for the current line/area planner. B1 generated the token tree
 and Rail + Neutral themes, B2 wired the renderer control surface, and B3 added typed threshold policy
 with the provenance/consumption gate. The six previously unverified implementation defaults remain
@@ -130,4 +148,4 @@ and widen the rule set past `hex/rgb/hsl` + `px`.** Nothing was unspecified; the
 See [`decisions/015-token-gate-is-a-parser.md`](decisions/015-token-gate-is-a-parser.md).
 
 ✅ **Licence: MIT**, decided 2026-08-23 — the assumption `raw/03` was already evaluating the field
-against, now written down. Copyright holder is blocked on the project name.
+against, now written down. ✅ **Copyright holder: Dhanya Rao**, recorded in the root `LICENSE`.

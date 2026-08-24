@@ -181,10 +181,11 @@ distribution, sublicensing, and selling copies. Therefore:
 - a legal licence, procurement audit, and package access are the enforcement layers—not a secret in
   the browser bundle.
 
-Apache-2.0 is worth evaluating before publication because its explicit patent grant can be useful
-in enterprise procurement. It is not a substitute for a product strategy, and it does not provide a
-commercial-use restriction. Choose MIT versus Apache-2.0 with counsel, then record the decision in
-`research/00-decisions.md` before the first public package.
+The repository has selected MIT and records copyright holder Dhanya Rao in the root `LICENSE`.
+Apache-2.0 remains useful comparison context because its explicit patent grant can matter in
+enterprise procurement, but it is not the active Free-package decision and should not be presented
+as an unresolved implementation blocker. Legal review may still confirm contributor and proprietary
+Pro-package terms before those workflows open.
 
 ### Contribution and ownership gates
 
@@ -522,8 +523,8 @@ forcing every Free consumer to download specialized chart code.
 
 ### Do now, before first public package
 
-- Confirm MIT versus Apache-2.0 with legal review.
-- Confirm copyright ownership and add a DCO or CLA before outside contributions.
+- Carry the selected MIT licence and copyright notice into every public package artifact.
+- Decide and add a DCO or CLA before accepting outside contributions.
 - Choose the final product name, npm scope, and trademark strategy.
 - Decide the Free catalogue and document “intended” versus “implemented” chart support.
 - Finish the public package publication contract: `dist` exports, package licences, notices,
@@ -579,8 +580,8 @@ contract before Pro depends on it.
 
 | Risk / question | Why it matters | Owner / next evidence |
 |---|---|---|
-| Final licence | MIT and Apache-2.0 support different procurement conversations; neither paywalls commercial use | Legal review before publish |
-| Copyright and contributions | Commercial relicensing and proprietary Pro work need clean ownership | Confirm entity/contractor rights; add DCO/CLA |
+| Licence artifact consistency | MIT is selected, but every tarball must carry the required notice | Package-content gate before publish |
+| Contributions | Commercial relicensing and proprietary Pro work need clean contributor ownership | Add DCO/CLA before outside contributions |
 | Provider choice | Tax, payouts, refunds, chargebacks, portal, and global availability differ | Accounting/legal review plus a provider proof of concept |
 | Private registry friction | Strong access control can make CI setup difficult for self-serve users | Pilot install from a clean CI environment |
 | Public commercial Pro package | Easier installation, weaker technical access control | Legal/licence and signing design if private registry fails usability test |

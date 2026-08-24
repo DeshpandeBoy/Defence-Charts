@@ -21,7 +21,7 @@ forced it.
 | 3 | Grid model — 12 columns × unlimited rows | `../00-decisions.md` | locked 2026-08-22 |
 | 4 | Theming — CSS custom properties + TS token types | `../00-decisions.md` | locked 2026-08-22 |
 | 5 | Chart core — raw d3 primitives, own SVG tree | `../00-decisions.md` | locked 2026-08-22 |
-| 6 | Grid engine — `react-grid-layout@2/core` | `../00-decisions.md` | locked 2026-08-22 |
+| 6 | Grid engine — `react-grid-layout@2`, core algorithms + client wrapper | `../00-decisions.md` | locked 2026-08-22; package-boundary clarification 2026-08-24 |
 | 7 | Render boundary — two entry points, one render tree | `../00-decisions.md` | locked 2026-08-22 |
 | 8 | Plan is data — pure `planChart()` | `../00-decisions.md` | locked 2026-08-22 |
 | 9 | Build — `tsdown` + `unbundle: true`, ESM-only, TS 6.0.3 | `../00-decisions.md` | locked 2026-08-22 |

@@ -400,10 +400,12 @@ type DashboardGridProps = {
 
 The grid should:
 
-- wrap react-grid-layout@2’s framework-agnostic core as planned;
+- use react-grid-layout@2's `./core` algorithms/types behind the client components/hooks exposed by
+  `./react`, with the exact wrapper boundary verified in C0;
 - use a pinned, verified version rather than a caret range while the layout bug history is known;
 - default to 12 columns;
-- offer 6/12/18 as explicit presets;
+- ship the locked 12-column public contract in v1; treat 6/18-column profiles as a later proposal
+  with migration and contract tests;
 - use corner resize handles;
 - support vertical compaction and collision push-down;
 - apply per-widget min/max constraints;

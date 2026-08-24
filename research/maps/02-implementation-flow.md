@@ -20,7 +20,7 @@ flowchart TD
     B2["<b>B2</b> Prove-we-exceed<br/><i>the restyle demo</i>"]
     B3["<b>B3</b> Threshold policy<br/><i>typed inputs · provenance + consumption gate</i>"]
 
-    C1["<b>C1</b> @gx/grid<br/><i>react-grid-layout@2/core</i>"]
+    C1["<b>C1</b> @gx/grid<br/><i>RGL2 core algorithms + client wrapper</i>"]
     C2["<b>C2</b> Widget chrome<br/><i>header · menu · empty · error</i>"]
 
     D["<b>D</b> Chart breadth<br/><i>bar → donut → KPI → scatter<br/>→ heatmap → funnel/progress/sparkline</i>"]

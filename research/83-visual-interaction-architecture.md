@@ -905,8 +905,9 @@ DOM alongside the image.
 
 ## 17. Open decisions before implementation
 
-1. **Grid engine:** use React Grid Layout, another maintained engine, or a small owned layout layer.
-   The decision must include keyboard resize, controlled layout, CSS transforms, and SSR behavior.
+1. ~~**Grid engine.**~~ **Resolved by decision 6:** use `react-grid-layout@2`. C0 still must pin the
+   tested version and verify the actual package split: algorithms/types under `./core`, React UI
+   under `./react`, plus keyboard resize, controlled layout, transforms, and SSR/client behavior.
 2. **Tooltip placement:** own the pure placement math first; optionally add a Floating UI adapter in
    `@gx/react`. Do not make a DOM placement library a core dependency.
 3. **Chart header ownership:** `@gx/grid` should own dashboard-level card chrome; decide whether a
@@ -919,9 +920,8 @@ DOM alongside the image.
    to the host.
 7. **External legend direction:** use measured fit to choose left/right/bottom, with a consumer
    override for product-specific art direction.
-8. **Ultrawide grid contract:** decide whether 18 columns are represented by a widened `SizeContext`,
-   a grid-only profile, or a separate dashboard coordinate system; add contract tests before exposing
-   that mode.
+8. **Ultrawide grid contract:** deferred beyond v1. The public v1 grid remains the locked 12-column
+   model. Any later 18-column profile needs migration semantics and contract tests before exposure.
 9. **Filter prioritisation:** define the stable default order and the host override for which filters
    are promoted inline at wide/medium widths.
 10. **Accessible active chart role:** keep `graphics-document` for the static chart and test whether a

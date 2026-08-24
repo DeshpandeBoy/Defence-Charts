@@ -514,7 +514,7 @@ without making the chart runtime responsible for account state.
 Use a permissive Free licence and a separate commercial Pro licence:
 
 ```text
-Free packages: MIT or Apache-2.0 after legal review
+Free packages: MIT (selected in the repository)
 Pro packages: commercial licence
 Enterprise: commercial agreement with support, security, and deployment terms
 ```
@@ -661,8 +661,8 @@ That is differentiated from:
 
 The research is sufficient for architecture, but not for final commercial terms. Still unresolved:
 
-- MIT versus Apache-2.0 for Free packages;
-- exact copyright ownership and DCO/CLA;
+- package-artifact consistency for the selected MIT licence and copyright notice;
+- DCO/CLA policy before outside contributions;
 - final npm scope and trademark clearance;
 - Stripe versus merchant-of-record provider;
 - India GST, EU VAT, US sales tax, invoicing, and payout treatment;
