@@ -208,7 +208,7 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | I1.4 | Codex interaction | done | I1.1 | Static and interactive legends |
 | I1.5 | Codex interaction | done | I1.3, I1.4 | Keyboard/touch interaction matrix |
 | D0.1 | Codex integration | done | C0.1 | Parallel chart-family module seam |
-| D0.2 | Codex verification | in progress | D0.1 | Shared family acceptance/visual fixture |
+| D0.2 | Codex verification | done | D0.1 | Shared family acceptance/visual fixture |
 | D1.1 | Codex bar | backlog | D0.2, R2 | Bar/timebar family |
 | D2.1 | Codex radial | backlog | D0.2, R2 | Donut family |
 | D3.1 | Codex metric | backlog | D0.2 | KPI family |
