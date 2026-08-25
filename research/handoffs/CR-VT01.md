@@ -6,7 +6,7 @@ state: ready
 owner: Claude review agent
 branch: claude/CR-VT01-visual-family-audit
 worktree: /Users/SameeraD/Defence-Charts-CR-VT01
-base_commit: 73cd88bc36a2f326b2d62a43f74e46573c58f354
+base_commit: 591ed1f11b6b9fa96f4c3b74688aab1aa76f366b
 depends_on: [D0.2]
 started_at: not-started
 last_checkpoint: 2026-08-25
@@ -66,7 +66,7 @@ Codex will apply accepted fixes in a separate implementation task.
 ## Baseline
 
 - Branch: `codex/D0.2-visual-polish`
-- Base commit: `73cd88bc36a2f326b2d62a43f74e46573c58f354`
+- Base commit: `591ed1f11b6b9fa96f4c3b74688aab1aa76f366b` (code baseline: `73cd88b`)
 - Demo: `http://127.0.0.1:5186/`
 - Fixture route: `apps/playground/src/family-matrix-fixture/`
 - Current committed browser result: `scripts/results/d0.2-family-matrix.latest.json`
