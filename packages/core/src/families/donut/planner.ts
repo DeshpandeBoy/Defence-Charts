@@ -33,7 +33,7 @@ const DONUT_RUNGS = Object.freeze({
 const DONUT_AXES: AxesPlan = Object.freeze({ x: AXIS_OFF, y: AXIS_OFF, y2: null })
 
 function donutLegend(sizeClass: FamilyPlannerInput<DonutChartType>['ctx']['sizeClass'], maxEntries: number): LegendPlan {
-  if (sizeClass === 'panel') return Object.freeze({ placement: 'internal', maxEntries })
+  if (sizeClass === 'panel') return Object.freeze({ placement: 'internal', maxEntries, flow: 'overlay' })
   if (sizeClass === 'canvas' || sizeClass === 'stage') {
     return Object.freeze({
       placement: 'external',

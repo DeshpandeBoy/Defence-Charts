@@ -93,9 +93,9 @@ function renderer(shape: DataShape, policy: PlanPolicy): MarksPlan['renderer'] {
  * the code instead of a promise repeated in six literals, and it reproduces all six of §6's
  * hand-authored arrays exactly — which is what the G9 snapshots check.
  *
- * ⚠ A `'direct'` or `'internal'` legend is **not** a region. Those live inside the plot, so
- * listing them would claim a band of the box that nothing occupies — and `legendBands()`
- * charges nothing for them, so the two would disagree.
+ * ⚠ A `'direct'` or `'internal'` legend is **not** a top-level region. Those live inside the
+ * plot; a reserved internal legend may charge a plot-internal band, but listing it here would
+ * claim a second outer region and make the plan/layout contract disagree.
  *
  * The canonical order — value, plot, legend, table — is the vertical chain of `./layout.ts`
  * read top to bottom. One order, one place.
@@ -267,6 +267,7 @@ export const tileRung: Rung = ({ type, ctx, shape, policy }) => {
     valueTypeScale: 'fit',
     tableDisclosure: 'widget-tap',
     tablePresent: true,
+    plotPresence: 'present',
   }
 
   // 2. Plot box, then the mark.
@@ -402,6 +403,7 @@ export const stripRung: Rung = ({ type, ctx, shape, policy }) => {
     valueTypeScale: 'fit',
     tableDisclosure: 'button',
     tablePresent: true,
+    plotPresence: 'present',
   }
   const box = resolvePlotBox(ctx, chrome, shape.series, policy)
   const degrade = degradeXLabels(x.ticks, box.width, shape.labelMaxChars, policy)
@@ -476,6 +478,7 @@ const lineStripRung: Rung = (input) => {
     legend: Object.freeze({
       placement: 'internal',
       maxEntries: input.policy.legendMaxEntries,
+      flow: 'reserved',
     }),
   })
 }
@@ -643,6 +646,7 @@ function valueLegibleRung(
     valueTypeScale: isStage ? 12 : 'fit',
     tableDisclosure: 'button',
     tablePresent: true,
+    plotPresence: 'present',
   }
 
   // 2–4. Plot box, tick count, label degradation.

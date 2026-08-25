@@ -55,7 +55,7 @@ import { formatXLabel, formatYLabel } from './format.ts'
 import {
   legendBands,
   resolvePlotBox,
-  valueBand,
+  resolvedValueBand,
   yAxisGutter,
   type ChromeSpec,
 } from './layout.ts'
@@ -297,6 +297,13 @@ export type ChartFrame = {
       readonly label: 'series'
       readonly context: 'none' | 'delta'
     }
+    /** Explicit coverage for compact multi-series readouts; the plot may still show every series. */
+    readonly coverage?: {
+      readonly totalSeries: number
+      readonly valueSeries: number
+      readonly shownSeries: number
+      readonly hiddenSeries: number
+    }
     /** px, already fitted to the band. `0` when nothing is drawn — see `fitValueDisplay()`. */
     readonly fontSize: number
     readonly entries: readonly {
@@ -421,6 +428,7 @@ export function chromeFromPlan(plan: ChartPlan): ChromeSpec {
     valueTypeScale: plan.narrative.valueTypeScale,
     tableDisclosure: plan.dataTable.disclosure,
     tablePresent: plan.dataTable.present,
+    plotPresence: plan.marks.primary.kind === 'none' ? 'none' : 'present',
   }
 }
 
@@ -698,6 +706,12 @@ function fitValueDisplay(
   const empty = Object.freeze({
     region,
     presentation,
+    coverage: Object.freeze({
+      totalSeries: series.length,
+      valueSeries: 0,
+      shownSeries: 0,
+      hiddenSeries: 0,
+    }),
     fontSize: 0,
     entries: Object.freeze([]),
     overflow: null,
@@ -813,6 +827,12 @@ function fitValueDisplay(
   return Object.freeze({
     region,
     presentation,
+    coverage: Object.freeze({
+      totalSeries: series.length,
+      valueSeries: drafts.length,
+      shownSeries: shown,
+      hiddenSeries: hidden,
+    }),
     fontSize,
     entries: Object.freeze(
       drafts.slice(0, shown).map((d, i) => Object.freeze({ ...d, x: centre(i), y })),
@@ -857,19 +877,18 @@ export function resolveFrame(
   const legendLeft =
     plan.legend.placement === 'external' && plan.legend.position === 'left' ? legend.width : 0
   const legendTop =
-    plan.legend.placement === 'external' && plan.legend.position === 'top' ? legend.height : 0
+    plan.legend.placement === 'external' && plan.legend.position === 'top'
+      ? legend.height
+      : plan.legend.placement === 'internal' && plan.legend.flow === 'reserved'
+        ? legend.height
+        : 0
 
   const boxHeight = Number.isFinite(ctx.height) && ctx.height > 0 ? ctx.height : 0
   // ⚠ Computed once and used twice. The band the plot's origin is pushed down by and the band
   // the value display paints into are the same band by construction here; two calls would be
   // two chances to pass different arguments, and the disagreement would be invisible — the
   // numbers would both look plausible and the text would sit slightly off its own region.
-  const valueHeight = valueBand(
-    plan.narrative.valueDisplay,
-    plan.narrative.valueTypeScale,
-    boxHeight,
-    resolved,
-  )
+  const valueHeight = resolvedValueBand(chrome, boxHeight, data.length, resolved)
   const plot: Rect = Object.freeze({
     x: yAxisGutter(plan.axes.y, resolved) + legendLeft,
     y: valueHeight + legendTop,
