@@ -15,11 +15,11 @@ import { describe, expect, it } from 'vitest'
 import { sizeContextFromPixels } from './context.ts'
 import type { Series } from './data.ts'
 import { chromeFromPlan, resolveFrame } from './frame.ts'
-import { resolvePlotBox } from './layout.ts'
+import { legendBands, resolvePlotBox } from './layout.ts'
 import { applyOverrides } from './overrides.ts'
 import { planChart } from './plan-chart.ts'
 import { DEFAULT_POLICY } from './policy.ts'
-import { MANY_SERIES, MICRO, PANEL, SHAPE, STAGE, STRIP, TILE, TILE_SHORT } from './rungs/fixtures.ts'
+import { MANY_SERIES, MICRO, PANEL, SHAPE, STAGE, STRIP, TILE, TILE_FLAT, TILE_SHORT } from './rungs/fixtures.ts'
 import { measureText, RANK_FONT_SIZE } from './text.ts'
 
 /** Twelve months of 2024, UTC. Real enough to exercise the time ladder. */
@@ -35,6 +35,13 @@ const THREE = [
   monthly('a', [10, 14, 9, 22, 18, 31, 27, 25, 33, 29, 40, 36]),
   monthly('b', [5, 8, 12, 11, 16, 14, 19, 21, 18, 24, 22, 28]),
   monthly('c', [30, 28, 26, 27, 24, 22, 23, 20, 19, 17, 15, 12]),
+] as const
+
+const SIX_SERIES = [
+  ...THREE,
+  monthly('d', [12, 14, 16]),
+  monthly('e', [8, 9, 11]),
+  monthly('f', [4, 5, 6]),
 ] as const
 
 describe('the plot box is the resolver’s, not a second opinion', () => {
@@ -527,6 +534,17 @@ describe('the value display', () => {
     expect(frame.value?.overflow?.hidden).toBe(2)
   })
 
+  it('describes compact multi-series coverage instead of implying one value is the dataset', () => {
+    const frame = resolveFrame(planChart('line', TILE, MANY_SERIES), SIX_SERIES, TILE)
+    const coverage = frame.value?.coverage
+
+    expect(coverage?.totalSeries).toBe(6)
+    expect(coverage?.valueSeries).toBe(6)
+    expect(coverage?.shownSeries).toBe(frame.value?.entries.length)
+    expect(coverage?.hiddenSeries).toBe(frame.value?.overflow?.hidden ?? 0)
+    expect((coverage?.shownSeries ?? 0) + (coverage?.hiddenSeries ?? 0)).toBe(6)
+  })
+
   /**
    * ⚠ A series with nothing to report contributes **no entry**, not an em-dash. A placeholder
    * in a value display is a reading of the data, and there is no reading to give — the reader
@@ -784,6 +802,7 @@ describe('the value display', () => {
 
     expect(first.value?.presentation).toEqual({ label: 'series', context: 'delta' })
     expect(first.value?.presentation).toEqual(second.value?.presentation)
+    expect(first.value?.coverage).toEqual(second.value?.coverage)
     expect(JSON.parse(JSON.stringify(first.value))).toEqual(first.value)
     expect(first.value?.entries.map(({ seriesId, seriesIndex, label }) => ({ seriesId, seriesIndex, label }))).toEqual(
       second.value?.entries.map(({ seriesId, seriesIndex, label }) => ({ seriesId, seriesIndex, label })),
@@ -797,5 +816,37 @@ describe('the value display', () => {
     expect(plan.valueLegibility).toBe('shape-only')
     expect(plan.narrative.valueDisplay).toBe('none')
     expect(frame.value).toBeNull()
+  })
+})
+
+describe('no-plot and reserved-legend geometry', () => {
+  it('spends the final no-plot surface on the value band', () => {
+    const plan = planChart('line', TILE_FLAT, SHAPE)
+    expect(plan.marks.primary).toEqual({ kind: 'none' })
+
+    const frame = resolveFrame(plan, THREE, TILE_FLAT)
+    const box = resolvePlotBox(TILE_FLAT, chromeFromPlan(plan), THREE.length, DEFAULT_POLICY)
+
+    expect(box.height).toBe(0)
+    expect(frame.plot.height).toBe(0)
+    expect(frame.value?.region.height).toBe(TILE_FLAT.height)
+    expect(frame.value?.fontSize ?? 0).toBeGreaterThan(0)
+  })
+
+  it('charges a reserved Strip legend before the marks and leaves overlay legends uncharged', () => {
+    const strip = planChart('line', STRIP, MANY_SERIES)
+    const reserved = legendBands(strip.legend, SIX_SERIES.length, DEFAULT_POLICY)
+    const frame = resolveFrame(strip, SIX_SERIES, STRIP)
+
+    expect(strip.legend).toEqual({ placement: 'internal', maxEntries: 8, flow: 'reserved' })
+    expect(reserved.height).toBeGreaterThan(0)
+    expect(frame.plot.y).toBe(reserved.height)
+    expect(frame.plot.y + frame.plot.height).toBeLessThanOrEqual(frame.box.height)
+    for (const series of frame.series) {
+      for (const point of series.points) expect(point.y).toBeGreaterThanOrEqual(frame.plot.y)
+    }
+
+    const overlay = { placement: 'internal' as const, maxEntries: 8, flow: 'overlay' as const }
+    expect(legendBands(overlay, SIX_SERIES.length, DEFAULT_POLICY)).toEqual({ width: 0, height: 0 })
   })
 })

@@ -391,9 +391,9 @@ describe('§3 — regionOrder lists exactly the present regions', () => {
   })
 
   /**
-   * ⚠ A `'direct'` or `'internal'` legend is not a region. Those live inside the plot, and
-   * `legendBands()` charges no vertical space for them — so listing one would claim a band of
-   * the box that nothing occupies, and the plan and the layout would disagree.
+   * ⚠ A `'direct'` or `'internal'` legend is not a top-level region. Those live inside the
+   * plot; a reserved internal legend may charge a plot-internal band, but listing one here
+   * would claim a second outer region and make the plan and layout disagree.
    */
   it('an internal legend is not a region', () => {
     for (const [name, plan] of CASES) {

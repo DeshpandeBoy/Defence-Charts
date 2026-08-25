@@ -276,7 +276,12 @@ export type LabelsPlan = {
 export type LegendPlan =
   | { readonly placement: 'absent' }
   | { readonly placement: 'direct' }
-  | { readonly placement: 'internal'; readonly maxEntries: number }
+  | {
+      readonly placement: 'internal'
+      readonly maxEntries: number
+      /** Whether the internal legend is allowed to sit over marks or owns a band above them. */
+      readonly flow?: 'overlay' | 'reserved' | undefined
+    }
   | {
       readonly placement: 'external'
       readonly position: 'left' | 'right' | 'top' | 'bottom'

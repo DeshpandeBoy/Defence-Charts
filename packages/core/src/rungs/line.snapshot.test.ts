@@ -155,7 +155,7 @@ const STRIP_PLAN: ChartPlan = {
     maxChars: null,
     labelHalo: 'none',
   },
-  legend: { placement: 'internal', maxEntries: 8 },
+  legend: { placement: 'internal', maxEntries: 8, flow: 'reserved' },
   interaction: {
     trigger: 'tap',
     tooltip: { enabled: true, placement: 'fix' },

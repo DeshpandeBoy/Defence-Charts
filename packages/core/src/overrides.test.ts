@@ -284,7 +284,7 @@ describe('the plan is a value, and stays one', () => {
   it('freezes every node it produces', () => {
     const out = applyOverrides(stage(), {
       axes: { y2: { visible: true, ticks: { mode: 'count', count: 3 } } },
-      legend: { placement: 'internal', maxEntries: 3 },
+      legend: { placement: 'internal', maxEntries: 3, flow: 'reserved' },
     })
     const seen: unknown[] = [out, out.axes, out.axes.y2, out.axes.y2?.ticks, out.legend]
     for (const node of seen) expect(Object.isFrozen(node)).toBe(true)

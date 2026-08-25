@@ -85,6 +85,8 @@ export type ChromeSpec = {
   /** `'button'` renders a visible affordance and costs a band; `'widget-tap'` costs nothing. */
   readonly tableDisclosure: 'button' | 'widget-tap'
   readonly tablePresent: boolean
+  /** Final mark presence. `'none'` gives the value region the remaining box. */
+  readonly plotPresence: 'present' | 'none'
 }
 
 /**
@@ -205,14 +207,29 @@ function boundAxisExtent(extent: number, axis: AxisPlan): number {
  * space. They occupy space *inside* the plot, beside the marks, so charging them against
  * the plot box would double-count. `'internal'` is the same case.
  *
- * `maxEntries` bounds the external band: a legend that grows with the series count could
- * consume the whole box, which is the containment failure §1.3 exists to prevent.
+ * `maxEntries` bounds every charged band: a legend that grows with the series count could
+ * consume the whole box, which is the containment failure §1.3 exists to prevent. An internal
+ * legend is charged only when its explicit `flow` is `'reserved'`; the default/`'overlay'`
+ * state preserves the older overlay contract for other families.
  */
 export function legendBands(
   legend: LegendPlan,
   seriesCount: number,
   policy: PlanPolicy,
 ): { readonly width: number; readonly height: number } {
+  if (legend.placement === 'internal') {
+    if (legend.flow !== 'reserved') return { width: 0, height: 0 }
+
+    const entries = Math.max(1, Math.min(seriesCount, legend.maxEntries))
+    return {
+      width: 0,
+      height:
+        policy.regionGap +
+        entries * lineHeight(LEGEND_RANK, policy) +
+        Math.max(0, entries - 1) * policy.legendItemGap,
+    }
+  }
+
   if (legend.placement !== 'external') return { width: 0, height: 0 }
 
   const entries = Math.max(1, Math.min(seriesCount, legend.maxEntries))
@@ -250,18 +267,9 @@ export function legendBands(
  * `valueRegionMaxShare` is Tier **C** — ours, unsourced. It is a share rather than a px
  * figure so that it degrades sensibly at every rung instead of starving small ones.
  *
- * ⚠ **The share is charged whether or not the plot below it draws anything, and at Micro
- * it does not.** Observed at A4 by resizing the playground to 62 × 42: the value display
- * takes the top half, `marks.primary.kind` is `'none'`, and the bottom half is a plot with
- * nothing in it — half of the smallest rung in the ladder, reserved for marks that the
- * rung has already decided not to draw.
- *
- * It is left that way deliberately. The obvious fix — give the band the whole budget when
- * there are no marks — requires this function to know the mark kind, and at Tile the mark
- * kind is *decided from* the plot height this function helps produce. That is a re-entry
- * into the chain `resolvePlotBox()` is explicitly single-pass to avoid, and buying Micro
- * 20 px by making the resolution order circular is a bad trade. The honest fix is a
- * per-rung share, which is a policy-shape change and belongs with the token tree at B1.
+ * The base share is still the provisional budget used while Tile chooses between `line`,
+ * `horizon`, and `none`. Once that mark decision is final, `resolvedValueBand()` can give a
+ * no-plot frame the remaining surface without re-entering the Tile decision.
  */
 export function valueBand(
   valueDisplay: NarrativePlan['valueDisplay'],
@@ -289,6 +297,29 @@ export function valueBand(
 export function tableBand(spec: ChromeSpec, policy: PlanPolicy): number {
   if (!spec.tablePresent || spec.tableDisclosure !== 'button') return 0
   return policy.regionGap + lineHeight(TICK_LABEL_RANK, policy)
+}
+
+/**
+ * Resolve the value band with the final plot-presence decision applied.
+ *
+ * The Tile rung must measure a provisional plot before it can choose `line`, `horizon`, or
+ * `none`; the final frame has the answer and must not keep reserving space for a mark that will
+ * not be painted. Keeping this as a pure shared helper makes the planner and frame use the same
+ * arithmetic without introducing a fixpoint.
+ */
+export function resolvedValueBand(
+  spec: ChromeSpec,
+  boxHeight: number,
+  seriesCount: number,
+  policy: PlanPolicy,
+): number {
+  const base = valueBand(spec.valueDisplay, spec.valueTypeScale, boxHeight, policy)
+  if (spec.plotPresence === 'present' || spec.valueDisplay === 'none') return base
+
+  const legend = legendBands(spec.legend, seriesCount, policy)
+  const fixedChrome =
+    xAxisBand(spec.x, policy) + legend.height + tableBand(spec, policy)
+  return Math.max(0, boxHeight - fixedChrome)
 }
 
 // --- The plot box ----------------------------------------------------------------------
@@ -329,7 +360,7 @@ export function resolvePlotBox(
   // Vertical: value → x-axis → legend → table → plot. Ours; see the module docblock.
   const height =
     boxHeight -
-    valueBand(spec.valueDisplay, spec.valueTypeScale, boxHeight, policy) -
+    resolvedValueBand(spec, boxHeight, seriesCount, policy) -
     xAxisBand(spec.x, policy) -
     legend.height -
     tableBand(spec, policy)
