@@ -665,6 +665,7 @@
     .gx-label,
     .gx-value-label,
     .gx-value,
+    .gx-value__metric,
     .gx-value__unit,
     .gx-value__delta,
     .gx-value__target,
@@ -750,10 +751,16 @@
    * separate tspan so the value remains the dominant token while the series context stays
    * visible in a static/RSC render.
    */
+  .gx-value__context,
   .gx-value__label,
   .gx-value__separator {
     fill: currentColor;
     font-weight: var(--gx-label-font-weight);
+  }
+
+  .gx-value__metric {
+    fill: var(--gx-series-color);
+    font-weight: var(--gx-value-label-font-weight);
   }
 
   /* KPI qualifiers remain visible text; themes may add emphasis without owning the meaning. */
@@ -770,6 +777,66 @@
     fill: currentColor;
     font-weight: var(--gx-label-font-weight);
     text-anchor: middle;
+    dominant-baseline: middle;
+  }
+
+  /* --- SVG compact identity rail --------------------------------------------------- */
+
+  /*
+   * The rail is painted in the same coordinate system as the marks. Its geometry comes from
+   * the serialisable layout helper, while these rules provide only theme-controlled ink and
+   * typography. It is not the HTML legend overlay: the plot layer has already been moved into
+   * the remaining coordinates before this group is painted.
+   */
+  .gx-compact-key {
+    pointer-events: none;
+  }
+
+  .gx-compact-key__entry[data-series-index='0'],
+  .gx-compact-key__swatch[data-series-index='0'] {
+    --gx-series-color: var(--gx-series-1);
+  }
+  .gx-compact-key__entry[data-series-index='1'],
+  .gx-compact-key__swatch[data-series-index='1'] {
+    --gx-series-color: var(--gx-series-2);
+  }
+  .gx-compact-key__entry[data-series-index='2'],
+  .gx-compact-key__swatch[data-series-index='2'] {
+    --gx-series-color: var(--gx-series-3);
+  }
+  .gx-compact-key__entry[data-series-index='3'],
+  .gx-compact-key__swatch[data-series-index='3'] {
+    --gx-series-color: var(--gx-series-4);
+  }
+  .gx-compact-key__entry[data-series-index='4'],
+  .gx-compact-key__swatch[data-series-index='4'] {
+    --gx-series-color: var(--gx-series-5);
+  }
+  .gx-compact-key__entry[data-series-index='5'],
+  .gx-compact-key__swatch[data-series-index='5'] {
+    --gx-series-color: var(--gx-series-6);
+  }
+
+  .gx-compact-key__swatch {
+    fill: var(--gx-series-color);
+    stroke: var(--gx-series-color);
+    stroke-width: var(--gx-bar-border-width);
+  }
+
+  .gx-compact-key__label {
+    fill: currentColor;
+    font-size: var(--gx-legend-label-font-size);
+    font-weight: var(--gx-legend-label-font-weight);
+    letter-spacing: var(--gx-legend-label-letter-spacing);
+    dominant-baseline: middle;
+  }
+
+  .gx-compact-key__more {
+    fill: currentColor;
+    font-size: var(--gx-legend-label-font-size);
+    font-weight: var(--gx-legend-label-font-weight);
+    letter-spacing: var(--gx-legend-label-letter-spacing);
+    text-anchor: end;
     dominant-baseline: middle;
   }
 }

@@ -49,6 +49,7 @@ import {
 import { useId, useMemo } from 'react'
 
 import { Axis } from './Axis.tsx'
+import { CompactSeriesKey, compactSeriesKeyLayout } from './CompactSeriesKey.tsx'
 import { DataTable } from './DataTable.tsx'
 import { Grid } from './Grid.tsx'
 import { Labels } from './Labels.tsx'
@@ -123,6 +124,7 @@ export function Chart({
 
   const titleId = `${base}-title`
   const descId = `${base}-desc`
+  const compactKey = compactSeriesKeyLayout(frame, plan, resolvedPolicy)
 
   return (
     <figure
@@ -181,43 +183,28 @@ export function Chart({
 
         {/* ⚠ Marks carry **absolute** coordinates and therefore sit in no transform, while
             `<Grid>` and `<Axis>` translate to the plot origin because tick offsets are
-            plot-relative. Both facts are `frame.ts`'s, both are documented there, and the two
-            groups are deliberately siblings so that neither inherits the other's frame of
-            reference by accident. */}
-        {frame.series.map((s) => (
-          <SeriesMarks key={s.id} frame={s} plan={plan} policy={resolvedPolicy} />
-        ))}
+            plot-relative. A core-reserved internal identity rail is painted above that origin;
+            a legacy overlay or compact Tile fallback is moved into its remaining coordinates by
+            the primitive so the key never sits on top of the marks. */}
+        {compactKey === null || compactKey.plotTransform === null ? (
+          <PlotContent
+            base={base}
+            frame={frame}
+            plan={plan}
+            policy={resolvedPolicy}
+          />
+        ) : (
+          <g className="gx-compact-plot" data-compact-plot="" transform={compactKey.plotTransform}>
+            <PlotContent
+              base={base}
+              frame={frame}
+              plan={plan}
+              policy={resolvedPolicy}
+            />
+          </g>
+        )}
 
-        {plan.axes.x.visible ? (
-          <Axis
-            orientation="x"
-            ticks={frame.xTicks}
-            plot={frame.plot}
-            rule={plan.axes.x.domainLine}
-            labels={plan.axes.x.ticks.mode !== 'none'}
-            labelFlush={plan.axes.x.labelFlush}
-            labelBound={plan.axes.x.labelBound}
-            tickBand={plan.axes.x.tickBand}
-            translateOffset={plan.axes.x.translate}
-            clipId={`${base}-axis-x-bound`}
-            policy={resolvedPolicy}
-          />
-        ) : null}
-        {plan.axes.y.visible ? (
-          <Axis
-            orientation="y"
-            ticks={frame.yTicks}
-            plot={frame.plot}
-            rule={plan.axes.y.domainLine}
-            labels={plan.axes.y.ticks.mode !== 'none'}
-            labelFlush={plan.axes.y.labelFlush}
-            labelBound={plan.axes.y.labelBound}
-            tickBand={plan.axes.y.tickBand}
-            translateOffset={plan.axes.y.translate}
-            clipId={`${base}-axis-y-bound`}
-            policy={resolvedPolicy}
-          />
-        ) : null}
+        {compactKey === null ? null : <CompactSeriesKey layout={compactKey} />}
 
         {/* ⚠ Last, and in no transform. Last because the value band is the one region that
             may legitimately be read over a mark — at Micro the plan's mark kind is `'none'`
@@ -234,7 +221,7 @@ export function Chart({
         <ValueDisplay value={frame.value} />
       </svg>
 
-      <Legend plan={plan.legend} series={data} />
+      {plan.legend.placement === 'external' ? <Legend plan={plan.legend} series={data} /> : null}
 
       {plan.dataTable.present ? (
         <figcaption className="gx-chart__caption">
@@ -249,6 +236,57 @@ export function Chart({
         </figcaption>
       ) : null}
     </figure>
+  )
+}
+
+function PlotContent({
+  base,
+  frame,
+  plan,
+  policy,
+}: {
+  readonly base: string
+  readonly frame: ChartFrame
+  readonly plan: ChartPlan
+  readonly policy: PlanPolicy
+}) {
+  return (
+    <>
+      {frame.series.map((s) => (
+        <SeriesMarks key={s.id} frame={s} plan={plan} policy={policy} />
+      ))}
+
+      {plan.axes.x.visible ? (
+        <Axis
+          orientation="x"
+          ticks={frame.xTicks}
+          plot={frame.plot}
+          rule={plan.axes.x.domainLine}
+          labels={plan.axes.x.ticks.mode !== 'none'}
+          labelFlush={plan.axes.x.labelFlush}
+          labelBound={plan.axes.x.labelBound}
+          tickBand={plan.axes.x.tickBand}
+          translateOffset={plan.axes.x.translate}
+          clipId={`${base}-axis-x-bound`}
+          policy={policy}
+        />
+      ) : null}
+      {plan.axes.y.visible ? (
+        <Axis
+          orientation="y"
+          ticks={frame.yTicks}
+          plot={frame.plot}
+          rule={plan.axes.y.domainLine}
+          labels={plan.axes.y.ticks.mode !== 'none'}
+          labelFlush={plan.axes.y.labelFlush}
+          labelBound={plan.axes.y.labelBound}
+          tickBand={plan.axes.y.tickBand}
+          translateOffset={plan.axes.y.translate}
+          clipId={`${base}-axis-y-bound`}
+          policy={policy}
+        />
+      ) : null}
+    </>
   )
 }
 

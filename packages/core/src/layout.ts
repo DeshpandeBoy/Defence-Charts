@@ -220,13 +220,13 @@ export function legendBands(
   if (legend.placement === 'internal') {
     if (legend.flow !== 'reserved') return { width: 0, height: 0 }
 
-    const entries = Math.max(1, Math.min(seriesCount, legend.maxEntries))
+    // The reserved internal rail is a single horizontal identity row. The SVG primitive owns
+    // the width fit and makes any omitted entries explicit as `+N`; charging one row here keeps
+    // that fallback honest at narrow widths without letting a six-series Strip consume the
+    // entire measured box as six vertical rows.
     return {
       width: 0,
-      height:
-        policy.regionGap +
-        entries * lineHeight(LEGEND_RANK, policy) +
-        Math.max(0, entries - 1) * policy.legendItemGap,
+      height: policy.regionGap + lineHeight(LEGEND_RANK, policy),
     }
   }
 
