@@ -122,18 +122,18 @@
     <section class="hero build-hero" id="top">
       <div>
         <p class="eyebrow">10 / How we build it</p>
-        <h1>From one working chart to a real dashboard library.</h1>
-        <p class="lede">The engine can already make a line or area chart change its level of detail when its space changes. The build is not finished: we still need the dashboard grid, the interaction layer, more chart families, and release proof.</p>
-        <div class="hero-note"><strong>The honest snapshot.</strong> A1–A6 and B1–B3 are working for the current line/area surface. The Widget Layout contract is in handoff/review. The real 12-column grid is the next product-sized piece.</div>
+        <h1>From responsive chart engine to ten-family release candidate.</h1>
+        <p class="lede">The project has now built the dashboard shell, the interaction layer, the planned Free-v1 chart families, and the packed-package proof. The remaining work is release readiness: layout migration, the final public package name, trusted Preview publication, and the Free-v1 claim audit.</p>
+        <div class="hero-note"><strong>The honest snapshot.</strong> A1–A6, B1–B3, C0.1–C4.2, I1.1–I1.5, D0.1–D7.1, and E1.1–E1.4 are complete in the current ledger. Preview and Free v1 are not publicly published yet.</div>
       </div>
       <div class="hero-plate">
         <div class="plate-title"><strong>The build in one picture</strong><span>working → next → publish</span></div>
         <div class="system-flow">
           <div class="flow-step"><span class="number">1</span><div><strong>Read the space</strong><span>Measure the widget, not the whole screen.</span></div><code>done</code></div>
           <div class="flow-step"><span class="number">2</span><div><strong>Choose the answer</strong><span>Build a serialisable plan for that size.</span></div><code>done</code></div>
-          <div class="flow-step"><span class="number">3</span><div><strong>Place the widget</strong><span>Make a real 12-column dashboard shell.</span></div><code>next</code></div>
-          <div class="flow-step"><span class="number">4</span><div><strong>Let people explore</strong><span>Tooltip, legend, keyboard, touch, and tables.</span></div><code>after grid</code></div>
-          <div class="flow-step"><span class="number">5</span><div><strong>Prove the package</strong><span>Install the built tarball in a real app.</span></div><code>release gate</code></div>
+          <div class="flow-step"><span class="number">3</span><div><strong>Place the widget</strong><span>Use the real 12-column dashboard shell.</span></div><code>done</code></div>
+          <div class="flow-step"><span class="number">4</span><div><strong>Let people explore</strong><span>Tooltip, legend, keyboard, touch, and tables.</span></div><code>done</code></div>
+          <div class="flow-step"><span class="number">5</span><div><strong>Prove the package</strong><span>Build CSS, packed consumers, and reliability gates.</span></div><code>E1 done</code></div>
         </div>
       </div>
     </section>
@@ -141,79 +141,79 @@
     <section class="section" id="today">
       <div class="section-head">
         <div><p class="kicker">Start here</p><h2>What is real today?</h2></div>
-        <p>This is the difference between “the code exists” and “the product is ready.” The first three cards are working foundations. The last two are visible gaps, not hidden promises.</p>
+        <p>This is the difference between “the code exists” and “the product is ready.” The first three cards are now shipped implementation/proof milestones. The last card is the release boundary that remains.</p>
       </div>
       <div class="grid-4 build-status-grid">
         <article class="card card-accent green">
           <span class="status live">implemented</span>
-          <h3>Line + area engine</h3>
-          <p>Plain data goes into a planner. The planner returns a size-aware answer. SVG and a data table can render that answer without needing the browser.</p>
-          <code>@gx/core + @gx/primitives</code>
+          <h3>Ten chart types</h3>
+          <p>Line, area, bar, timebar, scatter, donut, KPI, progress, heatmap, and funnel are registered centrally and pass the shared family matrix.</p>
+          <code>D0.1–D7.1 / 60 browser cards</code>
         </article>
         <article class="card card-accent teal">
           <span class="status live">implemented</span>
-          <h3>Trust surfaces</h3>
-          <p>Tokens, typography, motion, containment, policy, and client/server boundaries have gates around them so the chart does not quietly break.</p>
-          <code>tokens + tests + RSC proof</code>
+          <h3>Dashboard + interaction</h3>
+          <p>The controlled 12-column grid, widget shell/states, measured chart seam, keyboard move/resize, tooltip, crosshair, legend, touch, and browser matrix are complete.</p>
+          <code>C1–C4 + I1.1–I1.5</code>
         </article>
         <article class="card card-accent orange">
-          <span class="status next">handoff / review</span>
-          <h3>Widget Layout contract</h3>
-          <p>Stable widget identity, 12-column coordinates, min/max constraints, and a versioned serialisable snapshot now exist. The coordinator still has to promote the handoff.</p>
-          <code>C0.1 / 15 focused tests</code>
+          <span class="status live">implemented</span>
+          <h3>Build + package proof</h3>
+          <p>Built JavaScript/declarations, emitted CSS, package metadata, packed React/Next/Vite consumers, publint, attw, package-content, and no-network gates now pass.</p>
+          <code>E1.1–E1.4 / 6 packages</code>
         </article>
         <article class="card card-accent red">
-          <span class="status limit">not built yet</span>
-          <h3>Real dashboard grid</h3>
-          <p><code>@gx/grid</code> currently exposes a boundary constant, not a usable drag-and-resize dashboard. That is why the project is not a dashboard product yet.</p>
-          <code>C0.2 → C4</code>
+          <span class="status limit">release remains</span>
+          <h3>What is still open?</h3>
+          <p>Layout serialization/migration, the final public npm name/scope, trusted Preview publication, the Free-v1 claim audit, and empirical assistive-technology evidence remain.</p>
+          <code>C3.2 + P0.3 + E2.1/E3.1</code>
         </article>
       </div>
-      <div class="build-callout"><p><strong>Simple example.</strong> Today, “make a chart” is proven. Next, “put six charts on a page, move one, resize it, save the layout, and open it again” must become proven.</p></div>
+      <div class="build-callout"><p><strong>Simple example.</strong> We can now put many chart types on a real dashboard, move and resize them, explore them, and install the built packages in clean consumers. The remaining question is whether we can publish and support that surface as an honest release.</p></div>
     </section>
 
     <section class="section" id="pipeline">
       <div class="section-head">
         <div><p class="kicker">The dependency order</p><h2>Five stages, one direction.</h2></div>
-        <p>Later work depends on earlier contracts. A donut chart cannot be called complete if the grid cannot place it, its tooltip is not usable, or a consumer cannot install the package that contains it.</p>
+        <p>Later work depends on earlier contracts. The first four stages are now complete and tested. The fifth stage is partly complete: the package works from built artefacts, but the public release decision and claim audit remain.</p>
       </div>
       <div class="build-pipeline" aria-label="Build stages from foundation to release">
         <article class="build-stage"><div class="stage-index"><strong>A</strong><span>foundation</span></div><h3>Make the chart answer honestly</h3><p>Size, plan, data, text, and SVG agree. The current line/area surface lives here.</p><small>Completed for current surface</small><span class="status live">working</span></article>
         <article class="build-stage"><div class="stage-index"><strong>B</strong><span>trust</span></div><h3>Make it safe to reuse</h3><p>Tokens, fonts, motion, RSC, containment, and policy stay predictable across apps.</p><small>Completed for current surface</small><span class="status live">working</span></article>
-        <article class="build-stage"><div class="stage-index"><strong>C</strong><span>dashboard</span></div><h3>Give widgets a home</h3><p>Build the actual 12-column grid, widget chrome, controlled layout, and persistence seam.</p><small>Immediate build focus</small><span class="status next">next</span></article>
-        <article class="build-stage"><div class="stage-index"><strong>D</strong><span>breadth</span></div><h3>Teach more chart families</h3><p>Bar, donut, KPI, scatter, heatmap, funnel, and progress each need their own proof.</p><small>Free v1 scope</small><span class="status">planned</span></article>
-        <article class="build-stage"><div class="stage-index"><strong>E</strong><span>release</span></div><h3>Let someone else install it</h3><p>Exports, CSS, tarballs, metadata, a11y, and browser matrices must pass outside this repo.</p><small>Publication gate</small><span class="status">planned</span></article>
+        <article class="build-stage"><div class="stage-index"><strong>C</strong><span>dashboard</span></div><h3>Give widgets a home</h3><p>The 12-column grid, widget chrome, controlled layout, constraints, keyboard path, measured content seam, and stress proof are complete.</p><small>C3.2 serialization/migration remains</small><span class="status live">mostly done</span></article>
+        <article class="build-stage"><div class="stage-index"><strong>D</strong><span>breadth</span></div><h3>Teach the planned families</h3><p>Ten chart types are registered and covered by the shared six-rung browser matrix, including states, themes, accessibility text, and resize identity.</p><small>D0.1–D7.1 complete</small><span class="status live">complete</span></article>
+        <article class="build-stage"><div class="stage-index"><strong>E</strong><span>release</span></div><h3>Let someone else install it</h3><p>Built exports, CSS, tarballs, metadata, three consumer builds, publint, attw, and no-network checks are complete.</p><small>E2.1/E3.1 remain</small><span class="status next">release next</span></article>
       </div>
     </section>
 
     <section class="section" id="remaining">
       <div class="section-head">
-        <div><p class="kicker">The remaining build</p><h2>What still has to be completed?</h2></div>
-        <p>Read this from top to bottom. The first group unlocks the next. “Planned” means it is in the product roadmap; it does not mean implementation has started.</p>
+        <div><p class="kicker">Status by milestone</p><h2>What is complete, and what remains?</h2></div>
+        <p>Green means the implementation and its recorded proof are complete in the current ledger. Orange means the next release action. Red means a decision or evidence gate still blocks a public claim.</p>
       </div>
       <div class="card">
         <div class="build-group">
           <div class="build-group-label">C0 / contract</div>
-          <div><span class="status next">review, then next</span><h3>Finish the grid seam</h3><p>Turn the layout contract into the adapter that a real grid can use.</p><ul><li><strong>C0.1:</strong> review and promote stable <code>WidgetId</code>, <code>WidgetLayout</code>, 12-column coordinates, constraints, and snapshot versioning.</li><li><strong>C0.2:</strong> map that contract to the pinned <code>react-grid-layout@2.2.4</code> API without leaking the dependency into pure core code.</li></ul></div>
+          <div><span class="status live">complete</span><h3>Freeze the grid seam</h3><p>The pure contract and the pinned grid boundary are now the accepted foundation for the dashboard.</p><ul><li><strong>C0.1:</strong> stable <code>WidgetId</code>, <code>WidgetLayout</code>, 12-column coordinates, constraints, and versioned snapshots.</li><li><strong>C0.2:</strong> the contract maps to <code>react-grid-layout@2.2.4</code> without leaking RGL types into pure core code.</li></ul></div>
         </div>
         <div class="build-group">
           <div class="build-group-label">C1–C4 / grid</div>
-          <div><span class="status next">immediate build</span><h3>Build the dashboard people can actually use</h3><p>The grid owns outer geometry. The chart only explains its own data inside the box it receives.</p><ul><li><strong>C1:</strong> controlled 12-column layout, compaction, push-down, min/max constraints, and resize measurement.</li><li><strong>C2:</strong> widget shell with header, title, actions, loading/empty/error states, and drag-from-header behavior.</li><li><strong>C3:</strong> keyboard and touch behavior, focus order, visible focus, and chart-content drag cancellation.</li><li><strong>C4:</strong> stable layout persistence callbacks, migration/versioning, stress tests, and real browser proof.</li></ul></div>
+          <div><span class="status live">complete except C3.2</span><h3>Build the dashboard people can actually use</h3><p>The grid owns outer geometry. The chart explains its own data inside the box it receives.</p><ul><li><strong>C1:</strong> controlled 12-column layout, compaction, push-down, min/max constraints, and resize measurement.</li><li><strong>C2:</strong> widget shell with header, title, actions, loading/empty/error/stale states, and drag-from-header behavior.</li><li><strong>C3.1:</strong> keyboard move/resize, focus, Escape/cancel, and focus restoration.</li><li><strong>C4:</strong> browser gate and 1/10/50/100/200-widget stress evidence.</li><li><strong>Remaining C3.2:</strong> versioned layout serialization, migration, and duplicate/missing-widget reconciliation after CR-C03 research.</li></ul></div>
         </div>
         <div class="build-group">
           <div class="build-group-label">I1 / explore</div>
-          <div><span class="status">planned after grid seam</span><h3>Make the chart answer questions</h3><p>Interaction is useful only when it remains understandable at every size.</p><ul><li><strong>I1.1:</strong> stable datum and series identity.</li><li><strong>I1.2:</strong> tooltip and crosshair with size-aware degradation.</li><li><strong>I1.3:</strong> legend behavior that can collapse or move without hiding meaning.</li><li><strong>I1.4:</strong> keyboard, pointer, touch, and reduced-motion behavior.</li><li><strong>I1.5:</strong> accessible table fallback and screen-reader evidence.</li></ul></div>
+          <div><span class="status live">complete</span><h3>Make the chart answer questions</h3><p>Basic interaction is now implemented and exercised across static, Panel, and Canvas browser contexts.</p><ul><li><strong>I1.1:</strong> stable datum/series identity and controlled interaction state.</li><li><strong>I1.2:</strong> deterministic overlay placement with collision-safe boundaries.</li><li><strong>I1.3:</strong> tooltip and crosshair React layer.</li><li><strong>I1.4:</strong> static and controlled legends with keyboard activation.</li><li><strong>I1.5:</strong> touch lock/dismiss, keyboard navigation, reduced motion, forced colors, and runtime diagnostics.</li></ul><p><strong>Evidence still open:</strong> empirical assistive-technology review remains CR-X04, separate from the browser fixture.</p></div>
         </div>
         <div class="build-group">
           <div class="build-group-label">D0–D7 / breadth</div>
-          <div><span class="status">planned Free v1</span><h3>Repeat the complete proof for every family</h3><p>Adding a chart name to a registry is not enough. Each family needs data semantics, size rungs, rendering, labels, access, and browser evidence.</p><ul><li><strong>D0:</strong> freeze the chart-family union and family registration seam.</li><li><strong>D1:</strong> bar and time-bar; <strong>D2:</strong> donut; <strong>D3:</strong> KPI and progress.</li><li><strong>D4:</strong> scatter; <strong>D5:</strong> heatmap; <strong>D6:</strong> funnel.</li><li><strong>D7:</strong> catalogue registry, chart matrix, visual/a11y/performance evidence. A sparkline remains a line-chart composition, not a separate family.</li></ul></div>
+          <div><span class="status live">complete</span><h3>Integrate the ten-family catalogue</h3><p>Every family now passes the same central contract instead of only appearing in a type union.</p><ul><li><strong>Ten shipped types:</strong> line, area, bar, timebar, scatter, donut, KPI, progress, heatmap, and funnel.</li><li><strong>D7.1:</strong> planner/renderer registries are explicit and frozen; unsupported future marks still fail explicitly.</li><li><strong>Shared proof:</strong> 60 family/rung cards across six rungs, states, accessible text, resize identity, themes, forced colors, reduced motion, and screenshots.</li><li>A sparkline remains a line-chart composition, not a separate family.</li></ul></div>
         </div>
         <div class="build-group">
           <div class="build-group-label">E1–E3 / release</div>
-          <div><span class="status limit">not started</span><h3>Prove that a stranger can consume it</h3><p>The repository passing its own tests is only one part of a release.</p><ul><li><strong>E1:</strong> preview package with line/area plus the real grid from packed artefacts.</li><li><strong>E2:</strong> Free v1 packages, public docs, npm metadata, CSS subpaths, RSC/Vite fixtures, and a11y/browser matrices.</li><li><strong>E3:</strong> publish only after tarball consumers, tree-shaking, provenance, release automation, and claim audit pass.</li></ul></div>
+          <div><span class="status next">E1 complete / E2–E3 remain</span><h3>Prove that a stranger can consume it</h3><p>The built package surface is now verified. Public publication and the release claim are still separate gates.</p><ul><li><strong>E1.1:</strong> built JavaScript/declarations and seven emitted CSS subpaths.</li><li><strong>E1.2:</strong> public package metadata, package-local README/licence, and accurate dependencies.</li><li><strong>E1.3/E1.4:</strong> packed React/Next/Vite consumers, publint, attw, package-content, CSS-resolution, and no-network checks.</li><li><strong>Remaining E2.1:</strong> final rename/scope, Changesets, and trusted Preview publish. <strong>Remaining E3.1:</strong> Free-v1 claim and release audit.</li></ul></div>
         </div>
       </div>
-      <div class="build-callout"><p><strong>Known blocker.</strong> The public package name/npm scope and licence are not yet final. Until that is chosen, the package names are placeholders and publication cannot honestly be marked complete.</p></div>
+      <div class="build-callout"><p><strong>Known blocker.</strong> The package metadata and MIT licence are prepared, but the final public package name/npm scope is still unresolved under P0.3. Until that decision is made, the packages cannot be trusted as the final published identity.</p></div>
     </section>
 
     <section class="section" id="decisions">
@@ -233,19 +233,19 @@
 
     <section class="section" id="components">
       <div class="section-head">
-        <div><p class="kicker">Who does what?</p><h2>Package responsibilities and unfinished work.</h2></div>
-        <p>This is the simplest way to know where a future change belongs. If a package needs the browser to decide a pure chart answer, the boundary is probably in the wrong place.</p>
+        <div><p class="kicker">Who does what?</p><h2>Package responsibilities and the last gaps.</h2></div>
+        <p>This is the simplest way to know where a future change belongs. Most implementation packages are now proven; the remaining gaps are migration policy, empirical accessibility review, final naming, and publication.</p>
       </div>
       <div class="table-wrap build-table">
         <table>
           <thead><tr><th>Package</th><th>Its job</th><th>Working now</th><th>Still to complete</th></tr></thead>
           <tbody>
-            <tr><td><strong><code>@gx/core</code></strong></td><td>Pure, serialisable decisions: sizes, plans, scales, layout, identities, and chart data contracts.</td><td><span class="status live">strong foundation</span><br />Line/area planning and layout contracts are tested without the DOM.</td><td>Identity and interaction contracts for every new family; no React or browser APIs may enter.</td></tr>
-            <tr><td><strong><code>@gx/primitives</code></strong></td><td>Small SVG/table renderers that can be used by server-safe consumers.</td><td><span class="status live">current line/area</span><br />SVG, labels, values, and table fallback.</td><td>Renderers for the new families and their accessible equivalents.</td></tr>
-            <tr><td><strong><code>@gx/react</code></strong></td><td>Browser boundary: measure the widget, call the planner, render, and animate safely.</td><td><span class="status live">AutoChart seam</span><br />ResizeObserver, size context, motion, and RSC-safe split.</td><td>Tooltip, crosshair, legend, keyboard/touch behavior, and the widget-shell seam.</td></tr>
-            <tr><td><strong><code>@gx/grid</code></strong></td><td>Outer dashboard geometry: placement, drag, resize, compaction, constraints, and persistence callbacks.</td><td><span class="status limit">boundary stub</span><br />The 12-column constant and the pure layout contract exist.</td><td>Real adapter, controlled layout, stable identity, widget chrome, access, and stress proof.</td></tr>
-            <tr><td><strong><code>@gx/tokens</code></strong></td><td>Theme values for color, type, spacing, strokes, gaps, ticks, and policy-related presentation.</td><td><span class="status live">current surface</span><br />Typed/generated token system and font metrics.</td><td>Family-specific tokens, public CSS subpaths, and release artefacts.</td></tr>
-            <tr><td><strong><code>@gx/testing</code></strong></td><td>Proof helpers for pure Node, fake resize, browser, RSC, and consumer fixtures.</td><td><span class="status next">gates exist</span><br />The current A/B baseline is heavily tested.</td><td>Grid stress, full chart matrix, accessibility evidence, and packed-tarball consumers.</td></tr>
+            <tr><td><strong><code>@gx/core</code></strong></td><td>Pure, serialisable decisions: sizes, plans, scales, layout, identities, and chart data contracts.</td><td><span class="status live">ten-family core</span><br />Planner registry, family contracts, JSON round-trips, and no-DOM tests.</td><td>C3.2 does not belong here; keep future plan extensions pure and explicit.</td></tr>
+            <tr><td><strong><code>@gx/primitives</code></strong></td><td>Small SVG/table renderers that can be used by server-safe consumers.</td><td><span class="status live">ten-family renderers</span><br />Line, area, bar, timebar, scatter, donut, KPI, progress, heatmap, and funnel.</td><td>Continue evidence review; no unregistered silent fallback.</td></tr>
+            <tr><td><strong><code>@gx/react</code></strong></td><td>Browser boundary: measure the widget, call the planner, render, animate, and host basic interaction safely.</td><td><span class="status live">interaction complete</span><br />AutoChart, tooltip, crosshair, legends, resize, motion, and RSC-safe split.</td><td>CR-X04 empirical assistive-technology review remains outside the fixture proof.</td></tr>
+            <tr><td><strong><code>@gx/grid</code></strong></td><td>Outer dashboard geometry: placement, drag, resize, compaction, constraints, and persistence callbacks.</td><td><span class="status live">real grid complete</span><br />Controlled 12-column wrapper, widget shell/states, keyboard path, browser gate, and stress evidence.</td><td>C3.2 layout serialization/migration and duplicate/missing-widget policy.</td></tr>
+            <tr><td><strong><code>@gx/tokens</code></strong></td><td>Theme values for color, type, spacing, strokes, gaps, ticks, and policy-related presentation.</td><td><span class="status live">emitted package CSS</span><br />Typed/generated token system, font metrics, and seven packed CSS subpaths.</td><td>Final public package identity and release workflow.</td></tr>
+            <tr><td><strong><code>@gx/testing</code></strong></td><td>Proof helpers for pure Node, fake resize, browser, RSC, and consumer fixtures.</td><td><span class="status live">release gates complete</span><br />60-card family matrix, packed consumers, publint, attw, package-content, CSS, and no-network checks.</td><td>Coordinator must still run the final Preview/Free-v1 claim audit.</td></tr>
           </tbody>
         </table>
       </div>
@@ -254,20 +254,20 @@
     <section class="section" id="milestones">
       <div class="section-head">
         <div><p class="kicker">Release shape</p><h2>What each milestone promises.</h2></div>
-        <p>These are deliberately smaller promises. A release is useful when its boundary is clear, not when every possible chart is named.</p>
+        <p>These are deliberately smaller promises. The implementation has moved ahead of the release labels; a milestone is not public until its naming, publication, and claim gates also pass.</p>
       </div>
       <div class="release-ladder" aria-label="Release milestones">
         <article class="release-step preview">
-          <div class="release-step-head"><div class="release-step-index"><strong>01</strong>preview</div><span class="status next">next release</span></div>
+          <div class="release-step-head"><div class="release-step-index"><strong>01</strong>preview</div><span class="status next">publish next</span></div>
           <h3>A real dashboard slice</h3>
-          <p>Line/area, the 12-column grid, widget shell, basic interaction, and a packed consumer fixture.</p>
-          <div class="release-boundary"><span class="release-boundary-label">Not included yet</span><p><strong>Full chart catalogue</strong> and commercial Pro features.</p></div>
+          <p>The implementation is ready: the 12-column grid, widget shell, basic interaction, built artefacts, and packed consumer proof all exist.</p>
+          <div class="release-boundary"><span class="release-boundary-label">Still required</span><p><strong>P0.3/E2.1:</strong> final npm scope, Changesets, trusted publication, and an honest Preview release note.</p></div>
         </article>
         <article class="release-step free">
-          <div class="release-step-head"><div class="release-step-index"><strong>02</strong>free v1</div><span class="status">planned</span></div>
+          <div class="release-step-head"><div class="release-step-index"><strong>02</strong>free v1</div><span class="status next">audit remains</span></div>
           <h3>The reusable open library</h3>
-          <p>Preview plus bar/time-bar, donut, KPI/progress, scatter, heatmap, funnel, public docs, and a11y/browser matrices.</p>
-          <div class="release-boundary"><span class="release-boundary-label">Not included yet</span><p><strong>Advanced filters</strong>, linked views, and Pro-only interaction.</p></div>
+          <p>The planned catalogue is implemented: ten chart types, the six-rung matrix, interaction coverage, package gates, public package metadata, and consumer fixtures.</p>
+          <div class="release-boundary"><span class="release-boundary-label">Still required</span><p><strong>E3.1:</strong> final claim audit, release documentation, and explicit evidence for any remaining accessibility gap.</p></div>
         </article>
         <article class="release-step pro">
           <div class="release-step-head"><div class="release-step-index"><strong>03</strong>v1.1 / commercial</div><span class="status limit">later</span></div>
@@ -275,7 +275,7 @@
           <p>Advanced filters, brush/zoom/annotations where justified, and one validated Pro capability with an explicit package boundary.</p>
           <div class="release-boundary"><span class="release-boundary-label">Boundary rule</span><p><strong>Not started.</strong> Never imply this is in the Free package today.</p></div>
         </article>
-        <div class="release-rule" aria-hidden="true"><span>build the smallest useful proof</span><span>expand only after contracts hold</span><span>charge only for a validated boundary</span></div>
+        <div class="release-rule" aria-hidden="true"><span>implementation proof is green</span><span>publication proof is next</span><span>commercial scope stays later</span></div>
       </div>
     </section>
 
@@ -290,16 +290,16 @@
           <ul class="build-checklist">
             <li class="done"><span><strong>Plan:</strong> its data meaning and size ladder are explicit.</span></li>
             <li class="done"><span><strong>Render:</strong> SVG and table/fallback output agree with the plan.</span></li>
-            <li><span><strong>Explore:</strong> tooltip, legend, keyboard, touch, and reduced-motion behavior are proven.</span></li>
-            <li><span><strong>Evidence:</strong> unit, browser, accessibility, visual, and performance checks pass.</span></li>
+            <li class="done"><span><strong>Explore:</strong> tooltip, legend, keyboard, touch, and reduced-motion behavior are proven by the interaction matrix.</span></li>
+            <li><span><strong>Evidence:</strong> empirical assistive-technology review is still tracked as CR-X04.</span></li>
           </ul>
         </article>
         <article class="card card-accent orange">
           <h3>For the library release</h3>
           <ul class="build-checklist">
-            <li><span><strong>Install:</strong> a fresh app can use the packed artefacts, not just source files.</span></li>
-            <li><span><strong>Import:</strong> public exports, CSS, ESM, RSC, Vite, peer dependencies, and tree-shaking work.</span></li>
-            <li><span><strong>Operate:</strong> layout, filters, data, and persistence boundaries are documented.</span></li>
+            <li class="done"><span><strong>Install:</strong> a fresh app can use the packed artefacts, not just source files.</span></li>
+            <li class="done"><span><strong>Import:</strong> public exports, CSS, ESM, RSC, Vite, peer dependencies, and tree-shaking work.</span></li>
+            <li><span><strong>Operate:</strong> layout migration and host-owned persistence still need the C3.2 contract.</span></li>
             <li><span><strong>Claim:</strong> docs describe what is shipped, what is experimental, and what is still planned.</span></li>
           </ul>
         </article>
@@ -312,12 +312,11 @@
         <p>This order keeps the work small enough to review and strong enough to unlock the next step.</p>
       </div>
       <ol class="build-next">
-        <li><div><strong>Promote C0.1 after coordinator review.</strong><span>Make the Widget Layout contract the accepted source of truth. Do not add React behavior to it.</span></div></li>
-        <li><div><strong>Complete C0.2 with the pinned grid adapter.</strong><span>Keep the pure <code>./core</code> and browser-facing <code>./react</code> split clear, then prove one controlled 12-column layout.</span></div></li>
-        <li><div><strong>Build C1–C4 as one dependable dashboard seam.</strong><span>Placement, compaction, widget chrome, keyboard/touch access, measurement, persistence, and browser stress belong before chart expansion.</span></div></li>
-        <li><div><strong>Build I1 and D0 together at the contract level.</strong><span>Stable datum identity, tooltip/legend/accessibility contracts, and the chart-family union prevent every later family from inventing a different interaction model.</span></div></li>
-        <li><div><strong>Cut Preview from packed artefacts.</strong><span>Line/area plus the real grid must work in a fresh consumer before the project calls itself reusable.</span></div></li>
-        <li><div><strong>Expand through D1–D7, then publish Free v1.</strong><span>Each family repeats the same proof. Publication research can prepare the path, but it cannot replace runtime and consumer evidence.</span></div></li>
+        <li><div><strong>Finish C3.2 layout serialization and migration.</strong><span>Wait for CR-C03, then define versioned round-trips, duplicate/missing-widget reconciliation, and host-owned save boundaries.</span></div></li>
+        <li><div><strong>Resolve P0.3: final public package name and npm scope.</strong><span>The package metadata and licence are prepared, but the placeholder <code>@gx/*</code> identity cannot be the final public promise.</span></div></li>
+        <li><div><strong>Run E2.1 and publish Preview.</strong><span>Apply the final name, add Changesets/trusted publishing, and release the already-proven dashboard slice.</span></div></li>
+        <li><div><strong>Run E3.1 Free-v1 claim and release audit.</strong><span>Audit the ten-family catalogue, packed consumer proof, accessibility evidence, docs, and every public claim before calling Free v1 released.</span></div></li>
+        <li><div><strong>Keep advanced product scope separate.</strong><span>Shared filters, linked views, brush/zoom, annotations, and one validated Pro capability remain v1.1/commercial work.</span></div></li>
       </ol>
       <div class="build-callout"><p><strong>In one sentence:</strong> we are not just adding charts; we are building a dependable chain from data → plan → widget box → interaction → package → consumer proof.</p></div>
     </section>

@@ -14,6 +14,7 @@
         <a class="wordmark" href="#top" aria-label="GX project explainer home"><span class="rail-mark" aria-hidden="true"></span><span>GX / start here</span></a>
         <nav class="top-nav" aria-label="Explainer sections">
           <a href="#story">The story</a>
+          <a href="#status">Current status</a>
           <a href="#transition">Size changes</a>
           <a href="#components">Parts</a>
           <a href="#style">Themes + fonts</a>
@@ -45,6 +46,17 @@
             <div class="home-map-node"><span class="home-map-number">4</span><strong>The picture</strong><span>Small drawing pieces show exactly what the plan asked for.</span><code>SVG</code></div>
           </div>
         </div>
+      </section>
+
+      <section class="section" id="status" aria-labelledby="status-title">
+        <div class="section-head"><div><p class="kicker">Current checkpoint / 25 Aug 2026</p><h2 id="status-title">What has actually been built?</h2></div><p>The implementation has moved from a line/area experiment to a ten-family dashboard and package candidate. The remaining work is mostly release readiness, not another basic chart renderer.</p></div>
+        <div class="grid-4 home-status-grid">
+          <article class="card card-accent green"><span class="status live home-status">complete</span><h3>Dashboard shell</h3><p>Real 12-column placement, drag/resize, compaction, widget regions, measured chart content, loading/empty/error/stale states, keyboard move/resize, browser gate, and stress evidence.</p></article>
+          <article class="card card-accent blue"><span class="status live home-status">complete</span><h3>Ten chart types</h3><p>Line, area, bar, timebar, scatter, donut, KPI, progress, heatmap, and funnel are centrally registered and covered by the shared family matrix.</p></article>
+          <article class="card card-accent teal"><span class="status live home-status">complete</span><h3>Interaction + packages</h3><p>Tooltip, crosshair, legends, touch/keyboard behavior, emitted CSS, packed consumers, publint, attw, package-content, and no-network gates pass.</p></article>
+          <article class="card card-accent red"><span class="status limit home-status">remaining</span><h3>Release boundary</h3><p>Finish layout serialization/migration, choose the public npm name/scope, publish Preview, and run the Free-v1 claim audit. CR-X04 still tracks empirical assistive-technology evidence.</p></article>
+        </div>
+        <div class="home-answer" style="margin-top:1rem"><p><strong>Read the full build status:</strong> <a href="10-roadmap.html#today">10 / How we build it →</a></p></div>
       </section>
 
       <section class="section" id="problem" aria-labelledby="problem-title">
@@ -151,8 +163,8 @@
       </section>
 
       <section class="section" id="charts" aria-labelledby="charts-title">
-        <div class="section-head"><div><p class="kicker">Chart families</p><h2 id="charts-title">What are we concentrating on?</h2></div><p>The responsive ladder is the first product idea. Line and area are the current family. Other families are named in the research contract, but each one still needs its own size rules, renderer, accessibility proof, and browser tests.</p></div>
-        <div class="table-wrap"><table><thead><tr><th>Family</th><th>What question it answers</th><th>Current status</th><th>Small-size idea</th></tr></thead><tbody><tr><td><strong>Line</strong></td><td>How is something changing over time?</td><td><span class="status live">implemented</span></td><td>Trend, then latest value.</td></tr><tr><td><strong>Area</strong></td><td>How is a changing amount filling space?</td><td><span class="status live">implemented</span></td><td>Same line ladder with area treatment.</td></tr><tr><td><strong>Bar / timebar</strong></td><td>How do categories or periods compare?</td><td><span class="status next">planned</span></td><td>Total or compact comparison strip.</td></tr><tr><td><strong>Donut</strong></td><td>What parts make up a whole?</td><td><span class="status next">planned</span></td><td>Donut plus total, no crowded labels.</td></tr><tr><td><strong>Scatter</strong></td><td>Do two things move together?</td><td><span class="status next">planned</span></td><td>Correlation or point count.</td></tr><tr><td><strong>Funnel / KPI / heatmap / progress</strong></td><td>Where does a process drop, what is the current number, which cells are active, or how far along are we?</td><td><span class="status next">planned</span></td><td>One headline, total, or explicit aggregation.</td></tr></tbody></table></div>
+        <div class="section-head"><div><p class="kicker">Chart families</p><h2 id="charts-title">What is implemented now?</h2></div><p>The responsive ladder has now been repeated across ten integrated chart types. Each family passed the shared registration and six-rung browser matrix; release publication remains a separate step.</p></div>
+        <div class="table-wrap"><table><thead><tr><th>Family</th><th>What question it answers</th><th>Current status</th><th>Small-size idea</th></tr></thead><tbody><tr><td><strong>Line</strong></td><td>How is something changing over time?</td><td><span class="status live">implemented</span></td><td>Trend, then latest value.</td></tr><tr><td><strong>Area</strong></td><td>How is a changing amount filling space?</td><td><span class="status live">implemented</span></td><td>Same line ladder with area treatment.</td></tr><tr><td><strong>Bar / timebar</strong></td><td>How do categories or periods compare?</td><td><span class="status live">implemented</span></td><td>Total or compact comparison strip.</td></tr><tr><td><strong>Donut</strong></td><td>What parts make up a whole?</td><td><span class="status live">implemented</span></td><td>Donut plus total, no crowded labels.</td></tr><tr><td><strong>Scatter</strong></td><td>Do two things move together?</td><td><span class="status live">implemented</span></td><td>Correlation or point count.</td></tr><tr><td><strong>KPI / progress</strong></td><td>What is the current number or how far along are we?</td><td><span class="status live">implemented</span></td><td>One headline, delta, or explicit progress value.</td></tr><tr><td><strong>Heatmap</strong></td><td>Which repeated cells are active?</td><td><span class="status live">implemented</span></td><td>Count or explicit aggregation.</td></tr><tr><td><strong>Funnel</strong></td><td>Where does a process drop?</td><td><span class="status live">implemented</span></td><td>Overall conversion or stage drop-off.</td></tr></tbody></table></div>
         <p class="source">The full chart catalogue is in <a href="07-chart-catalog.html">07 / Chart catalogue</a>.</p>
       </section>
 
@@ -185,15 +197,16 @@ import '@gx/tokens/theme.css'
       </section>
 
       <section class="section" id="roadmap" aria-labelledby="roadmap-title">
-        <div class="section-head"><div><p class="kicker">Build order</p><h2 id="roadmap-title">How we build this without losing the plot.</h2></div><p>Each stage produces something that can be checked. The order matters: first define what “useful” means, then make the decision data, then draw it, then add the browser behaviour and more chart families.</p></div>
+        <div class="section-head"><div><p class="kicker">Build order</p><h2 id="roadmap-title">How we built this without losing the plot.</h2></div><p>The original order is now mostly complete: question → data → size ladder → plan → render → browser proof. The remaining steps are layout migration, final public identity, and release audit.</p></div>
         <div class="home-answer" style="margin-bottom:1rem"><p><strong>Continuation rule:</strong> Codex and Claude work in separate bounded lanes, but both resume from committed task handoffs. The <a href="../90-final-delivery-and-agent-plan.md">master delivery plan</a> owns live status; chat history never does.</p></div>
         <div class="timeline">
-          <div class="timeline-item"><span></span><span class="timeline-code">01 / question</span><div><h3>Write the problem and the reader’s question.</h3><p>For this case study: “Are equipment programmes getting closer to the 80% readiness target?”</p></div></div>
-          <div class="timeline-item"><span></span><span class="timeline-code">02 / data</span><div><h3>Describe the dataset without tying it to pixels.</h3><p>Names, dates, values, target, units, missing-value rules, and the questions the chart must answer.</p></div></div>
-          <div class="timeline-item"><span></span><span class="timeline-code">03 / size families</span><div><h3>Write the transition before writing the renderer.</h3><p>Decide what stays, what leaves, and what the chart claims at Stage, Panel, Strip, Tile, and Micro.</p></div></div>
-          <div class="timeline-item"><span></span><span class="timeline-code">04 / plan</span><div><h3>Make the choice plain data.</h3><p>Core returns a ChartPlan that can be tested, saved, rendered on a server, and explained to another person.</p></div></div>
-          <div class="timeline-item"><span></span><span class="timeline-code">05 / draw</span><div><h3>Render only what the plan asks for.</h3><p>Primitives make accessible SVG. They do not hide missing pieces or add an unapproved fallback.</p></div></div>
-          <div class="timeline-item"><span></span><span class="timeline-code">06 / browser</span><div><h3>Connect resize, interaction, themes, and tests.</h3><p>Only after the meaning is stable do we add the live browser loop, visual tokens, user interactions, and evidence.</p></div></div>
+          <div class="timeline-item"><span></span><span class="timeline-code">01 / question</span><div><span class="status live">done</span><h3>Write the problem and the reader’s question.</h3><p>For this case study: “Are equipment programmes getting closer to the 80% readiness target?”</p></div></div>
+          <div class="timeline-item"><span></span><span class="timeline-code">02 / data</span><div><span class="status live">done</span><h3>Describe the dataset without tying it to pixels.</h3><p>Names, dates, values, target, units, missing-value rules, and the questions the chart must answer.</p></div></div>
+          <div class="timeline-item"><span></span><span class="timeline-code">03 / size families</span><div><span class="status live">done</span><h3>Write the transition before writing the renderer.</h3><p>Decide what stays, what leaves, and what the chart claims at Stage, Panel, Strip, Tile, and Micro.</p></div></div>
+          <div class="timeline-item"><span></span><span class="timeline-code">04 / plan</span><div><span class="status live">done</span><h3>Make the choice plain data.</h3><p>Core returns a ChartPlan that can be tested, transmitted, rendered on a server, and explained to another person.</p></div></div>
+          <div class="timeline-item"><span></span><span class="timeline-code">05 / draw</span><div><span class="status live">done</span><h3>Render only what the plan asks for.</h3><p>Primitives make accessible SVG for ten integrated chart types. They do not hide missing pieces or add an unapproved fallback.</p></div></div>
+          <div class="timeline-item"><span></span><span class="timeline-code">06 / browser</span><div><span class="status live">done</span><h3>Connect resize, interaction, themes, and tests.</h3><p>Grid, widget shell, tooltip, crosshair, legend, touch/keyboard behavior, six-rung family matrix, and package gates are complete.</p></div></div>
+          <div class="timeline-item"><span></span><span class="timeline-code">07 / release</span><div><span class="status next">remaining</span><h3>Finish the public release boundary.</h3><p>Complete C3.2 migration, choose the public npm identity, publish Preview, and run the Free-v1 claim audit.</p></div></div>
         </div>
       </section>
 
@@ -212,7 +225,7 @@ import '@gx/tokens/theme.css'
           <a href="04-planner.html"><strong>04 / How the chart chooses</strong><span>Size context, data shape, policy, ChartPlan, and transitions.</span></a>
           <a href="05-themes-tokens.html"><strong>05 / Themes and tokens</strong><span>Rail, Neutral, generated CSS, token vocabulary, and policy split.</span></a>
           <a href="06-fonts.html"><strong>06 / Fonts and measurements</strong><span>Roboto Flex, ranks, glyph widths, fallback bands, and font capability.</span></a>
-          <a href="07-chart-catalog.html"><strong>07 / Chart families</strong><span>Line and area now; bar, donut, scatter, funnel, KPI, heatmap, and progress planned.</span></a>
+          <a href="07-chart-catalog.html"><strong>07 / Chart families</strong><span>Ten integrated chart types, their size stories, shared proof, and remaining release evidence.</span></a>
           <a href="08-consumer-guide.html"><strong>08 / How a consumer uses it</strong><span>Install shape, render paths, configuration, theming, and boundaries.</span></a>
           <a href="09-data-case-study.html"><strong>09 / Dataset and case study</strong><span>How to supply a useful dataset and map a real application to the library.</span></a>
           <a href="10-roadmap.html"><strong>10 / How we build it</strong><span>What is working, what remains, and the exact path from chart engine to published library.</span></a>
