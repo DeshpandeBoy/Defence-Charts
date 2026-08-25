@@ -1,7 +1,13 @@
+import {
+  describeShape,
+  planChart,
+  resolveSizeClass,
+  sizeContextFromPixels,
+  type Series,
+} from '@gx/core'
 import { Chart } from '@gx/primitives'
-import { AutoChart } from '@gx/react'
-import { useState, type ReactNode } from 'react'
-import type { Series } from '@gx/core'
+import { AutoChart, useElementSize } from '@gx/react'
+import { useMemo, useState, type ReactNode } from 'react'
 
 import {
   EMPTY_DATA,
@@ -48,13 +54,13 @@ export function FamilyMatrixApp() {
       <section aria-labelledby="family-matrix-ladder">
         <div className="family-matrix__section-heading">
           <div>
-            <p className="family-matrix__eyebrow">Static / RSC-safe surface</p>
+            <p className="family-matrix__eyebrow">Static plan / measured SVG surface</p>
             <h2 id="family-matrix-ladder">Micro → Stage</h2>
           </div>
           <p>
-            Each card receives the same serialisable plan contract as a server consumer. The
-            fixture attributes expose the plan metadata for the browser gate without adding
-            runtime chart behavior.
+            Each card keeps the row's serialisable grid footprint while measuring its real card
+            box. The fixture attributes expose the same plan metadata as a server consumer, while
+            the SVG frame uses the pixels the browser actually gives it.
           </p>
         </div>
         <div className="family-matrix__grid">
@@ -179,9 +185,48 @@ function StaticMatrixCard({ type, row }: { readonly type: FamilyType; readonly r
         </span>
       </div>
       <div className="family-matrix__chart-frame">
-        <StaticChart type={type} row={row} data={dataForType(type)} id={'matrix-' + type + '-' + row.id} />
+        <MeasuredMatrixChart type={type} row={row} data={dataForType(type)} id={'matrix-' + type + '-' + row.id} />
       </div>
     </article>
+  )
+}
+
+function MeasuredMatrixChart({
+  type,
+  row,
+  data,
+  id,
+}: {
+  readonly type: FamilyType
+  readonly row: FamilyMatrixRow
+  readonly data: readonly Series[]
+  readonly id: string
+}) {
+  const [ref, size] = useElementSize<HTMLDivElement>({
+    initialSize: { width: row.width, height: row.height },
+  })
+  const ctx = useMemo(() => {
+    const measured = sizeContextFromPixels(size.width, size.height)
+    return Object.freeze({
+      ...measured,
+      cols: row.ctx.cols,
+      rows: row.ctx.rows,
+      sizeClass: resolveSizeClass(row.ctx.cols, row.ctx.rows),
+    })
+  }, [row.ctx.cols, row.ctx.rows, size.height, size.width])
+  const plan = useMemo(() => planChart(type, ctx, describeShape(data)), [ctx, data, type])
+
+  return (
+    <div ref={ref} className="family-matrix__measured-chart">
+      <Chart
+        plan={plan}
+        data={data}
+        ctx={ctx}
+        title={type + ' ' + row.id + ' family fixture'}
+        description="The SVG is planned from the row footprint and measured from the card content box."
+        id={id}
+      />
+    </div>
   )
 }
 
