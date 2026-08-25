@@ -290,6 +290,49 @@ describe('accessibility structure', () => {
   })
 })
 
+describe('compact information structure', () => {
+  it('gives Tile a visible identity key for every plotted series', () => {
+    const html = render(240, 80)
+    const keyEntries = parseElements(html).filter(
+      (el) => el.attrs['class'] === 'gx-compact-key__entry',
+    )
+    const key = parseElements(html).find((el) => el.attrs['class'] === 'gx-compact-key')
+    const plot = parseElements(html).find((el) => el.attrs['class'] === 'gx-compact-plot')
+
+    expect(key?.attrs['data-legend-source']).toBe('fallback')
+    expect(keyEntries.map((entry) => entry.attrs['data-series-id'])).toEqual([
+      'alpha',
+      'beta',
+      'gamma',
+    ])
+    expect(keyEntries.every((entry) => entry.attrs['role'] === 'listitem')).toBe(true)
+    expect(Number(key?.attrs['data-legend-rail-height'])).toBeGreaterThan(0)
+    expect(plot?.attrs.transform).toMatch(/translate\(0 [\d.]+\) scale\(1 0\.[\d]+\)/)
+    expect(html.indexOf('class="gx-compact-key"')).toBeGreaterThan(
+      html.indexOf('class="gx-compact-plot"'),
+    )
+  })
+
+  it('moves Strip geometry below its SVG identity rail instead of overlaying HTML labels', () => {
+    const html = render(400, 200)
+    const key = parseElements(html).find((el) => el.attrs['class'] === 'gx-compact-key')
+    const plot = parseElements(html).find((el) => el.attrs['class'] === 'gx-compact-plot')
+
+    expect(key?.attrs['data-legend-placement']).toBe('internal')
+    expect(key?.attrs['data-legend-source']).toBe('core')
+    expect(Number(key?.attrs['data-legend-rail-height'])).toBeGreaterThan(0)
+    expect(html).not.toContain('gx-legend--internal')
+    expect(plot).toBeUndefined()
+    expect(parseElements(html).filter((el) => el.attrs['class'] === 'gx-compact-key__label')).toHaveLength(3)
+  })
+
+  it('does not add a plot identity rail to Micro, where the value reading is the chart', () => {
+    const html = render(60, 24)
+    expect(html).not.toContain('gx-compact-key')
+    expect(html).toContain('gx-value__metric')
+  })
+})
+
 describe('determinism', () => {
   it('renders character-identical markup twice', () => {
     expect(render(900, 520)).toBe(render(900, 520))

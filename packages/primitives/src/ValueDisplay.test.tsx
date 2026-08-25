@@ -127,6 +127,17 @@ describe('the Micro rung, whose entire content this is', () => {
     expect(html).toContain('>27<')
   })
 
+  it('separates series context from the dominant metric in the SVG reading', () => {
+    const context = parseElements(html).find((el) => el.attrs['class'] === 'gx-value__context gx-value__label')
+    const metric = parseElements(html).find((el) => el.attrs['class'] === 'gx-value__metric')
+
+    expect(context?.tag).toBe('tspan')
+    expect(metric?.tag).toBe('tspan')
+    expect(html).toMatch(
+      /<text[^>]*class="gx-value"[^>]*aria-label="ALPHA 27"[^>]*>.*gx-value__context.*ALPHA.*gx-value__metric.*27/s,
+    )
+  })
+
   it('takes its coordinates and its size from the frame, unmodified', () => {
     const value = valueOf(60, 24)
     const entry = value?.entries[0]

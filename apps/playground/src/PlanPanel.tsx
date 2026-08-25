@@ -152,6 +152,7 @@ function chromeOf(plan: ChartPlan): ChromeSpec {
     valueTypeScale: plan.narrative.valueTypeScale,
     tableDisclosure: plan.dataTable.disclosure,
     tablePresent: plan.dataTable.present,
+    plotPresence: plan.marks.primary.kind === 'none' ? 'none' : 'present',
   }
 }
 

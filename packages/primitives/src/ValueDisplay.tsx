@@ -87,9 +87,9 @@ export function ValueDisplay({ value, className }: ValueDisplayProps) {
             y={roundCoord(entry.y)}
             fontSize={fontSize}
           >
-            {showLabel ? <tspan className="gx-value__label">{label}</tspan> : null}
+            {showLabel ? <tspan className="gx-value__context gx-value__label">{label}</tspan> : null}
             {showLabel ? <tspan className="gx-value__separator"> · </tspan> : null}
-            {entry.text}
+            <tspan className="gx-value__metric">{entry.text}</tspan>
           {entry.unit === null || entry.unit.length === 0 ? null : (
             <tspan className="gx-value__unit">{` ${entry.unit}`}</tspan>
           )}
