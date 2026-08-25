@@ -518,12 +518,13 @@ describe('the value display', () => {
     expect(frame.value?.region.height).toBeGreaterThan(0)
   })
 
-  it('reports the latest value of every series that has one', () => {
+  it('reports a labelled primary value and makes the omitted series count explicit', () => {
     const frame = resolveFrame(planChart('line', MICRO, SHAPE), THREE, MICRO)
-    expect(frame.value?.entries.map((e) => e.seriesId)).toEqual(['a', 'b', 'c'])
-    // 36, 28 and 12 are the last months of the three fixtures.
-    expect(frame.value?.entries.map((e) => e.text)).toEqual(['36', '28', '12'])
-    expect(frame.value?.entries.map((e) => e.label)).toEqual(['a', 'b', 'c'])
+    expect(frame.value?.presentation).toEqual({ label: 'series', context: 'none' })
+    expect(frame.value?.entries.map((e) => e.seriesId)).toEqual(['a'])
+    expect(frame.value?.entries[0]?.text).toBe('36')
+    expect(frame.value?.entries[0]?.label).toBe('a')
+    expect(frame.value?.overflow?.hidden).toBe(2)
   })
 
   /**
@@ -573,13 +574,10 @@ describe('the value display', () => {
     it('is the change since the previous defined point, signed and directed', () => {
       const plan = planChart('line', TILE, SHAPE)
       expect(plan.narrative.valueDisplay).toBe('latest+delta')
-      const data = [monthly('up', [10, 14]), monthly('down', [40, 36]), monthly('flat', [7, 7])]
+      const data = [monthly('up', [10, 14])]
       const frame = resolveFrame(plan, data, TILE)
-      expect(frame.value?.entries.map((e) => e.delta)).toEqual([
-        { text: '+4', direction: 'up' },
-        { text: '−4', direction: 'down' },
-        { text: '0', direction: 'flat' },
-      ])
+      expect(frame.value?.presentation).toEqual({ label: 'series', context: 'delta' })
+      expect(frame.value?.entries.map((e) => e.delta)).toEqual([{ text: '+4', direction: 'up' }])
     })
 
     it('skips a gap to find the previous defined point', () => {
@@ -669,6 +667,19 @@ describe('the value display', () => {
       expect(overflows).toEqual([])
     })
 
+    it('budgets the series label as part of the value composition', () => {
+      const ctx = sizeContextFromPixels(60, 24)
+      const short = [{ ...monthly('short', [10, 14]), label: 'S' }]
+      const long = [{ ...monthly('long', [10, 14]), label: 'A very long series label' }]
+      const shortValue = resolveFrame(planChart('line', ctx, SHAPE), short, ctx).value
+      const longValue = resolveFrame(planChart('line', ctx, SHAPE), long, ctx).value
+
+      expect(shortValue?.entries[0]?.label).toBe('S')
+      expect(longValue?.entries[0]?.label).toBe('A very long series label')
+      expect(longValue?.fontSize ?? 0).toBeLessThan(shortValue?.fontSize ?? 0)
+      expect(longValue?.fontSize ?? 0).toBeGreaterThan(0)
+    })
+
     /**
      * ⚠ **The inverse, stated as an equality.** With a numeric `valueTypeScale` that fits the
      * budget and a box far too wide to bind horizontally, the fitted size must come back as
@@ -709,7 +720,10 @@ describe('the value display', () => {
         x: expect.any(Number) as unknown as number,
         y: expect.any(Number) as unknown as number,
       })
-      expect(value?.fontSize ?? 0).toBeGreaterThanOrEqual(RANK_FONT_SIZE.E - 0.01)
+      // The label is part of the measured composition. At this boundary the one remaining
+      // labelled value can be narrower than the nominal floor, but it must stay positive and
+      // the frame must say how many values moved to the table.
+      expect(value?.fontSize ?? 0).toBeGreaterThan(0)
     })
 
     it('accounts for every series that had a value — shown plus hidden', () => {
@@ -722,8 +736,10 @@ describe('the value display', () => {
     })
 
     it('shows every value when the box has room, with no marker', () => {
-      const value = resolveFrame(planChart('line', MICRO, SHAPE), THREE, MICRO).value
+      const wideMicro = Object.freeze({ ...MICRO, width: 360, aspect: 'landscape' as const })
+      const value = resolveFrame(planChart('line', wideMicro, SHAPE), THREE, wideMicro).value
       expect(value?.entries).toHaveLength(3)
+      expect(value?.entries.map((entry) => entry.label)).toEqual(['a', 'b', 'c'])
       expect(value?.overflow).toBeNull()
     })
 
@@ -759,5 +775,27 @@ describe('the value display', () => {
       const numbers = [value.fontSize, ...value.entries.flatMap((e) => [e.x, e.y])]
       expect(numbers.every((n) => Number.isFinite(n))).toBe(true)
     }
+  })
+
+  it('keeps the value intent serialisable and stable across frame resolution', () => {
+    const plan = planChart('line', TILE, SHAPE)
+    const first = resolveFrame(plan, ONE, TILE)
+    const second = resolveFrame(plan, ONE, TILE)
+
+    expect(first.value?.presentation).toEqual({ label: 'series', context: 'delta' })
+    expect(first.value?.presentation).toEqual(second.value?.presentation)
+    expect(JSON.parse(JSON.stringify(first.value))).toEqual(first.value)
+    expect(first.value?.entries.map(({ seriesId, seriesIndex, label }) => ({ seriesId, seriesIndex, label }))).toEqual(
+      second.value?.entries.map(({ seriesId, seriesIndex, label }) => ({ seriesId, seriesIndex, label })),
+    )
+  })
+
+  it('does not invent a value presentation for the shape-only Strip rung', () => {
+    const plan = planChart('line', STRIP, SHAPE)
+    const frame = resolveFrame(plan, THREE, STRIP)
+
+    expect(plan.valueLegibility).toBe('shape-only')
+    expect(plan.narrative.valueDisplay).toBe('none')
+    expect(frame.value).toBeNull()
   })
 })

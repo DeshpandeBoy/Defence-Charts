@@ -39,17 +39,14 @@ describe('KPI frame composition', () => {
   })
 
   it('keeps direction explicit for down and flat changes', () => {
-    const data = [
-      { id: 'down', points: [{ x: 0, y: 10 }, { x: 1, y: 8 }] },
-      { id: 'flat', points: [{ x: 0, y: 10 }, { x: 1, y: 10 }] },
-    ] as const
     const ctx = sizeContextFromPixels(240, 80)
-    const frame = resolveFrame(planChart('kpi', ctx, describeShape(data)), data, ctx)
+    const down = [{ id: 'down', points: [{ x: 0, y: 10 }, { x: 1, y: 8 }] }] as const
+    const flat = [{ id: 'flat', points: [{ x: 0, y: 10 }, { x: 1, y: 10 }] }] as const
+    const downFrame = resolveFrame(planChart('kpi', ctx, describeShape(down)), down, ctx)
+    const flatFrame = resolveFrame(planChart('kpi', ctx, describeShape(flat)), flat, ctx)
 
-    expect(frame.value?.entries.map((entry) => entry.delta)).toEqual([
-      { text: '−2', direction: 'down' },
-      { text: '0', direction: 'flat' },
-    ])
+    expect(downFrame.value?.entries[0]?.delta).toEqual({ text: '−2', direction: 'down' })
+    expect(flatFrame.value?.entries[0]?.delta).toEqual({ text: '0', direction: 'flat' })
   })
 
   it('renders a missing target/status as explicit absence rather than an inferred value', () => {

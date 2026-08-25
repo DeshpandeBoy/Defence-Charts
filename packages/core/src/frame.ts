@@ -280,6 +280,23 @@ export type ChartFrame = {
   readonly value: {
     /** The band, in absolute SVG coordinates. Composed exactly as `plot`'s origin is. */
     readonly region: Rect
+    /**
+     * The semantic composition the renderer should expose in this band.
+     *
+     * `entries[].label` has always travelled with the value so consumers could recover the
+     * series identity, but the old contract treated that label as table-only metadata. That
+     * made a multi-series Micro/Tile frame look like a row of unowned numbers when the static
+     * renderer painted it. The intent is explicit now: paint the series label with the value,
+     * and expose the delta as supporting context only when the plan asks for it. Strip has no
+     * value frame at all, so it remains shape-only rather than gaining a hidden metric band.
+     *
+     * This is a render instruction, not presentation CSS. It is plain data and is derived from
+     * the plan's existing `valueDisplay`, so server and client render the same composition.
+     */
+    readonly presentation: {
+      readonly label: 'series'
+      readonly context: 'none' | 'delta'
+    }
     /** px, already fitted to the band. `0` when nothing is drawn — see `fitValueDisplay()`. */
     readonly fontSize: number
     readonly entries: readonly {
@@ -292,7 +309,7 @@ export type ChartFrame = {
        * look entirely correct.
        */
       readonly seriesIndex: number
-      /** The series' human label. Not painted at A4; see `ValueEntry` below. */
+      /** The series' human label, painted according to `value.presentation.label`. */
       readonly label: string
       /** The formatted latest value. */
       readonly text: string
@@ -364,12 +381,10 @@ export type ValueFrame = NonNullable<ChartFrame['value']>
 /**
  * One value in the display.
  *
- * ⚠ `label` is carried and not painted, which is deliberate rather than dead. The frame is
- * the coordinate contract, and a consumer laying out their own value display needs the
- * pairing; inside this repo the pairing is carried by the data table, which
- * `./rungs/line.ts` keeps `present: true` at every rung that asks for a value display. What
- * ties a painted number to its series today is colour — `<ValueDisplay>` emits
- * `data-series-index` and `chart.css` binds the same six-colour ramp the marks use.
+ * `label` is the pairing between a painted value and its series. `ChartFrame.value.presentation`
+ * makes the renderer's use of that pairing explicit; colour remains a redundant visual cue,
+ * not the only identity channel. The data table still carries the same label for the accessible
+ * full-detail path.
  */
 export type ValueEntry = ValueFrame['entries'][number]
 
@@ -676,7 +691,17 @@ function fitValueDisplay(
   region: Rect,
   policy: PlanPolicy,
 ): ChartFrame['value'] {
-  const empty = Object.freeze({ region, fontSize: 0, entries: Object.freeze([]), overflow: null })
+  const presentation = Object.freeze({
+    label: 'series' as const,
+    context: narrative.valueDisplay === 'latest+delta' ? ('delta' as const) : ('none' as const),
+  })
+  const empty = Object.freeze({
+    region,
+    presentation,
+    fontSize: 0,
+    entries: Object.freeze([]),
+    overflow: null,
+  })
 
   // "Latest" is the last point whose `y` is non-null, and `SeriesFrame.points` holds only
   // defined points in data order — so it is the last element, and a series with no defined
@@ -722,11 +747,12 @@ function fitValueDisplay(
   })
   if (drafts.length === 0) return empty
 
-  // The painted string, which is the string measured. The gap between a value and its delta
-  // is a space *inside* the text rather than a `dx` on the tspan, so that the width fitted is
-  // the width drawn; a gap added after measurement is a gap the fit does not know about.
+  // The painted string, which is the string measured. The series label is part of the value
+  // composition, not a table-only annotation. The gap between a label, value and delta is a
+  // space *inside* the text rather than a `dx` on a tspan, so that the width fitted is the width
+  // drawn; a gap added after measurement is a gap the fit does not know about.
   const painted = (d: (typeof drafts)[number]): string => {
-    const parts = [d.text]
+    const parts = presentation.label === 'series' && d.label.length > 0 ? [d.label, d.text] : [d.text]
     if (d.unit !== null && d.unit !== undefined && d.unit.length > 0) parts.push(d.unit)
     if (d.delta !== null) parts.push(d.delta.text)
     if (d.comparison !== null) parts.push(`(${d.comparison})`)
@@ -786,6 +812,7 @@ function fitValueDisplay(
 
   return Object.freeze({
     region,
+    presentation,
     fontSize,
     entries: Object.freeze(
       drafts.slice(0, shown).map((d, i) => Object.freeze({ ...d, x: centre(i), y })),
