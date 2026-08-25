@@ -464,6 +464,22 @@ export const stripRung: Rung = ({ type, ctx, shape, policy }) => {
   })
 }
 
+/**
+ * Line/area Strip presentation: keep the shared shape-only rung honest while making its
+ * multiple coloured lines interpretable. Other families reuse `stripRung` as their chrome
+ * seed and retain their own family-specific legend decisions.
+ */
+const lineStripRung: Rung = (input) => {
+  const base = stripRung(input)
+  return Object.freeze({
+    ...base,
+    legend: Object.freeze({
+      placement: 'internal',
+      maxEntries: input.policy.legendMaxEntries,
+    }),
+  })
+}
+
 // --- Panel (3×3 – 6×4) — research/40-chart-plan.md:615 ----------------------------------
 
 /**
@@ -728,7 +744,7 @@ function facetColumns(ctx: SizeContext, shape: DataShape, policy: PlanPolicy): n
 export const LINE_RUNGS: Readonly<Record<ChartPlan['sizeClass'], Rung>> = Object.freeze({
   micro: microRung,
   tile: tileRung,
-  strip: stripRung,
+  strip: lineStripRung,
   panel: panelRung,
   canvas: canvasRung,
   stage: stageRung,

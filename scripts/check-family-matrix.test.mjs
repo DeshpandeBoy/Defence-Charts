@@ -132,7 +132,9 @@ describe('shared line, area, bar, timebar, scatter, donut, KPI, progress, heatma
                 ? ['canvas', 'stage'].includes(row.id) ? 'external' : 'absent'
               : type === 'funnel'
                 ? 'absent'
-                : row.expected.legend,
+                : ['line', 'area'].includes(type) && row.id === 'strip'
+                  ? 'internal'
+                  : row.expected.legend,
           legendToggle: type === 'kpi' ? ['canvas', 'stage'].includes(row.id) : type === 'progress' || type === 'heatmap' || type === 'funnel' ? false : row.expected.legendToggle,
           interaction:
             type === 'kpi'
