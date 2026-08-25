@@ -2,7 +2,7 @@
 
 Status: ready for Claude review
 Date/access window: 2026-08-25 onward
-Repository baseline: `591ed1f11b6b9fa96f4c3b74688aab1aa76f366b` (code baseline: `73cd88b`)
+Repository baseline: `3d22609` (chart-information checkpoint; supersedes `591ed1f` / `73cd88b`)
 Owner: Claude review agent
 Coordinator: Codex
 
@@ -231,7 +231,7 @@ Required issue fields:
 - The automated gate checks metadata, static accessibility, stable series IDs, state fixtures,
   themes, forced colors, reduced motion, and resize boundaries. It does not replace this visual
   comprehension audit.
-- The compact information work is recorded in `research/handoffs/D0.2-information-preservation.md`.
+- The current chart-information work is recorded in `research/handoffs/D0.2-chart-information.md`.
   Verify it visually; do not assume its acceptance from the prose.
 
 ## Alternatives

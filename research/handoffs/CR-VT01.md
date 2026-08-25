@@ -6,7 +6,7 @@ state: ready
 owner: Claude review agent
 branch: claude/CR-VT01-visual-family-audit
 worktree: /Users/SameeraD/Defence-Charts-CR-VT01
-base_commit: 591ed1f11b6b9fa96f4c3b74688aab1aa76f366b
+base_commit: 3d22609
 depends_on: [D0.2]
 started_at: not-started
 last_checkpoint: 2026-08-25
@@ -66,7 +66,7 @@ Codex will apply accepted fixes in a separate implementation task.
 ## Baseline
 
 - Branch: `codex/D0.2-visual-polish`
-- Base commit: `591ed1f11b6b9fa96f4c3b74688aab1aa76f366b` (code baseline: `73cd88b`)
+- Base commit: `3d22609` (current chart-information implementation checkpoint)
 - Demo: `http://127.0.0.1:5186/`
 - Fixture route: `apps/playground/src/family-matrix-fixture/`
 - Current committed browser result: `scripts/results/d0.2-family-matrix.latest.json`
@@ -128,6 +128,9 @@ sed -n '1,260p' research/agent-work/claude/CR-VT01-visual-family-audit.md
 | `73cd88b` | `npx -y node@24 "$(which pnpm)" test` | 0 | 74 files, 955 tests passed |
 | `73cd88b` | `npx -y node@24 "$(which pnpm)" --filter @gx/playground build` | 0 | Vite build passed; 301 modules |
 | `73cd88b` | `GX_REQUIRE_BROWSER=1 npx -y node@24 scripts/check-family-matrix.mjs` | 0 | Chromium matrix passed; 60 cards and runtime error arrays empty |
+| `3d22609` | `npx -y node@24 "$(which pnpm)" test` | 0 | 74 files, 958 tests passed |
+| `3d22609` | `npx -y node@24 "$(which pnpm)" build` | 0 | Turbo build passed; 9 packages successful |
+| `3d22609` | `GX_REQUIRE_BROWSER=1 npx -y node@24 scripts/check-family-matrix.mjs` | 0 | Chromium passed 60 cards at desktop and narrow widths; containment and runtime error arrays empty |
 
 ## Known failures and blockers
 
