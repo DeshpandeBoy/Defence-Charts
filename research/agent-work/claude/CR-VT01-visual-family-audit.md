@@ -2,7 +2,7 @@
 
 Status: ready for Claude review
 Date/access window: 2026-08-25 onward
-Repository baseline: `73cd88bc36a2f326b2d62a43f74e46573c58f354`
+Repository baseline: `591ed1f11b6b9fa96f4c3b74688aab1aa76f366b` (code baseline: `73cd88b`)
 Owner: Claude review agent
 Coordinator: Codex
 
