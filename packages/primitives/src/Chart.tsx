@@ -277,6 +277,7 @@ function SeriesMarks({
 }) {
   return (
     <g className="gx-series" data-series-id={frame.id} data-series-index={frame.index}>
+      <title>{frame.label}</title>
       {renderBuiltInMark({ frame, plan, policy })}
       <PointMarks
         points={frame.points}

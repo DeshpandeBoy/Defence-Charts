@@ -745,6 +745,17 @@
     font-weight: var(--gx-label-font-weight);
   }
 
+  /*
+   * The label is part of the value reading, not a colour swatch. It is intentionally a
+   * separate tspan so the value remains the dominant token while the series context stays
+   * visible in a static/RSC render.
+   */
+  .gx-value__label,
+  .gx-value__separator {
+    fill: currentColor;
+    font-weight: var(--gx-label-font-weight);
+  }
+
   /* KPI qualifiers remain visible text; themes may add emphasis without owning the meaning. */
   .gx-value__unit,
   .gx-value__target,

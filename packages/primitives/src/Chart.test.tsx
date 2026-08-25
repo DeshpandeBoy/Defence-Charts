@@ -281,6 +281,13 @@ describe('accessibility structure', () => {
     expect(html.indexOf('<table')).toBeGreaterThan(svgEnd)
     expect(html).toContain('<figcaption')
   })
+
+  it.each(RUNGS)('names each series inside the static SVG at $name', (rung) => {
+    const html = render(rung.w, rung.h)
+    expect(html).toContain('<title>ALPHA</title>')
+    expect(html).toContain('<title>BETA</title>')
+    expect(html).toContain('<title>GAMMA</title>')
+  })
 })
 
 describe('determinism', () => {

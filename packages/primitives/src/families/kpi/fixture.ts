@@ -23,6 +23,7 @@ const KPI_SERIES = Object.freeze({
 
 const KPI_VALUE = Object.freeze({
   region: Object.freeze({ x: 0, y: 0, width: 240, height: 48 }),
+  presentation: Object.freeze({ label: 'series', context: 'delta' }),
   fontSize: 28,
   entries: Object.freeze([
     Object.freeze({
