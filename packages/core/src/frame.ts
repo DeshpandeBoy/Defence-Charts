@@ -698,6 +698,7 @@ function fitValueDisplay(
   series: readonly SeriesFrame[],
   region: Rect,
   policy: PlanPolicy,
+  mode: 'latest' | 'donut-total' = 'latest',
 ): ChartFrame['value'] {
   const presentation = Object.freeze({
     label: 'series' as const,
@@ -722,6 +723,23 @@ function fitValueDisplay(
   // point contributes no entry at all. Not a '—' entry: a placeholder in a value display is a
   // reading of the data, and there is no reading to give.
   const drafts = series.flatMap((s) => {
+    if (mode === 'donut-total') {
+      const total = s.arcs.reduce((sum, arc) => sum + arc.value, 0)
+      return [{
+        seriesId: s.id,
+        seriesIndex: s.index,
+        label: s.label,
+        text: formatYLabel(total),
+        // A donut's compact reading is the total of its parts, not the last category. Keep the
+        // qualifier visible so a number such as `1` cannot masquerade as the whole donut.
+        unit: 'total',
+        target: null,
+        status: null,
+        delta: null,
+        comparison: null,
+        progress: null,
+      }]
+    }
     const last = s.points[s.points.length - 1]
     if (last === undefined) return []
     const previous = s.points[s.points.length - 2]
@@ -991,6 +1009,7 @@ export function resolveFrame(
             height: valueHeight,
           }),
           resolved,
+          plan.type === 'donut' || mark.kind === 'arc' ? 'donut-total' : 'latest',
         )
 
   return Object.freeze({
@@ -1005,15 +1024,18 @@ export function resolveFrame(
       plot.x,
       plan.axes.x.tickExtra,
     ),
-    yTicks: computeTicks(
-      plan.axes.y.ticks,
-      wrapLinear(yScale),
-      [ylo ?? 0, yhi ?? 0],
-      formatYLabel,
-      false,
-      plot.y,
-      plan.axes.y.tickExtra,
-    ),
+    yTicks:
+      mark.kind === 'cell'
+        ? heatmapRowTicks(series, plot)
+        : computeTicks(
+            plan.axes.y.ticks,
+            wrapLinear(yScale),
+            [ylo ?? 0, yhi ?? 0],
+            formatYLabel,
+            false,
+            plot.y,
+            plan.axes.y.tickExtra,
+          ),
     series: Object.freeze(series),
     zeroLine: (ylo ?? 0) <= 0 && (yhi ?? 0) >= 0 ? yScale(0) : null,
     value,
@@ -1061,6 +1083,26 @@ function heatmapIntensity(value: number, lo: number, hi: number): number {
   if (!Number.isFinite(span)) return value === hi ? 1 : value === lo ? 0 : value > 0 ? 1 : 0
   const ratio = (value - lo) / span
   return Number.isFinite(ratio) ? Math.max(0, Math.min(1, ratio)) : value > 0 ? 1 : 0
+}
+
+/**
+ * Heatmap rows are categorical series, not positions on the numeric value scale. The generic
+ * y-axis tick resolver is correct for line/bar charts but would label these rows with values
+ * such as `18`, even though the cells are placed by row index. Keep the row label and its stable
+ * series identity in the same computed-tick seam the SVG axis already renders.
+ */
+function heatmapRowTicks(series: readonly SeriesFrame[], plot: Rect): readonly ComputedTick[] {
+  if (series.length === 0 || plot.height <= 0) return Object.freeze([])
+  const rowHeight = plot.height / series.length
+  return Object.freeze(
+    series.map((item, index) =>
+      Object.freeze({
+        value: item.id,
+        offset: rowHeight * (index + 0.5),
+        label: item.label,
+      }),
+    ),
+  )
 }
 
 /** One series' geometry, keyed off the mark kind the plan chose. */
@@ -1135,7 +1177,11 @@ function seriesFrame(
 
     for (const p of points) {
       const slotOffset = mark.grouped ? (index - (seriesCount - 1) / 2) * slotWidth : 0
-      const x = p.x + slotOffset - barWidth / 2
+      // A category scale maps the first/last datum to the plot edges. Keep grouped bars inside
+      // that finite plot rather than letting the half-slot overhang the SVG at either endpoint.
+      const rawX = p.x + slotOffset - barWidth / 2
+      const maxX = Math.max(plot.x, plot.x + plot.width - barWidth)
+      const x = Math.min(maxX, Math.max(plot.x, rawX))
       const y = Math.min(baseline, p.y)
       cellsArr.push(
         Object.freeze({

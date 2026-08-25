@@ -62,12 +62,7 @@
      * feedback loop, arriving through a default nobody set.
      */
     display: block;
-    /*
-     * Direct-end series labels sit past the plot's right edge on purpose: yAxisGutter()
-     * reserves space on the left and nothing reserves it on the right until layout.ts
-     * grows a right gutter at B. Clipping them would hide the multi-series legend at
-     * exactly the sizes that depend on it. See Labels.tsx.
-     */
+    /* Direct-end series labels anchor inward at the final point. */
     overflow: visible;
   }
 
@@ -368,7 +363,8 @@
   }
 
   .gx-heatmap-cell {
-    fill: var(--gx-series-color);
+    /* Heatmap colour is one comparable intensity field; row identity comes from the axis. */
+    fill: currentColor;
     stroke: var(--gx-plot-border-color);
     stroke-width: var(--gx-plot-border-width);
   }
@@ -399,6 +395,39 @@
     fill-opacity: 1;
   }
 
+  .gx-legend[data-legend-family='heatmap'] {
+    flex-wrap: wrap;
+  }
+
+  .gx-legend[data-legend-family='heatmap'] .gx-legend__symbol {
+    border-color: currentColor;
+    background-color: currentColor;
+  }
+
+  .gx-legend[data-legend-family='heatmap'] .gx-legend__title {
+    font-weight: var(--gx-legend-label-font-weight);
+  }
+
+  .gx-legend[data-legend-family='heatmap'] .gx-legend__item[data-heatmap-intensity='0'] .gx-legend__symbol {
+    opacity: calc(var(--gx-area-opacity) * 0.5);
+  }
+
+  .gx-legend[data-legend-family='heatmap'] .gx-legend__item[data-heatmap-intensity='1'] .gx-legend__symbol {
+    opacity: var(--gx-area-opacity);
+  }
+
+  .gx-legend[data-legend-family='heatmap'] .gx-legend__item[data-heatmap-intensity='2'] .gx-legend__symbol {
+    opacity: calc(var(--gx-area-opacity) * 1.5);
+  }
+
+  .gx-legend[data-legend-family='heatmap'] .gx-legend__item[data-heatmap-intensity='3'] .gx-legend__symbol {
+    opacity: calc(var(--gx-area-opacity) * 2);
+  }
+
+  .gx-legend[data-legend-family='heatmap'] .gx-legend__item[data-heatmap-intensity='4'] .gx-legend__symbol {
+    opacity: 1;
+  }
+
   .gx-funnel-stage__mark {
     fill: var(--gx-series-color);
     stroke: var(--gx-series-color);
@@ -414,9 +443,25 @@
     dominant-baseline: middle;
   }
 
+  /* Horizontal funnels start at the plot edge; centering those labels on x=0 hides half
+   * of every stage name. Their value is still inside the shared frame, so start anchoring is
+   * the faithful text geometry while vertical funnels remain centered inside each bar. */
+  .gx-funnel--horizontal .gx-funnel-stage__text {
+    text-anchor: start;
+  }
+
   .gx-progress__state {
     fill: currentColor;
     font-weight: var(--gx-label-font-weight);
+    text-anchor: middle;
+    dominant-baseline: middle;
+  }
+
+  .gx-progress__value {
+    fill: currentColor;
+    font-size: var(--gx-value-label-font-size);
+    font-weight: var(--gx-value-label-font-weight);
+    letter-spacing: var(--gx-value-label-letter-spacing);
     text-anchor: middle;
     dominant-baseline: middle;
   }
@@ -459,7 +504,7 @@
     font-size: var(--gx-legend-label-font-size);
     font-weight: var(--gx-legend-label-font-weight);
     letter-spacing: var(--gx-legend-label-letter-spacing);
-    text-anchor: start;
+    text-anchor: end;
     dominant-baseline: middle;
   }
 

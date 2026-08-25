@@ -1,4 +1,11 @@
-import { describeShape, planChart, sizeContextFromPixels, type Series } from '@gx/core'
+import {
+  describeShape,
+  planChart,
+  sizeContextFromPixels,
+  type ArcFrame,
+  type CellFrame,
+  type Series,
+} from '@gx/core'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
@@ -60,6 +67,77 @@ describe('static legend', () => {
     expect(html).toContain('>10 · 33%</span>')
     expect(html).toContain('>20 · 67%</span>')
     expect(html).toContain('>— · —</span>')
+  })
+
+  it('identifies donut slices rather than repeating the source series label', () => {
+    const arcs = [
+      {
+        id: 'slice:alpha',
+        label: 'Alpha',
+        value: 40,
+        share: 0.8,
+        startAngle: 0,
+        endAngle: 1,
+        cx: 20,
+        cy: 20,
+        innerRadius: 8,
+        outerRadius: 18,
+        d: 'M0 0',
+        other: false,
+      },
+      {
+        id: 'slice:other',
+        label: 'Other',
+        value: 10,
+        share: 0.2,
+        startAngle: 1,
+        endAngle: 2,
+        cx: 20,
+        cy: 20,
+        innerRadius: 8,
+        outerRadius: 18,
+        d: 'M0 0',
+        other: true,
+      },
+    ] satisfies readonly ArcFrame[]
+    const plan = {
+      placement: 'external',
+      position: 'right',
+      maxEntries: 8,
+      showValues: true,
+      showPercent: true,
+    } as const
+    const html = renderToStaticMarkup(<Legend plan={plan} series={DATA} arcs={arcs} />)
+
+    expect(html).toContain('data-legend-family="donut"')
+    expect(html).toContain('aria-label="Donut categories"')
+    expect(html).toContain('data-slice-label="Alpha"')
+    expect(html).toContain('data-slice-label="Other"')
+    expect(html).toContain('>40 · 80%</span>')
+    expect(html).not.toContain('data-series-id=')
+  })
+
+  it('renders a shared heatmap intensity scale with the observed minimum and maximum', () => {
+    const cells = [
+      { x: 0, y: 0, width: 10, height: 10, value: -2, intensity: 0, column: 0, row: 0 },
+      { x: 10, y: 0, width: 10, height: 10, value: 18, intensity: 4, column: 1, row: 0 },
+      { x: 20, y: 0, width: 10, height: 10, value: null, intensity: null, column: 2, row: 0 },
+    ] satisfies readonly CellFrame[]
+    const plan = {
+      placement: 'external',
+      position: 'right',
+      maxEntries: 8,
+      showValues: true,
+      showPercent: false,
+    } as const
+    const html = renderToStaticMarkup(<Legend plan={plan} series={DATA} heatmapCells={cells} />)
+
+    expect(html).toContain('data-legend-family="heatmap"')
+    expect(html).toContain('aria-label="Heatmap intensity"')
+    expect((html.match(/data-heatmap-intensity=/g) ?? []).length).toBe(5)
+    expect(html).toContain('>Low</span><span class="gx-legend__detail">−2</span>')
+    expect(html).toContain('>High</span><span class="gx-legend__detail">18</span>')
+    expect(html).not.toContain('data-series-id=')
   })
 
   it('caps fractional and zero capacities without mutating source data', () => {

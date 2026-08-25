@@ -7,7 +7,7 @@
  * becoming a plausible-looking completion mark.
  */
 
-import type { ProgressFrame } from '@gx/core'
+import { formatYLabel, type ProgressFrame } from '@gx/core'
 
 import type { MarkRenderer, MarkRendererRegistration } from '../../renderer-seam.ts'
 import { classes, roundCoord, translate } from '../../svg.ts'
@@ -25,9 +25,10 @@ const renderNone: MarkRenderer = () => null
 /**
  * Paint target-aware horizontal or radial progress geometry from the shared frame.
  *
- * State text is intentionally emitted only for exceptional states. A normal ring remains a
- * compact mark at Micro, while indeterminate/missing/over-target cases retain a visible textual
- * explanation even when a theme removes all colour.
+ * A normal radial ring also carries its current value in the ring. Micro intentionally has no
+ * value band, so a ring without `74%` would communicate shape but not the metric it encodes.
+ * Exceptional states retain their visible textual explanation even when a theme removes all
+ * colour.
  */
 export const renderProgress: MarkRenderer = ({ frame, plan }) => {
   const mark = plan.marks.primary
@@ -48,6 +49,7 @@ export const renderProgress: MarkRenderer = ({ frame, plan }) => {
   validateProgress(progress)
   const state = progressState(progress)
   const stateLabel = progressStateLabel(state)
+  const valueLabel = progressValueLabel(frame, progress)
   const attributes = progressAttributes(frame.id, progress, state)
 
   return (
@@ -92,6 +94,17 @@ export const renderProgress: MarkRenderer = ({ frame, plan }) => {
           )}
         </g>
       )}
+      {valueLabel === null || stateLabel !== null ? null : (
+        <text
+          className="gx-progress__value"
+          data-progress-part="value"
+          data-progress-value={valueLabel}
+          x={roundCoord(stateTextX(progress))}
+          y={roundCoord(stateTextY(progress))}
+        >
+          {valueLabel}
+        </text>
+      )}
       {stateLabel === null ? null : (
         <text
           className="gx-progress__state"
@@ -104,6 +117,15 @@ export const renderProgress: MarkRenderer = ({ frame, plan }) => {
       )}
     </g>
   )
+}
+
+function progressValueLabel(
+  frame: { readonly unit: string | null },
+  progress: ProgressFrame,
+): string | null {
+  if (progress.orientation !== 'radial' || progress.current === null) return null
+  const unit = frame.unit?.trim() ?? ''
+  return `${formatYLabel(progress.current)}${unit}`
 }
 
 function progressAttributes(

@@ -16,7 +16,8 @@ describe('D6.1 funnel frame', () => {
   it('orders stages canonically and resolves stable conversion/drop-off geometry', () => {
     const ctx = sizeContextFromPixels(900, 520)
     const plan = planChart('funnel', ctx, describeShape(DATA))
-    const frame = resolveFrame(plan, DATA, ctx, resolvePolicy()).series[0]?.funnel
+    const chartFrame = resolveFrame(plan, DATA, ctx, resolvePolicy())
+    const frame = chartFrame.series[0]?.funnel
 
     expect(plan.marks.primary).toEqual({ kind: 'funnel', orientation: 'vertical', detail: 'dropoff' })
     expect(frame?.stages.map((stage) => stage.id)).toEqual([
@@ -34,6 +35,10 @@ describe('D6.1 funnel frame', () => {
       expect(Number.isFinite(stage.y)).toBe(true)
       expect(stage.width).toBeGreaterThanOrEqual(0)
       expect(stage.height).toBeGreaterThanOrEqual(0)
+      expect(stage.x).toBeGreaterThanOrEqual(chartFrame.plot.x)
+      expect(stage.x + stage.width).toBeLessThanOrEqual(chartFrame.plot.x + chartFrame.plot.width)
+      expect(stage.y).toBeGreaterThanOrEqual(chartFrame.plot.y)
+      expect(stage.y + stage.height).toBeLessThanOrEqual(chartFrame.plot.y + chartFrame.plot.height)
     }
     expect(JSON.parse(JSON.stringify(frame))).toEqual(frame)
   })
@@ -41,9 +46,16 @@ describe('D6.1 funnel frame', () => {
   it('uses horizontal bars for Strip and an explicit summary for Tile', () => {
     const stripCtx = sizeContextFromPixels(400, 200)
     const stripPlan = planChart('funnel', stripCtx, describeShape(DATA))
-    const stripFrame = resolveFrame(stripPlan, DATA, stripCtx, resolvePolicy()).series[0]?.funnel
+    const stripChartFrame = resolveFrame(stripPlan, DATA, stripCtx, resolvePolicy())
+    const stripFrame = stripChartFrame.series[0]?.funnel
     expect(stripPlan.marks.primary).toEqual({ kind: 'funnel', orientation: 'horizontal', detail: 'stages' })
     expect(stripFrame?.stages.every((stage) => stage.width >= 0 && stage.height >= 0)).toBe(true)
+    for (const stage of stripFrame?.stages ?? []) {
+      expect(stage.x).toBeGreaterThanOrEqual(stripChartFrame.plot.x)
+      expect(stage.x + stage.width).toBeLessThanOrEqual(stripChartFrame.plot.x + stripChartFrame.plot.width)
+      expect(stage.y).toBeGreaterThanOrEqual(stripChartFrame.plot.y)
+      expect(stage.y + stage.height).toBeLessThanOrEqual(stripChartFrame.plot.y + stripChartFrame.plot.height)
+    }
 
     const tileCtx = sizeContextFromPixels(200, 200)
     const tilePlan = planChart('funnel', tileCtx, describeShape(DATA))

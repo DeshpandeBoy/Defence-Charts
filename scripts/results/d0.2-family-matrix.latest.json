@@ -5,6 +5,28 @@
   "browser": "151.0.7922.34",
   "playwrightFrom": "playwright",
   "cards": 60,
+  "visualInformation": {
+    "desktop": {
+      "viewport": {
+        "width": 1440,
+        "height": 1100
+      },
+      "cards": 60,
+      "textBearingCards": 56,
+      "outOfCard": [],
+      "summaryOverlaps": []
+    },
+    "narrow": {
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "cards": 60,
+      "textBearingCards": 56,
+      "outOfCard": [],
+      "summaryOverlaps": []
+    }
+  },
   "states": [
     {
       "state": "normal",

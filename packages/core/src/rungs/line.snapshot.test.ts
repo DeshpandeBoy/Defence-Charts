@@ -395,9 +395,10 @@ describe("G9 — Tile's three mark states, chosen by measured plot height", () =
       planChart('line', TILE_SHORT, SHAPE, { horizonMinHeight: 30, plotHeightOptimal: 60 }).marks
         .primary,
     ).toEqual({ kind: 'none' })
-    // Lower the optimal below it and the line must come back.
+    // Lower the optimal below the measured plot that remains after the compact summary band and
+    // the line must come back.
     expect(
-      planChart('line', TILE_SHORT, SHAPE, { plotHeightOptimal: 10 }).marks.primary,
+      planChart('line', TILE_SHORT, SHAPE, { plotHeightOptimal: 7 }).marks.primary,
     ).toEqual({ kind: 'line', area: false })
   })
 })
