@@ -145,7 +145,8 @@ export function FamilyMatrixApp() {
 function StaticMatrixCard({ type, row }: { readonly type: FamilyType; readonly row: FamilyMatrixRow }) {
   const plan = planForRow(type, row)
   const metadata = metadataForPlan(plan)
-  const seriesCount = dataForType(type).length
+  const data = dataForType(type)
+  const dataLabel = matrixDataLabel(type, data)
   return (
     <article
       className="family-matrix__card"
@@ -177,7 +178,7 @@ function StaticMatrixCard({ type, row }: { readonly type: FamilyType; readonly r
       <div className="family-matrix__card-summary" aria-label="Chart summary">
         <span>
           <small>Data</small>
-          <strong>{seriesCount} series</strong>
+          <strong>{dataLabel}</strong>
         </span>
         <span>
           <small>Readout</small>
@@ -189,6 +190,15 @@ function StaticMatrixCard({ type, row }: { readonly type: FamilyType; readonly r
       </div>
     </article>
   )
+}
+
+function matrixDataLabel(type: FamilyType, data: readonly Series[]): string {
+  const count = type === 'donut' ? data[0]?.points.length ?? 0 : data.length
+  if (type === 'donut') return `${count} parts`
+  if (type === 'funnel') return `${data[0]?.points.length ?? 0} stages`
+  if (type === 'heatmap') return `${count} rows`
+  if (type === 'kpi' || type === 'progress') return `${count} metric`
+  return `${count} series`
 }
 
 function MeasuredMatrixChart({

@@ -39,17 +39,21 @@ export type DataTableProps = {
   readonly progress?: boolean | undefined
   /** Heatmap keeps the static value table as the non-colour equivalent. */
   readonly heatmap?: boolean | undefined
+  /** Donut rows are parts of a whole, not min/max/latest observations of one series. */
+  readonly donut?: boolean | undefined
   /** Funnel exposes ordered stage conversion and drop-off as text, not colour-only shape. */
   readonly funnel?: boolean | undefined
   readonly className?: string
 }
 
-export function DataTable({ data, plan, caption, progress = false, heatmap = false, funnel = false, className }: DataTableProps) {
+export function DataTable({ data, plan, caption, progress = false, heatmap = false, donut = false, funnel = false, className }: DataTableProps) {
   if (!plan.present) return null
 
   const table =
     funnel ? (
       <FunnelTable data={data} caption={caption} />
+    ) : donut ? (
+      <DonutTable data={data} caption={caption} />
     ) : plan.columns === 'summary' || progress ? (
       <SummaryTable data={data} caption={caption} progress={progress} heatmap={heatmap} />
     ) : (
@@ -61,6 +65,37 @@ export function DataTable({ data, plan, caption, progress = false, heatmap = fal
       <summary className="gx-data-table__summary">{caption}</summary>
       {table}
     </details>
+  )
+}
+
+function DonutTable({ data, caption }: { readonly data: readonly Series[]; readonly caption: string }) {
+  const points = [...(data[0]?.points ?? [])]
+  const total = points.reduce((sum, point) => sum + (point.y === null ? 0 : Math.max(0, point.y)), 0)
+
+  return (
+    <table className="gx-data-table__table">
+      <caption>{caption}</caption>
+      <thead>
+        <tr>
+          <th scope="col">Part</th>
+          <th scope="col">Value</th>
+          <th scope="col">Share</th>
+        </tr>
+      </thead>
+      <tbody>
+        {points.map((point, index) => {
+          const value = point.y === null ? null : Math.max(0, point.y)
+          const share = value === null || total === 0 ? null : value / total
+          return (
+            <tr key={`${key(point.x)}:${index}`}>
+              <th scope="row">{formatXLabel(point.x)}</th>
+              <td>{value === null ? '—' : formatYLabel(value)}</td>
+              <td>{share === null ? '—' : `${Math.round(share * 100)}%`}</td>
+            </tr>
+          )
+        })}
+      </tbody>
+    </table>
   )
 }
 

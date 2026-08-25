@@ -221,7 +221,14 @@ export function Chart({
         <ValueDisplay value={frame.value} />
       </svg>
 
-      {plan.legend.placement === 'external' ? <Legend plan={plan.legend} series={data} /> : null}
+      {plan.legend.placement === 'external' ? (
+        <Legend
+          plan={plan.legend}
+          series={data}
+          arcs={plan.type === 'donut' ? frame.series[0]?.arcs : undefined}
+          heatmapCells={plan.type === 'heatmap' ? frame.series.flatMap((item) => item.cells) : undefined}
+        />
+      ) : null}
 
       {plan.dataTable.present ? (
         <figcaption className="gx-chart__caption">
@@ -231,6 +238,7 @@ export function Chart({
             caption={title}
             progress={plan.type === 'progress'}
             heatmap={plan.type === 'heatmap'}
+            donut={plan.type === 'donut'}
             funnel={plan.type === 'funnel'}
           />
         </figcaption>

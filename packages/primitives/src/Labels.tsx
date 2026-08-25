@@ -8,12 +8,8 @@
  * multi-series chart with no way to tell the series apart, and every geometry assertion still
  * passes.
  *
- * ⚠ **The label is drawn outside the plot rect, on purpose.** `yAxisGutter()` reserves space
- * on the left and nothing reserves it on the right, because at A3 there was no renderer to
- * reserve it for. The text therefore overhangs into whatever margin the box has. That is a
- * known, bounded imprecision — `LabelsPlan.maxChars` caps the width — and the honest fix is a
- * right gutter in `layout.ts`, which moves all six G9 rung snapshots and is therefore a
- * B-milestone change, not an A4 one.
+ * ⚠ **The label is drawn at the final plot point and anchors inward.** This keeps the direct
+ * identity channel inside the measured SVG without stealing plot width from the line itself.
  */
 
 import { DEFAULT_POLICY, formatYLabel, type LabelsPlan, type PlanPolicy, type SeriesFrame } from '@gx/core'
@@ -50,7 +46,7 @@ export function Labels({
         <text
           className={classes('gx-label', className)}
           data-halo={labelHalo !== 'none' ? labelHalo : undefined}
-          x={roundCoord(last.x + policy.regionGap)}
+          x={roundCoord(last.x - policy.regionGap)}
           y={roundCoord(last.y)}
         >
           {truncate(series.label, maxChars)}

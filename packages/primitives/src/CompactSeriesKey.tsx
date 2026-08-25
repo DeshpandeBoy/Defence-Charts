@@ -15,7 +15,6 @@ import {
   type ChartFrame,
   type ChartPlan,
   type PlanPolicy,
-  type SeriesFrame,
 } from '@gx/core'
 
 import { classes, roundCoord } from './svg.ts'
@@ -34,6 +33,12 @@ type LegendRegionState = {
 type FrameWithLegend = ChartFrame & {
   /** Compatibility shape for a future core frame that charges an internal legend explicitly. */
   readonly legend?: LegendRegionState | undefined
+}
+
+type CompactSeriesKeyItem = {
+  readonly id: string
+  readonly index: number
+  readonly label: string
 }
 
 export type CompactSeriesKeyLayout = {
@@ -75,20 +80,32 @@ export function compactSeriesKeyLayout(
 ): CompactSeriesKeyLayout | null {
   const internal = plan.legend.placement === 'internal'
   const tileFallback =
-    plan.sizeClass === 'tile' && plan.legend.placement === 'absent' && frame.series.length > 1
+    plan.sizeClass === 'tile' &&
+    plan.legend.placement === 'absent' &&
+    frame.series.length > 1 &&
+    // Heatmap Tile already names each row beside its summary value. A second identity rail has
+    // no new information and, with no plotted cells, competes with the disclosure caption.
+    !(plan.type === 'heatmap' && (frame.value?.entries.length ?? 0) > 0)
   if (!internal && !tileFallback) return null
+
+  const items: readonly CompactSeriesKeyItem[] =
+    plan.type === 'donut'
+      ? frame.series.flatMap((series) =>
+          series.arcs.map((arc, index) => ({ id: arc.id, index, label: arc.label })),
+        )
+      : frame.series
 
   const explicit = (frame as FrameWithLegend).legend?.region
   if (isRectLike(explicit)) {
-    return buildEntries(frame.series, explicit, policy, 'core')
+    return buildEntries(items, explicit, policy, 'core')
   }
 
   const maxEntries =
     plan.legend.placement === 'internal'
       ? Math.max(0, Math.floor(plan.legend.maxEntries))
       : Math.max(0, Math.floor(policy.legendMaxEntries))
-  const series = frame.series.slice(0, maxEntries)
-  const hidden = Math.max(0, frame.series.length - series.length)
+  const series = items.slice(0, maxEntries)
+  const hidden = Math.max(0, items.length - series.length)
   if (series.length === 0) return null
 
   // A reserved internal legend is already part of the core plot contract. The frame's plot
@@ -110,10 +127,8 @@ export function compactSeriesKeyLayout(
     return buildEntries(series, region, policy, 'core', hidden, itemCount, 0, labels.labels, null)
   }
 
-  const style = policy.typography.byRank.C
   const rowHeight = lineHeight('C', policy)
   const gap = Math.max(0, policy.regionGap)
-  const swatch = Math.max(0, style.fontSize)
   const width = Math.max(0, frame.box.width - gap * 2)
   const keyLabels = compactLabels(series, hidden, width, policy)
   const columns = chooseColumns(
@@ -208,7 +223,7 @@ export function CompactSeriesKey({ layout, className }: CompactSeriesKeyProps) {
 }
 
 function buildEntries(
-  series: readonly SeriesFrame[],
+  series: readonly CompactSeriesKeyItem[],
   region: RectLike,
   policy: PlanPolicy,
   source: CompactSeriesKeyLayout['source'],
@@ -300,7 +315,7 @@ function chooseColumns(widths: readonly number[], available: number, policy: Pla
 }
 
 function compactLabels(
-  series: readonly SeriesFrame[],
+  series: readonly CompactSeriesKeyItem[],
   hidden: number,
   available: number,
   policy: PlanPolicy,

@@ -125,10 +125,15 @@ async function runStaticMatrix(page) {
     progress: card.querySelectorAll('.gx-progress').length,
     progressFills: card.querySelectorAll('.gx-progress__fill').length,
     progressStates: card.querySelectorAll('.gx-progress__state').length,
+    progressValue: card.querySelectorAll('.gx-progress__value').length,
+    progressValueText: card.querySelector('.gx-progress__value')?.textContent?.trim() ?? null,
     progressOrientation: card.querySelector('.gx-progress')?.getAttribute('data-progress-orientation') ?? null,
     heatmapCells: card.querySelectorAll('.gx-heatmap-cell').length,
     heatmapMissing: card.querySelectorAll('.gx-heatmap-cell[data-heatmap-state="missing"]').length,
     heatmapIntensity: card.querySelectorAll('.gx-heatmap-cell[data-heatmap-intensity]').length,
+    heatmapLegendItems: card.querySelectorAll('[data-legend-family="heatmap"] [data-heatmap-intensity]').length,
+    heatmapLegendText: card.querySelector('[data-legend-family="heatmap"]')?.textContent?.trim() ?? null,
+    yAxisLabels: [...card.querySelectorAll('.gx-axis--y .gx-axis__tick-label')].map((label) => label.textContent?.trim() ?? ''),
     funnelStages: card.querySelectorAll('.gx-funnel-stage').length,
     funnelLabels: card.querySelectorAll('.gx-funnel-stage__text').length,
     funnelValues: card.querySelectorAll('[data-funnel-stage-value]').length,
@@ -138,6 +143,10 @@ async function runStaticMatrix(page) {
     valueTargets: card.querySelectorAll('.gx-value__target').length,
     valueStatuses: card.querySelectorAll('.gx-value__status').length,
     valueProgress: card.querySelectorAll('.gx-value__progress').length,
+    valueText: card.querySelector('.gx-value')?.textContent?.trim() ?? null,
+    compactKeyLabels: [...card.querySelectorAll('.gx-compact-key__label')].map((label) => label.textContent?.trim() ?? ''),
+    legendFamily: card.querySelector('[data-legend-family]')?.getAttribute('data-legend-family') ?? null,
+    legendLabels: [...card.querySelectorAll('[data-legend-family] .gx-legend__label')].map((label) => label.textContent?.trim() ?? ''),
     tableMetricHeaders: card.querySelectorAll('.gx-data-table__table th').length,
     tableHasProgressSemantics: [...card.querySelectorAll('.gx-data-table__table th')].some((header) =>
       ['Remaining', 'Over target', 'Progress state'].includes(header.textContent?.trim() ?? '')),
@@ -179,6 +188,17 @@ async function runStaticMatrix(page) {
       if ((card.rung === 'canvas' || card.rung === 'stage') && card.otherArcs === 0) {
         throw new Error('donut Other bucket missing for ' + card.caseId + ': ' + JSON.stringify(card))
       }
+      if ((card.rung === 'micro' || card.rung === 'tile') && !card.valueText?.includes('107 total')) {
+        throw new Error('donut aggregate value is not readable for ' + card.caseId + ': ' + JSON.stringify(card))
+      }
+      if (card.rung === 'panel' &&
+        (card.compactKeyLabels.length === 0 || card.compactKeyLabels.includes('Program mix'))) {
+        throw new Error('donut panel key lost slice identity for ' + card.caseId + ': ' + JSON.stringify(card))
+      }
+      if ((card.rung === 'canvas' || card.rung === 'stage') &&
+        (card.legendFamily !== 'donut' || card.legendLabels.length === 0 || !card.legendLabels.includes('Other'))) {
+        throw new Error('donut external slice legend missing for ' + card.caseId + ': ' + JSON.stringify(card))
+      }
     }
     if (card.type === 'kpi') {
       if (card.rung === 'micro' && card.mark !== 'none') {
@@ -196,8 +216,8 @@ async function runStaticMatrix(page) {
       if (card.progressOrientation !== (radial ? 'radial' : 'horizontal')) {
         throw new Error('Progress orientation missing for ' + card.caseId + ': ' + JSON.stringify(card))
       }
-      if (card.rung === 'micro' && card.valueProgress !== 0) {
-        throw new Error('Progress Micro should remain ring-only: ' + JSON.stringify(card))
+      if (card.rung === 'micro' && (card.progressValue !== 1 || card.progressValueText !== '74%')) {
+        throw new Error('Progress Micro value is not readable inside the ring: ' + JSON.stringify(card))
       }
       if (card.rung !== 'micro' && card.valueProgress === 0) {
         throw new Error('Progress value semantics missing for ' + card.caseId + ': ' + JSON.stringify(card))
@@ -219,6 +239,15 @@ async function runStaticMatrix(page) {
       }
       if (!compact && (card.heatmapCells === 0 || card.heatmapIntensity === 0)) {
         throw new Error('heatmap cell/intensity geometry missing for ' + card.caseId + ': ' + JSON.stringify(card))
+      }
+      if (['panel', 'canvas', 'stage'].includes(card.rung) &&
+        (!card.yAxisLabels.includes('Maintenance') || !card.yAxisLabels.includes('Inspection'))) {
+        throw new Error('heatmap row labels are not readable for ' + card.caseId + ': ' + JSON.stringify(card))
+      }
+      if ((card.rung === 'canvas' || card.rung === 'stage') &&
+        (card.heatmapLegendItems !== 5 || card.legendFamily !== 'heatmap' ||
+          !card.heatmapLegendText?.includes('Low') || !card.heatmapLegendText.includes('High'))) {
+        throw new Error('heatmap intensity legend missing for ' + card.caseId + ': ' + JSON.stringify(card))
       }
       if (card.rung === 'panel' && card.heatmapMissing === 0) {
         throw new Error('heatmap missing-cell semantics missing for ' + card.caseId + ': ' + JSON.stringify(card))
@@ -247,6 +276,111 @@ async function runStaticMatrix(page) {
     }
   }
   return observed
+}
+
+async function runVisualInformation(browser, label, viewport) {
+  // Capture the settled geometry. Motion has its own browser/media gate; this report is about
+  // the resting information surface, so transitions must not make a transient frame look like
+  // a clipping defect.
+  const context = await browser.newContext({ viewport, reducedMotion: 'reduce' })
+  const page = await context.newPage()
+  const errors = captureErrors(page)
+  try {
+    await openFixture(page)
+    const report = await page.locator('[data-family-case]').evaluateAll((cards) => {
+      const epsilon = 8
+      const visible = (element) => {
+        const style = getComputedStyle(element)
+        if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return false
+        const rect = element.getBoundingClientRect()
+        return rect.width > 0 || rect.height > 0
+      }
+      const snapshot = (rect) => ({
+        left: rect.left,
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        width: rect.width,
+        height: rect.height,
+      })
+      const overlap = (a, b) =>
+        Math.min(a.right, b.right) - Math.max(a.left, b.left) > epsilon &&
+        Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > epsilon
+      const nodes = 'svg text, svg path, svg rect, svg circle, svg line, svg polygon'
+
+      return cards.map((card) => {
+        const cardRect = card.getBoundingClientRect()
+        const summary = card.querySelector('.gx-data-table__summary')
+        const summaryRect = summary !== null && visible(summary) ? summary.getBoundingClientRect() : null
+        const chartNodes = [...card.querySelectorAll(nodes)].filter(visible)
+        const outOfCard = chartNodes
+          .map((element) => ({ element, rect: element.getBoundingClientRect() }))
+          .filter(({ rect }) =>
+            rect.left < cardRect.left - epsilon ||
+            rect.right > cardRect.right + epsilon ||
+            rect.top < cardRect.top - epsilon ||
+            rect.bottom > cardRect.bottom + epsilon)
+          .map(({ element, rect }) => ({
+            tag: element.tagName.toLowerCase(),
+            className: element.getAttribute('class') ?? '',
+            text: element.textContent?.trim() ?? '',
+            rect: snapshot(rect),
+          }))
+        const summaryNodes = [...card.querySelectorAll('svg text')].filter(visible)
+        const summaryOverlaps = summaryRect === null
+          ? []
+          : summaryNodes
+            .map((element) => ({ element, rect: element.getBoundingClientRect() }))
+            .filter(({ rect }) => overlap(rect, summaryRect))
+            .map(({ element, rect }) => ({
+              tag: element.tagName.toLowerCase(),
+              className: element.getAttribute('class') ?? '',
+              text: element.textContent?.trim() ?? '',
+              rect: snapshot(rect),
+            }))
+        return {
+          caseId: card.getAttribute('data-family-case'),
+          type: card.getAttribute('data-family-type'),
+          rung: card.getAttribute('data-family-rung'),
+          card: snapshot(cardRect),
+          chartTextCount: card.querySelectorAll('svg text').length,
+          outOfCard,
+          summaryOverlaps,
+        }
+      })
+    })
+    const outOfCard = report.flatMap((card) => card.outOfCard.length > 0 ? [
+      { caseId: card.caseId, nodes: card.outOfCard },
+    ] : [])
+    const summaryOverlaps = report.flatMap((card) => card.summaryOverlaps.length > 0 ? [
+      { caseId: card.caseId, nodes: card.summaryOverlaps },
+    ] : [])
+    if (outOfCard.length > 0 || summaryOverlaps.length > 0) {
+      throw new Error(label + ' chart information containment failed: ' + JSON.stringify({ outOfCard, summaryOverlaps }))
+    }
+    // Shape-only Strip cards intentionally carry their readable legend outside the SVG. The
+    // static matrix above verifies those HTML channels, so this gate requires complete card
+    // geometry rather than incorrectly requiring every SVG to contain text.
+    if (report.length !== 60 || report.some((card) =>
+      card.card.width <= 0 ||
+      card.card.height <= 0 ||
+      !Number.isFinite(card.card.left) ||
+      !Number.isFinite(card.card.top))) {
+      throw new Error(label + ' chart information report is incomplete: ' + JSON.stringify(report))
+    }
+    if (errors.console.length > 0 || errors.page.length > 0 || errors.resizeObserver.length > 0) {
+      throw new Error(label + ' visual information runtime errors: ' + JSON.stringify(errors))
+    }
+    return {
+      viewport,
+      cards: report.length,
+      textBearingCards: report.filter((card) => card.chartTextCount > 0).length,
+      outOfCard,
+      summaryOverlaps,
+    }
+  } finally {
+    await context.close().catch(() => {})
+  }
 }
 
 async function runStates(page) {
@@ -388,6 +522,8 @@ async function runGate() {
   try {
     await openFixture(page)
     const staticMatrix = await runStaticMatrix(page)
+    const visualDesktop = await runVisualInformation(browser, 'desktop', { width: 1440, height: 1100 })
+    const visualNarrow = await runVisualInformation(browser, 'narrow', { width: 390, height: 844 })
     const states = await runStates(page)
     const theme = await runTheme(page)
     const resize = await runResize(page)
@@ -405,6 +541,7 @@ async function runGate() {
       browser: browser.version(),
       playwrightFrom: from,
       cards: staticMatrix.length,
+      visualInformation: { desktop: visualDesktop, narrow: visualNarrow },
       states,
       theme,
       resize,

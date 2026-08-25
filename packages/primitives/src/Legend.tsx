@@ -1,8 +1,18 @@
-import { formatYLabel, type ChartPlan, type Series } from '@gx/core'
+import {
+  formatYLabel,
+  type ArcFrame,
+  type CellFrame,
+  type ChartPlan,
+  type Series,
+} from '@gx/core'
 
 export type LegendProps = {
   readonly plan: ChartPlan['legend']
   readonly series: readonly Series[]
+  /** Donut categories are slices, not a single source series. */
+  readonly arcs?: readonly ArcFrame[] | undefined
+  /** Heatmap cells are one intensity field, not a set of coloured source series. */
+  readonly heatmapCells?: readonly CellFrame[] | undefined
   readonly className?: string | undefined
 }
 
@@ -28,7 +38,15 @@ export function legendEntries(
 }
 
 /** Hook-free, static legend output; safe to render in an RSC. */
-export function Legend({ plan, series, className }: LegendProps) {
+export function Legend({ plan, series, arcs, heatmapCells, className }: LegendProps) {
+  if (heatmapCells !== undefined && heatmapCells.length > 0) {
+    return <HeatmapLegend plan={plan} cells={heatmapCells} className={className} />
+  }
+
+  if (arcs !== undefined && arcs.length > 0) {
+    return <ArcLegend plan={plan} arcs={arcs} className={className} />
+  }
+
   const entries = legendEntries(plan, series)
   if (entries.length === 0) return null
 
@@ -71,6 +89,109 @@ export function Legend({ plan, series, className }: LegendProps) {
           </div>
         )
       })}
+    </div>
+  )
+}
+
+function HeatmapLegend({
+  plan,
+  cells,
+  className,
+}: {
+  readonly plan: ChartPlan['legend']
+  readonly cells: readonly CellFrame[]
+  readonly className?: string | undefined
+}) {
+  if (plan.placement === 'absent' || plan.placement === 'direct') return null
+  const values = cells.flatMap((cell) =>
+    cell.value !== null && cell.value !== undefined && Number.isFinite(cell.value)
+      ? [cell.value]
+      : [],
+  )
+  const minimum = values.length === 0 ? null : Math.min(...values)
+  const maximum = values.length === 0 ? null : Math.max(...values)
+  const rootClass = ['gx-legend', `gx-legend--${plan.placement}`, className]
+    .filter(Boolean)
+    .join(' ')
+  const entries = [0, 1, 2, 3, 4] as const
+
+  return (
+    <div
+      className={rootClass}
+      data-legend-placement={plan.placement}
+      data-legend-position={plan.placement === 'external' ? plan.position : undefined}
+      data-legend-family="heatmap"
+      role="list"
+      aria-label="Heatmap intensity"
+    >
+      <span className="gx-legend__title">Intensity</span>
+      {entries.map((intensity) => (
+        <div
+          className="gx-legend__item"
+          data-heatmap-intensity={intensity}
+          key={intensity}
+          role="listitem"
+        >
+          <span className="gx-legend__symbol" aria-hidden="true" />
+          <span className="gx-legend__label">{intensity === 0 ? 'Low' : intensity === 4 ? 'High' : ''}</span>
+          {intensity === 0 && minimum !== null ? (
+            <span className="gx-legend__detail">{formatYLabel(minimum)}</span>
+          ) : intensity === 4 && maximum !== null ? (
+            <span className="gx-legend__detail">{formatYLabel(maximum)}</span>
+          ) : null}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function ArcLegend({
+  plan,
+  arcs,
+  className,
+}: {
+  readonly plan: ChartPlan['legend']
+  readonly arcs: readonly ArcFrame[]
+  readonly className?: string | undefined
+}) {
+  if (plan.placement === 'absent' || plan.placement === 'direct') return null
+  const limit = Math.max(0, Math.floor(plan.maxEntries))
+  const entries = arcs.slice(0, limit)
+  const rootClass = ['gx-legend', `gx-legend--${plan.placement}`, className]
+    .filter(Boolean)
+    .join(' ')
+  const showValues = plan.placement === 'external' && plan.showValues
+  const showPercent = plan.placement === 'external' && plan.showPercent
+
+  return (
+    <div
+      className={rootClass}
+      data-legend-placement={plan.placement}
+      data-legend-position={plan.placement === 'external' ? plan.position : undefined}
+      data-legend-family="donut"
+      role="list"
+      aria-label="Donut categories"
+    >
+      {entries.map((arc, index) => (
+        <div
+          className="gx-legend__item"
+          data-slice-id={arc.id}
+          data-slice-index={index}
+          data-slice-label={arc.label}
+          key={arc.id}
+          role="listitem"
+        >
+          <span className="gx-legend__symbol" aria-hidden="true" />
+          <span className="gx-legend__label" title={arc.label}>{arc.label}</span>
+          {showValues || showPercent ? (
+            <span className="gx-legend__detail">
+              {showValues ? formatYLabel(arc.value) : null}
+              {showValues && showPercent ? ' · ' : null}
+              {showPercent ? `${Math.round(arc.share * 100)}%` : null}
+            </span>
+          ) : null}
+        </div>
+      ))}
     </div>
   )
 }

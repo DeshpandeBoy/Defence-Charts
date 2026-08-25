@@ -204,8 +204,8 @@ function boundAxisExtent(extent: number, axis: AxisPlan): number {
  * `'top'`/`'bottom'` vertically — the one fact `legend.position` carries (§3).
  *
  * ⚠ `'direct'` costs nothing here even though direct end-of-line labels plainly occupy
- * space. They occupy space *inside* the plot, beside the marks, so charging them against
- * the plot box would double-count. `'internal'` is the same case.
+ * space. The renderer anchors those labels inward at the final point, so charging a right rail
+ * would double-count the space they use inside the plot. `'internal'` is the same case.
  *
  * `maxEntries` bounds every charged band: a legend that grows with the series count could
  * consume the whole box, which is the containment failure §1.3 exists to prevent. An internal
@@ -355,7 +355,10 @@ export function resolvePlotBox(
 
   // Horizontal: y gutter → plot width. §1.3, verbatim.
   const width =
-    boxWidth - yAxisGutter(spec.y, policy) - yAxisGutter(spec.y2, policy) - legend.width
+    boxWidth -
+    yAxisGutter(spec.y, policy) -
+    yAxisGutter(spec.y2, policy) -
+    legend.width
 
   // Vertical: value → x-axis → legend → table → plot. Ours; see the module docblock.
   const height =

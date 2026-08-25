@@ -62,7 +62,7 @@ export const renderFunnel: MarkRenderer = (input) => {
       data-funnel-overall-conversion={ratioAttribute(funnel.overallConversion)}
       data-funnel-series-id={frame.id}
     >
-      {renderDetail(funnel, mark.detail)}
+      {renderDetail(funnel, mark.detail, mark.orientation)}
     </g>
   )
 }
@@ -70,23 +70,24 @@ export const renderFunnel: MarkRenderer = (input) => {
 function renderDetail(
   funnel: FunnelFrame,
   detail: 'summary' | 'stages' | 'dropoff' | 'breakdown',
+  orientation: 'horizontal' | 'vertical',
 ) {
   if (detail === 'summary') return renderSummary(funnel)
-  return funnel.stages.map((stage) => renderStage(stage, detail))
+  return funnel.stages.map((stage) => renderStage(stage, detail, orientation))
 }
 
 function renderSummary(funnel: FunnelFrame) {
-  // FunnelFrame currently exposes stage geometry, not a second summary rectangle. Anchoring to
-  // the first frame-provided stage coordinate keeps this renderer geometry-blind: no midpoint,
-  // plot size, or fallback pixel is invented here.
+  // FunnelFrame currently exposes stage geometry, not a second summary rectangle. Centering on
+  // the first frame-provided rectangle keeps this renderer geometry-blind while ensuring the
+  // compact summary is visible when the first stage starts at the plot's left edge.
   const anchor = funnel.stages[0]
   return (
     <text
       className={classes('gx-funnel__summary', 'gx-funnel-label')}
       data-funnel-overall-conversion={ratioAttribute(funnel.overallConversion)}
       data-funnel-part="summary"
-      x={anchor === undefined ? undefined : roundCoord(anchor.x)}
-      y={anchor === undefined ? undefined : roundCoord(anchor.y)}
+      x={anchor === undefined ? undefined : roundCoord(anchor.x + anchor.width / 2)}
+      y={anchor === undefined ? undefined : roundCoord(anchor.y + anchor.height / 2)}
     >
       {`Overall conversion: ${formatRatio(funnel.overallConversion)}`}
     </text>
@@ -96,6 +97,7 @@ function renderSummary(funnel: FunnelFrame) {
 function renderStage(
   stage: FunnelStageFrame,
   detail: 'stages' | 'dropoff' | 'breakdown',
+  orientation: 'horizontal' | 'vertical',
 ) {
   const text = stageText(stage, detail)
   return (
@@ -123,8 +125,8 @@ function renderStage(
         className={classes('gx-funnel-label', 'gx-funnel-stage__text')}
         data-funnel-part="stage-text"
         data-funnel-stage-id={stage.id}
-        x={roundCoord(stage.x)}
-        y={roundCoord(stage.y)}
+        x={roundCoord(orientation === 'horizontal' ? stage.x : stage.x + stage.width / 2)}
+        y={roundCoord(stage.y + stage.height / 2)}
       >
         {text}
       </text>

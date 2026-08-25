@@ -14,6 +14,7 @@ import { describe, expect, it } from 'vitest'
 
 import { sizeContextFromPixels } from './context.ts'
 import type { Series } from './data.ts'
+import { describeShape } from './data.ts'
 import { chromeFromPlan, resolveFrame } from './frame.ts'
 import { legendBands, resolvePlotBox } from './layout.ts'
 import { applyOverrides } from './overrides.ts'
@@ -43,6 +44,12 @@ const SIX_SERIES = [
   monthly('e', [8, 9, 11]),
   monthly('f', [4, 5, 6]),
 ] as const
+
+const BAR_DATA: Series[] = [
+  { id: 'a', points: [{ x: 0, y: 10 }, { x: 1, y: 14 }, { x: 2, y: 9 }] },
+  { id: 'b', points: [{ x: 0, y: 5 }, { x: 1, y: 8 }, { x: 2, y: 12 }] },
+  { id: 'c', points: [{ x: 0, y: 3 }, { x: 1, y: 6 }, { x: 2, y: 11 }] },
+]
 
 describe('the plot box is the resolver’s, not a second opinion', () => {
   /**
@@ -359,6 +366,24 @@ describe('the y axis', () => {
     const lowest = points.reduce((a, b) => (a.value < b.value ? a : b))
     const highest = points.reduce((a, b) => (a.value > b.value ? a : b))
     expect(highest.y).toBeLessThan(lowest.y)
+  })
+})
+
+describe('bar geometry', () => {
+  it('keeps grouped endpoint bars inside the finite plot box', () => {
+    const ctx = sizeContextFromPixels(500, 300)
+    const plan = planChart('bar', ctx, describeShape(BAR_DATA))
+    const frame = resolveFrame(plan, BAR_DATA, ctx)
+    const right = frame.plot.x + frame.plot.width
+
+    const bars = frame.series.flatMap((series) => series.cells)
+    expect(bars).toHaveLength(BAR_DATA.length * 3)
+    for (const bar of bars) {
+      expect(bar.x).toBeGreaterThanOrEqual(frame.plot.x)
+      expect(bar.x + bar.width).toBeLessThanOrEqual(right)
+      expect(bar.y).toBeGreaterThanOrEqual(frame.plot.y)
+      expect(bar.y + bar.height).toBeLessThanOrEqual(frame.plot.y + frame.plot.height)
+    }
   })
 })
 
