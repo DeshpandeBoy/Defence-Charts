@@ -26,7 +26,7 @@ exports[`gate G14: the element set > 'Canvas' 1`] = `
   "3× text.gx-label",
   "11× th",
   "1× thead",
-  "1× title",
+  "4× title",
   "8× tr",
 ]
 `;
@@ -48,8 +48,10 @@ exports[`gate G14: the element set > 'Micro' 1`] = `
   "1× text.gx-value__overflow",
   "7× th",
   "1× thead",
-  "1× title",
+  "4× title",
   "4× tr",
+  "1× tspan.gx-value__label",
+  "1× tspan.gx-value__separator",
 ]
 `;
 
@@ -78,7 +80,7 @@ exports[`gate G14: the element set > 'Panel' 1`] = `
   "3× text.gx-label",
   "11× th",
   "1× thead",
-  "1× title",
+  "4× title",
   "8× tr",
 ]
 `;
@@ -110,7 +112,7 @@ exports[`gate G14: the element set > 'Stage' 1`] = `
   "8× text.gx-value-label",
   "11× th",
   "1× thead",
-  "1× title",
+  "4× title",
   "8× tr",
 ]
 `;
@@ -135,7 +137,7 @@ exports[`gate G14: the element set > 'Strip' 1`] = `
   "2× text.gx-axis__tick-label",
   "11× th",
   "1× thead",
-  "1× title",
+  "4× title",
   "8× tr",
 ]
 `;
@@ -154,12 +156,15 @@ exports[`gate G14: the element set > 'Tile-horizon' 1`] = `
   "1× table.gx-data-table__table",
   "1× tbody",
   "9× td",
-  "3× text.gx-value",
+  "1× text.gx-value",
+  "1× text.gx-value__overflow",
   "7× th",
   "1× thead",
-  "1× title",
+  "4× title",
   "4× tr",
-  "3× tspan.gx-value__delta",
+  "1× tspan.gx-value__delta",
+  "1× tspan.gx-value__label",
+  "1× tspan.gx-value__separator",
 ]
 `;
 
@@ -177,11 +182,14 @@ exports[`gate G14: the element set > 'Tile-line' 1`] = `
   "1× table.gx-data-table__table",
   "1× tbody",
   "9× td",
-  "3× text.gx-value",
+  "1× text.gx-value",
+  "1× text.gx-value__overflow",
   "7× th",
   "1× thead",
-  "1× title",
+  "4× title",
   "4× tr",
-  "3× tspan.gx-value__delta",
+  "1× tspan.gx-value__delta",
+  "1× tspan.gx-value__label",
+  "1× tspan.gx-value__separator",
 ]
 `;

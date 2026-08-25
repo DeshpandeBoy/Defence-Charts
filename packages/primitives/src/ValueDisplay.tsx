@@ -31,14 +31,17 @@
  * Everything a theme *does* control — fill, weight, letter-spacing, anchoring, the delta's
  * relative weight — is in `chart.css` under `.gx-value`.
  *
- * ## What is deliberately absent
+ * ## What is deliberately present
  *
- * ⚠ No `<title>` and no `aria-label`. The value display is a *summary of the series*, and the
- * accessible equivalent is already in the tree: `./rungs/line.ts` keeps `dataTable.present`
- * true at both rungs that ask for a value display, and `<DataTable>` renders it in a real
- * `<table>` outside the `<svg>` with the series label beside the value. Naming a role-less
- * SVG `<text>` would duplicate that for some assistive technologies and be dropped by
- * others; the `<table>` works in all of them.
+ * ⚠ The series label is painted from the frame rather than inferred from CSS colour. The colour
+ * ramp is a useful secondary channel, but a number without its series name is ambiguous as soon
+ * as a value band contains more than one entry, and colour is not a sufficient non-visual
+ * equivalent. The frame already carries the label, so the renderer keeps the pairing in the
+ * static SVG as `label · value` and repeats the full reading in `aria-label`.
+ *
+ * The data table remains the complete accessible equivalent for every point. The per-entry
+ * `aria-label` is the compact equivalent for the summary that is visible in the chart itself;
+ * it is not a replacement for the table and does not require client state.
  */
 
 import type { ValueFrame } from '@gx/core'
@@ -63,27 +66,34 @@ export function ValueDisplay({ value, className }: ValueDisplayProps) {
 
   const fontSize = roundCoord(value.fontSize)
   const { overflow } = value
+  const showLabel = value.presentation.label === 'series'
+  const showDelta = value.presentation.context === 'delta'
 
   return (
     <g className={classes('gx-value-display', className)}>
-      {value.entries.map((entry) => (
-        <text
-          className="gx-value"
-          key={entry.seriesId}
-          data-series-id={entry.seriesId}
-          // ⚠ The series' index, straight off the frame — never the map's index. It is what
-          // `chart.css` binds `--gx-series-color` from, and a series with no defined value
-          // contributes no entry, so the two differ exactly when a chart has a silent series.
-          data-series-index={entry.seriesIndex}
-          x={roundCoord(entry.x)}
-          y={roundCoord(entry.y)}
-          fontSize={fontSize}
-        >
-          {entry.text}
+      {value.entries.map((entry) => {
+        const label = displayLabel(entry.label, entry.seriesId)
+        return (
+          <text
+            className="gx-value"
+            key={entry.seriesId}
+            data-series-id={entry.seriesId}
+            // ⚠ The series' index, straight off the frame — never the map's index. It is what
+            // `chart.css` binds `--gx-series-color` from, and a series with no defined value
+            // contributes no entry, so the two differ exactly when a chart has a silent series.
+            data-series-index={entry.seriesIndex}
+            aria-label={accessibleValue(entry, label)}
+            x={roundCoord(entry.x)}
+            y={roundCoord(entry.y)}
+            fontSize={fontSize}
+          >
+            {showLabel ? <tspan className="gx-value__label">{label}</tspan> : null}
+            {showLabel ? <tspan className="gx-value__separator"> · </tspan> : null}
+            {entry.text}
           {entry.unit === null || entry.unit.length === 0 ? null : (
             <tspan className="gx-value__unit">{` ${entry.unit}`}</tspan>
           )}
-          {entry.delta === null ? null : (
+          {entry.delta === null || !showDelta ? null : (
             /*
              * ⚠ The separating space is inside the string, not a `dx` on the tspan. `@gx/core`
              * fitted the width of `"36 +4"` including that space; a gap introduced here would
@@ -116,8 +126,9 @@ export function ValueDisplay({ value, className }: ValueDisplayProps) {
                     : ` remaining ${entry.progress.remainingText ?? ''}`}
             </tspan>
           )}
-        </text>
-      ))}
+          </text>
+        )
+      })}
 
       {overflow === null ? null : (
         /*
@@ -129,6 +140,7 @@ export function ValueDisplay({ value, className }: ValueDisplayProps) {
         <text
           className="gx-value__overflow"
           data-hidden={overflow.hidden}
+          aria-label={`${overflow.hidden} additional series`}
           x={roundCoord(overflow.x)}
           y={roundCoord(overflow.y)}
           fontSize={fontSize}
@@ -138,4 +150,32 @@ export function ValueDisplay({ value, className }: ValueDisplayProps) {
       )}
     </g>
   )
+}
+
+function displayLabel(label: string, seriesId: string): string {
+  const trimmed = label.trim()
+  return trimmed.length > 0 ? trimmed : seriesId
+}
+
+function accessibleValue(
+  entry: ValueFrame['entries'][number],
+  label: string,
+): string {
+  const parts = [label, entry.text]
+  if (entry.unit !== null && entry.unit.length > 0) parts.push(entry.unit)
+  if (entry.delta !== null) {
+    parts.push(entry.delta.text)
+    if (entry.comparison !== null) parts.push(`(${entry.comparison})`)
+  }
+  if (entry.target !== null) parts.push(`target ${entry.target.text}`)
+  if (entry.status !== null) parts.push(`status ${entry.status}`)
+  if (entry.progress !== undefined && entry.progress !== null) {
+    if (entry.progress.indeterminate) parts.push('indeterminate')
+    else if (entry.progress.overTarget !== null && entry.progress.overTarget > 0) {
+      parts.push(`over target ${entry.progress.overTargetText ?? ''}`.trim())
+    } else if (entry.progress.remainingText !== null) {
+      parts.push(`remaining ${entry.progress.remainingText}`)
+    }
+  }
+  return parts.join(' ')
 }
