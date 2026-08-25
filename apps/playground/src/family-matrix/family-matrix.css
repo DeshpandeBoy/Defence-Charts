@@ -234,6 +234,13 @@ button {
   block-size: 100%;
 }
 
+.family-matrix__measured-chart {
+  inline-size: 100%;
+  block-size: 100%;
+  min-inline-size: 0;
+  min-block-size: 0;
+}
+
 .family-matrix__chart-frame .gx-chart__svg,
 .family-matrix__state-body .gx-chart__svg {
   inline-size: 100%;
