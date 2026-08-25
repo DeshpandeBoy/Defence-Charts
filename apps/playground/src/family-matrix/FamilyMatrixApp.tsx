@@ -29,10 +29,10 @@ export function FamilyMatrixApp() {
       <header className="family-matrix__header">
         <div>
           <p className="family-matrix__eyebrow">D0.2 · shared family acceptance</p>
-          <h1>Line / area / bar / timebar / scatter / donut / KPI / progress / heatmap / funnel family matrix</h1>
+          <h1>Chart families, from micro to stage.</h1>
           <p>
-            One fixture exercises the ten registered families across six information budgets, the static accessibility surface,
-            the host-owned states, and the measured resize boundary contract.
+            Ten registered families adapt their marks, summaries, axes, and interaction affordances as the report card grows.
+            This fixture makes that information contract visible in one calm, inspectable surface.
           </p>
         </div>
         <button
@@ -139,6 +139,7 @@ export function FamilyMatrixApp() {
 function StaticMatrixCard({ type, row }: { readonly type: FamilyType; readonly row: FamilyMatrixRow }) {
   const plan = planForRow(type, row)
   const metadata = metadataForPlan(plan)
+  const seriesCount = dataForType(type).length
   return (
     <article
       className="family-matrix__card"
@@ -158,12 +159,25 @@ function StaticMatrixCard({ type, row }: { readonly type: FamilyType; readonly r
       data-plan-facet={metadata.facet}
     >
       <header className="family-matrix__card-header">
-        <div>
-          <h3>{type} · {row.id}</h3>
-          <p>{row.label}</p>
+        <div className="family-matrix__card-identity">
+          <p className="family-matrix__card-rung">{row.label}</p>
+          <h3>{type}</h3>
         </div>
-        <code>{metadata.primary}{metadata.area === true ? ' + fill' : ''}</code>
+        <div className="family-matrix__card-meta" aria-label="Chart contract">
+          <code>{metadata.primary}{metadata.area === true ? ' + fill' : ''}</code>
+          <span>{metadata.interaction}</span>
+        </div>
       </header>
+      <div className="family-matrix__card-summary" aria-label="Chart summary">
+        <span>
+          <small>Data</small>
+          <strong>{seriesCount} series</strong>
+        </span>
+        <span>
+          <small>Readout</small>
+          <strong>{metadata.valueLegibility.replace('-', ' ')}</strong>
+        </span>
+      </div>
       <div className="family-matrix__chart-frame">
         <StaticChart type={type} row={row} data={dataForType(type)} id={'matrix-' + type + '-' + row.id} />
       </div>

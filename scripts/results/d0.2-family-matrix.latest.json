@@ -221,8 +221,8 @@
     "reducedMotion": true,
     "forcedColors": false,
     "transitionDuration": "0s",
-    "background": "color(srgb 0.215529 0.215529 0.215529)",
-    "border": "color(srgb 0.768627 0.768627 0.768627 / 0.28)",
+    "background": "color(srgb 0.134588 0.134588 0.134588)",
+    "border": "color(srgb 0.768627 0.768627 0.768627 / 0.18)",
     "rootBackground": "rgb(24, 24, 24)"
   },
   "forcedColors": {

@@ -24,7 +24,7 @@ button {
 
 .family-matrix {
   min-block-size: 100vh;
-  padding: 2rem;
+  padding: clamp(var(--gx-widget-padding), 4vw, 3rem);
   background: var(--gx-surface-color);
   color: var(--gx-surface-text-color);
 }
@@ -35,13 +35,13 @@ button {
   align-items: end;
   justify-content: space-between;
   gap: 2rem;
-  max-inline-size: 100rem;
+  max-inline-size: 88rem;
   margin-inline: auto;
 }
 
 .family-matrix__header {
   align-items: start;
-  margin-block-end: 2rem;
+  margin-block-end: 3rem;
 }
 
 .family-matrix__header h1,
@@ -52,7 +52,9 @@ button {
 }
 
 .family-matrix__header h1 {
-  font-size: clamp(2rem, 4vw, 4rem);
+  max-inline-size: 42rem;
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  line-height: 0.98;
 }
 
 .family-matrix__header p,
@@ -62,13 +64,24 @@ button {
   color: color-mix(in srgb, currentColor 72%, transparent);
 }
 
+.family-matrix__header p:not(.family-matrix__eyebrow) {
+  margin-block: 1rem 0;
+  font-size: 1rem;
+  line-height: 1.55;
+}
+
 .family-matrix__header button {
-  border: 1px solid currentColor;
-  border-radius: 999px;
-  padding: 0.6rem 1rem;
+  flex: 0 0 auto;
+  border: 1px solid color-mix(in srgb, var(--gx-surface-text-color) 28%, transparent);
+  border-radius: var(--gx-widget-radius);
+  padding: 0.65rem 0.85rem;
   background: transparent;
   color: inherit;
   cursor: pointer;
+}
+
+.family-matrix__header button:hover {
+  background: color-mix(in srgb, var(--gx-surface-text-color) 8%, transparent);
 }
 
 .family-matrix__eyebrow {
@@ -81,30 +94,41 @@ button {
 }
 
 .family-matrix > section {
-  max-inline-size: 100rem;
+  max-inline-size: 88rem;
   margin: 0 auto 3rem;
+  padding-block-start: var(--gx-widget-padding);
+  border-block-start: 1px solid color-mix(in srgb, var(--gx-surface-text-color) 16%, transparent);
 }
 
 .family-matrix__section-heading {
-  margin-block-end: 1rem;
+  align-items: end;
+  margin-block-end: var(--gx-widget-gap);
 }
 
 .family-matrix__section-heading > p {
   margin: 0;
 }
 
+.family-matrix__section-heading h2,
+.family-matrix__coverage h2 {
+  font-size: 1.25rem;
+  line-height: 1.1;
+}
+
 .family-matrix__grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1rem;
+  align-items: start;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gx-widget-gap);
 }
 
 .family-matrix__card,
 .family-matrix__state,
 .family-matrix__coverage {
   min-inline-size: 0;
-  border: 1px solid color-mix(in srgb, currentColor 28%, transparent);
-  background: color-mix(in srgb, var(--gx-surface-color) 82%, currentColor);
+  border: 1px solid color-mix(in srgb, var(--gx-surface-text-color) 18%, transparent);
+  border-radius: var(--gx-widget-radius);
+  background: color-mix(in srgb, var(--gx-surface-color) 94%, var(--gx-surface-text-color));
 }
 
 .family-matrix__card {
@@ -115,32 +139,93 @@ button {
   display: flex;
   align-items: start;
   justify-content: space-between;
-  gap: 1rem;
-  padding: 0.8rem 1rem;
+  gap: var(--gx-widget-gap);
+  padding: var(--gx-widget-padding-tight) var(--gx-widget-padding);
+}
+
+.family-matrix__card-identity {
+  min-inline-size: 0;
+}
+
+.family-matrix__card-rung {
+  margin: 0 0 0.25rem;
+  color: color-mix(in srgb, currentColor 58%, transparent);
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  line-height: 1;
+  text-transform: uppercase;
 }
 
 .family-matrix__card-header h3,
 .family-matrix__state h3 {
   margin: 0;
-  font-size: 0.95rem;
+  color: var(--gx-surface-text-color);
+  font-size: var(--gx-title-font-size);
+  font-weight: var(--gx-title-font-weight);
+  line-height: 1.1;
 }
 
-.family-matrix__card-header p {
-  margin: 0.2rem 0 0;
-  color: color-mix(in srgb, currentColor 62%, transparent);
-  font-size: 0.78rem;
+.family-matrix__card-meta {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.4rem;
+  color: color-mix(in srgb, currentColor 58%, transparent);
+  font-size: 0.625rem;
 }
 
-.family-matrix__card-header code {
+.family-matrix__card-meta code {
+  border: 1px solid color-mix(in srgb, var(--gx-series-2) 36%, transparent);
+  border-radius: calc(var(--gx-widget-radius) / 2);
+  padding: 0.25rem 0.35rem;
   color: var(--gx-series-2);
-  font-size: 0.75rem;
+  font-size: 0.625rem;
+  line-height: 1;
+}
+
+.family-matrix__card-meta span {
+  color: color-mix(in srgb, currentColor 68%, transparent);
+  text-transform: capitalize;
+}
+
+.family-matrix__card-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--gx-widget-gap);
+  padding: 0 var(--gx-widget-padding) var(--gx-widget-padding-tight);
+}
+
+.family-matrix__card-summary > span {
+  display: grid;
+  min-inline-size: 0;
+  gap: 0.2rem;
+}
+
+.family-matrix__card-summary small {
+  color: color-mix(in srgb, currentColor 52%, transparent);
+  font-size: 0.625rem;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.family-matrix__card-summary strong {
+  overflow: hidden;
+  color: color-mix(in srgb, currentColor 82%, transparent);
+  font-size: 0.6875rem;
+  font-weight: 500;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .family-matrix__chart-frame {
-  block-size: 14rem;
+  position: relative;
+  block-size: 11rem;
   min-block-size: 0;
-  padding: 0.5rem;
-  background: color-mix(in srgb, var(--gx-surface-color) 90%, currentColor);
+  padding: var(--gx-widget-padding-tight);
+  border-block-start: 1px solid color-mix(in srgb, var(--gx-surface-text-color) 12%, transparent);
+  background: var(--gx-surface-color);
 }
 
 .family-matrix__chart-frame .gx-chart,
@@ -155,10 +240,59 @@ button {
   block-size: 100%;
 }
 
+.family-matrix__chart-frame .gx-chart__caption {
+  padding: 0.35rem var(--gx-widget-padding-tight);
+  border-block-start: 1px solid color-mix(in srgb, var(--gx-surface-text-color) 12%, transparent);
+  background: var(--gx-surface-color);
+  color: color-mix(in srgb, currentColor 58%, transparent);
+}
+
+.family-matrix__chart-frame .gx-data-table__summary {
+  font-size: 0.625rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.family-matrix__chart-frame .gx-data-table__table {
+  font-size: 0.6875rem;
+}
+
+.family-matrix__chart-frame .gx-grid__line {
+  opacity: 0.55;
+}
+
+.family-matrix__chart-frame .gx-axis__tick-label {
+  opacity: 0.72;
+}
+
+.family-matrix__card[data-family-rung='micro'] .family-matrix__chart-frame {
+  block-size: 5.25rem;
+}
+
+.family-matrix__card[data-family-rung='tile'] .family-matrix__chart-frame {
+  block-size: 7rem;
+}
+
+.family-matrix__card[data-family-rung='strip'] .family-matrix__chart-frame {
+  block-size: 8rem;
+}
+
+.family-matrix__card[data-family-rung='panel'] .family-matrix__chart-frame {
+  block-size: 11rem;
+}
+
+.family-matrix__card[data-family-rung='canvas'] .family-matrix__chart-frame {
+  block-size: 15rem;
+}
+
+.family-matrix__card[data-family-rung='stage'] .family-matrix__chart-frame {
+  block-size: 19rem;
+}
+
 .family-matrix__states {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1rem;
+  gap: var(--gx-widget-gap);
 }
 
 .family-matrix__state {
@@ -166,14 +300,15 @@ button {
 }
 
 .family-matrix__state h3 {
-  padding: 0.8rem 1rem;
+  padding: var(--gx-widget-padding-tight) var(--gx-widget-padding);
   text-transform: capitalize;
 }
 
 .family-matrix__state-body {
   block-size: 13rem;
   min-block-size: 0;
-  padding: 0.5rem;
+  padding: var(--gx-widget-padding-tight);
+  border-block-start: 1px solid color-mix(in srgb, var(--gx-surface-text-color) 12%, transparent);
 }
 
 .family-matrix__error {
@@ -213,7 +348,7 @@ button {
 }
 
 .family-matrix__coverage {
-  padding: 1.5rem;
+  padding: var(--gx-widget-padding);
 }
 
 .family-matrix__coverage ul {
@@ -234,8 +369,17 @@ button {
     gap: 1rem;
   }
 
-  .family-matrix__grid,
+  .family-matrix__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .family-matrix__states {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 40rem) {
+  .family-matrix__grid {
     grid-template-columns: 1fr;
   }
 }
