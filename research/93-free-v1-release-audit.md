@@ -1,7 +1,7 @@
 # ShiftCharts Free-v1 release audit
 
 Date: 2026-08-26  
-Candidate lineage: `c53efe4` plus this evidence-only checkpoint  
+Candidate lineage: `c53efe4` through `9a8ccf0`  
 Prospective public version: `0.1.0` for all six packages
 
 ## Outcome
@@ -9,6 +9,10 @@ Prospective public version: `0.1.0` for all six packages
 The repository implementation is release-candidate complete. A clean isolated worktree generated
 the Changesets `0.1.0` state, built from no pre-existing `dist/` directories, passed the full source
 and package gate, and completed a six-package `pnpm publish --dry-run`.
+
+The verified candidate is integrated into `main`. Hosted CI run `32989961984` passed both the
+source-verification and browser jobs, and Release run `32991174680` passed its full verification and
+created GitHub PR #1 (`Version Packages`) for the six version bumps.
 
 Live npm publication is not complete. The local npm CLI is unauthenticated, and account-level
 ownership/trusted-publisher entries for `@shiftcharts/*` have not been demonstrated. This audit does
@@ -44,6 +48,8 @@ access disabled after install.
 | clean worktree: `changeset version && pnpm verify` | pass at six-package `0.1.0`; proved the verification gate no longer relies on stale ignored build output |
 | clean worktree: `pnpm -r --filter './packages/**' publish --dry-run --no-git-checks` | pass for all six public `0.1.0` packages; npm correctly warned that live publication needs login |
 | `git diff --check` | pass |
+| GitHub CI run `32989961984` on `main` | pass; `verify` and `browser` jobs green |
+| GitHub Release run `32991174680` on `main` | pass; Changesets PR #1 created |
 
 ## P0 findings fixed during the audit
 
@@ -57,6 +63,8 @@ access disabled after install.
    as final while package availability remains accurately gated on the first publish.
 4. Fumadocs core/base UI were refreshed from 16.15.1 to current 16.15.2. The current registry release
    of tsdown remains the already-pinned 0.22.14.
+5. Hosted CI still ran the artifact tests before the build even after the local `verify` script was
+   corrected. The CI job now builds before tests; the hosted `main` run is green.
 
 ## Claim boundaries and known limitations
 
@@ -76,6 +84,10 @@ access disabled after install.
 Pushing this candidate to `main` is safe only as a fast-forward. The Changesets action should open a
 version PR that converts the six packages from workspace `0.0.0` to `0.1.0`; do not merge that PR
 until the npm scope and all six trusted-publisher entries exist.
+
+The version PR is currently open as
+`https://github.com/DeshpandeBoy/Defence-Charts/pull/1`. It is intentionally not merged: npm scope
+ownership and trusted-publisher setup remain the only external publication prerequisites.
 
 Before npm publication, rollback is a normal Git revert of the release-candidate commits followed by
 a fast-forward push. After npm publication, versions are immutable release artifacts: correct with a
