@@ -91,11 +91,13 @@ describe('shared line, area, bar, timebar, scatter, donut, KPI, progress, heatma
                 : row.expected.valueLegibility,
           regions:
             type === 'donut'
-              ? row.id === 'micro'
-                ? ['value', 'table']
-                : row.id === 'canvas' || row.id === 'stage'
-                  ? ['plot', 'legend', 'table']
-                  : ['plot', 'table']
+                ? row.id === 'micro'
+                  ? ['value', 'table']
+                  : row.id === 'canvas' || row.id === 'stage'
+                    ? ['plot', 'legend', 'table']
+                    : row.id === 'tile'
+                      ? ['value', 'plot', 'table']
+                      : ['plot', 'table']
               : type === 'kpi'
                 ? row.id === 'micro'
                   ? ['value', 'table']
