@@ -192,6 +192,36 @@ describe('WidgetGrid controlled wrapper', () => {
     expect(document.activeElement).toBe(move)
   })
 
+  it('ignores one stale RGL layout callback after keyboard cancellation', () => {
+    const onLayoutChange = vi.fn<(snapshot: LayoutSnapshot) => void>()
+    const onLayoutCancel = vi.fn<(snapshot: LayoutSnapshot) => void>()
+    mount(INITIAL_LAYOUT, { onLayoutChange, onLayoutCancel })
+    const resize = container.querySelector<HTMLButtonElement>('[data-shiftcharts-keyboard-control="resize"]')
+    if (resize === null) throw new Error('missing keyboard resize control')
+
+    act(() => resize.focus())
+    press(resize, 'Enter')
+    press(resize, 'ArrowRight')
+    press(resize, 'Escape')
+    expect(onLayoutCancel).toHaveBeenCalledTimes(1)
+
+    const stalePreview: RglLayout = [
+      { i: 'sales', x: 0, y: 0, w: 5, h: 2, isResizable: false },
+      { i: 'margin', x: 4, y: 0, w: 4, h: 1 },
+    ]
+    act(() => latest().onLayoutChange?.(stalePreview))
+    expect(onLayoutChange).not.toHaveBeenCalled()
+
+    act(() => latest().onLayoutChange?.(latest().layout ?? []))
+    expect(onLayoutChange).not.toHaveBeenCalled()
+
+    act(() => latest().onLayoutChange?.([
+      { i: 'sales', x: 1, y: 0, w: 4, h: 2, isResizable: false },
+      { i: 'margin', x: 5, y: 0, w: 4, h: 1 },
+    ]))
+    expect(onLayoutChange).toHaveBeenCalledTimes(1)
+  })
+
   it('removes keyboard editing affordances in read-only mode', () => {
     mount(INITIAL_LAYOUT, { mode: 'read-only' })
 

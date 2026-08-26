@@ -177,6 +177,7 @@ export function WidgetGrid({
   const normalizedLayout = useMemo(() => normalizeGridLayout(layout), [layout])
   const [keyboardLayout, setKeyboardLayout] = useState<readonly WidgetLayout[] | null>(null)
   const keyboardInteractionRef = useRef(false)
+  const keyboardCancelSignatureRef = useRef<string | null>(null)
   const activeInteractionRef = useRef<GridInteractionState | null>(null)
   const lastCommitSignatureRef = useRef<string | null>(null)
   const cancelTokenRef = useRef<number | undefined>(cancelInteractionToken)
@@ -203,6 +204,7 @@ export function WidgetGrid({
             layout={displayLayout}
             mode={mode}
             onLayoutStart={(nextLayout) => {
+              keyboardCancelSignatureRef.current = null
               keyboardInteractionRef.current = true
               onLayoutStart?.(createLayoutSnapshot(nextLayout))
             }}
@@ -211,14 +213,20 @@ export function WidgetGrid({
               onLayoutPreview?.(createLayoutSnapshot(nextLayout))
             }}
             onLayoutCommit={(nextLayout) => {
+              keyboardCancelSignatureRef.current = null
               keyboardInteractionRef.current = false
               setKeyboardLayout(null)
               emitCommittedLayout(createLayoutSnapshot(nextLayout))
             }}
             onLayoutCancel={(nextLayout) => {
+              // RGL can emit stale preview geometry while the controlled layout is being
+              // restored. Hold the exact cancellation snapshot until RGL reports it, so a stale
+              // callback cannot overwrite the host's restored state.
+              const snapshot = createLayoutSnapshot(nextLayout)
+              keyboardCancelSignatureRef.current = serializeLayoutSnapshot(snapshot)
               keyboardInteractionRef.current = false
               setKeyboardLayout(null)
-              onLayoutCancel?.(createLayoutSnapshot(nextLayout))
+              onLayoutCancel?.(snapshot)
             }}
           >
             {renderItem(item)}
@@ -227,6 +235,7 @@ export function WidgetGrid({
       )),
     [displayLayout, emitCommittedLayout, mode, onLayoutCancel, onLayoutPreview, onLayoutStart, renderItem],
   )
+
   const gridConfig = useMemo(
     () => ({
       cols: GRID_COLUMNS,
@@ -248,6 +257,7 @@ export function WidgetGrid({
 
   const beginInteraction = useCallback(
     (kind: GridInteractionKind, nextLayout: RglLayout, oldItem: RglLayoutItem | null, newItem: RglLayoutItem | null) => {
+      keyboardCancelSignatureRef.current = null
       const item = newItem ?? oldItem
       if (item === null) return
       const snapshot = toSnapshot(nextLayout)
@@ -295,8 +305,16 @@ export function WidgetGrid({
 
   const handleLayoutChange = useCallback(
     (nextLayout: RglLayout) => {
+      const snapshot = toSnapshot(nextLayout)
+      const keyboardCancelSignature = keyboardCancelSignatureRef.current
+      if (keyboardCancelSignature !== null) {
+        if (keyboardCancelSignature === serializeLayoutSnapshot(snapshot)) {
+          keyboardCancelSignatureRef.current = null
+        }
+        return
+      }
       if (activeInteractionRef.current !== null || keyboardInteractionRef.current) return
-      emitCommittedLayout(toSnapshot(nextLayout))
+      emitCommittedLayout(snapshot)
     },
     [emitCommittedLayout],
   )
