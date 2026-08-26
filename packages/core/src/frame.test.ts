@@ -692,6 +692,29 @@ describe('the value display', () => {
     })
   })
 
+  /**
+   * VT-003: `DataPoint` had no field for a category/stage name, so donut slices and funnel
+   * stages fell back to `formatXLabel(point.x)` — a raw point index for the common case of
+   * sequential integer `x`. `category` gives a point a real name; absent, the fallback is
+   * unchanged.
+   */
+  describe('donut slice labels prefer a point’s category (VT-003)', () => {
+    it('uses the category when present, and the formatted x otherwise', () => {
+      const data: Series[] = [
+        {
+          id: 'programs',
+          points: [
+            { x: 0, y: 10, category: 'Personnel' },
+            { x: 1, y: 5 },
+          ],
+        },
+      ]
+      const plan = planChart('donut', TILE, describeShape(data))
+      const frame = resolveFrame(plan, data, TILE)
+      expect(frame.series[0]?.arcs.map((arc) => arc.label)).toEqual(['Personnel', '1'])
+    })
+  })
+
   describe('the fit', () => {
     const RUNGS = [
       ['micro-60', MICRO_PX],

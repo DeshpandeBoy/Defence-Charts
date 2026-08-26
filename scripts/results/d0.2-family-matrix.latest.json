@@ -2,7 +2,7 @@
   "status": "pass",
   "fixture": "apps/playground/src/family-matrix-fixture/",
   "sourceRoot": "/Users/SameeraD/Defence-Charts/",
-  "origin": "http://127.0.0.1:5207/",
+  "origin": "http://127.0.0.1:5186/",
   "browser": "151.0.7922.34",
   "playwrightFrom": "playwright",
   "cards": 60,

@@ -13,6 +13,7 @@ const stages: readonly FunnelStageFrame[] = Object.freeze([
     y: 12,
     width: 160,
     height: 18,
+    labelWidth: 600,
   }),
   Object.freeze({
     id: 'checkout:details',
@@ -26,6 +27,7 @@ const stages: readonly FunnelStageFrame[] = Object.freeze([
     y: 42,
     width: 128,
     height: 18,
+    labelWidth: 600,
   }),
   Object.freeze({
     id: 'checkout:complete',
@@ -39,6 +41,7 @@ const stages: readonly FunnelStageFrame[] = Object.freeze([
     y: 72,
     width: 64,
     height: 18,
+    labelWidth: 600,
   }),
 ])
 
@@ -62,6 +65,7 @@ export const FUNNEL_ZERO_BASELINE_FRAME: FunnelFrame = Object.freeze({
       y: 0,
       width: 0,
       height: 0,
+      labelWidth: 600,
     }),
     Object.freeze({
       id: 'zero:last',
@@ -75,6 +79,7 @@ export const FUNNEL_ZERO_BASELINE_FRAME: FunnelFrame = Object.freeze({
       y: 20,
       width: 0,
       height: 0,
+      labelWidth: 600,
     }),
   ]),
   overallConversion: null,

@@ -167,6 +167,7 @@ async function runStaticMatrix(page) {
     yAxisLabels: [...card.querySelectorAll('.gx-axis--y .gx-axis__tick-label')].map((label) => label.textContent?.trim() ?? ''),
     funnelStages: card.querySelectorAll('.gx-funnel-stage').length,
     funnelLabels: card.querySelectorAll('.gx-funnel-stage__text').length,
+    funnelLabelTexts: [...card.querySelectorAll('.gx-funnel-stage__text')].map((label) => label.textContent?.trim() ?? ''),
     funnelValues: card.querySelectorAll('[data-funnel-stage-value]').length,
     funnelDropoffs: card.querySelectorAll('[data-funnel-stage-dropoff]').length,
     funnelSummary: card.querySelectorAll('[data-funnel-part="summary"]').length,
@@ -246,9 +247,15 @@ async function runStaticMatrix(page) {
           (card.compactKeyLabels.length === 0 || card.compactKeyLabels.includes('Program mix'))) {
           throw new Error('donut panel key lost slice identity for ' + card.caseId + ': ' + JSON.stringify(card))
         }
+        if (card.rung === 'panel' && card.compactKeyLabels.some((label) => /^\d+$/.test(label))) {
+          throw new Error('donut panel key slice label regressed to a raw point index (VT-003) for ' + card.caseId + ': ' + JSON.stringify(card))
+        }
         if ((card.rung === 'canvas' || card.rung === 'stage') &&
           (card.legendFamily !== 'donut' || card.legendLabels.length === 0 || !card.legendLabels.includes('Other'))) {
           throw new Error('donut external slice legend missing for ' + card.caseId + ': ' + JSON.stringify(card))
+        }
+        if ((card.rung === 'canvas' || card.rung === 'stage') && card.legendLabels.some((label) => /^\d+$/.test(label))) {
+          throw new Error('donut legend slice label regressed to a raw point index (VT-003) for ' + card.caseId + ': ' + JSON.stringify(card))
         }
       }
     }
@@ -321,6 +328,9 @@ async function runStaticMatrix(page) {
       }
       if (!compact && (card.funnelStages === 0 || card.funnelLabels === 0 || card.funnelValues === 0)) {
         throw new Error('funnel stage/value semantics missing for ' + card.caseId + ': ' + JSON.stringify(card))
+      }
+      if (!compact && card.funnelLabelTexts.some((label) => /^\d+$/.test(label))) {
+        throw new Error('funnel stage label regressed to a raw point index (VT-003) for ' + card.caseId + ': ' + JSON.stringify(card))
       }
       if (card.rung === 'canvas' && card.funnelDropoffs === 0) {
         throw new Error('funnel Canvas drop-off semantics missing for ' + card.caseId + ': ' + JSON.stringify(card))

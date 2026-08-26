@@ -87,6 +87,20 @@ describe('D6.1 funnel frame', () => {
     expect(zeroFrame?.stages.every((stage) => stage.conversion === null)).toBe(true)
   })
 
+  it('prefers a stage’s category over its formatted x as the stage label (VT-003)', () => {
+    const ctx = sizeContextFromPixels(900, 520)
+    const named = [{
+      id: 'pipeline',
+      points: [
+        { x: 0, y: 100, category: 'Assigned' },
+        { x: 1, y: 75 },
+      ],
+    }]
+    const plan = planChart('funnel', ctx, describeShape(named))
+    const frame = resolveFrame(plan, named, ctx, resolvePolicy()).series[0]?.funnel
+    expect(frame?.stages.map((stage) => stage.label)).toEqual(['Assigned', '1'])
+  })
+
   it('rejects negative, duplicate, and ambiguous multi-series inputs', () => {
     const ctx = sizeContextFromPixels(900, 520)
     expect(() => planChart('funnel', ctx, describeShape([{ id: 'negative', points: [{ x: 0, y: -1 }] }]))).toThrow(

@@ -90,6 +90,18 @@ describe('describeShape', () => {
     expect(describeShape(data).labelMaxChars).toBe(6)
   })
 
+  /**
+   * VT-003: donut/funnel prefer a point's `category` over `formatXLabel(x)` as its drawn
+   * label. If `labelMaxChars` only measured the `x` half, a long category name would be
+   * under-budgeted — legible in the data but silently unaccounted for in layout.
+   */
+  it('measures a category as a candidate label too, not only the formatted x', () => {
+    const data: Series[] = [
+      { id: 'a', points: [{ x: 0, y: 1, category: 'Intelligence' }, { x: 1, y: 2 }] },
+    ]
+    expect(describeShape(data).labelMaxChars).toBe('Intelligence'.length)
+  })
+
   it('is empty and well-formed for no series', () => {
     expect(describeShape([])).toEqual({
       series: 0,

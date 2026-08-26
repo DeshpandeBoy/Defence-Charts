@@ -186,6 +186,16 @@ export type FunnelStageFrame = {
   readonly y: number
   readonly width: number
   readonly height: number
+  /**
+   * The room available for this stage's *label*, not its bar. `width` scales with `share`, but
+   * every stage's label sits at the same horizontal position regardless of its own bar's width
+   * — centered on the plot for a vertical funnel (every bar is itself centered there, so a
+   * narrow-share bar's label center is exactly the same x as a full-width bar's), and started
+   * at the plot's left edge for a horizontal one (every bar starts there too). So the true
+   * budget is the plot width in both orientations, not the individual stage's `width` — using
+   * `width` would degrade a low-share stage's label for room it never actually lacked.
+   */
+  readonly labelWidth: number
 }
 
 /** Funnel geometry and non-colour stage semantics resolved from the source series. */
@@ -1378,7 +1388,7 @@ function funnelFrame(
     output.push(
       Object.freeze({
         id: `${series.id}:${entry.x}`,
-        label: formatXLabel(entry.point.x),
+        label: entry.point.category ?? formatXLabel(entry.point.x),
         index,
         value,
         share,
@@ -1388,6 +1398,7 @@ function funnelFrame(
         y,
         width: Math.max(0, width),
         height: Math.max(0, height),
+        labelWidth: Math.max(0, plot.width),
       }),
     )
   })
@@ -1509,7 +1520,7 @@ function donutArcs(
     const key = point.x instanceof Date ? `date:${point.x.getTime()}` : `number:${point.x}`
     const existing = byKey.get(key)
     if (existing === undefined) {
-      byKey.set(key, { label: formatXLabel(point.x), value: point.y, order })
+      byKey.set(key, { label: point.category ?? formatXLabel(point.x), value: point.y, order })
     } else {
       existing.value += point.y
     }

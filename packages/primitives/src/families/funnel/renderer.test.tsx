@@ -1,3 +1,4 @@
+import { DEFAULT_POLICY } from '@gx/core'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
@@ -23,7 +24,7 @@ const input = {
       renderer: 'svg',
     },
   },
-  policy: {},
+  policy: DEFAULT_POLICY,
 } as unknown as MarkRendererInput
 
 describe('funnel family renderer', () => {
@@ -89,6 +90,48 @@ describe('funnel family renderer', () => {
     expect(dropoffHtml).toContain('data-funnel-stage-dropoff="0.2"')
     expect(breakdownHtml).toContain('>Details: value 800; share 80%; conversion 80%; drop-off 20%<')
     expect(breakdownHtml).toContain('data-funnel-stage-conversion="0.8"')
+  })
+
+  /**
+   * VT-003 fallout: a real category `label` can be long enough that the fullest `detail`
+   * wording no longer fits `stage.labelWidth`. This is the one test in the file that keeps
+   * `labelWidth` realistically narrow instead of generously wide, so it actually exercises the
+   * degrade path the other cases are deliberately sized to avoid.
+   */
+  it('degrades stage text to a shorter tier when the fullest wording would not fit', () => {
+    const narrow = {
+      ...input,
+      frame: {
+        ...input.frame,
+        funnel: {
+          overallConversion: 0.8,
+          stages: [
+            {
+              id: 'checkout:long',
+              label: 'A Very Long Category Name',
+              index: 0,
+              value: 1000,
+              share: 1,
+              conversion: 0.8,
+              dropoff: 0.1,
+              x: 24,
+              y: 12,
+              width: 160,
+              height: 18,
+              labelWidth: 90,
+            },
+          ],
+        },
+      },
+      plan: {
+        ...input.plan,
+        marks: { ...input.plan.marks, primary: { kind: 'funnel', orientation: 'vertical', detail: 'breakdown' } },
+      },
+    } as MarkRendererInput
+    const html = renderToStaticMarkup(renderFunnel(narrow))
+    const visibleText = /<text[^>]*>([^<]*)<\/text>/.exec(html)?.[1] ?? ''
+
+    expect(visibleText).toBe('A Very Long Category Name: value 1000')
   })
 
   it('keeps zero-baseline conversion and zero-sized geometry explicit', () => {

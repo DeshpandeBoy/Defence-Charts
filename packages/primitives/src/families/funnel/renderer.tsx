@@ -7,16 +7,20 @@
  * back to another mark family.
  */
 
-import type { FunnelFrame, FunnelStageFrame } from '@gx/core'
+import type { FunnelFrame, FunnelStageFrame, PlanPolicy, TypeRank } from '@gx/core'
+import { measureText } from '@gx/core'
 
 import type { MarkRenderer, MarkRendererRegistration } from '../../renderer-seam.ts'
 import { classes, roundCoord } from '../../svg.ts'
+
+/** Matches `--gx-legend-label-font-size` (`chart.css`), which `.gx-funnel-stage__text` uses. */
+const STAGE_TEXT_RANK: TypeRank = 'D'
 
 const renderNone: MarkRenderer = () => null
 
 /** Paint the explicit funnel mark and the detail selected by the shared plan. */
 export const renderFunnel: MarkRenderer = (input) => {
-  const { frame, plan } = input
+  const { frame, plan, policy } = input
 
   if (plan.type !== 'funnel') {
     throw new Error(`@gx/primitives: funnel renderer requires a funnel plan; received '${String(plan.type)}'.`)
@@ -62,7 +66,7 @@ export const renderFunnel: MarkRenderer = (input) => {
       data-funnel-overall-conversion={ratioAttribute(funnel.overallConversion)}
       data-funnel-series-id={frame.id}
     >
-      {renderDetail(funnel, mark.detail, mark.orientation)}
+      {renderDetail(funnel, mark.detail, mark.orientation, policy)}
     </g>
   )
 }
@@ -71,9 +75,10 @@ function renderDetail(
   funnel: FunnelFrame,
   detail: 'summary' | 'stages' | 'dropoff' | 'breakdown',
   orientation: 'horizontal' | 'vertical',
+  policy: PlanPolicy,
 ) {
   if (detail === 'summary') return renderSummary(funnel)
-  return funnel.stages.map((stage) => renderStage(stage, detail, orientation))
+  return funnel.stages.map((stage) => renderStage(stage, detail, orientation, policy))
 }
 
 function renderSummary(funnel: FunnelFrame) {
@@ -98,8 +103,9 @@ function renderStage(
   stage: FunnelStageFrame,
   detail: 'stages' | 'dropoff' | 'breakdown',
   orientation: 'horizontal' | 'vertical',
+  policy: PlanPolicy,
 ) {
-  const text = stageText(stage, detail)
+  const text = fitStageText(stage, detail, policy)
   return (
     <g
       className="gx-funnel-stage-container"
@@ -134,11 +140,31 @@ function renderStage(
   )
 }
 
-function stageText(stage: FunnelStageFrame, detail: 'stages' | 'dropoff' | 'breakdown'): string {
+/** Most to least verbose for the requested `detail` — the same wording `stageText` always
+ * built, just kept as steps instead of committing to only the fullest one. */
+function stageTextTiers(stage: FunnelStageFrame, detail: 'stages' | 'dropoff' | 'breakdown'): readonly string[] {
   const prefix = `${stage.label}: value ${formatValue(stage.value)}`
-  if (detail === 'stages') return prefix
-  if (detail === 'dropoff') return `${prefix}; drop-off ${formatRatio(stage.dropoff)}`
-  return `${prefix}; share ${formatRatio(stage.share)}; conversion ${formatRatio(stage.conversion)}; drop-off ${formatRatio(stage.dropoff)}`
+  if (detail === 'stages') return [prefix]
+  const withDropoff = `${prefix}; drop-off ${formatRatio(stage.dropoff)}`
+  if (detail === 'dropoff') return [withDropoff, prefix]
+  const full = `${prefix}; share ${formatRatio(stage.share)}; conversion ${formatRatio(stage.conversion)}; drop-off ${formatRatio(stage.dropoff)}`
+  return [full, withDropoff, prefix]
+}
+
+/**
+ * VT-003 fallout: a real category `label` (rather than a one-character point index) can push
+ * the fullest `detail` wording past `stage.labelWidth` — a budget this renderer has always had
+ * available but never checked, because no fixture's label was ever long enough to expose it.
+ * Degrade to a shorter, still-accurate tier instead of running text past its budget; the
+ * shortest tier ("label: value") is never dropped, matching this project's existing rule of
+ * keeping identity and the latest value visible over denser detail (VT-005/006).
+ */
+function fitStageText(stage: FunnelStageFrame, detail: 'stages' | 'dropoff' | 'breakdown', policy: PlanPolicy): string {
+  const tiers = stageTextTiers(stage, detail)
+  for (const candidate of tiers) {
+    if (measureText(candidate, STAGE_TEXT_RANK, policy.typography.metrics) <= stage.labelWidth) return candidate
+  }
+  return tiers[tiers.length - 1] ?? ''
 }
 
 function validateFunnel(funnel: FunnelFrame): void {

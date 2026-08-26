@@ -48,6 +48,13 @@ export type DataPoint = {
   readonly x: number | Date
   /** `null` = no observation at this x. Not zero. */
   readonly y: number | null
+  /**
+   * An optional human-readable name for this point, such as a donut slice or funnel stage.
+   * Falls back to a formatted `x` the same way `Series.label` falls back to `id` — most
+   * families ignore it, since `x` is already the label there (an axis position, a date).
+   * Donut and funnel have no axis to read a name from, so they read this instead.
+   */
+  readonly category?: string
 }
 
 /** A visible metric state. The word is rendered as text; it is never colour-only. */
@@ -79,9 +86,12 @@ export type Series = {
 /**
  * Real data → the counts the resolver accepts.
  *
- * ⚠ **`labelMaxChars` is measured against the labels that will actually be drawn**, via the
- * same `formatXLabel()` `./frame.ts` uses. That partially closes a gap `./layout.ts` records
- * as open: it notes that `'M'.repeat(n)` is *"a floor on what fits, not a prediction of it"*,
+ * ⚠ **`labelMaxChars` is measured against the labels that will actually be drawn**: the same
+ * `formatXLabel()` `./frame.ts` uses for the fallback case, or `point.category`'s own length
+ * when a point supplies one (donut/funnel prefer it over `formatXLabel()` — see `DataPoint`).
+ * Skipping the `category` half of that max would under-budget space for exactly the labels
+ * this field exists to make legible. That partially closes a gap `./layout.ts` records as
+ * open: it notes that `'M'.repeat(n)` is *"a floor on what fits, not a prediction of it"*,
  * because real axis labels — `"Jan 1"`, `"2024"` — are mostly digits and narrow lowercase
  * while `M` is the widest common Latin glyph.
  *
@@ -125,7 +135,7 @@ export function describeShape(data: readonly Series[]): DataShape {
 
       if (point.y !== null && point.y < 0) hasNegative = true
 
-      const chars = formatXLabel(point.x).length
+      const chars = Math.max(formatXLabel(point.x).length, point.category?.length ?? 0)
       if (chars > labelMaxChars) labelMaxChars = chars
     }
   }
