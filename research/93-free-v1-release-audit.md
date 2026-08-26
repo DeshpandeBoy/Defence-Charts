@@ -1,7 +1,7 @@
 # ShiftCharts Free-v1 release audit
 
 Date: 2026-08-26  
-Candidate lineage: `c53efe4` through `9a8ccf0`
+Candidate lineage: `c53efe4` through `cd63a0e`
 Prospective public version: `0.1.0` for all six packages
 
 ## Outcome
@@ -10,9 +10,10 @@ The repository implementation is release-candidate complete. A clean isolated wo
 the Changesets `0.1.0` state, built from no pre-existing `dist/` directories, passed the full source
 and package gate, and completed a six-package `pnpm publish --dry-run`.
 
-The verified candidate is integrated into `main`. Hosted CI run `32989961984` passed both the
-source-verification and browser jobs, and Release run `32991174680` passed its full verification and
-created GitHub PR #1 (`Version Packages`) for the six version bumps.
+The verified candidate is integrated into `main`. Hosted CI run `32994016463` passed both the
+source-verification and browser jobs on the latest candidate, and the earlier Release run
+`32991174680` passed its full verification and created GitHub PR #1 (`Version Packages`) for the
+six version bumps.
 
 Live npm publication is not complete. The local npm CLI is unauthenticated, and account-level
 ownership/trusted-publisher entries for `@shiftcharts/*` have not been demonstrated. This audit does
@@ -65,6 +66,9 @@ access disabled after install.
    of tsdown remains the already-pinned 0.22.14.
 5. Hosted CI still ran the artifact tests before the build even after the local `verify` script was
    corrected. The CI job now builds before tests; the hosted `main` run is green.
+6. Hosted C4.1 verification found a controlled-layout race where stale RGL geometry could overwrite
+   a keyboard Escape restoration. `WidgetGrid` now suppresses callbacks until the exact restored
+   snapshot is observed; hosted CI `32994016463` passes the complete browser matrix.
 
 ## Claim boundaries and known limitations
 
