@@ -138,6 +138,21 @@ async function runStaticMatrix(page) {
     scatterPoints: card.querySelectorAll('.gx-scatter-point').length,
     arcs: card.querySelectorAll('.gx-arc').length,
     otherArcs: card.querySelectorAll('.gx-arc--other').length,
+    sliceArcColors: [...card.querySelectorAll('.gx-arc[data-slice-index]')].map((arc) => ({
+      index: Number(arc.getAttribute('data-slice-index')),
+      kind: arc.getAttribute('data-slice-kind'),
+      fill: getComputedStyle(arc).fill,
+    })),
+    sliceKeyColors: [...card.querySelectorAll('.gx-compact-key__swatch[data-slice-index]')].map((swatch) => ({
+      index: Number(swatch.getAttribute('data-slice-index')),
+      kind: swatch.getAttribute('data-slice-kind'),
+      fill: getComputedStyle(swatch).fill,
+    })),
+    sliceLegendColors: [...card.querySelectorAll('[data-legend-family="donut"] .gx-legend__item[data-slice-index]')].map((item) => ({
+      index: Number(item.getAttribute('data-slice-index')),
+      kind: item.getAttribute('data-slice-kind'),
+      fill: getComputedStyle(item.querySelector('.gx-legend__symbol')).backgroundColor,
+    })),
     progress: card.querySelectorAll('.gx-progress').length,
     progressFills: card.querySelectorAll('.gx-progress__fill').length,
     progressStates: card.querySelectorAll('.gx-progress__state').length,
@@ -206,6 +221,23 @@ async function runStaticMatrix(page) {
       if (card.rung !== 'micro') {
         if (card.mark !== 'arc' || card.arcs === 0) {
           throw new Error('donut geometry missing for ' + card.caseId + ': ' + JSON.stringify(card))
+        }
+        const valueArcs = card.sliceArcColors.filter((slice) => slice.kind === 'value')
+        if (new Set(valueArcs.map((slice) => slice.fill)).size !== valueArcs.length) {
+          throw new Error('donut value slices do not have distinct colours for ' + card.caseId + ': ' + JSON.stringify(card))
+        }
+        const arcByIndex = new Map(card.sliceArcColors.map((slice) => [slice.index, slice]))
+        for (const swatch of card.sliceKeyColors) {
+          const arc = arcByIndex.get(swatch.index)
+          if (arc !== undefined && swatch.fill !== arc.fill) {
+            throw new Error('donut compact-key colour does not match its slice for ' + card.caseId + ': ' + JSON.stringify(card))
+          }
+        }
+        for (const swatch of card.sliceLegendColors) {
+          const arc = arcByIndex.get(swatch.index)
+          if (arc !== undefined && swatch.fill !== arc.fill) {
+            throw new Error('donut legend colour does not match its slice for ' + card.caseId + ': ' + JSON.stringify(card))
+          }
         }
         if ((card.rung === 'canvas' || card.rung === 'stage') && card.otherArcs === 0) {
           throw new Error('donut Other bucket missing for ' + card.caseId + ': ' + JSON.stringify(card))
@@ -281,6 +313,9 @@ async function runStaticMatrix(page) {
       if (compact && card.funnelStages !== 0) {
         throw new Error('funnel Micro should replace the plot with a summary: ' + JSON.stringify(card))
       }
+      if (card.rung === 'micro' && (!card.valueText?.includes('Overall conversion') || !card.valueText.includes('%'))) {
+        throw new Error('funnel Micro conversion summary is not readable: ' + JSON.stringify(card))
+      }
       if (card.rung === 'tile' && card.funnelSummary !== 1) {
         throw new Error('funnel Tile summary missing: ' + JSON.stringify(card))
       }
@@ -326,6 +361,9 @@ async function runVisualInformation(browser, label, viewport) {
       const overlap = (a, b) =>
         Math.min(a.right, b.right) - Math.max(a.left, b.left) > epsilon &&
         Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > epsilon
+      const labelOverlap = (a, b) =>
+        Math.min(a.right, b.right) - Math.max(a.left, b.left) > 0.5 &&
+        Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 0.5
       const nodes = 'svg text, svg path, svg rect, svg circle, svg line, svg polygon'
 
       return cards.map((card) => {
@@ -358,6 +396,42 @@ async function runVisualInformation(browser, label, viewport) {
               text: element.textContent?.trim() ?? '',
               rect: snapshot(rect),
             }))
+        const labels = [...card.querySelectorAll('.gx-label, .gx-value-label')]
+          .filter(visible)
+          .map((element) => ({ element, rect: element.getBoundingClientRect() }))
+        const labelOverlaps = []
+        for (let i = 0; i < labels.length; i += 1) {
+          for (let j = i + 1; j < labels.length; j += 1) {
+            if (!labelOverlap(labels[i].rect, labels[j].rect)) continue
+            labelOverlaps.push({
+              first: {
+                className: labels[i].element.getAttribute('class') ?? '',
+                text: labels[i].element.textContent?.trim() ?? '',
+                rect: snapshot(labels[i].rect),
+              },
+              second: {
+                className: labels[j].element.getAttribute('class') ?? '',
+                text: labels[j].element.textContent?.trim() ?? '',
+                rect: snapshot(labels[j].rect),
+              },
+            })
+          }
+        }
+        const axisLabels = card.getAttribute('data-family-type') === 'heatmap' &&
+          ['canvas', 'stage'].includes(card.getAttribute('data-family-rung') ?? '') && viewport.width <= 390
+          ? [...card.querySelectorAll('.gx-axis--x .gx-axis__tick-label')].filter(visible)
+            .map((element) => ({ element, rect: element.getBoundingClientRect() }))
+          : []
+        const axisLabelOverlaps = []
+        for (let i = 0; i < axisLabels.length; i += 1) {
+          for (let j = i + 1; j < axisLabels.length; j += 1) {
+            if (!labelOverlap(axisLabels[i].rect, axisLabels[j].rect)) continue
+            axisLabelOverlaps.push({
+              first: { text: axisLabels[i].element.textContent?.trim() ?? '', rect: snapshot(axisLabels[i].rect) },
+              second: { text: axisLabels[j].element.textContent?.trim() ?? '', rect: snapshot(axisLabels[j].rect) },
+            })
+          }
+        }
         return {
           caseId: card.getAttribute('data-family-case'),
           type: card.getAttribute('data-family-type'),
@@ -366,6 +440,8 @@ async function runVisualInformation(browser, label, viewport) {
           chartTextCount: card.querySelectorAll('svg text').length,
           outOfCard,
           summaryOverlaps,
+          labelOverlaps,
+          axisLabelOverlaps,
         }
       })
     })
@@ -375,8 +451,14 @@ async function runVisualInformation(browser, label, viewport) {
     const summaryOverlaps = report.flatMap((card) => card.summaryOverlaps.length > 0 ? [
       { caseId: card.caseId, nodes: card.summaryOverlaps },
     ] : [])
-    if (outOfCard.length > 0 || summaryOverlaps.length > 0) {
-      throw new Error(label + ' chart information containment failed: ' + JSON.stringify({ outOfCard, summaryOverlaps }))
+    const labelOverlaps = report.flatMap((card) => card.labelOverlaps.length > 0 ? [
+      { caseId: card.caseId, nodes: card.labelOverlaps },
+    ] : [])
+    const axisLabelOverlaps = report.flatMap((card) => card.axisLabelOverlaps.length > 0 ? [
+      { caseId: card.caseId, nodes: card.axisLabelOverlaps },
+    ] : [])
+    if (outOfCard.length > 0 || summaryOverlaps.length > 0 || labelOverlaps.length > 0 || axisLabelOverlaps.length > 0) {
+      throw new Error(label + ' chart information containment/label-collision failed: ' + JSON.stringify({ outOfCard, summaryOverlaps, labelOverlaps, axisLabelOverlaps }))
     }
     // Shape-only Strip cards intentionally carry their readable legend outside the SVG. The
     // static matrix above verifies those HTML channels, so this gate requires complete card
@@ -397,6 +479,8 @@ async function runVisualInformation(browser, label, viewport) {
       textBearingCards: report.filter((card) => card.chartTextCount > 0).length,
       outOfCard,
       summaryOverlaps,
+      labelOverlaps,
+      axisLabelOverlaps,
     }
   } finally {
     await context.close().catch(() => {})

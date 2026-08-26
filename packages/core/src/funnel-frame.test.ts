@@ -62,6 +62,15 @@ describe('D6.1 funnel frame', () => {
     expect(tilePlan.marks.primary).toEqual({ kind: 'funnel', orientation: 'vertical', detail: 'summary' })
     expect(tilePlan.narrative.valueDisplay).toBe('none')
     expect(tilePlan.funnel?.summary).toBe('conversion')
+
+    const microCtx = sizeContextFromPixels(100, 100)
+    const microPlan = planChart('funnel', microCtx, describeShape(DATA))
+    const microFrame = resolveFrame(microPlan, DATA, microCtx, resolvePolicy())
+    expect(microFrame.value?.entries[0]).toMatchObject({
+      label: 'Overall conversion',
+      text: '10%',
+      unit: null,
+    })
   })
 
   it('keeps empty and zero-baseline semantics explicit', () => {

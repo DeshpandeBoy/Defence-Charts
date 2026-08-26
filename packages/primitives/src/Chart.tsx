@@ -52,7 +52,7 @@ import { Axis } from './Axis.tsx'
 import { CompactSeriesKey, compactSeriesKeyLayout } from './CompactSeriesKey.tsx'
 import { DataTable } from './DataTable.tsx'
 import { Grid } from './Grid.tsx'
-import { Labels } from './Labels.tsx'
+import { Labels, resolveLabelOffsets } from './Labels.tsx'
 import { PointMarks } from './PointMarks.tsx'
 import { renderBuiltInMark } from './renderer-registry.ts'
 import { classes, roundCoord } from './svg.ts'
@@ -258,10 +258,12 @@ function PlotContent({
   readonly plan: ChartPlan
   readonly policy: PlanPolicy
 }) {
+  const labelOffsets = resolveLabelOffsets(frame.series, plan.labels, frame.plot, policy)
+
   return (
     <>
       {frame.series.map((s) => (
-        <SeriesMarks key={s.id} frame={s} plan={plan} policy={policy} />
+        <SeriesMarks key={s.id} frame={s} plan={plan} policy={policy} labelOffsets={labelOffsets} />
       ))}
 
       {plan.axes.x.visible ? (
@@ -316,10 +318,12 @@ function SeriesMarks({
   frame,
   plan,
   policy,
+  labelOffsets,
 }: {
   readonly frame: ChartFrame['series'][number]
   readonly plan: ChartPlan
   readonly policy: PlanPolicy
+  readonly labelOffsets: ReadonlyMap<string, number>
 }) {
   return (
     <g className="gx-series" data-series-id={frame.id} data-series-index={frame.index}>
@@ -339,6 +343,7 @@ function SeriesMarks({
         labelHalo={plan.labels.labelHalo}
         maxChars={plan.labels.maxChars}
         policy={policy}
+        offsets={labelOffsets}
       />
     </g>
   )

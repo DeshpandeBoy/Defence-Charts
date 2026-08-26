@@ -177,6 +177,7 @@ function ArcLegend({
           className="gx-legend__item"
           data-slice-id={arc.id}
           data-slice-index={index}
+          data-slice-kind={arc.other ? 'other' : 'value'}
           data-slice-label={arc.label}
           key={arc.id}
           role="listitem"

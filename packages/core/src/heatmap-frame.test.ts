@@ -44,6 +44,8 @@ describe('heatmap frame seam', () => {
       `maintenance:${START + DAY * 2}`,
     ])
     expect(maintenance.cells[1]?.value).toBeNull()
+    expect(maintenance.cells[0]?.intensity).not.toBe(maintenance.cells[2]?.intensity)
+    expect(first.frame.xTicks[0]?.label).toBe('Jan 01')
     expect(maintenance.cells.every((cell) => Number.isFinite(cell.x) && Number.isFinite(cell.width))).toBe(true)
     expect(maintenance.cells.filter((cell) => cell.intensity !== null && cell.intensity !== undefined).length).toBe(2)
     expect(maintenance.cells.map((cell) => cell.id)).toEqual(second.frame.series[0]?.cells.map((cell) => cell.id))

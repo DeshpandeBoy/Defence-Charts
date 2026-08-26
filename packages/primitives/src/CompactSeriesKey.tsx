@@ -39,6 +39,8 @@ type CompactSeriesKeyItem = {
   readonly id: string
   readonly index: number
   readonly label: string
+  readonly kind: 'series' | 'slice'
+  readonly other?: boolean | undefined
 }
 
 export type CompactSeriesKeyLayout = {
@@ -55,6 +57,8 @@ export type CompactSeriesKeyEntry = {
   readonly index: number
   readonly label: string
   readonly visibleLabel: string
+  readonly kind: CompactSeriesKeyItem['kind']
+  readonly other: boolean
   readonly x: number
   readonly y: number
   readonly swatch: number
@@ -91,9 +95,15 @@ export function compactSeriesKeyLayout(
   const items: readonly CompactSeriesKeyItem[] =
     plan.type === 'donut'
       ? frame.series.flatMap((series) =>
-          series.arcs.map((arc, index) => ({ id: arc.id, index, label: arc.label })),
+          series.arcs.map((arc, index) => ({
+            id: arc.id,
+            index,
+            label: arc.label,
+            kind: 'slice' as const,
+            other: arc.other,
+          })),
         )
-      : frame.series
+      : frame.series.map((item) => ({ id: item.id, index: item.index, label: item.label, kind: 'series' as const }))
 
   const explicit = (frame as FrameWithLegend).legend?.region
   if (isRectLike(explicit)) {
@@ -184,14 +194,18 @@ export function CompactSeriesKey({ layout, className }: CompactSeriesKeyProps) {
         <g
           className="gx-compact-key__entry"
           data-series-id={entry.id}
-          data-series-index={entry.index}
+          data-series-index={entry.kind === 'series' ? entry.index : undefined}
+          data-slice-index={entry.kind === 'slice' ? entry.index : undefined}
+          data-slice-kind={entry.kind === 'slice' ? (entry.other ? 'other' : 'value') : undefined}
           key={entry.id}
           role="listitem"
           aria-label={entry.label}
         >
           <rect
             className="gx-compact-key__swatch"
-            data-series-index={entry.index}
+            data-series-index={entry.kind === 'series' ? entry.index : undefined}
+            data-slice-index={entry.kind === 'slice' ? entry.index : undefined}
+            data-slice-kind={entry.kind === 'slice' ? (entry.other ? 'other' : 'value') : undefined}
             x={roundCoord(entry.x)}
             y={roundCoord(entry.y - entry.swatch / 2)}
             width={roundCoord(entry.swatch)}
@@ -276,6 +290,8 @@ function buildEntries(
         return Object.freeze({
           id: item.id,
           index: item.index,
+          kind: item.kind,
+          other: item.other === true,
           label: displayLabel(item.label, item.id),
           visibleLabel: labels[itemIndex] ?? displayLabel(item.label, item.id),
           x: point.x,

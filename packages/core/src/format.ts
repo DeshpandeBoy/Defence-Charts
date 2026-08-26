@@ -119,6 +119,13 @@ export function formatXLabel(value: number | Date): string {
   return Number.isFinite(value) ? FORMAT_NUMBER(value) : ''
 }
 
+/** Keep the calendar day visible when a heatmap's first temporal tick would otherwise be year-only. */
+export function formatHeatmapXLabel(value: number | Date): string {
+  if (!(value instanceof Date) || !Number.isFinite(value.getTime())) return formatXLabel(value)
+  const label = formatXLabel(value)
+  return /^\d{4}$/.test(label) ? FORMAT_DAY(value) : label
+}
+
 /**
  * A y tick value → its label. SI-suffixed; see `FORMAT_SI` for why this differs from x.
  *

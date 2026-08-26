@@ -51,7 +51,7 @@
 
 import type { SizeContext } from './context.ts'
 import type { DataPoint, MetricStatus, Series } from './data.ts'
-import { formatXLabel, formatYLabel } from './format.ts'
+import { formatHeatmapXLabel, formatXLabel, formatYLabel } from './format.ts'
 import {
   legendBands,
   resolvePlotBox,
@@ -698,7 +698,7 @@ function fitValueDisplay(
   series: readonly SeriesFrame[],
   region: Rect,
   policy: PlanPolicy,
-  mode: 'latest' | 'donut-total' = 'latest',
+  mode: 'latest' | 'donut-total' | 'funnel-conversion' = 'latest',
 ): ChartFrame['value'] {
   const presentation = Object.freeze({
     label: 'series' as const,
@@ -738,6 +738,22 @@ function fitValueDisplay(
         // A donut's compact reading is the total of its parts, not the last category. Keep the
         // qualifier visible so a number such as `1` cannot masquerade as the whole donut.
         unit: 'total',
+        target: null,
+        status: null,
+        delta: null,
+        comparison: null,
+        progress: null,
+      }]
+    }
+    if (mode === 'funnel-conversion') {
+      const conversion = s.funnel?.overallConversion ?? null
+      if (conversion === null) return []
+      return [{
+        seriesId: s.id,
+        seriesIndex: s.index,
+        label: 'Overall conversion',
+        text: String(Math.round(conversion * 100)) + '%',
+        unit: null,
         target: null,
         status: null,
         delta: null,
@@ -991,6 +1007,7 @@ export function resolveFrame(
       nominalCategoryStep,
       sortedX,
       heatmapExtent(data),
+      plan.type === 'funnel',
     ),
   )
 
@@ -1014,7 +1031,11 @@ export function resolveFrame(
             height: valueHeight,
           }),
           resolved,
-          plan.type === 'donut' || mark.kind === 'arc' ? 'donut-total' : 'latest',
+          plan.type === 'donut' || mark.kind === 'arc'
+            ? 'donut-total'
+            : plan.type === 'funnel' && plan.sizeClass === 'micro'
+              ? 'funnel-conversion'
+              : 'latest',
         )
 
   return Object.freeze({
@@ -1024,7 +1045,9 @@ export function resolveFrame(
       plan.axes.x.ticks,
       x,
       sortedX,
-      (v) => formatXLabel(temporal ? new Date(v) : v),
+      (v) => mark.kind === 'cell' && temporal
+        ? formatHeatmapXLabel(new Date(v))
+        : formatXLabel(temporal ? new Date(v) : v),
       temporal,
       plot.x,
       plan.axes.x.tickExtra,
@@ -1086,6 +1109,13 @@ function heatmapIntensity(value: number, lo: number, hi: number): number {
   if (hi === lo) return 1
   const span = hi - lo
   if (!Number.isFinite(span)) return value === hi ? 1 : value === lo ? 0 : value > 0 ? 1 : 0
+  // A sequential ramp cannot distinguish a small negative from zero when both land in the
+  // minimum bucket. Reserve the midpoint for zero whenever the domain crosses it, giving
+  // negative readings their own lower half of the ramp and preserving a visible sign change.
+  if (lo < 0 && hi > 0) {
+    if (value < 0) return Math.max(0, Math.min(0.5, (value - lo) / (-lo) * 0.5))
+    return Math.max(0.5, Math.min(1, 0.5 + (value / hi) * 0.5))
+  }
   const ratio = (value - lo) / span
   return Number.isFinite(ratio) ? Math.max(0, Math.min(1, ratio)) : value > 0 ? 1 : 0
 }
@@ -1123,6 +1153,7 @@ function seriesFrame(
   categoryStep: number,
   heatmapColumns: readonly number[],
   heatmapValueExtent: readonly [number, number],
+  funnelSummary: boolean,
 ): SeriesFrame {
   const defined = (p: DataPoint): boolean => p.y !== null && Number.isFinite(p.y)
 
@@ -1202,8 +1233,13 @@ function seriesFrame(
     arcs = donutArcs(s, aggregate, plot)
   } else if (mark.kind === 'progress') {
     progress = progressFrame(s, mark.orientation, plot)
-  } else if (mark.kind === 'funnel') {
-    funnel = funnelFrame(s, mark.orientation, mark.detail, plot)
+  } else if (mark.kind === 'funnel' || funnelSummary) {
+    funnel = funnelFrame(
+      s,
+      mark.kind === 'funnel' ? mark.orientation : 'vertical',
+      mark.kind === 'funnel' ? mark.detail : 'summary',
+      plot,
+    )
   }
 
   return Object.freeze({

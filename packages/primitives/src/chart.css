@@ -344,6 +344,76 @@
     stroke-width: var(--gx-bar-border-width);
   }
 
+  /* Donut slices are categories inside one source series, so their colour identity comes from
+   * the slice index rather than the ancestor series index. The seventh slot is a blended token
+   * colour, keeping the existing six-series palette useful without introducing a second palette. */
+  .gx-arc[data-slice-index='0'],
+  .gx-legend__item[data-slice-index='0'],
+  .gx-compact-key__entry[data-slice-index='0'],
+  .gx-compact-key__swatch[data-slice-index='0'] {
+    --gx-series-color: var(--gx-series-1);
+  }
+  .gx-arc[data-slice-index='1'],
+  .gx-legend__item[data-slice-index='1'],
+  .gx-compact-key__entry[data-slice-index='1'],
+  .gx-compact-key__swatch[data-slice-index='1'] {
+    --gx-series-color: var(--gx-series-2);
+  }
+  .gx-arc[data-slice-index='2'],
+  .gx-legend__item[data-slice-index='2'],
+  .gx-compact-key__entry[data-slice-index='2'],
+  .gx-compact-key__swatch[data-slice-index='2'] {
+    --gx-series-color: var(--gx-series-3);
+  }
+  .gx-arc[data-slice-index='3'],
+  .gx-legend__item[data-slice-index='3'],
+  .gx-compact-key__entry[data-slice-index='3'],
+  .gx-compact-key__swatch[data-slice-index='3'] {
+    --gx-series-color: var(--gx-series-4);
+  }
+  .gx-arc[data-slice-index='4'],
+  .gx-legend__item[data-slice-index='4'],
+  .gx-compact-key__entry[data-slice-index='4'],
+  .gx-compact-key__swatch[data-slice-index='4'] {
+    --gx-series-color: var(--gx-series-5);
+  }
+  .gx-arc[data-slice-index='5'],
+  .gx-legend__item[data-slice-index='5'],
+  .gx-compact-key__entry[data-slice-index='5'],
+  .gx-compact-key__swatch[data-slice-index='5'] {
+    --gx-series-color: var(--gx-series-6);
+  }
+  .gx-arc[data-slice-index='6'],
+  .gx-legend__item[data-slice-index='6'],
+  .gx-compact-key__entry[data-slice-index='6'],
+  .gx-compact-key__swatch[data-slice-index='6'] {
+    --gx-series-color: color-mix(in srgb, var(--gx-series-1) 35%, var(--gx-series-6));
+  }
+  .gx-arc[data-slice-index='7'],
+  .gx-legend__item[data-slice-index='7'],
+  .gx-compact-key__entry[data-slice-index='7'],
+  .gx-compact-key__swatch[data-slice-index='7'] {
+    --gx-series-color: color-mix(in srgb, var(--gx-series-2) 35%, var(--gx-series-5));
+  }
+  .gx-arc[data-slice-index='8'],
+  .gx-legend__item[data-slice-index='8'],
+  .gx-compact-key__entry[data-slice-index='8'],
+  .gx-compact-key__swatch[data-slice-index='8'] {
+    --gx-series-color: color-mix(in srgb, var(--gx-series-3) 35%, var(--gx-series-4));
+  }
+  .gx-arc[data-slice-index='9'],
+  .gx-legend__item[data-slice-index='9'],
+  .gx-compact-key__entry[data-slice-index='9'],
+  .gx-compact-key__swatch[data-slice-index='9'] {
+    --gx-series-color: color-mix(in srgb, var(--gx-series-1) 65%, var(--gx-series-5));
+  }
+  .gx-arc[data-slice-kind='other'],
+  .gx-legend__item[data-slice-kind='other'],
+  .gx-compact-key__entry[data-slice-kind='other'],
+  .gx-compact-key__swatch[data-slice-kind='other'] {
+    --gx-series-color: currentColor;
+  }
+
   /* `Other` remains distinguishable in forced-colors and without relying on hue alone. */
   .gx-arc--other {
     fill: currentColor;
