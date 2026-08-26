@@ -1,8 +1,8 @@
-# `@shiftcharts/playground` — the resize lab
+# `@shiftcharts/playground` — local demos
 
-Not shipped, not published, not a demo. It exists to answer one question that the test
-suite cannot: **what has actually been built, and does it behave the way the research says
-it should when you drag a corner?**
+The default route is the product-facing ShiftCharts dashboard demo. It shows three realistic
+widgets in the controlled grid and makes the resize-to-information-density behavior visible.
+The measurement lab remains available at `/?lab=1` for engineering inspection.
 
 ```bash
 pnpm install
@@ -13,12 +13,24 @@ Then open <http://localhost:5173>.
 
 ## Current status
 
-Milestones A1-A6 and B1-B3 are implemented and verified for the line/area proof. The playground
-exercises the generated 198-token presentation surface, Rail/Neutral themes, renderer controls and
-typed `PlanPolicy` thresholds. C1-C2 grid work is next; bar/timebar and the remaining chart families
-are on the D track.
+The local demo exercises the generated token surface, the Rail theme, `WidgetGrid`, `WidgetShell`,
+`AutoChart`, controlled layout commits, keyboard movement/resizing and the line/area proof. The
+measurement lab exposes the resolver and threshold details. Bar/timebar and the remaining chart
+families are not part of this demo yet.
 
-## What you are looking at
+## What you are looking at by default
+
+The dashboard explains the core interaction in one sentence: **shape your dashboard and the charts
+follow**. Start in edit mode, move a widget with its grip, resize it from the corner, or use the
+visible Move and Resize keyboard controls. `Reset layout` returns the three widgets to their
+initial placements. `View details` opens a compact explanation of the grid, planner and stable
+identity contract.
+
+Each widget owns its metric, title and data. The grid owns placement and passes the actual footprint
+to `AutoChart`, so the chart can change its information density without the grid knowing what the
+chart means. The optional details panel also links to the measurement lab.
+
+## Measurement lab (`/?lab=1`)
 
 A container with `resize: both` and nothing else deciding its size, measured by a
 `ResizeObserver`. Every number in the right-hand panel is a pure function of the two
