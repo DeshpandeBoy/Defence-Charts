@@ -122,9 +122,9 @@
     <section class="hero build-hero" id="top">
       <div>
         <p class="eyebrow">10 / How we build it</p>
-        <h1>From responsive chart engine to ten-family release candidate.</h1>
-        <p class="lede">The project has now built the dashboard shell, the interaction layer, the planned Free-v1 chart families, and the packed-package proof. The remaining work is release readiness: layout migration, the final public package name, trusted Preview publication, and the Free-v1 claim audit.</p>
-        <div class="hero-note"><strong>The honest snapshot.</strong> A1–A6, B1–B3, C0.1–C4.2, I1.1–I1.5, D0.1–D7.1, and E1.1–E1.4 are complete in the current ledger. Preview and Free v1 are not publicly published yet.</div>
+        <h1>From responsive chart engine to release candidate—with visual polish still open.</h1>
+        <p class="lede">The project has now built the dashboard shell, the interaction layer, the planned Free-v1 chart families, and the packed-package proof. The latest visual audit adds a concrete fix queue before release readiness: layout migration, the final public package name, trusted Preview publication, the Free-v1 claim audit, and seven confirmed chart-comprehension fixes.</p>
+        <div class="hero-note"><strong>The honest snapshot / 26 Aug 2026.</strong> A1–A6, B1–B3, C0.1–C4.2, I1.1–I1.5, D0.1–D7.1, and E1.1–E1.4 are complete in the current ledger. CR-VT01 is still verifying; D0.2-visual-defects is ready. Preview and Free v1 are not publicly published yet.</div>
       </div>
       <div class="hero-plate">
         <div class="plate-title"><strong>The build in one picture</strong><span>working → next → publish</span></div>
@@ -141,13 +141,13 @@
     <section class="section" id="today">
       <div class="section-head">
         <div><p class="kicker">Start here</p><h2>What is real today?</h2></div>
-        <p>This is the difference between “the code exists” and “the product is ready.” The first three cards are now shipped implementation/proof milestones. The last card is the release boundary that remains.</p>
+        <p>This is the difference between “the code exists” and “the product is ready.” The first three cards are implementation/proof milestones. The visual audit and the last card show what still has to be closed before a public release claim.</p>
       </div>
       <div class="grid-4 build-status-grid">
         <article class="card card-accent green">
           <span class="status live">implemented</span>
           <h3>Ten chart types</h3>
-          <p>Line, area, bar, timebar, scatter, donut, KPI, progress, heatmap, and funnel are registered centrally and pass the shared family matrix.</p>
+          <p>Line, area, bar, timebar, scatter, donut, KPI, progress, heatmap, and funnel are registered centrally and pass the shared family matrix. CR-VT01 visual review is still open.</p>
           <code>D0.1–D7.1 / 60 browser cards</code>
         </article>
         <article class="card card-accent teal">
@@ -165,23 +165,36 @@
         <article class="card card-accent red">
           <span class="status limit">release remains</span>
           <h3>What is still open?</h3>
-          <p>Layout serialization/migration, the final public npm name/scope, trusted Preview publication, the Free-v1 claim audit, and empirical assistive-technology evidence remain.</p>
-          <code>C3.2 + P0.3 + E2.1/E3.1</code>
+          <p>Seven confirmed visual fixes, one data-model decision, layout serialization/migration, the final public npm name/scope, trusted Preview publication, the Free-v1 claim audit, and empirical assistive-technology evidence remain.</p>
+          <code>D0.2 + VT-003 + C3.2 + P0.3 + E2.1/E3.1</code>
         </article>
       </div>
-      <div class="build-callout"><p><strong>Simple example.</strong> We can now put many chart types on a real dashboard, move and resize them, explore them, and install the built packages in clean consumers. The remaining question is whether we can publish and support that surface as an honest release.</p></div>
+      <div class="build-callout"><p><strong>Simple example.</strong> We can now put many chart types on a real dashboard, move and resize them, explore them, and install the built packages in clean consumers. The visual audit then found cases where a person could still misread the answer. So the next step is not “add more chart types”; it is “make the existing answers unambiguous, then publish honestly.”</p></div>
+    </section>
+
+    <section class="section" id="quality">
+      <div class="section-head">
+        <div><p class="kicker">New checkpoint / visual comprehension</p><h2>What changed after the 120-card review?</h2></div>
+        <p>The automated matrix is a technical safety net. CR-VT01 was a person-focused pass across every family, every size rung, and both desktop and narrow widths. It recorded 9 confirmed issues plus 2 lower-confidence design questions that can pass geometry checks but still confuse a reader.</p>
+      </div>
+      <div class="grid-3">
+        <article class="card card-accent green"><span class="status live">automated gate passed</span><h3 style="margin-top:.8rem">The build still works</h3><p>All 60 family/rung cards render and resize with their identity, states, themes, forced colors, reduced motion, and accessibility text. This part remains complete.</p></article>
+        <article class="card card-accent orange"><span class="status next">D0.2 ready</span><h3 style="margin-top:.8rem">Seven fixes before release</h3><ul><li>Correct the donut Micro total.</li><li>Label funnel Micro as conversion.</li><li>Separate negative heatmap values from zero.</li><li>Stop direct labels from colliding at Panel/Canvas.</li><li>Reduce dense Stage labels that collide.</li><li>Prevent narrow heatmap date-tick collisions.</li><li>Make donut slices and keys use the same colours.</li></ul></article>
+        <article class="card card-accent red"><span class="status limit">separate decisions</span><h3 style="margin-top:.8rem">Do not hide the open questions</h3><p><strong>VT-003:</strong> donut/funnel categories currently fall back to raw indexes such as 0, 1, 2; real names need a <code>DataPoint</code>/<code>Series</code> data-model decision. <strong>VT-009–VT-011:</strong> anomaly hints, middle heatmap legend labels, and strip-key consistency remain design questions.</p></article>
+      </div>
+      <div class="build-callout"><p><strong>Release meaning.</strong> “Ten families integrated” is true. “Every visual detail is signed off” is not true yet. The seven fixes must land with regression proof, and the data-model question must be decided instead of patched around.</p></div>
     </section>
 
     <section class="section" id="pipeline">
       <div class="section-head">
         <div><p class="kicker">The dependency order</p><h2>Five stages, one direction.</h2></div>
-        <p>Later work depends on earlier contracts. The first four stages are now complete and tested. The fifth stage is partly complete: the package works from built artefacts, but the public release decision and claim audit remain.</p>
+        <p>Later work depends on earlier contracts. The first four stages are implemented and tested, but stage D now has a visual follow-up queue. The fifth stage is partly complete: the package works from built artefacts, but the public release decision and claim audit remain.</p>
       </div>
       <div class="build-pipeline" aria-label="Build stages from foundation to release">
         <article class="build-stage"><div class="stage-index"><strong>A</strong><span>foundation</span></div><h3>Make the chart answer honestly</h3><p>Size, plan, data, text, and SVG agree. The current line/area surface lives here.</p><small>Completed for current surface</small><span class="status live">working</span></article>
         <article class="build-stage"><div class="stage-index"><strong>B</strong><span>trust</span></div><h3>Make it safe to reuse</h3><p>Tokens, fonts, motion, RSC, containment, and policy stay predictable across apps.</p><small>Completed for current surface</small><span class="status live">working</span></article>
         <article class="build-stage"><div class="stage-index"><strong>C</strong><span>dashboard</span></div><h3>Give widgets a home</h3><p>The 12-column grid, widget chrome, controlled layout, constraints, keyboard path, measured content seam, and stress proof are complete.</p><small>C3.2 serialization/migration remains</small><span class="status live">mostly done</span></article>
-        <article class="build-stage"><div class="stage-index"><strong>D</strong><span>breadth</span></div><h3>Teach the planned families</h3><p>Ten chart types are registered and covered by the shared six-rung browser matrix, including states, themes, accessibility text, and resize identity.</p><small>D0.1–D7.1 complete</small><span class="status live">complete</span></article>
+        <article class="build-stage"><div class="stage-index"><strong>D</strong><span>breadth</span></div><h3>Teach the planned families</h3><p>Ten chart types are registered and covered by the shared six-rung browser matrix, including states, themes, accessibility text, and resize identity. Human visual review has opened a fix queue.</p><small>D0.1–D7.1 complete / D0.2 follow-up</small><span class="status next">audit open</span></article>
         <article class="build-stage"><div class="stage-index"><strong>E</strong><span>release</span></div><h3>Let someone else install it</h3><p>Built exports, CSS, tarballs, metadata, three consumer builds, publint, attw, and no-network checks are complete.</p><small>E2.1/E3.1 remain</small><span class="status next">release next</span></article>
       </div>
     </section>
@@ -206,7 +219,7 @@
         </div>
         <div class="build-group">
           <div class="build-group-label">D0–D7 / breadth</div>
-          <div><span class="status live">complete</span><h3>Integrate the ten-family catalogue</h3><p>Every family now passes the same central contract instead of only appearing in a type union.</p><ul><li><strong>Ten shipped types:</strong> line, area, bar, timebar, scatter, donut, KPI, progress, heatmap, and funnel.</li><li><strong>D7.1:</strong> planner/renderer registries are explicit and frozen; unsupported future marks still fail explicitly.</li><li><strong>Shared proof:</strong> 60 family/rung cards across six rungs, states, accessible text, resize identity, themes, forced colors, reduced motion, and screenshots.</li><li>A sparkline remains a line-chart composition, not a separate family.</li></ul></div>
+          <div><span class="status next">implementation complete / audit open</span><h3>Integrate the ten-family catalogue</h3><p>Every family now passes the same central contract instead of only appearing in a type union. That proves integration, not perfect visual comprehension.</p><ul><li><strong>Ten shipped types:</strong> line, area, bar, timebar, scatter, donut, KPI, progress, heatmap, and funnel.</li><li><strong>D7.1:</strong> planner/renderer registries are explicit and frozen; unsupported future marks still fail explicitly.</li><li><strong>Shared proof:</strong> 60 family/rung cards across six rungs, states, accessible text, resize identity, themes, forced colors, reduced motion, and screenshots.</li><li><strong>CR-VT01:</strong> 120 visual checks recorded 9 confirmed issues plus 2 lower-confidence design questions; D0.2-visual-defects is ready for 7 fixes, while VT-003 needs a data-model decision and VT-009–VT-011 remain design questions.</li><li>A sparkline remains a line-chart composition, not an additional family.</li></ul></div>
         </div>
         <div class="build-group">
           <div class="build-group-label">E1–E3 / release</div>
@@ -241,11 +254,11 @@
           <thead><tr><th>Package</th><th>Its job</th><th>Working now</th><th>Still to complete</th></tr></thead>
           <tbody>
             <tr><td><strong><code>@gx/core</code></strong></td><td>Pure, serialisable decisions: sizes, plans, scales, layout, identities, and chart data contracts.</td><td><span class="status live">ten-family core</span><br />Planner registry, family contracts, JSON round-trips, and no-DOM tests.</td><td>C3.2 does not belong here; keep future plan extensions pure and explicit.</td></tr>
-            <tr><td><strong><code>@gx/primitives</code></strong></td><td>Small SVG/table renderers that can be used by server-safe consumers.</td><td><span class="status live">ten-family renderers</span><br />Line, area, bar, timebar, scatter, donut, KPI, progress, heatmap, and funnel.</td><td>Continue evidence review; no unregistered silent fallback.</td></tr>
+            <tr><td><strong><code>@gx/primitives</code></strong></td><td>Small SVG/table renderers that can be used by server-safe consumers.</td><td><span class="status live">ten-family renderers</span><br />Line, area, bar, timebar, scatter, donut, KPI, progress, heatmap, and funnel.</td><td>Apply the seven D0.2 visual fixes; keep VT-003 separate until the data model is decided.</td></tr>
             <tr><td><strong><code>@gx/react</code></strong></td><td>Browser boundary: measure the widget, call the planner, render, animate, and host basic interaction safely.</td><td><span class="status live">interaction complete</span><br />AutoChart, tooltip, crosshair, legends, resize, motion, and RSC-safe split.</td><td>CR-X04 empirical assistive-technology review remains outside the fixture proof.</td></tr>
             <tr><td><strong><code>@gx/grid</code></strong></td><td>Outer dashboard geometry: placement, drag, resize, compaction, constraints, and persistence callbacks.</td><td><span class="status live">real grid complete</span><br />Controlled 12-column wrapper, widget shell/states, keyboard path, browser gate, and stress evidence.</td><td>C3.2 layout serialization/migration and duplicate/missing-widget policy.</td></tr>
             <tr><td><strong><code>@gx/tokens</code></strong></td><td>Theme values for color, type, spacing, strokes, gaps, ticks, and policy-related presentation.</td><td><span class="status live">emitted package CSS</span><br />Typed/generated token system, font metrics, and seven packed CSS subpaths.</td><td>Final public package identity and release workflow.</td></tr>
-            <tr><td><strong><code>@gx/testing</code></strong></td><td>Proof helpers for pure Node, fake resize, browser, RSC, and consumer fixtures.</td><td><span class="status live">release gates complete</span><br />60-card family matrix, packed consumers, publint, attw, package-content, CSS, and no-network checks.</td><td>Coordinator must still run the final Preview/Free-v1 claim audit.</td></tr>
+            <tr><td><strong><code>@gx/testing</code></strong></td><td>Proof helpers for pure Node, fake resize, browser, RSC, and consumer fixtures.</td><td><span class="status live">technical gates complete</span><br />60-card family matrix, packed consumers, publint, attw, package-content, CSS, and no-network checks.</td><td>The automated gate does not replace the CR-VT01 human visual review; Preview/Free-v1 claim audits remain.</td></tr>
           </tbody>
         </table>
       </div>
@@ -291,6 +304,7 @@
             <li class="done"><span><strong>Plan:</strong> its data meaning and size ladder are explicit.</span></li>
             <li class="done"><span><strong>Render:</strong> SVG and table/fallback output agree with the plan.</span></li>
             <li class="done"><span><strong>Explore:</strong> tooltip, legend, keyboard, touch, and reduced-motion behavior are proven by the interaction matrix.</span></li>
+            <li><span><strong>Visual review:</strong> CR-VT01 recorded 9 confirmed issues plus 2 lower-confidence design questions; 7 confirmed issues are ready for fixes, so this sign-off step is still open.</span></li>
             <li><span><strong>Evidence:</strong> empirical assistive-technology review is still tracked as CR-X04.</span></li>
           </ul>
         </article>
@@ -301,6 +315,7 @@
             <li class="done"><span><strong>Import:</strong> public exports, CSS, ESM, RSC, Vite, peer dependencies, and tree-shaking work.</span></li>
             <li><span><strong>Operate:</strong> layout migration and host-owned persistence still need the C3.2 contract.</span></li>
             <li><span><strong>Claim:</strong> docs describe what is shipped, what is experimental, and what is still planned.</span></li>
+            <li><span><strong>Visual honesty:</strong> the seven D0.2 fixes and VT-003 data-model decision are closed or clearly marked before publication.</span></li>
           </ul>
         </article>
       </div>
@@ -312,10 +327,12 @@
         <p>This order keeps the work small enough to review and strong enough to unlock the next step.</p>
       </div>
       <ol class="build-next">
+        <li><div><strong>Run D0.2: fix the seven confirmed visual defects.</strong><span>Correct the wrong compact values, misleading colour treatment, and label collisions; add regression proof and rerun the matrix.</span></div></li>
+        <li><div><strong>Make the VT-003 data-model decision.</strong><span>Decide how donut and funnel points carry real category/stage names instead of silently displaying raw indexes.</span></div></li>
         <li><div><strong>Finish C3.2 layout serialization and migration.</strong><span>Wait for CR-C03, then define versioned round-trips, duplicate/missing-widget reconciliation, and host-owned save boundaries.</span></div></li>
         <li><div><strong>Resolve P0.3: final public package name and npm scope.</strong><span>The package metadata and licence are prepared, but the placeholder <code>@gx/*</code> identity cannot be the final public promise.</span></div></li>
         <li><div><strong>Run E2.1 and publish Preview.</strong><span>Apply the final name, add Changesets/trusted publishing, and release the already-proven dashboard slice.</span></div></li>
-        <li><div><strong>Run E3.1 Free-v1 claim and release audit.</strong><span>Audit the ten-family catalogue, packed consumer proof, accessibility evidence, docs, and every public claim before calling Free v1 released.</span></div></li>
+        <li><div><strong>Run E3.1 Free-v1 claim and release audit.</strong><span>Audit the ten-family catalogue, packed consumer proof, visual fixes, accessibility evidence, docs, and every public claim before calling Free v1 released.</span></div></li>
         <li><div><strong>Keep advanced product scope separate.</strong><span>Shared filters, linked views, brush/zoom, annotations, and one validated Pro capability remain v1.1/commercial work.</span></div></li>
       </ol>
       <div class="build-callout"><p><strong>In one sentence:</strong> we are not just adding charts; we are building a dependable chain from data → plan → widget box → interaction → package → consumer proof.</p></div>

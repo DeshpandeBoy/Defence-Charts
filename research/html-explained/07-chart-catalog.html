@@ -24,20 +24,21 @@
       <div>
         <p class="eyebrow">07 / Chart catalogue</p>
         <h1>Ten chart types now share one size ladder.</h1>
-        <p class="lede">Chart breadth is no longer only a research list. The planned Free-v1 families are integrated into the planner and renderer registries, then exercised through the same six size rungs and browser checks.</p>
-        <div class="hero-note"><strong>Current truth.</strong> D0.1–D7.1 are complete. The catalogue is implemented and centrally integrated; Preview and Free v1 still need the final naming, publication, and claim gates.</div>
+        <p class="lede">Chart breadth is no longer only a research list. The planned Free-v1 families are integrated into the planner and renderer registries, then exercised through the same six size rungs and browser checks. The implementation is real; visual sign-off is still in progress.</p>
+        <div class="hero-note"><strong>Current truth / 26 Aug 2026.</strong> D0.1–D7.1 are complete for implementation. CR-VT01 then inspected all 120 chart-card and viewport combinations and recorded 9 confirmed issues plus 2 lower-confidence design questions. Seven confirmed issues are ready for a fix task; VT-003 needs a data-model decision; VT-009–VT-011 remain design questions. Preview and Free v1 still need the final naming, publication, claim, and visual gates.</div>
       </div>
       <div class="hero-plate">
         <div class="plate-title"><strong>Catalogue status</strong><span>implementation → proof → release</span></div>
-        <div class="grid-2" style="margin-top:1rem">
+        <div class="grid-3" style="margin-top:1rem">
           <div class="card"><div class="stat"><strong>10</strong><span>integrated types</span></div><p>line, area, bar, timebar, scatter, donut, KPI, progress, heatmap, funnel</p></div>
           <div class="card"><div class="stat"><strong>60</strong><span>browser cards</span></div><p>ten families × six rungs, with states, themes, resize identity, and accessibility text</p></div>
+          <div class="card"><div class="stat"><strong>120</strong><span>visual checks</span></div><p>all cards at desktop and narrow width; 9 confirmed issues plus 2 design questions recorded</p></div>
         </div>
       </div>
     </section>
 
     <section class="section" id="catalogue">
-      <div class="section-head"><div><p class="kicker">Implemented catalogue</p><h2>What can the current build answer?</h2></div><p>Each row is a shipped family, not merely a future type name. The small-size story is still part of the contract: it says what the chart does when there is not enough room for the full explanation.</p></div>
+      <div class="section-head"><div><p class="kicker">Implemented catalogue</p><h2>What can the current build answer?</h2></div><p>Each row is an integrated family, not merely a future type name. The small-size story is still part of the contract: it says what the chart does when there is not enough room for the full explanation. “Complete” here means the family is built and registered; see the audit below for the remaining clarity work.</p></div>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Family</th><th>Question it answers</th><th>Small-size story</th><th>Current proof</th><th>Status</th></tr></thead>
@@ -57,14 +58,25 @@
       <p class="source">The central D7.1 proof covers ten types across 60 family/rung cards. A sparkline remains a line-chart composition, not an additional chart family.</p>
     </section>
 
+    <section class="section" id="audit">
+      <div class="section-head"><div><p class="kicker">Latest quality check / 26 Aug</p><h2>Green automated proof, unfinished visual polish.</h2></div><p>This distinction matters. The browser gate can confirm that cards render, resize, keep their identity, expose states, and avoid obvious geometry failures. A person can still find a wrong number, a confusing label, or a colour key that does not match the picture.</p></div>
+      <div class="grid-3">
+        <article class="card card-accent green"><span class="status live">passed</span><h3 style="margin-top:.8rem">What is proven</h3><p>All 60 family/rung cards pass the current automated matrix. Themes, forced colors, reduced motion, accessibility text, resize identity, and screenshots are covered.</p></article>
+        <article class="card card-accent orange"><span class="status next">7 fixes ready</span><h3 style="margin-top:.8rem">What needs repair</h3><ul><li>Donut Micro can show a wrong total.</li><li>Funnel Micro can show a bare number.</li><li>Heatmap negative and zero cells can look the same.</li><li>Direct labels collide at Panel/Canvas.</li><li>Dense Stage labels collide with one another and the marks.</li><li>Narrow heatmap date labels can collide.</li><li>Donut slice colours do not match its key.</li></ul><p><strong>Task:</strong> D0.2-visual-defects.</p></article>
+        <article class="card card-accent red"><span class="status limit">decision / design</span><h3 style="margin-top:.8rem">What is not silently fixed</h3><p>VT-003 needs a data-model decision so donut/funnel categories can have real names instead of raw indexes. VT-009–VT-011 are lower-confidence questions about anomaly hints, middle heatmap labels, and strip-key consistency.</p></article>
+      </div>
+      <div class="home-answer" style="margin-top:1rem"><p><strong>Plain-English meaning:</strong> the chart families exist and can run, but the release still needs a person-focused pass. We do not mark these issues fixed until the code and regression checks actually change.</p></div>
+    </section>
+
     <section class="section" id="proof">
-      <div class="section-head"><div><p class="kicker">What “complete” means here</p><h2>A chart name is not enough.</h2></div><p>Every family repeats the same proof so the system does not become a collection of unrelated renderers.</p></div>
+      <div class="section-head"><div><p class="kicker">What “complete” means here</p><h2>A chart name is not enough.</h2></div><p>Every family repeats the same implementation proof so the system does not become a collection of unrelated renderers. The sixth step is now a separate visual review, and that step is not closed yet.</p></div>
       <div class="timeline">
         <div class="timeline-item"><span></span><span class="timeline-code">01 / semantics</span><div><span class="status live">done</span><h3>Write the size ladder</h3><p>Each rung says what stays, what disappears, what aggregates, and what the chart can honestly claim.</p></div></div>
         <div class="timeline-item"><span></span><span class="timeline-code">02 / plan</span><div><span class="status live">done</span><h3>Map it to ChartPlan</h3><p>The family uses shared fields where the meaning is shared and typed fields where it introduces a genuinely new state.</p></div></div>
         <div class="timeline-item"><span></span><span class="timeline-code">03 / render</span><div><span class="status live">done</span><h3>Build the renderer and data frame</h3><p>Geometry remains in core, markup remains in primitives, and browser interaction stays behind the client boundary.</p></div></div>
         <div class="timeline-item"><span></span><span class="timeline-code">04 / integration</span><div><span class="status live">done</span><h3>Register it explicitly</h3><p>Planner and renderer registries are frozen and central. Unsupported future marks fail explicitly instead of silently becoming a line chart.</p></div></div>
         <div class="timeline-item"><span></span><span class="timeline-code">05 / matrix</span><div><span class="status live">done</span><h3>Run the shared browser proof</h3><p>Normal/empty/error states, accessible text, themes, forced colors, reduced motion, resize identity, screenshots, and runtime diagnostics are covered across six rungs.</p></div></div>
+        <div class="timeline-item"><span></span><span class="timeline-code">06 / visual review</span><div><span class="status next">open</span><h3>Ask whether a person can read it</h3><p>CR-VT01 inspected all 120 card-and-viewport combinations. It recorded 9 confirmed issues plus 2 lower-confidence design questions that the automated gate did not classify as failures; 7 confirmed issues are now ready for implementation fixes.</p></div></div>
       </div>
     </section>
 
