@@ -1,0 +1,87 @@
+name: Release
+
+# ⚠ Triggers on push to `main` only. As of this workflow's creation, `main` is a single
+# disconnected "Initial commit" with no shared history with the branch all real development
+# happens on (`Anti-gravity-and-other-Agent-changes`) — see `git merge-base` returning nothing
+# between them. This workflow is therefore intentionally dormant: it cannot fire for real work
+# until that history is reconciled (a merge/rebase onto `main`, decided and performed
+# deliberately, not by this file) and P0.3 (public name/npm scope) is resolved. Wiring it now,
+# inert, lets the mechanics (Changesets version PR, trusted-publish job shape) be reviewed and
+# fixed before either of those blockers clears, rather than after.
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  # ⚠ `id-token: write` is the exact, sole requirement npm's trusted-publishing docs state for
+  # OIDC provenance (confirmed 2026-08-24 against docs.npmjs.com and the GitHub Changelog GA
+  # announcement — see `research/agent-work/claude/CR-E04-publication-current-state.md`). No
+  # `NPM_TOKEN` secret is configured or read anywhere in this file, on purpose: trusted
+  # publishing's whole point is that a long-lived registry token is not needed. Both conditions
+  # npm requires for automatic provenance — a public repository publishing public packages — are
+  # already true here (`publishConfig.access: "public"` on every package; this repository is
+  # public).
+  contents: write
+  id-token: write
+  pull-requests: write
+
+env:
+  TZ: UTC
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # changesets/action needs full history to diff changesets against the base branch.
+          fetch-depth: 0
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        # Version comes from `packageManager` in package.json, same as `ci.yml`.
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: pnpm
+          # ⚠ Registry URL is required for OIDC trusted publishing even though no token is set
+          # here — this is what makes `id-token: write` above actually take effect for the
+          # publish step, per npm's trusted-publishing setup docs.
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      # ⚠ Full verification gate before any version bump or publish — the same bar every PR
+      # meets in `ci.yml`. A release workflow that skips this and relies on branch protection
+      # alone is one force-push away from publishing something that never passed CI.
+      - name: Verify
+        run: pnpm verify
+
+      # ⚠ **This is the one step in the whole file with a real, live regression risk, not a
+      # theoretical one.** `changeset publish` auto-detects the workspace package manager from
+      # `pnpm-workspace.yaml` and shells out to `pnpm publish` per package — confirmed by reading
+      # `@changesets/cli`'s own `getPublishTool()` — so this repo's actual publish path is
+      # `pnpm publish`'s OIDC support, not npm's. `pnpm/pnpm#11513` reports a live OIDC-publish
+      # regression, though against pnpm 11, not this repo's pinned `pnpm@10.34.5` — that
+      # regression's applicability to the pinned version was not confirmed either way (see
+      # `CR-E04`). `pnpm publish --dry-run` and `pnpm -r publish --dry-run` were both run
+      # successfully against this exact pinned version (2026-08-26) and packed all 6 packages
+      # correctly; the one thing a dry run cannot exercise is the live OIDC token exchange
+      # itself, which only a real run of this job can prove. Treat this job's first real
+      # execution as that proof, not as a foregone conclusion.
+      - name: Create Release Pull Request or Publish to npm
+        id: changesets
+        uses: changesets/action@v1
+        with:
+          version: pnpm version-packages
+          publish: pnpm release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
