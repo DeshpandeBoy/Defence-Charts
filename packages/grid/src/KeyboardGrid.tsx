@@ -30,6 +30,7 @@ export type KeyboardGridProps = {
   readonly layout: readonly WidgetLayout[]
   readonly mode: KeyboardGridHostMode
   readonly children: ReactNode
+  readonly cancelInteractionToken?: number
   readonly onLayoutStart?: (layout: readonly WidgetLayout[]) => void
   readonly onLayoutPreview?: (layout: readonly WidgetLayout[]) => void
   readonly onLayoutCommit?: (layout: readonly WidgetLayout[]) => void
@@ -59,6 +60,7 @@ export function KeyboardGrid({
   layout,
   mode,
   children,
+  cancelInteractionToken,
   onLayoutStart,
   onLayoutPreview,
   onLayoutCommit,
@@ -72,12 +74,30 @@ export function KeyboardGrid({
   const liveId = `shiftcharts-keyboard-live-${instructionId}`
   const [session, setSession] = useState<KeyboardEditSession | null>(null)
   const [announcement, setAnnouncement] = useState('')
+  const modeRef = useRef(mode)
+  const cancelTokenRef = useRef<number | undefined>(cancelInteractionToken)
 
   useEffect(() => {
     if (!restoreFocusRef.current) return
     restoreFocusRef.current = false
     initiatingControlRef.current?.focus({ preventScroll: true })
   }, [session])
+
+  useEffect(() => {
+    const modeChanged = modeRef.current !== mode
+    const cancelTokenChanged = cancelTokenRef.current !== cancelInteractionToken
+    modeRef.current = mode
+    cancelTokenRef.current = cancelInteractionToken
+    if (!modeChanged && !cancelTokenChanged) return
+    if (session === null) return
+
+    const nextLayout = cancelKeyboardSession(session)
+    restoreFocusRef.current = mode === 'edit'
+    setSession(null)
+    const nextItem = nextLayout.find((candidate) => candidate.id === item.id) ?? item
+    setAnnouncement(`${modeLabel(session.mode)} cancelled; restored ${describeKeyboardLayout(nextItem)}.`)
+    onLayoutCancel?.(nextLayout)
+  }, [cancelInteractionToken, item, mode, onLayoutCancel, session])
 
   const currentItem = session?.current.find((candidate) => candidate.id === item.id) ?? item
 

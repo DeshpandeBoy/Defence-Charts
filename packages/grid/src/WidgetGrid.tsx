@@ -203,6 +203,7 @@ export function WidgetGrid({
             item={item}
             layout={displayLayout}
             mode={mode}
+            {...(cancelInteractionToken === undefined ? {} : { cancelInteractionToken })}
             onLayoutStart={(nextLayout) => {
               keyboardCancelSignatureRef.current = null
               keyboardInteractionRef.current = true
@@ -233,7 +234,7 @@ export function WidgetGrid({
           </KeyboardGrid>
         </div>
       )),
-    [displayLayout, emitCommittedLayout, mode, onLayoutCancel, onLayoutPreview, onLayoutStart, renderItem],
+    [cancelInteractionToken, displayLayout, emitCommittedLayout, mode, onLayoutCancel, onLayoutPreview, onLayoutStart, renderItem],
   )
 
   const gridConfig = useMemo(
@@ -297,11 +298,19 @@ export function WidgetGrid({
     if (cancelInteractionToken === cancelTokenRef.current) return
     cancelTokenRef.current = cancelInteractionToken
     const active = activeInteractionRef.current
-    if (active === null) return
-    const cancelled = cancelGridInteraction(active)
-    activeInteractionRef.current = null
-    onLayoutCancel?.(cancelled.snapshot)
+    if (active !== null) {
+      const cancelled = cancelGridInteraction(active)
+      activeInteractionRef.current = null
+      onLayoutCancel?.(cancelled.snapshot)
+    }
+    keyboardInteractionRef.current = false
+    setKeyboardLayout(null)
   }, [cancelInteractionToken, onLayoutCancel])
+
+  useEffect(() => {
+    keyboardInteractionRef.current = false
+    setKeyboardLayout(null)
+  }, [mode])
 
   const handleLayoutChange = useCallback(
     (nextLayout: RglLayout) => {

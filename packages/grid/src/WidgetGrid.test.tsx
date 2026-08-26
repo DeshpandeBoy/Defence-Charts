@@ -192,6 +192,81 @@ describe('WidgetGrid controlled wrapper', () => {
     expect(document.activeElement).toBe(move)
   })
 
+  it('clears keyboard preview and session when the host cancels the interaction', () => {
+    const onLayoutCancel = vi.fn<(snapshot: LayoutSnapshot) => void>()
+    mount(INITIAL_LAYOUT, { cancelInteractionToken: 0, onLayoutCancel })
+    const move = container.querySelector<HTMLButtonElement>('[data-shiftcharts-keyboard-control="move"]')
+    if (move === null) throw new Error('missing keyboard move control')
+
+    act(() => move.focus())
+    press(move, 'Enter')
+    press(move, 'ArrowRight')
+    expect(latest().layout?.find((item) => item.i === 'sales')).toMatchObject({ x: 1 })
+
+    act(() => {
+      root.render(
+        <WidgetGrid
+          layout={INITIAL_LAYOUT}
+          width={960}
+          renderItem={renderItem}
+          cancelInteractionToken={1}
+          onLayoutCancel={onLayoutCancel}
+        />,
+      )
+    })
+
+    expect(latest().layout?.find((item) => item.i === 'sales')).toMatchObject({ x: 0 })
+    expect(container.querySelector<HTMLButtonElement>('[data-shiftcharts-keyboard-control="move"]')?.getAttribute('aria-pressed'))
+      .toBe('false')
+    expect(onLayoutCancel).toHaveBeenCalledWith(expect.objectContaining({
+      items: expect.arrayContaining([expect.objectContaining({ id: 'sales', x: 0 })]),
+    }))
+  })
+
+  it('cancels the keyboard session and preview when switching out of edit mode', () => {
+    const onLayoutCancel = vi.fn<(snapshot: LayoutSnapshot) => void>()
+    mount(INITIAL_LAYOUT, { onLayoutCancel })
+    const move = container.querySelector<HTMLButtonElement>('[data-shiftcharts-keyboard-control="move"]')
+    if (move === null) throw new Error('missing keyboard move control')
+
+    act(() => move.focus())
+    press(move, 'Enter')
+    press(move, 'ArrowRight')
+
+    act(() => {
+      root.render(
+        <WidgetGrid
+          layout={INITIAL_LAYOUT}
+          width={960}
+          renderItem={renderItem}
+          mode="read-only"
+          onLayoutCancel={onLayoutCancel}
+        />,
+      )
+    })
+
+    expect(latest().layout?.find((item) => item.i === 'sales')).toMatchObject({ x: 0 })
+    expect(container.querySelector('[data-shiftcharts-keyboard-control]')).toBeNull()
+    expect(onLayoutCancel).toHaveBeenCalledWith(expect.objectContaining({
+      items: expect.arrayContaining([expect.objectContaining({ id: 'sales', x: 0 })]),
+    }))
+
+    act(() => {
+      root.render(
+        <WidgetGrid
+          layout={INITIAL_LAYOUT}
+          width={960}
+          renderItem={renderItem}
+          mode="edit"
+          onLayoutCancel={onLayoutCancel}
+        />,
+      )
+    })
+
+    expect(container.querySelector<HTMLButtonElement>('[data-shiftcharts-keyboard-control="move"]')?.getAttribute('aria-pressed'))
+      .toBe('false')
+  })
+
   it('ignores one stale RGL layout callback after keyboard cancellation', () => {
     const onLayoutChange = vi.fn<(snapshot: LayoutSnapshot) => void>()
     const onLayoutCancel = vi.fn<(snapshot: LayoutSnapshot) => void>()
