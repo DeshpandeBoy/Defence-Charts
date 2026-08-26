@@ -9,7 +9,7 @@ worktree: /Users/SameeraD/Defence-Charts
 base_commit: 20709d9af90fbe2e34b24a8eac6df415579f4bac
 depends_on: []
 started_at: 2026-08-26T00:00:00+05:30
-last_checkpoint: 2026-08-26T23:25:50+05:30
+last_checkpoint: 2026-08-26T23:27:17+05:30
 ---
 
 # FT-V1 — ShiftCharts polished demo shell
@@ -109,7 +109,7 @@ pnpm --filter @shiftcharts/playground typecheck
 | `apps/playground/src/main.tsx` | Main route selection and grid style imports | yes |
 | `apps/playground/index.html` | Product-facing document title | yes |
 | `apps/playground/README.md` | Document the shipped local demo and measurement lab | yes |
-| `research/handoffs/FT-V1.md` | Durable task contract and restart checkpoint | no |
+| `research/handoffs/FT-V1.md` | Durable task contract and restart checkpoint | yes |
 
 ## Verification evidence
 
@@ -139,6 +139,6 @@ pnpm --filter @shiftcharts/playground typecheck
 
 - Worker commit: `5342e0a feat(FT-V1): add polished ShiftCharts demo`
 - Branch pushed or locally available: local branch `Fine-Tuning-V1`
-- Working tree clean: pending final handoff commit
+- Working tree clean: yes after the final handoff commit
 - Narrow restart check: `pnpm --filter @shiftcharts/playground typecheck`
 - Remaining risk/limitations: Pointer drag on the standalone CSS resize handle is not reproducible in the in-app browser driver; keyboard grid movement is verified. No deployment or push was requested.
