@@ -121,7 +121,7 @@ PY
 
 ## Final handoff
 
-- Worker commit: `0111631` (`docs: refresh explainer after visual audit`).
+- Worker commit: `fe151b7` (`docs: refresh explainer after visual audit`).
 - Working tree: clean after commit.
 - Narrow restart check: `git diff --check && curl -fsS http://127.0.0.1:8123/10-roadmap.html >/dev/null`.
 - Remaining risk: the pages report the visual audit accurately, but the seven D0.2 fixes are not
