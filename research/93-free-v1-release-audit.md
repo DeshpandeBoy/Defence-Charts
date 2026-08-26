@@ -1,7 +1,7 @@
 # ShiftCharts Free-v1 release audit
 
 Date: 2026-08-26  
-Candidate lineage: `c53efe4` through `9a8ccf0`  
+Candidate lineage: `c53efe4` through `9a8ccf0`
 Prospective public version: `0.1.0` for all six packages
 
 ## Outcome
