@@ -72,7 +72,7 @@ describe('the deny direction', () => {
 
   it('permits the one generated symbol that is on the allowlist', async () => {
     // ⚠ If this ever fails, the generated rule has stopped being an allowlist and become a
-    // ban — and `ROBOTO_FLEX_METRICS` is a published part of `@gx/core`.
+    // ban — and `ROBOTO_FLEX_METRICS` is a published part of `@shiftcharts/core`.
     const { forbiddenExports } = await report('api-deny')
     expect(forbiddenExports.map((f) => f.symbol)).not.toContain('ROBOTO_FLEX_METRICS')
   })
@@ -80,7 +80,7 @@ describe('the deny direction', () => {
 
 describe('the origin rule', () => {
   it('permits a type owned by a declared dependency and on that dependency’s barrel', async () => {
-    // `@gx/primitives` is this shape at scale: thirty-five `@gx/core` types reachable from
+    // `@shiftcharts/primitives` is this shape at scale: thirty-five `@shiftcharts/core` types reachable from
     // its props. Demanding it re-export them would be thirty-five reports about nothing.
     const { missingExports } = await report('api-allow')
     expect(missingExports.filter((m) => m.pkg === '@fixture/allow-api-consumer')).toEqual([])
@@ -106,7 +106,7 @@ describe('the origin rule', () => {
 describe('the exclusions', () => {
   it('does not report a type used only inside a function body', async () => {
     // ⚠ `AxisScale`, the first false positive. It is a `const` annotation forty lines
-    // inside `@gx/core`'s `resolveFrame`. A function body is not a public signature.
+    // inside `@shiftcharts/core`'s `resolveFrame`. A function body is not a public signature.
     const { missingExports } = await report('api-deny')
     expect(missingExports.map((m) => m.type)).not.toContain('BodyLocal')
   })
@@ -137,22 +137,22 @@ describe('the real tree', () => {
   it('walks every workspace package rather than a subset', async () => {
     const world = await discoverPackages(PACKAGES)
     expect(world.map((p) => p.name).sort()).toEqual([
-      '@gx/core',
-      '@gx/grid',
-      '@gx/primitives',
-      '@gx/react',
-      '@gx/testing',
-      '@gx/tokens',
+      '@shiftcharts/core',
+      '@shiftcharts/grid',
+      '@shiftcharts/primitives',
+      '@shiftcharts/react',
+      '@shiftcharts/testing',
+      '@shiftcharts/tokens',
     ])
   })
 
-  it('ships @gx/tokens and @gx/core clean', async () => {
-    // ⚠ Two packages, not all six. `@gx/testing` is knowingly red — `Callback` is
+  it('ships @shiftcharts/tokens and @shiftcharts/core clean', async () => {
+    // ⚠ Two packages, not all six. `@shiftcharts/testing` is knowingly red — `Callback` is
     // `FakeResizeObserver`'s constructor parameter type and is not on the barrel, which is
     // the exact papercut this gate exists for and a one-word fix in that package. Asserting
     // the whole tree here would encode that bug as expected.
     const world = await discoverPackages(PACKAGES)
-    const subset = world.filter((p) => p.name === '@gx/tokens' || p.name === '@gx/core')
+    const subset = world.filter((p) => p.name === '@shiftcharts/tokens' || p.name === '@shiftcharts/core')
     const { missingExports, forbiddenExports } = checkWorld(subset)
     expect(missingExports).toEqual([])
     expect(forbiddenExports).toEqual([])

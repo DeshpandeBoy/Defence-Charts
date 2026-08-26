@@ -7,11 +7,10 @@ import { RootProvider } from 'fumadocs-ui/provider/next';
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3001'),
   title: {
-    default: 'GX documentation',
-    template: '%s · GX documentation',
+    default: 'ShiftCharts documentation',
+    template: '%s · ShiftCharts documentation',
   },
-  description:
-    'Developer documentation for the GX size-adaptive chart and dashboard widget library.',
+  description: 'ShiftCharts — charts that shift with their space.',
 };
 
 export const viewport: Viewport = {
@@ -24,11 +23,11 @@ export const viewport: Viewport = {
 
 const designContract = `
 <!--
-THESIS: GX documentation is a calibration instrument, not a marketing page; the live size-to-plan proof leads and generic hero cards do not.
+THESIS: ShiftCharts documentation is a calibration instrument, not a marketing page; the live size-to-plan proof leads and generic hero cards do not.
 OWN-WORLD: Emission-Line Rail charcoal grounds, exact wavelength signals, square controls, hairline registration, and Roboto Flex.
 STORY: A developer sees one chart change meaning, learns the data-to-plan-to-render boundary, and reaches a compiling API route.
 FIRST VIEWPORT: Fixed documentation rail, literal product claim, draggable chart instrument, live plan readout, and page outline.
-FORM: Calibration console, selected from the established-world surface structures; seed gx-docs-988c5e23.
+FORM: Calibration console, selected from the established-world surface structures; seed shiftcharts-docs-988c5e23.
 FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, DESIGN.md, and every shipping raster carrying its provenance
 -->
 `;
@@ -36,9 +35,9 @@ FINISH: unreviewed and undocumented is unfinished; this build ends with the fini
 export default function Layout({ children }: LayoutProps<'/'>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="gx-docs min-h-screen">
+      <body className="shiftcharts-docs min-h-screen">
         <template
-          data-design-contract="gx-docs-988c5e23"
+          data-design-contract="shiftcharts-docs-988c5e23"
           dangerouslySetInnerHTML={{ __html: designContract }}
         />
         <RootProvider>{children}</RootProvider>

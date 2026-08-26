@@ -15,7 +15,7 @@ import {
   type ChartFrame,
   type ChartPlan,
   type PlanPolicy,
-} from '@gx/core'
+} from '@shiftcharts/core'
 
 import { classes, roundCoord } from './svg.ts'
 
@@ -181,7 +181,7 @@ export function compactSeriesKeyLayout(
 export function CompactSeriesKey({ layout, className }: CompactSeriesKeyProps) {
   return (
     <g
-      className={classes('gx-compact-key', className)}
+      className={classes('shiftcharts-compact-key', className)}
       data-legend-placement="internal"
       data-legend-source={layout.source}
       data-legend-rail-height={roundCoord(layout.region.height)}
@@ -192,7 +192,7 @@ export function CompactSeriesKey({ layout, className }: CompactSeriesKeyProps) {
       <title>Chart series</title>
       {layout.entries.map((entry) => (
         <g
-          className="gx-compact-key__entry"
+          className="shiftcharts-compact-key__entry"
           data-series-id={entry.id}
           data-series-index={entry.kind === 'series' ? entry.index : undefined}
           data-slice-index={entry.kind === 'slice' ? entry.index : undefined}
@@ -202,7 +202,7 @@ export function CompactSeriesKey({ layout, className }: CompactSeriesKeyProps) {
           aria-label={entry.label}
         >
           <rect
-            className="gx-compact-key__swatch"
+            className="shiftcharts-compact-key__swatch"
             data-series-index={entry.kind === 'series' ? entry.index : undefined}
             data-slice-index={entry.kind === 'slice' ? entry.index : undefined}
             data-slice-kind={entry.kind === 'slice' ? (entry.other ? 'other' : 'value') : undefined}
@@ -212,7 +212,7 @@ export function CompactSeriesKey({ layout, className }: CompactSeriesKeyProps) {
             height={roundCoord(entry.swatch)}
           />
           <text
-            className="gx-compact-key__label"
+            className="shiftcharts-compact-key__label"
             data-series-index={entry.index}
             x={roundCoord(entry.x + entry.swatch)}
             y={roundCoord(entry.y)}
@@ -223,7 +223,7 @@ export function CompactSeriesKey({ layout, className }: CompactSeriesKeyProps) {
       ))}
       {layout.hidden > 0 ? (
         <text
-          className="gx-compact-key__more"
+          className="shiftcharts-compact-key__more"
           data-hidden={layout.hidden}
           x={roundCoord(layout.more?.x ?? layout.region.x)}
           y={roundCoord(layout.more?.y ?? layout.region.y)}

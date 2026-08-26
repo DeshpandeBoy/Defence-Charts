@@ -46,11 +46,11 @@ function DocsCallout({
   } as const;
 
   return (
-    <aside className="gx-callout" data-type={type}>
+    <aside className="shiftcharts-callout" data-type={type}>
       <FontAwesomeIcon icon={icons[type]} aria-hidden="true" />
       <div>
         {title === undefined ? null : <strong>{title}</strong>}
-        <div className="gx-callout__body">{children}</div>
+        <div className="shiftcharts-callout__body">{children}</div>
       </div>
     </aside>
   );

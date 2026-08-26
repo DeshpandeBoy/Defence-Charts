@@ -7,7 +7,7 @@
  * one placement gate **G15** permits, so `check-determinism.mjs` is proven not to reject
  * legitimate use. A gate that only ever says no has not been tested either.
  *
- * ⚠ jsdom, never happy-dom. On the measurement APIs `@gx/core` may not call, jsdom throws
+ * ⚠ jsdom, never happy-dom. On the measurement APIs `@shiftcharts/core` may not call, jsdom throws
  * and happy-dom returns `0` — a throw is a failing test, a `0` is a chart laid out as
  * though every label were empty. `scripts/check-determinism.mjs` G8.
  */

@@ -11,7 +11,7 @@ The shared matrix definition in matrix.ts is consumed by:
   screenshot evidence;
 - FamilyMatrixApp.tsx for the visual gallery.
 
-The ladder cards reuse `@gx/react`'s `useElementSize` with the direct `Chart` path. The measured
+The ladder cards reuse `@shiftcharts/react`'s `useElementSize` with the direct `Chart` path. The measured
 pixel context drives the SVG frame while the row's `cols`/`rows` drive the semantic information
 budget (`Micro` through `Stage`). `AutoChart` is intentionally not used for these cards: its
 client interaction overlay would change this static/RSC-safe matrix's markup on interactive rungs.

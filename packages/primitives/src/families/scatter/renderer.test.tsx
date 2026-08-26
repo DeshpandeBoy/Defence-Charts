@@ -28,7 +28,7 @@ describe('scatter family renderer', () => {
 
   it('renders every defined point with stable data identity', () => {
     const html = renderToStaticMarkup(renderScatter(base))
-    expect((html.match(/gx-scatter-point/g) ?? []).length).toBe(3)
+    expect((html.match(/shiftcharts-scatter-point/g) ?? []).length).toBe(3)
     expect(html).toContain('data-scatter-index="0"')
     expect(html).toContain('data-scatter-index="2"')
   })

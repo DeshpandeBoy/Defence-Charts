@@ -15,47 +15,47 @@ const HOMEPAGE = 'https://github.com/DeshpandeBoy/Defence-Charts'
 const BUGS_URL = HOMEPAGE + '/issues'
 const NODE_ENGINE = '>=22.18'
 
-/** @typedef {'@gx/core' | '@gx/grid' | '@gx/primitives' | '@gx/react' | '@gx/testing' | '@gx/tokens'} PackageName */
+/** @typedef {'@shiftcharts/core' | '@shiftcharts/grid' | '@shiftcharts/primitives' | '@shiftcharts/react' | '@shiftcharts/testing' | '@shiftcharts/tokens'} PackageName */
 /** @typedef {{ dependencies: readonly string[], peers: readonly string[], css: boolean }} PackageExpectation */
 
 /** @type {readonly PackageName[]} */
 export const PACKAGE_NAMES = Object.freeze([
-  '@gx/core',
-  '@gx/grid',
-  '@gx/primitives',
-  '@gx/react',
-  '@gx/testing',
-  '@gx/tokens',
+  '@shiftcharts/core',
+  '@shiftcharts/grid',
+  '@shiftcharts/primitives',
+  '@shiftcharts/react',
+  '@shiftcharts/testing',
+  '@shiftcharts/tokens',
 ])
 
 /** @type {Readonly<Record<PackageName, PackageExpectation>>} */
 const EXPECTED = Object.freeze({
-  '@gx/core': {
+  '@shiftcharts/core': {
     dependencies: ['d3-array', 'd3-format', 'd3-scale', 'd3-shape', 'd3-time-format'],
     peers: [],
     css: false,
   },
-  '@gx/grid': {
-    dependencies: ['@gx/core', 'react-grid-layout'],
+  '@shiftcharts/grid': {
+    dependencies: ['@shiftcharts/core', 'react-grid-layout'],
     peers: ['react', 'react-dom'],
     css: true,
   },
-  '@gx/primitives': {
-    dependencies: ['@gx/core'],
+  '@shiftcharts/primitives': {
+    dependencies: ['@shiftcharts/core'],
     peers: ['react'],
     css: true,
   },
-  '@gx/react': {
-    dependencies: ['@gx/core', '@gx/primitives'],
+  '@shiftcharts/react': {
+    dependencies: ['@shiftcharts/core', '@shiftcharts/primitives'],
     peers: ['react', 'react-dom'],
     css: true,
   },
-  '@gx/testing': {
+  '@shiftcharts/testing': {
     dependencies: ['jsdom'],
     peers: [],
     css: false,
   },
-  '@gx/tokens': {
+  '@shiftcharts/tokens': {
     dependencies: [],
     peers: [],
     css: true,
@@ -149,7 +149,7 @@ export async function assertPackageMetadata() {
 }
 
 export async function assertPackedMetadata() {
-  const temporaryRoot = await mkdtemp(join(tmpdir(), 'gx-package-metadata-'))
+  const temporaryRoot = await mkdtemp(join(tmpdir(), 'shiftcharts-package-metadata-'))
   const packRoot = join(temporaryRoot, 'packs')
   const extractedRoot = join(temporaryRoot, 'extracted')
   const rootLicense = await readFile(join(REPO_ROOT, 'LICENSE'), 'utf8')

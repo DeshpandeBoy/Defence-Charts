@@ -52,7 +52,7 @@ function donutMark(seed: ChartPlan): MarkSpec {
 
 function planDonut(input: FamilyPlannerInput<DonutChartType>): ChartPlan {
   if (input.shape.hasNegative) {
-    throw new Error('@gx/core: donut requires non-negative parts-of-a-whole values.')
+    throw new Error('@shiftcharts/core: donut requires non-negative parts-of-a-whole values.')
   }
   const seed = DONUT_RUNGS[input.ctx.sizeClass]({
     type: 'line',

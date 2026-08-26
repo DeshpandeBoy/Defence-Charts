@@ -3,9 +3,9 @@ import {
   planChart,
   sizeContextFromPixels,
   type Series,
-} from '@gx/core'
-import { Chart } from '@gx/primitives'
-import { AutoChart, LegendControl } from '@gx/react'
+} from '@shiftcharts/core'
+import { Chart } from '@shiftcharts/primitives'
+import { AutoChart, LegendControl } from '@shiftcharts/react'
 import { useMemo, useState, type CSSProperties, type ReactElement } from 'react'
 
 const DATA: readonly Series[] = [
@@ -71,7 +71,7 @@ export function InteractionFixture(): ReactElement {
   }
 
   return (
-    <main className="interaction-fixture" data-gx-fixture="interaction">
+    <main className="interaction-fixture" data-shiftcharts-fixture="interaction">
       <header className="interaction-fixture__header">
         <h1>Interaction browser fixture</h1>
         <p>
@@ -82,7 +82,7 @@ export function InteractionFixture(): ReactElement {
 
       <section className="interaction-fixture__section" aria-labelledby="static-title">
         <h2 id="static-title">Static Chart / RSC surface</h2>
-        <div className="interaction-fixture__static-frame" data-gx-static-chart>
+        <div className="interaction-fixture__static-frame" data-shiftcharts-static-chart>
           <Chart
             plan={STATIC_PLAN}
             data={DATA}
@@ -96,7 +96,7 @@ export function InteractionFixture(): ReactElement {
 
       <section className="interaction-fixture__section" aria-labelledby="tap-title">
         <h2 id="tap-title">Strip / touch tap lock</h2>
-        <div className="interaction-fixture__chart-frame" style={STRIP_STYLE} data-gx-tap-chart>
+        <div className="interaction-fixture__chart-frame" style={STRIP_STYLE} data-shiftcharts-tap-chart>
           <AutoChart
             type="line"
             data={DATA}
@@ -112,7 +112,7 @@ export function InteractionFixture(): ReactElement {
         <h2 id="panel-title">Panel → Canvas / open overlay resize</h2>
         <button
           type="button"
-          data-gx-resize-toggle
+          data-shiftcharts-resize-toggle
           aria-pressed={resized}
           onClick={() => setResized((current) => !current)}
         >
@@ -121,8 +121,8 @@ export function InteractionFixture(): ReactElement {
         <div
           className="interaction-fixture__chart-frame"
           style={resizableStyle}
-          data-gx-resizable-chart
-          data-gx-size-class={resized ? 'canvas' : 'panel'}
+          data-shiftcharts-resizable-chart
+          data-shiftcharts-size-class={resized ? 'canvas' : 'panel'}
         >
           <AutoChart
             type="line"
@@ -137,7 +137,7 @@ export function InteractionFixture(): ReactElement {
 
       <section className="interaction-fixture__section" aria-labelledby="canvas-title">
         <h2 id="canvas-title">Canvas / controlled legend</h2>
-        <div className="interaction-fixture__chart-frame" style={CANVAS_STYLE} data-gx-canvas-chart>
+        <div className="interaction-fixture__chart-frame" style={CANVAS_STYLE} data-shiftcharts-canvas-chart>
           <AutoChart
             type="line"
             data={DATA}
@@ -147,7 +147,7 @@ export function InteractionFixture(): ReactElement {
             id="canvas-chart"
           />
         </div>
-        <div data-gx-legend-control>
+        <div data-shiftcharts-legend-control>
           <LegendControl
             plan={legendPlan}
             series={DATA}
@@ -157,7 +157,7 @@ export function InteractionFixture(): ReactElement {
         </div>
       </section>
 
-      <output data-gx-interaction-state>
+      <output data-shiftcharts-interaction-state>
         hidden-series:{hiddenSeriesIds.join(',') || 'none'}; resize:{resized ? 'canvas' : 'panel'}
       </output>
     </main>

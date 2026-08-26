@@ -1,9 +1,9 @@
 {
-  "name": "@gx/react",
+  "name": "@shiftcharts/react",
   "version": "0.0.0",
   "type": "module",
   "license": "MIT",
-  "description": "Client-side responsive chart boundary with AutoChart measurement, tooltip and crosshair behavior, and controlled legend interaction.",
+  "description": "Adaptive ShiftCharts client boundary with measurement, tooltip, crosshair, and controlled legends.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DeshpandeBoy/Defence-Charts.git",
@@ -35,15 +35,15 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@gx/core": "workspace:*",
-    "@gx/primitives": "workspace:*"
+    "@shiftcharts/core": "workspace:*",
+    "@shiftcharts/primitives": "workspace:*"
   },
   "peerDependencies": {
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@gx/testing": "workspace:*",
+    "@shiftcharts/testing": "workspace:*",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.4",
     "react": "^19.2.0",

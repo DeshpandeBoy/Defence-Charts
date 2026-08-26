@@ -25,7 +25,7 @@
  * ⚠ WHAT COUNTS AS A "COMPONENT", AND THE SET THAT WAS REJECTED.
  *
  * The obvious universe is *every package-owned module that survives*. Measured against
- * `@gx/core` that produces a table of thirty-four rows, twenty-three of which say the same
+ * `@shiftcharts/core` that produces a table of thirty-four rows, twenty-three of which say the same
  * thing: `font-metrics.generated.ts` — a 26 KB advance table — rides along on almost
  * everything, because `DEFAULT_POLICY` references `DEFAULT_TYPOGRAPHY` references
  * `ROBOTO_FLEX_METRICS`, and that chain is a genuine value dependency no bundler can cut.
@@ -64,12 +64,12 @@ const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
 
 /** @type {readonly ComponentRule[]} */
 export const COMPONENTS = [
-  // @gx/core — one chart type's semantics, and the two resolvers that reach them.
+  // @shiftcharts/core — one chart type's semantics, and the two resolvers that reach them.
   { component: 'line', module: 'rungs/line.ts' },
   { component: 'planner', module: 'plan-chart.ts' },
   { component: 'frame', module: 'frame.ts' },
 
-  // @gx/primitives — one chart type's marks.
+  // @shiftcharts/primitives — one chart type's marks.
   //
   // ⚠ `Axis.tsx`, `Labels.tsx`, `Grid.tsx`, `DataTable.tsx` and `svg.ts` are deliberately
   // absent. They are chrome: every chart type carries them, so their presence in a bundle
@@ -88,13 +88,13 @@ export const COMPONENTS = [
  * ⚠ Every package must appear as a key even when its table is empty. A package that is
  * merely missing would be skipped, and a skipped package is a gate that exits 0.
  *
- * ⚠ These values were recorded by running the gate, not predicted. `@gx/primitives` was
+ * ⚠ These values were recorded by running the gate, not predicted. `@shiftcharts/primitives` was
  * being written while this was authored; its components land when its chart modules do.
  *
  * @type {Record<string, Record<string, readonly string[]>>}
  */
 export const EXPECTED = {
-  '@gx/core': {
+  '@shiftcharts/core': {
     // The six line/area rungs. Each one *is* the line chart's semantics, so each one
     // carrying `rungs/line.ts` is the claim holding, not failing.
     LINE_RUNGS: ['line'],
@@ -111,9 +111,9 @@ export const EXPECTED = {
 
     resolveFrame: ['frame'],
   },
-  '@gx/tokens': {},
-  '@gx/testing': {},
-  '@gx/primitives': {
+  '@shiftcharts/tokens': {},
+  '@shiftcharts/testing': {},
+  '@shiftcharts/primitives': {
     // The claim, at the renderer. Each mark carries itself and the shared `svg.ts`, and
     // nothing else — measured, and the reason `import { LinePath }` is honest.
     AreaPath: ['area-path'],
@@ -128,15 +128,15 @@ export const EXPECTED = {
     // going up when a chart type lands is correct; the four above it going up is not.
     Chart: ['area-path', 'horizon-bands', 'line-path', 'point-marks'],
   },
-  '@gx/react': {},
-  '@gx/grid': {},
+  '@shiftcharts/react': {},
+  '@shiftcharts/grid': {},
 }
 
 const VIRTUAL_ENTRY = '\0gx-treeshake-probe'
 
 /**
  * ⚠ Bare specifiers are external and that is the point: `react`, `d3-scale` and
- * `@gx/core` are separately-resolved packages, and pulling them into the measurement
+ * `@shiftcharts/core` are separately-resolved packages, and pulling them into the measurement
  * would make this gate report on somebody else's tree-shaking.
  *
  * ⚠ `.css` is external too. `sideEffects: ["*.css"]` in every manifest means a stylesheet
@@ -215,7 +215,7 @@ export async function probeSymbol(entry, symbol, srcDir, components = COMPONENTS
     input: VIRTUAL_ENTRY,
     plugins: [
       {
-        name: 'gx-treeshake-probe',
+        name: 'shiftcharts-treeshake-probe',
         resolveId(id) {
           return id === VIRTUAL_ENTRY ? VIRTUAL_ENTRY : null
         },

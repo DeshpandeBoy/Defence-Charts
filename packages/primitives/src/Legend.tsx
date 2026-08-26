@@ -4,7 +4,7 @@ import {
   type CellFrame,
   type ChartPlan,
   type Series,
-} from '@gx/core'
+} from '@shiftcharts/core'
 
 export type LegendProps = {
   readonly plan: ChartPlan['legend']
@@ -59,7 +59,7 @@ export function Legend({ plan, series, arcs, heatmapCells, className }: LegendPr
   const showPercent = plan.placement === 'external' && plan.showPercent
   const placement = plan.placement
   const position = plan.placement === 'external' ? plan.position : undefined
-  const rootClass = ['gx-legend', `gx-legend--${placement}`, className]
+  const rootClass = ['shiftcharts-legend', `shiftcharts-legend--${placement}`, className]
     .filter(Boolean)
     .join(' ')
 
@@ -77,15 +77,15 @@ export function Legend({ plan, series, arcs, heatmapCells, className }: LegendPr
         const detail = legendDetail(showValues, showPercent, value, percent)
         return (
           <div
-            className="gx-legend__item"
+            className="shiftcharts-legend__item"
             data-series-id={item.id}
             data-series-index={index}
             key={item.id}
             role="listitem"
           >
-            <span className="gx-legend__symbol" aria-hidden="true" />
-            <span className="gx-legend__label" title={label}>{label}</span>
-            {detail === null ? null : <span className="gx-legend__detail">{detail}</span>}
+            <span className="shiftcharts-legend__symbol" aria-hidden="true" />
+            <span className="shiftcharts-legend__label" title={label}>{label}</span>
+            {detail === null ? null : <span className="shiftcharts-legend__detail">{detail}</span>}
           </div>
         )
       })}
@@ -110,7 +110,7 @@ function HeatmapLegend({
   )
   const minimum = values.length === 0 ? null : Math.min(...values)
   const maximum = values.length === 0 ? null : Math.max(...values)
-  const rootClass = ['gx-legend', `gx-legend--${plan.placement}`, className]
+  const rootClass = ['shiftcharts-legend', `shiftcharts-legend--${plan.placement}`, className]
     .filter(Boolean)
     .join(' ')
   const entries = [0, 1, 2, 3, 4] as const
@@ -124,20 +124,20 @@ function HeatmapLegend({
       role="list"
       aria-label="Heatmap intensity"
     >
-      <span className="gx-legend__title">Intensity</span>
+      <span className="shiftcharts-legend__title">Intensity</span>
       {entries.map((intensity) => (
         <div
-          className="gx-legend__item"
+          className="shiftcharts-legend__item"
           data-heatmap-intensity={intensity}
           key={intensity}
           role="listitem"
         >
-          <span className="gx-legend__symbol" aria-hidden="true" />
-          <span className="gx-legend__label">{intensity === 0 ? 'Low' : intensity === 4 ? 'High' : ''}</span>
+          <span className="shiftcharts-legend__symbol" aria-hidden="true" />
+          <span className="shiftcharts-legend__label">{intensity === 0 ? 'Low' : intensity === 4 ? 'High' : ''}</span>
           {intensity === 0 && minimum !== null ? (
-            <span className="gx-legend__detail">{formatYLabel(minimum)}</span>
+            <span className="shiftcharts-legend__detail">{formatYLabel(minimum)}</span>
           ) : intensity === 4 && maximum !== null ? (
-            <span className="gx-legend__detail">{formatYLabel(maximum)}</span>
+            <span className="shiftcharts-legend__detail">{formatYLabel(maximum)}</span>
           ) : null}
         </div>
       ))}
@@ -157,7 +157,7 @@ function ArcLegend({
   if (plan.placement === 'absent' || plan.placement === 'direct') return null
   const limit = Math.max(0, Math.floor(plan.maxEntries))
   const entries = arcs.slice(0, limit)
-  const rootClass = ['gx-legend', `gx-legend--${plan.placement}`, className]
+  const rootClass = ['shiftcharts-legend', `shiftcharts-legend--${plan.placement}`, className]
     .filter(Boolean)
     .join(' ')
   const showValues = plan.placement === 'external' && plan.showValues
@@ -174,7 +174,7 @@ function ArcLegend({
     >
       {entries.map((arc, index) => (
         <div
-          className="gx-legend__item"
+          className="shiftcharts-legend__item"
           data-slice-id={arc.id}
           data-slice-index={index}
           data-slice-kind={arc.other ? 'other' : 'value'}
@@ -182,10 +182,10 @@ function ArcLegend({
           key={arc.id}
           role="listitem"
         >
-          <span className="gx-legend__symbol" aria-hidden="true" />
-          <span className="gx-legend__label" title={arc.label}>{arc.label}</span>
+          <span className="shiftcharts-legend__symbol" aria-hidden="true" />
+          <span className="shiftcharts-legend__label" title={arc.label}>{arc.label}</span>
           {showValues || showPercent ? (
-            <span className="gx-legend__detail">
+            <span className="shiftcharts-legend__detail">
               {showValues ? formatYLabel(arc.value) : null}
               {showValues && showPercent ? ' · ' : null}
               {showPercent ? `${Math.round(arc.share * 100)}%` : null}

@@ -11,7 +11,7 @@ import {
   type ChartFrame,
   type Series,
   type SizeContext,
-} from '@gx/core'
+} from '@shiftcharts/core'
 import { act, createElement, Fragment, type RefObject } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -72,7 +72,7 @@ function renderOverlay(ctx: SizeContext): { resolved: ChartPlan; renderedFrame: 
       createElement(
         Fragment,
         null,
-        createElement('figure', { className: 'gx-chart' }),
+        createElement('figure', { className: 'shiftcharts-chart' }),
         createElement(InteractionOverlay, {
           containerRef,
           plan: resolved,
@@ -85,8 +85,8 @@ function renderOverlay(ctx: SizeContext): { resolved: ChartPlan; renderedFrame: 
     )
   })
   act(() => {})
-  chartHost = container.querySelector('.gx-chart') as HTMLElement
-  const svg = container.querySelector('.gx-interaction__svg')
+  chartHost = container.querySelector('.shiftcharts-chart') as HTMLElement
+  const svg = container.querySelector('.shiftcharts-interaction__svg')
   if (svg !== null) {
     Object.defineProperty(svg, 'getBoundingClientRect', {
       configurable: true,
@@ -107,7 +107,7 @@ function renderOverlay(ctx: SizeContext): { resolved: ChartPlan; renderedFrame: 
 }
 
 function target(): SVGRectElement {
-  const element = container.querySelector('.gx-interaction__target')
+  const element = container.querySelector('.shiftcharts-interaction__target')
   if (element === null) throw new Error('interaction target did not render')
   return element as SVGRectElement
 }
@@ -134,16 +134,16 @@ describe('interaction availability and the portal boundary', () => {
   it('does not mount a pointer surface when the plan disables interaction', () => {
     renderOverlay(context(120, 24))
 
-    expect(container.querySelector('.gx-interaction')).toBeNull()
+    expect(container.querySelector('.shiftcharts-interaction')).toBeNull()
     expect(chartHost.children).toHaveLength(0)
   })
 
   it('keeps the interaction layer inside the chart figure and exposes a status equivalent', () => {
     renderOverlay(context(420, 320))
 
-    expect(chartHost.querySelector('.gx-interaction')).not.toBeNull()
+    expect(chartHost.querySelector('.shiftcharts-interaction')).not.toBeNull()
     expect(chartHost.querySelector('[role="status"]')).not.toBeNull()
-    expect(chartHost.querySelector('.gx-interaction__target')?.getAttribute('role')).toBe('button')
+    expect(chartHost.querySelector('.shiftcharts-interaction__target')?.getAttribute('role')).toBe('button')
   })
 })
 
@@ -161,7 +161,7 @@ describe('fixed and fluid tooltip interaction', () => {
     expect(tooltip?.getAttribute('data-point-index')).toBe('2')
     expect(container.querySelector('[role="status"]')?.textContent).toContain('ALPHA')
 
-    const crosshair = container.querySelector('.gx-interaction__crosshair')
+    const crosshair = container.querySelector('.shiftcharts-interaction__crosshair')
     expect(crosshair?.getAttribute('clip-path')).toBe('url(#interaction-test-plot-clip)')
     expect(crosshair?.querySelector('line')?.getAttribute('y1')).toBe(String(renderedFrame.plot.y))
     expect(crosshair?.querySelector('line')?.getAttribute('y2')).toBe(
@@ -206,7 +206,7 @@ describe('fixed and fluid tooltip interaction', () => {
         createElement(
           Fragment,
           null,
-          createElement('figure', { className: 'gx-chart' }),
+          createElement('figure', { className: 'shiftcharts-chart' }),
           createElement(InteractionOverlay, {
             containerRef,
             plan: resizedPlan,

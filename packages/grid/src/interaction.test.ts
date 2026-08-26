@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { createLayoutSnapshot, createWidgetId } from '@gx/core'
+import { createLayoutSnapshot, createWidgetId } from '@shiftcharts/core'
 import {
   GridInteractionError,
   beginGridInteraction,

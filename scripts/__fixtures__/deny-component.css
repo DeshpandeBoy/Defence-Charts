@@ -30,5 +30,5 @@
   /* ⚠ Gradients have NO allowlist in any position, including on a token definition in
      the tokens package. The ban is semantic — a gradient encodes a value that varies
      where no value varies — so it does not relax. 43-theming.md §3.1. */
-  background: linear-gradient(to bottom, var(--gx-surface-color), var(--gx-surface));
+  background: linear-gradient(to bottom, var(--shiftcharts-surface-color), var(--shiftcharts-surface));
 }

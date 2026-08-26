@@ -27,7 +27,7 @@ a replaced element cannot animate at all. Motion is opt-in at the platform level
 inside `@media (prefers-reduced-motion: no-preference)`, so an environment that expresses no
 preference gets a still chart, and the still chart is the baseline rather than a degraded version of
 the animated one. A measured 0.50% boundary floor showed that transitions alone could not prevent
-new marks from appearing without a previous value, so `@gx/react` now keeps the last accepted size
+new marks from appearing without a previous value, so `@shiftcharts/react` now keeps the last accepted size
 class and applies a 1% fractional deadband. `SizeContext` and `planChart()` remain pure and
 memory-free.
 
@@ -77,7 +77,7 @@ remain later work unless the master plan explicitly promotes them.
 
 ## Publishing blockers
 
-1. Choose the project name and npm scope. `@gx/*` is a placeholder.
+1. Choose the project name and npm scope. `@shiftcharts/*` is a placeholder.
 2. Freeze the C0 contract and complete the C grid shell before broad parallel chart integration.
 3. Expand chart breadth only after the line/area renderer contract is stable.
 4. Finish release automation and package validation.

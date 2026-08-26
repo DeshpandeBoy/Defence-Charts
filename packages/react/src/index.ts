@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * `@gx/react` — the client boundary, declared once, here.
+ * `@shiftcharts/react` — the client boundary, declared once, here.
  *
  * ⚠ **The `"use client"` directive above is load-bearing and must stay on line 1.** It is
  * not a hint. It is the one statement in this repository that tells an RSC bundler where the
@@ -16,22 +16,22 @@
  *
  * ⚠ **A5 filled this package, and the shape of what landed is the point.** Two exports: one
  * hook that reads a box, one component that turns that box into a plan and hands the plan to
- * `@gx/primitives`. There is no chart code here, no geometry, no policy and no ladder — all
+ * `@shiftcharts/primitives`. There is no chart code here, no geometry, no policy and no ladder — all
  * of that lives in packages that have never seen the DOM and are tested without one. The
  * amount of this library that requires a browser is this file's two exports, and keeping
  * that number small *is* the architecture rather than a side effect of it.
  *
  * ⚠ **Import `./auto-chart.css` explicitly.** It is a side-effect import and deliberately not
- * pulled in from here: a bare `import '@gx/react'` must not drag a stylesheet along, and a
+ * pulled in from here: a bare `import '@shiftcharts/react'` must not drag a stylesheet along, and a
  * consumer with their own build pipeline needs to order the cascade layers themselves. The
- * file's two rules sit in `@layer gx.theme`, so anything unlayered in a consumer's own CSS
+ * file's two rules sit in `@layer shiftcharts.theme`, so anything unlayered in a consumer's own CSS
  * beats them with no `!important`.
  *
  * ```ts
- * import { AutoChart } from '@gx/react'
- * import '@gx/tokens/theme.css'
- * import '@gx/primitives/chart.css'
- * import '@gx/react/auto-chart.css'
+ * import { AutoChart } from '@shiftcharts/react'
+ * import '@shiftcharts/tokens/theme.css'
+ * import '@shiftcharts/primitives/chart.css'
+ * import '@shiftcharts/react/auto-chart.css'
  * ```
  *
  * ⚠ Every type named in a public signature is re-exported here, because gate **G6** walks

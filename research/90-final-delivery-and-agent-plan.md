@@ -188,7 +188,7 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 |---|---|---|---|---|
 | P0.1 | Coordinator | **done** | — | Final agent plan and continuity system; committed and verified |
 | P0.2 | Claude research | **handoff** | P0.1 | Decision-conflict register |
-| P0.3 | User/coordinator | **in progress** | — | User selected **ShiftCharts**, `@shiftcharts/*`, and “Charts that shift with their space.”; integration tracked in `research/handoffs/P0.3.md` |
+| P0.3 | User/coordinator | **done** | — | **ShiftCharts**, `@shiftcharts/*`, and “Charts that shift with their space.” integrated across packages, CSS, docs, fixtures, scripts, and release config; full verify green |
 | P0.5 | User/coordinator | **in progress** | — | Preserve both disconnected histories through an unrelated-history merge, then fast-forward `main`; tracked in `research/handoffs/P0.5.md` |
 | P0.4 | Codex integration | **done** | P0.2 | Record RGL `./core` + `./react` boundary and widget-shell owner |
 | C0.1 | Codex integration | **done** | P0.1, P0.2, P0.4 | Grid/widget/identity contract |

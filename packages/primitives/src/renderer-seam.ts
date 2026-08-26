@@ -6,7 +6,7 @@
  * DOM access, or registration side effects.
  */
 
-import type { ChartFrame, ChartPlan, PlanPolicy } from '@gx/core'
+import type { ChartFrame, ChartPlan, PlanPolicy } from '@shiftcharts/core'
 import type { ReactNode } from 'react'
 
 export type MarkKind = ChartPlan['marks']['primary']['kind']

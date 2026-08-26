@@ -5,15 +5,15 @@
  * `scripts/check-tokens.mjs` scans `packages/` only, so the raw values below are outside
  * the raw-hex ban that governs the library. They are chrome for a development tool, not
  * product surface — but the moment anything in this file starts describing how a *chart*
- * looks, it belongs in `@gx/tokens` and under the gate. See `apps/playground/README.md`.
+ * looks, it belongs in `@shiftcharts/tokens` and under the gate. See `apps/playground/README.md`.
  *
- * ⚠ The theme is imported, not reimplemented. Pulling `@gx/tokens/theme.css` in through
+ * ⚠ The theme is imported, not reimplemented. Pulling `@shiftcharts/tokens/theme.css` in through
  * its published `"./theme.css"` export means the playground exercises the same entry point
  * a consumer uses — if that export map breaks, this page loses its colours rather than
  * silently carrying on with a private copy.
  */
 
-@import '@gx/tokens/theme.css';
+@import '@shiftcharts/tokens/theme.css';
 
 /*
  * ⚠ The charcoal ramp does not flip with `prefers-color-scheme`, and it should not: it is
@@ -25,20 +25,20 @@
 :root {
   color-scheme: dark light;
 
-  --pg-fg: var(--gx-ramp-neutral-9);
-  --pg-fg-dim: var(--gx-ramp-neutral-7);
-  --pg-fg-faint: var(--gx-ramp-neutral-5);
-  --pg-rule: var(--gx-ramp-neutral-3);
-  --pg-recede: var(--gx-ramp-neutral-1);
+  --pg-fg: var(--shiftcharts-ramp-neutral-9);
+  --pg-fg-dim: var(--shiftcharts-ramp-neutral-7);
+  --pg-fg-faint: var(--shiftcharts-ramp-neutral-5);
+  --pg-rule: var(--shiftcharts-ramp-neutral-3);
+  --pg-recede: var(--shiftcharts-ramp-neutral-1);
 }
 
 @media (prefers-color-scheme: light) {
   :root {
-    --pg-fg: var(--gx-ramp-neutral-2);
-    --pg-fg-dim: var(--gx-ramp-neutral-4);
-    --pg-fg-faint: var(--gx-ramp-neutral-6);
-    --pg-rule: var(--gx-ramp-neutral-8);
-    --pg-recede: var(--gx-ramp-neutral-9);
+    --pg-fg: var(--shiftcharts-ramp-neutral-2);
+    --pg-fg-dim: var(--shiftcharts-ramp-neutral-4);
+    --pg-fg-faint: var(--shiftcharts-ramp-neutral-6);
+    --pg-rule: var(--shiftcharts-ramp-neutral-8);
+    --pg-recede: var(--shiftcharts-ramp-neutral-9);
   }
 }
 
@@ -48,10 +48,10 @@
 
 body {
   margin: 0;
-  background: var(--gx-surface-color);
+  background: var(--shiftcharts-surface-color);
   color: var(--pg-fg);
-  font-family: var(--gx-font-family);
-  font-optical-sizing: var(--gx-font-optical-sizing);
+  font-family: var(--shiftcharts-font-family);
+  font-optical-sizing: var(--shiftcharts-font-optical-sizing);
   font-size: 14px;
   line-height: 1.5;
 }
@@ -59,7 +59,7 @@ body {
 code {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   font-size: 0.9em;
-  color: var(--gx-series-1);
+  color: var(--shiftcharts-series-1);
 }
 
 /* --- Layout ------------------------------------------------------------------------ */
@@ -70,9 +70,9 @@ code {
   grid-template-areas:
     'head panel'
     'stage panel';
-  gap: calc(var(--gx-size-gap) * 6);
+  gap: calc(var(--shiftcharts-size-gap) * 6);
   align-items: start;
-  padding: calc(var(--gx-size-gap) * 6);
+  padding: calc(var(--shiftcharts-size-gap) * 6);
   min-height: 100vh;
 }
 
@@ -92,9 +92,9 @@ code {
 }
 
 .lab__head h1 {
-  margin: 0 0 calc(var(--gx-size-gap) * 2);
+  margin: 0 0 calc(var(--shiftcharts-size-gap) * 2);
   font-size: 1.5rem;
-  font-weight: var(--gx-title-font-weight);
+  font-weight: var(--shiftcharts-title-font-weight);
   letter-spacing: -0.01em;
 }
 
@@ -105,16 +105,16 @@ code {
 .lab__panel {
   grid-area: panel;
   border-left: 1px solid var(--pg-rule);
-  padding-left: calc(var(--gx-size-gap) * 5);
+  padding-left: calc(var(--shiftcharts-size-gap) * 5);
   display: flex;
   flex-direction: column;
-  gap: calc(var(--gx-size-gap) * 7);
+  gap: calc(var(--shiftcharts-size-gap) * 7);
 }
 
 .lab__panel h2 {
-  margin: 0 0 calc(var(--gx-size-gap) * 2);
-  font-size: var(--gx-axis-title-font-size);
-  font-weight: var(--gx-axis-title-font-weight);
+  margin: 0 0 calc(var(--shiftcharts-size-gap) * 2);
+  font-size: var(--shiftcharts-axis-title-font-size);
+  font-weight: var(--shiftcharts-axis-title-font-weight);
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--pg-fg-dim);
@@ -124,7 +124,7 @@ code {
 
 /*
  * `resize: both` hands sizing to the browser. Nothing in the app sets width or height, so
- * the only way a number reaches `@gx/core` is through the `ResizeObserver` — which is the
+ * the only way a number reaches `@shiftcharts/core` is through the `ResizeObserver` — which is the
  * arrangement the library has to work under in production.
  *
  * ⚠ `overflow: hidden`, not `auto`, and the change is load-bearing rather than tidy. The
@@ -150,7 +150,7 @@ code {
   min-height: 24px;
   max-width: 100%;
   border: 1px solid var(--pg-rule);
-  border-radius: var(--gx-widget-radius);
+  border-radius: var(--shiftcharts-widget-radius);
   background: var(--pg-recede);
   display: block;
 }
@@ -163,24 +163,24 @@ code {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: calc(var(--gx-size-gap) * 3);
-  margin-top: calc(var(--gx-size-gap) * 2);
-  font-variant-numeric: var(--gx-numeric-variant);
+  gap: calc(var(--shiftcharts-size-gap) * 3);
+  margin-top: calc(var(--shiftcharts-size-gap) * 2);
+  font-variant-numeric: var(--shiftcharts-numeric-variant);
   color: var(--pg-fg-dim);
-  font-size: var(--gx-label-font-size);
+  font-size: var(--shiftcharts-label-font-size);
 }
 
 .widget__label strong {
   font-size: 1.25rem;
-  font-weight: var(--gx-title-font-weight);
+  font-weight: var(--shiftcharts-title-font-weight);
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--gx-series-1);
+  color: var(--shiftcharts-series-1);
 }
 
 /*
  * ⚠ **The consumer half of the containment contract, and the whole reason this page is
- * honest.** `auto-chart.css` deliberately sets no `block-size` on `.gx-auto-chart` — a
+ * honest.** `auto-chart.css` deliberately sets no `block-size` on `.shiftcharts-auto-chart` — a
  * library that guessed at a parent it cannot see would be wrong in the case it was meant to
  * protect, and `100%` of an auto-height parent resolves to `auto` and silently does nothing.
  * So the rule `<AutoChart>`'s docblock states for every consumer is: **give the wrapper a
@@ -188,14 +188,14 @@ code {
  *
  * Two things follow from it. The wrapper is sized by `.widget` rather than by the chart it
  * contains, which is what keeps the chart's own height out of the box that measures it. And
- * `.widget`'s content box and `.gx-auto-chart`'s content box become the same rectangle —
+ * `.widget`'s content box and `.shiftcharts-auto-chart`'s content box become the same rectangle —
  * which matters because `App.tsx` observes the first and `<AutoChart>` observes the second,
  * so every number in the right-hand panel is describing the box the chart was actually
  * planned for. Delete this and both properties go at once.
  *
- * `inline-size` needs no rule: `.gx-auto-chart` is `display: block`, so it already fills.
+ * `inline-size` needs no rule: `.shiftcharts-auto-chart` is `display: block`, so it already fills.
  */
-.widget .gx-auto-chart {
+.widget .shiftcharts-auto-chart {
   block-size: 100%;
 }
 
@@ -205,7 +205,7 @@ code {
  * margin, and a `<figure>` that indents itself would make the drawn chart narrower than the
  * box it was planned for.
  */
-.widget .gx-chart {
+.widget .shiftcharts-chart {
   margin: 0;
 }
 
@@ -222,30 +222,30 @@ code {
 .rung {
   display: grid;
   grid-template-columns: 4.5rem minmax(0, 1fr);
-  gap: calc(var(--gx-size-gap) * 2);
-  padding: calc(var(--gx-size-gap) * 1.5) 0 calc(var(--gx-size-gap) * 1.5)
-    calc(var(--gx-size-gap) * 2);
+  gap: calc(var(--shiftcharts-size-gap) * 2);
+  padding: calc(var(--shiftcharts-size-gap) * 1.5) 0 calc(var(--shiftcharts-size-gap) * 1.5)
+    calc(var(--shiftcharts-size-gap) * 2);
   /* The rail: a hairline the active rung lights up. DESIGN.md's left-edge state. */
   border-left: 2px solid transparent;
   color: var(--pg-fg-faint);
-  font-size: var(--gx-label-font-size);
+  font-size: var(--shiftcharts-label-font-size);
 }
 
 .rung--active {
-  border-left-color: var(--gx-series-1);
+  border-left-color: var(--shiftcharts-series-1);
   color: var(--pg-fg);
 }
 
 .rung__name {
-  font-weight: var(--gx-value-label-font-weight);
+  font-weight: var(--shiftcharts-value-label-font-weight);
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  font-size: var(--gx-value-label-font-size);
+  font-size: var(--shiftcharts-value-label-font-size);
   padding-top: 0.1em;
 }
 
 .rung--active .rung__name {
-  color: var(--gx-series-1);
+  color: var(--shiftcharts-series-1);
 }
 
 /* --- Readouts ----------------------------------------------------------------------- */
@@ -253,10 +253,10 @@ code {
 .kv {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  gap: calc(var(--gx-size-gap) / 2) calc(var(--gx-size-gap) * 3);
+  gap: calc(var(--shiftcharts-size-gap) / 2) calc(var(--shiftcharts-size-gap) * 3);
   margin: 0;
-  font-size: var(--gx-label-font-size);
-  font-variant-numeric: var(--gx-numeric-variant);
+  font-size: var(--shiftcharts-label-font-size);
+  font-variant-numeric: var(--shiftcharts-numeric-variant);
 }
 
 .kv dt {
@@ -267,7 +267,7 @@ code {
   margin: 0;
   text-align: right;
   color: var(--pg-fg);
-  font-weight: var(--gx-value-label-font-weight);
+  font-weight: var(--shiftcharts-value-label-font-weight);
 }
 
 .thresholds {
@@ -276,14 +276,14 @@ code {
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: calc(var(--gx-size-gap) * 1.5);
+  gap: calc(var(--shiftcharts-size-gap) * 1.5);
 }
 
 .threshold {
   display: grid;
   grid-template-columns: 3.5rem minmax(0, 1fr);
-  gap: 0 calc(var(--gx-size-gap) * 2);
-  font-size: var(--gx-label-font-size);
+  gap: 0 calc(var(--shiftcharts-size-gap) * 2);
+  font-size: var(--shiftcharts-label-font-size);
   color: var(--pg-fg-faint);
   opacity: 0.55;
 }
@@ -294,18 +294,18 @@ code {
 }
 
 .threshold__px {
-  font-variant-numeric: var(--gx-numeric-variant);
-  font-weight: var(--gx-value-label-font-weight);
+  font-variant-numeric: var(--shiftcharts-numeric-variant);
+  font-weight: var(--shiftcharts-value-label-font-weight);
   text-align: right;
 }
 
 .threshold--cleared .threshold__px {
-  color: var(--gx-series-3);
+  color: var(--shiftcharts-series-3);
 }
 
 .threshold__cite {
   grid-column: 2;
-  font-size: var(--gx-annotation-font-size);
+  font-size: var(--shiftcharts-annotation-font-size);
   color: var(--pg-fg-faint);
 }
 
@@ -314,31 +314,31 @@ code {
 .control {
   display: flex;
   align-items: center;
-  gap: calc(var(--gx-size-gap) * 2);
-  margin-bottom: calc(var(--gx-size-gap) * 2);
-  font-size: var(--gx-label-font-size);
+  gap: calc(var(--shiftcharts-size-gap) * 2);
+  margin-bottom: calc(var(--shiftcharts-size-gap) * 2);
+  font-size: var(--shiftcharts-label-font-size);
 }
 
 .control input[type='range'] {
   flex: 1;
-  accent-color: var(--gx-series-1);
+  accent-color: var(--shiftcharts-series-1);
 }
 
 .control input[type='text'] {
   flex: 1;
   min-width: 0;
-  padding: calc(var(--gx-size-gap) * 1.5);
+  padding: calc(var(--shiftcharts-size-gap) * 1.5);
   border: 1px solid var(--pg-rule);
-  border-radius: var(--gx-widget-radius);
+  border-radius: var(--shiftcharts-widget-radius);
   background: var(--pg-recede);
   color: var(--pg-fg);
   font: inherit;
-  font-size: var(--gx-label-font-size);
+  font-size: var(--shiftcharts-label-font-size);
 }
 
 .control output {
-  font-variant-numeric: var(--gx-numeric-variant);
-  font-weight: var(--gx-value-label-font-weight);
+  font-variant-numeric: var(--shiftcharts-numeric-variant);
+  font-weight: var(--shiftcharts-value-label-font-weight);
   min-width: 4rem;
   text-align: right;
 }
@@ -349,24 +349,24 @@ code {
 
 .control--ranks {
   flex-wrap: wrap;
-  gap: var(--gx-size-gap);
+  gap: var(--shiftcharts-size-gap);
 }
 
 .rank {
-  padding: calc(var(--gx-size-gap) / 2) var(--gx-size-gap);
+  padding: calc(var(--shiftcharts-size-gap) / 2) var(--shiftcharts-size-gap);
   border: 1px solid var(--pg-rule);
-  border-radius: var(--gx-widget-radius);
+  border-radius: var(--shiftcharts-widget-radius);
   background: transparent;
   color: var(--pg-fg-faint);
   font: inherit;
-  font-size: var(--gx-value-label-font-size);
-  font-variant-numeric: var(--gx-numeric-variant);
+  font-size: var(--shiftcharts-value-label-font-size);
+  font-variant-numeric: var(--shiftcharts-numeric-variant);
   cursor: pointer;
 }
 
 .rank--active {
-  border-color: var(--gx-series-1);
-  color: var(--gx-series-1);
+  border-color: var(--shiftcharts-series-1);
+  color: var(--shiftcharts-series-1);
 }
 
 /* --- The measurement demo ----------------------------------------------------------- */
@@ -375,20 +375,20 @@ code {
   display: block;
   width: 100%;
   height: auto;
-  margin: calc(var(--gx-size-gap) * 3) 0;
+  margin: calc(var(--shiftcharts-size-gap) * 3) 0;
   overflow: visible;
 }
 
 .measure__predicted {
   /* The prediction, drawn behind the glyphs it claims to bound. */
-  fill: var(--gx-series-2);
+  fill: var(--shiftcharts-series-2);
   opacity: 0.25;
 }
 
 .measure__text {
   fill: var(--pg-fg);
-  font-family: var(--gx-font-family);
-  font-variant-numeric: var(--gx-numeric-variant);
+  font-family: var(--shiftcharts-font-family);
+  font-variant-numeric: var(--shiftcharts-numeric-variant);
 }
 
 /* --- The resolved plan --------------------------------------------------------------- */
@@ -400,14 +400,14 @@ code {
    * tail is exactly the "looks complete, isn't" shape this project keeps naming.
    */
   max-height: 22rem;
-  margin: calc(var(--gx-size-gap) * 2) 0 0;
-  padding: calc(var(--gx-size-gap) * 1.5);
+  margin: calc(var(--shiftcharts-size-gap) * 2) 0 0;
+  padding: calc(var(--shiftcharts-size-gap) * 1.5);
   overflow: auto;
   border: 1px solid var(--pg-rule);
-  border-radius: var(--gx-widget-radius);
+  border-radius: var(--shiftcharts-widget-radius);
   background: var(--pg-recede);
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: var(--gx-annotation-font-size);
+  font-size: var(--shiftcharts-annotation-font-size);
   line-height: 1.5;
   color: var(--pg-fg-dim);
   tab-size: 2;
@@ -416,17 +416,17 @@ code {
 /* --- Prose -------------------------------------------------------------------------- */
 
 .note {
-  margin: calc(var(--gx-size-gap) * 2) 0 0;
-  font-size: var(--gx-annotation-font-size);
+  margin: calc(var(--shiftcharts-size-gap) * 2) 0 0;
+  font-size: var(--shiftcharts-annotation-font-size);
   line-height: 1.6;
   color: var(--pg-fg-faint);
 }
 
 .warn {
-  margin: calc(var(--gx-size-gap) * 2) 0 0;
-  padding-left: calc(var(--gx-size-gap) * 2);
-  border-left: 2px solid var(--gx-series-2);
-  font-size: var(--gx-annotation-font-size);
+  margin: calc(var(--shiftcharts-size-gap) * 2) 0 0;
+  padding-left: calc(var(--shiftcharts-size-gap) * 2);
+  border-left: 2px solid var(--shiftcharts-series-2);
+  font-size: var(--shiftcharts-annotation-font-size);
   line-height: 1.6;
   color: var(--pg-fg-dim);
 }

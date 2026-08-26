@@ -2,8 +2,8 @@ import {
   GRID_COLUMNS,
   createWidgetLayout,
   validateWidgetLayouts,
-} from '@gx/core'
-import type { WidgetLayout, WidgetLayoutInput } from '@gx/core'
+} from '@shiftcharts/core'
+import type { WidgetLayout, WidgetLayoutInput } from '@shiftcharts/core'
 import {
   correctBounds,
   getAllCollisions,
@@ -190,7 +190,7 @@ export function applyGridProposal(
 
   correctBounds(resolved as RglLayoutItem[], { cols: GRID_COLUMNS })
   resolved = getCompactor('vertical').compact(resolved, GRID_COLUMNS)
-  validateRglLayout(resolved, '@gx/grid proposal result')
+  validateRglLayout(resolved, '@shiftcharts/grid proposal result')
   rejectCollisions(resolved)
   return fromRglLayout(resolved)
 }

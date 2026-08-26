@@ -1,4 +1,4 @@
-import type { ArcFrame, ChartFrame } from '@gx/core'
+import type { ArcFrame, ChartFrame } from '@shiftcharts/core'
 
 /** Deterministic shared-frame geometry used by the donut renderer tests. */
 export const DONUT_RENDERER_FIXTURE: Pick<ChartFrame['series'][number], 'id' | 'label' | 'index' | 'arcs'> =

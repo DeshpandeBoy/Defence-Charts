@@ -32,7 +32,7 @@
  *
  * ⚠ **The RSC flight payload in the HTML is not a violation, and the scan must not read it.**
  * App Router serialises the rendered element tree into inline `self.__next_f.push(...)`
- * scripts, so `"gx-chart__svg"` and `"graphics-document"` appear in the document as **data**
+ * scripts, so `"shiftcharts-chart__svg"` and `"graphics-document"` appear in the document as **data**
  * on a page that is doing exactly the right thing. Grepping the HTML would therefore fail a
  * correct RSC page — a gate that fires on success is worse than no gate, because the first
  * fix anyone reaches for is to delete it. The scan reads `.next/static/`, which is compiled
@@ -97,8 +97,8 @@
  *
  * ```
  * useid-ssr  the title id is "_R_avb_-title" — the `R_` infix is stamped by react-dom (SSR)
- * client-js  "gx-chart__svg" … is compiled into .next/static/chunks/40sr3mooet0z9.js
- *            … ,children:[(0,o.jsxs)("svg",{className:"gx-chart__svg",role:"graphics-doc …
+ * client-js  "shiftcharts-chart__svg" … is compiled into .next/static/chunks/40sr3mooet0z9.js
+ *            … ,children:[(0,o.jsxs)("svg",{className:"shiftcharts-chart__svg",role:"graphics-doc …
  * ```
  *
  * — plus all six markers, in one chunk. Three things this confirmed that no amount of
@@ -110,8 +110,8 @@
  * 2. **Assertion 1b fired on one letter**, `_R_` where `_S_` belonged, before the bundle was
  *    consulted at all.
  * 3. **The excerpts vindicate literals-not-identifiers.** `Chart` had become `o.jsxs`,
- *    `resolveFrame` was inlined, `titleId` was `d` — and `"gx-chart__svg"` was still
- *    `"gx-chart__svg"`, because it has to reach the DOM. A gate searching for function names
+ *    `resolveFrame` was inlined, `titleId` was `d` — and `"shiftcharts-chart__svg"` was still
+ *    `"shiftcharts-chart__svg"`, because it has to reach the DOM. A gate searching for function names
  *    would have read that chunk and found nothing.
  *
  * ## Why a real build, every time
@@ -120,7 +120,7 @@
  * build is the cheapest possible way for this gate to lie: edit `Chart.tsx`, add
  * `"use client"`, run the gate, watch it pass on chunks compiled before the edit. Roughly
  * thirty seconds of build time buys the guarantee that the bytes being searched are the
- * bytes this source tree produces. `GX_RSC_SKIP_BUILD=1` exists for iterating on the gate
+ * bytes this source tree produces. `SHIFTCHARTS_RSC_SKIP_BUILD=1` exists for iterating on the gate
  * itself and prints a warning every time it is used, because it turns the gate back into
  * something that can lie.
  *
@@ -151,7 +151,7 @@ const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
 const FIXTURE_DIR = join(REPO_ROOT, 'apps/rsc-fixture')
 const STATIC_DIR = join(FIXTURE_DIR, '.next/static')
 
-const ORIGIN = process.env.GX_RSC_ORIGIN ?? 'http://localhost:3210/'
+const ORIGIN = process.env.SHIFTCHARTS_RSC_ORIGIN ?? 'http://localhost:3210/'
 
 /** The accessible name the fixture is contracted to render. Coordinated, not guessed. */
 const EXPECTED_TITLE = 'RSC fixture line chart'
@@ -167,17 +167,17 @@ const EXPECTED_TITLE = 'RSC fixture line chart'
  * of our code a bundler is not permitted to rewrite.
  *
  * ⚠ Each one is scoped tightly enough that a false positive would have to be someone else's
- * deliberate reference to us. `gx-` is this library's prefix and appears nowhere in React,
+ * deliberate reference to us. `shiftcharts-` is this library's prefix and appears nowhere in React,
  * React-DOM or Next; `graphics-document` is a WAI-ARIA Graphics Module role that no framework
  * has cause to name; the resolver's message is a sentence.
  *
  * @type {ReadonlyArray<{ literal: string, why: string }>}
  */
-export const MARKERS = [  { literal: 'gx-chart__svg', why: '<Chart>’s own <svg> className' },
+export const MARKERS = [  { literal: 'shiftcharts-chart__svg', why: '<Chart>’s own <svg> className' },
   { literal: 'graphics-document', why: '<Chart>’s role, per 20-architecture.md §7.3' },
-  { literal: 'gx-chart__caption', why: '<Chart>’s <figcaption>' },
-  { literal: 'gx-axis__tick', why: '<Axis> tick marks' },
-  { literal: 'gx-grid__line', why: '<Grid> gridlines' },
+  { literal: 'shiftcharts-chart__caption', why: '<Chart>’s <figcaption>' },
+  { literal: 'shiftcharts-axis__tick', why: '<Axis> tick marks' },
+  { literal: 'shiftcharts-grid__line', why: '<Grid> gridlines' },
   { literal: 'planChart: chart type', why: 'the resolver’s unsupported-type throw' },
 ]
 
@@ -250,7 +250,7 @@ async function startServer() {
 
   const child = spawn(
     'npx',
-    ['--yes', 'pnpm@10.34.5', '--filter', '@gx/rsc-fixture', 'start'],
+    ['--yes', 'pnpm@10.34.5', '--filter', '@shiftcharts/rsc-fixture', 'start'],
     { cwd: REPO_ROOT, detached: true, stdio: ['ignore', 'pipe', 'pipe'] },
   )
 
@@ -284,8 +284,8 @@ async function startServer() {
  *
  * ⚠ **`.js` only, and the filter is load-bearing rather than tidy.** `<Chart>`'s stylesheet
  * is imported as a side effect, so Next compiles it to `.next/static/chunks/*.css` — a file
- * that legitimately contains `gx-chart__svg`, `gx-chart__caption`, `gx-axis__tick` and
- * `gx-grid__line`, because those are the selectors it is made of. Verified by scanning a real
+ * that legitimately contains `shiftcharts-chart__svg`, `shiftcharts-chart__caption`, `shiftcharts-axis__tick` and
+ * `shiftcharts-grid__line`, because those are the selectors it is made of. Verified by scanning a real
  * build: every one of those markers appears in the CSS chunk and none appears in any `.js`
  * chunk. Widening this to "every file under `.next/static`" would therefore fail a perfectly
  * correct RSC page on its stylesheet, and the obvious repair — deleting the marker that
@@ -362,8 +362,8 @@ export async function scanForChartCode(files, relativeTo = FIXTURE_DIR) {
  * One reading of the rendered chart. Everything assertion 1 needs, in one round trip.
  */
 function readChart() {
-  const figure = document.querySelector('.gx-chart')
-  const svg = document.querySelector('.gx-chart__svg')
+  const figure = document.querySelector('.shiftcharts-chart')
+  const svg = document.querySelector('.shiftcharts-chart__svg')
   const paths = svg === null ? [] : [...svg.querySelectorAll('path')]
   const drawn = paths.filter((p) => (p.getAttribute('d') ?? '').length > 8)
   const title = svg === null ? null : svg.querySelector('title')
@@ -420,7 +420,7 @@ export function judgeChart(c) {
     out.push({
       kind: 'no-svg',
       detail:
-        'with JavaScript disabled there is no `.gx-chart__svg` in the document — the chart ' +
+        'with JavaScript disabled there is no `.shiftcharts-chart__svg` in the document — the chart ' +
         `needs a browser to exist. Page said: "${c.bodyText}"`,
     })
     // Everything below reads from an element that is not there; one finding, not six.
@@ -429,7 +429,7 @@ export function judgeChart(c) {
   if (!c.figureFound) {
     out.push({
       kind: 'no-figure',
-      detail: 'the <svg> rendered but its `.gx-chart` <figure> did not — the root is wrong',
+      detail: 'the <svg> rendered but its `.shiftcharts-chart` <figure> did not — the root is wrong',
     })
   }
   if (c.role !== 'graphics-document') {
@@ -538,21 +538,21 @@ if (invokedDirectly) {
   //
   // ⚠ **`openChromium()` is imported, not reimplemented.** It carries the half of the policy
   // that actually matters: that a *resolved package* and a *downloaded browser* are different
-  // absences, that only the second is a legitimate opt-out, and that `GX_REQUIRE_BROWSER=1`
+  // absences, that only the second is a legitimate opt-out, and that `SHIFTCHARTS_REQUIRE_BROWSER=1`
   // revokes even that. Two browser gates with two opinions about when a skip is honest is
   // exactly the drift the shared import exists to prevent — and the version that drifts is
   // always the one nobody runs.
   const { browser, from } = await openChromium('rsc gate (G4)')
 
   // --- Build ------------------------------------------------------------------------
-  const skipBuild = process.env.GX_RSC_SKIP_BUILD === '1'
+  const skipBuild = process.env.SHIFTCHARTS_RSC_SKIP_BUILD === '1'
   if (skipBuild) {
     console.warn(
-      'rsc gate (G4): ⚠ GX_RSC_SKIP_BUILD=1 — searching whatever `.next` already holds. ' +
+      'rsc gate (G4): ⚠ SHIFTCHARTS_RSC_SKIP_BUILD=1 — searching whatever `.next` already holds. ' +
         'These bytes are not known to come from this source tree.',
     )
   } else {
-    const build = await run('build', ['--filter', '@gx/rsc-fixture', 'build'])
+    const build = await run('build', ['--filter', '@shiftcharts/rsc-fixture', 'build'])
     if (build.code !== 0) {
       console.error('rsc gate (G4): FAILED — `next build` did not succeed.\n')
       console.error(build.output.split('\n').slice(-40).join('\n'))
@@ -560,7 +560,7 @@ if (invokedDirectly) {
         '\n⚠ A build error here is a finding, not an obstacle, and the shape of it matters. ' +
           'React 19\'s `react-server` build replaces `useState`, `useEffect`, `useRef`, ' +
           '`useReducer` and `useLayoutEffect` with a hook that throws; `useId`, `useMemo` and ' +
-          '`useCallback` are real there and `@gx/primitives` is allowed to use them. So a ' +
+          '`useCallback` are real there and `@shiftcharts/primitives` is allowed to use them. So a ' +
           'compile failure naming one of the first five is this gate doing its job. Do not ' +
           'reach for `"use client"`: that makes the build pass and makes assertion 2 fail, ' +
           'which is the same finding one step later.',

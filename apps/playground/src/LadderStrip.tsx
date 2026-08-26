@@ -1,4 +1,4 @@
-import type { SizeClass } from '@gx/core'
+import type { SizeClass } from '@shiftcharts/core'
 
 /**
  * The six rungs, in the resolver's order, with the line/area ladder's own words for what

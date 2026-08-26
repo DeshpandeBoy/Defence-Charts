@@ -9,15 +9,15 @@
 
 .plot {
   /* Ordinary token usage — the shape every component style should have. */
-  color: var(--gx-surface-text-color);
-  padding: var(--gx-plot-padding);
-  border-radius: var(--gx-widget-radius);
+  color: var(--shiftcharts-surface-text-color);
+  padding: var(--shiftcharts-plot-padding);
+  border-radius: var(--shiftcharts-widget-radius);
 }
 
 .grid-line {
   /* Legal outside the allowlist as well. */
   stroke: currentColor;
-  opacity: var(--gx-grid-opacity);
+  opacity: var(--shiftcharts-grid-opacity);
 }
 
 .marker {
@@ -35,11 +35,11 @@
 .derived {
   /* color-mix() derives from tokens rather than replacing them, so it stays legal —
      `color-mix(` must not match the `color(` rule. */
-  background: color-mix(in oklch, var(--gx-series-1), var(--gx-surface-color) 40%);
+  background: color-mix(in oklch, var(--shiftcharts-series-1), var(--shiftcharts-surface-color) 40%);
 }
 
 .spacing {
   /* Unitless zero and a calc() multiplier are legal everywhere, not just in themes. */
   margin: 0;
-  gap: calc(var(--gx-size-gap) * 2);
+  gap: calc(var(--shiftcharts-size-gap) * 2);
 }

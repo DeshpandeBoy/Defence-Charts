@@ -49,34 +49,34 @@ export function WidgetStates({
   action,
   className,
 }: WidgetStatesProps): ReactElement {
-  const rootClassName = className === undefined ? 'gx-widget-states' : `gx-widget-states ${className}`
+  const rootClassName = className === undefined ? 'shiftcharts-widget-states' : `shiftcharts-widget-states ${className}`
   const resolvedMessage = message === undefined ? DEFAULT_MESSAGES[state] : message
 
   return (
     <div
       className={rootClassName}
-      data-gx-widget-state={state}
+      data-shiftcharts-widget-state={state}
       aria-busy={state === 'loading' ? 'true' : undefined}
     >
-      <div className="gx-widget-states__content" data-gx-widget-state-slot="content">
+      <div className="shiftcharts-widget-states__content" data-shiftcharts-widget-state-slot="content">
         {children}
       </div>
       <div
-        className="gx-widget-states__status"
-        data-gx-widget-state-slot="status"
+        className="shiftcharts-widget-states__status"
+        data-shiftcharts-widget-state-slot="status"
         role={stateRole(state)}
         aria-live={stateLiveMode(state)}
         aria-atomic="true"
       >
-        <div className="gx-widget-states__message" data-gx-widget-state-slot="message">
-          <p className="gx-widget-states__label" data-gx-widget-state-slot="label">
+        <div className="shiftcharts-widget-states__message" data-shiftcharts-widget-state-slot="message">
+          <p className="shiftcharts-widget-states__label" data-shiftcharts-widget-state-slot="label">
             {resolvedMessage}
           </p>
-          <div className="gx-widget-states__description" data-gx-widget-state-slot="description">
+          <div className="shiftcharts-widget-states__description" data-shiftcharts-widget-state-slot="description">
             {description}
           </div>
         </div>
-        <div className="gx-widget-states__action" data-gx-widget-state-slot="action">
+        <div className="shiftcharts-widget-states__action" data-shiftcharts-widget-state-slot="action">
           {action}
         </div>
       </div>

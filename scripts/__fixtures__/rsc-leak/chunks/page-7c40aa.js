@@ -18,17 +18,17 @@
         const o = n.useId(),
           s = n.useMemo(() => f(e, t, r), [e, t, r])
         return n.jsxs('figure', {
-          className: 'gx-chart',
+          className: 'shiftcharts-chart',
           'data-size-class': r.sizeClass,
           children: [
             n.jsxs('svg', {
-              className: 'gx-chart__svg',
+              className: 'shiftcharts-chart__svg',
               role: 'graphics-document',
               'aria-labelledby': `${o}-title`,
               viewBox: `0 0 ${s.box.width} ${s.box.height}`,
               children: [n.jsx('title', { id: `${o}-title`, children: a })],
             }),
-            n.jsx('figcaption', { className: 'gx-chart__caption' }),
+            n.jsx('figcaption', { className: 'shiftcharts-chart__caption' }),
           ],
         })
       }

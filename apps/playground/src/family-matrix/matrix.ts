@@ -5,7 +5,7 @@ import {
   type ChartPlan,
   type Series,
   type SizeContext,
-} from '@gx/core'
+} from '@shiftcharts/core'
 
 export const FAMILY_TYPES = ['line', 'area', 'bar', 'timebar', 'scatter', 'donut', 'kpi', 'progress', 'heatmap', 'funnel'] as const
 export type FamilyType = (typeof FAMILY_TYPES)[number]

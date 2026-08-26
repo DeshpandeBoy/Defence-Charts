@@ -2,7 +2,7 @@
  * An axis: a rule, and a tick per `ComputedTick`.
  *
  * ⚠ **Every tick is a `<rect>`, never a `<line>`.** `x1`/`y1`/`x2`/`y2` are not CSS-settable
- * in any browser and none is planned, so `line { y2: var(--gx-tick-length) }` parses, passes
+ * in any browser and none is planned, so `line { y2: var(--shiftcharts-tick-length) }` parses, passes
  * the token gate, builds, warns about nothing, and does nothing — see
  * `research/decisions/012-no-line-element-for-tokened-geometry.md` for the SVG2 property
  * table and the element census (Vega ships 28 `<line>` elements, Observable Plot ships 0).
@@ -11,7 +11,7 @@
  * ## Why the tick geometry arrives as attributes and not as CSS
  *
  * It looks like the exception to rule 2 — *everything visual comes from a class* — and it is
- * not, because tick length is not visual. `xAxisBand()` in `@gx/core`'s `layout.ts` folds
+ * not, because tick length is not visual. `xAxisBand()` in `@shiftcharts/core`'s `layout.ts` folds
  * `PlanPolicy.tickLength` into the vertical band it subtracts from the plot. A theme that set a tick
  * length in CSS would move the glyphs and leave the band where it was, and the chart would be
  * subtly, unfixably wrong in a way no stylesheet-parsing gate can see. So the numbers come
@@ -27,7 +27,7 @@
  * having to re-derive an offset or re-read the plan. Absent, the default ticks render.
  */
 
-import { DEFAULT_POLICY, type ComputedTick, type PlanPolicy, type Rect } from '@gx/core'
+import { DEFAULT_POLICY, type ComputedTick, type PlanPolicy, type Rect } from '@shiftcharts/core'
 import type { ReactNode } from 'react'
 
 import { classes, roundCoord, translate } from './svg.ts'
@@ -75,7 +75,7 @@ export function Axis({
   const { tickLength, tickLabelGap, axisRuleWidth } = policy
   const flushLabels = labelFlush === true || (typeof labelFlush === 'number' && labelFlush > 0)
   const boundLabels = labelBound === true || (typeof labelBound === 'number' && labelBound > 0)
-  const axisClipId = clipId ?? `gx-axis-${orientation}-bound`
+  const axisClipId = clipId ?? `shiftcharts-axis-${orientation}-bound`
   // Band ticks are positioned at the edge of their cell; the half-pixel correction keeps the
   // rect's visible edge on the same coordinate as the continuous-axis center position.
   const tickBandOffset = tickBand === 'extent' ? -0.5 : 0
@@ -95,7 +95,7 @@ export function Axis({
 
   return (
     <g
-      className={classes('gx-axis', `gx-axis--${orientation}`, className)}
+      className={classes('shiftcharts-axis', `shiftcharts-axis--${orientation}`, className)}
       data-axis={orientation}
       data-tick-band={tickBand}
       data-label-bound={boundLabels ? '' : undefined}
@@ -115,7 +115,7 @@ export function Axis({
 
       {rule ? (
           <rect
-            className="gx-axis__rule"
+            className="shiftcharts-axis__rule"
             x={horizontal ? 0 : -axisRuleWidth}
             y={0}
             width={horizontal ? roundCoord(plot.width) : axisRuleWidth}
@@ -137,10 +137,10 @@ export function Axis({
             // when it is swapped.
             //
             // `value` is stable across a resize by construction — it is the domain value, not
-            // a rendering of it — and `computeTicks()` in `@gx/core` de-duplicates by it, so
+            // a rendering of it — and `computeTicks()` in `@shiftcharts/core` de-duplicates by it, so
             // the pixel collision the old key defended against cannot reach here.
             <g
-              className="gx-axis__tick"
+              className="shiftcharts-axis__tick"
               key={String(tick.value)}
               data-value={String(tick.value)}
               transform={
@@ -151,7 +151,7 @@ export function Axis({
             >
               {marks ? (
                 <rect
-                  className="gx-axis__tick-mark"
+                  className="shiftcharts-axis__tick-mark"
                   x={horizontal ? -axisRuleWidth / 2 : -tickLength}
                   y={horizontal ? 0 : -axisRuleWidth / 2}
                   width={horizontal ? axisRuleWidth : tickLength}
@@ -160,7 +160,7 @@ export function Axis({
               ) : null}
               {labels && tick.label !== '' ? (
                 <text
-                  className="gx-axis__tick-label"
+                  className="shiftcharts-axis__tick-label"
                   x={horizontal ? 0 : -labelOffset}
                   y={horizontal ? labelOffset : 0}
                   // ⚠ An anchor hint, not an anchor. CSS reads it

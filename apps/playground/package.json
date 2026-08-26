@@ -1,5 +1,5 @@
 {
-  "name": "@gx/playground",
+  "name": "@shiftcharts/playground",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -12,10 +12,10 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@gx/core": "workspace:*",
-    "@gx/primitives": "workspace:*",
-    "@gx/react": "workspace:*",
-    "@gx/tokens": "workspace:*",
+    "@shiftcharts/core": "workspace:*",
+    "@shiftcharts/primitives": "workspace:*",
+    "@shiftcharts/react": "workspace:*",
+    "@shiftcharts/tokens": "workspace:*",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },

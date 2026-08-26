@@ -6,7 +6,7 @@
     // walking up to the workspace root.
     //
     // Both halves matter. Without them, `el.getBBox()` and `process.cwd()` typecheck
-    // cleanly inside `@gx/core`, and the ESLint rule becomes the only thing standing
+    // cleanly inside `@shiftcharts/core`, and the ESLint rule becomes the only thing standing
     // between the resolver and a call that cannot work on a server. A rule you can
     // silence with one inline comment is not the same as a type that does not exist.
     "types": []

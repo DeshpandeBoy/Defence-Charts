@@ -91,7 +91,7 @@ export function resolvePlanPath(project, path) {
 }
 
 /**
- * Build the one `Project` this gate needs — just enough of `@gx/core` to read `plan.ts`'s AST.
+ * Build the one `Project` this gate needs — just enough of `@shiftcharts/core` to read `plan.ts`'s AST.
  *
  * @returns {import('ts-morph').Project}
  */
@@ -152,7 +152,7 @@ export function auditGranularity({ rows, dispositions, declaredTokens, project, 
     }
 
     const tokens = disposition.tokens ?? []
-    const notDeclared = tokens.filter((name) => !declaredTokens.has(`--gx-${name}`))
+    const notDeclared = tokens.filter((name) => !declaredTokens.has(`--shiftcharts-${name}`))
     owedToB1 += notDeclared.length
 
     for (const path of disposition.planPaths ?? []) {

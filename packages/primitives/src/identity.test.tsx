@@ -37,7 +37,7 @@ import {
   resolveFrame,
   type Series,
   sizeContextFromPixels,
-} from '@gx/core'
+} from '@shiftcharts/core'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -115,7 +115,7 @@ function renderAt(width: number, height: number, data: readonly Series[]): Chart
  * comparing the wrong pairs.
  */
 function gridByValue(axis: 'x' | 'y', frame: ChartFrame): Map<number | string, Element> {
-  const nodes = Array.from(container.querySelectorAll(`.gx-grid__line[data-axis="${axis}"]`))
+  const nodes = Array.from(container.querySelectorAll(`.shiftcharts-grid__line[data-axis="${axis}"]`))
   const ticks = axis === 'y' ? frame.yTicks : frame.xTicks
   expect(nodes).toHaveLength(ticks.length)
 
@@ -130,7 +130,7 @@ function gridByValue(axis: 'x' | 'y', frame: ChartFrame): Map<number | string, E
 /** Axis ticks publish `data-value`, so these need no positional trust. */
 function axisTicksByValue(orientation: 'x' | 'y'): Map<string, Element> {
   const byValue = new Map<string, Element>()
-  for (const node of container.querySelectorAll(`.gx-axis--${orientation} .gx-axis__tick`)) {
+  for (const node of container.querySelectorAll(`.shiftcharts-axis--${orientation} .shiftcharts-axis__tick`)) {
     const value = node.getAttribute('data-value')
     if (value !== null) byValue.set(value, node)
   }
@@ -233,7 +233,7 @@ describe('point marks', () => {
    */
   it('keeps the same <circle> for a datum across a resize', () => {
     renderAt(1200, 700, MONTHS)
-    const before = Array.from(container.querySelectorAll('.gx-point'))
+    const before = Array.from(container.querySelectorAll('.shiftcharts-point'))
     expect(before.length).toBeGreaterThan(0)
     // ⚠ The LAST point, for the same reason the gridline guard takes an interior tick: point
     // 0 sits at the plot's left edge, and the left edge is the y-label gutter, which a width
@@ -242,7 +242,7 @@ describe('point marks', () => {
     const cxBefore = last?.getAttribute('cx')
 
     renderAt(900, 500, MONTHS)
-    const after = Array.from(container.querySelectorAll('.gx-point'))
+    const after = Array.from(container.querySelectorAll('.shiftcharts-point'))
 
     expect(after).toHaveLength(before.length)
     after.forEach((node, i) => {

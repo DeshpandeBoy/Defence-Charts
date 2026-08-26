@@ -1,5 +1,5 @@
-import { createWidgetId } from '@gx/core'
-import type { LayoutSnapshot, WidgetId } from '@gx/core'
+import { createWidgetId } from '@shiftcharts/core'
+import type { LayoutSnapshot, WidgetId } from '@shiftcharts/core'
 
 export type GridInteractionKind = 'drag' | 'resize'
 export type GridInteractionPhase = 'start' | 'preview' | 'commit' | 'cancel'

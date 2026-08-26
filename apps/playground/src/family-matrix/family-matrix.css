@@ -1,7 +1,7 @@
-@import '@gx/tokens/theme.css';
-@import '@gx/primitives/chart.css';
-@import '@gx/react/auto-chart.css';
-@import '@gx/react/interaction-overlay.css';
+@import '@shiftcharts/tokens/theme.css';
+@import '@shiftcharts/primitives/chart.css';
+@import '@shiftcharts/react/auto-chart.css';
+@import '@shiftcharts/react/interaction-overlay.css';
 
 :root {
   color-scheme: dark light;
@@ -13,9 +13,9 @@
 
 body {
   margin: 0;
-  background: var(--gx-surface-color);
-  color: var(--gx-surface-text-color);
-  font-family: var(--gx-font-family);
+  background: var(--shiftcharts-surface-color);
+  color: var(--shiftcharts-surface-text-color);
+  font-family: var(--shiftcharts-font-family);
 }
 
 button {
@@ -24,9 +24,9 @@ button {
 
 .family-matrix {
   min-block-size: 100vh;
-  padding: clamp(var(--gx-widget-padding), 4vw, 3rem);
-  background: var(--gx-surface-color);
-  color: var(--gx-surface-text-color);
+  padding: clamp(var(--shiftcharts-widget-padding), 4vw, 3rem);
+  background: var(--shiftcharts-surface-color);
+  color: var(--shiftcharts-surface-text-color);
 }
 
 .family-matrix__header,
@@ -72,8 +72,8 @@ button {
 
 .family-matrix__header button {
   flex: 0 0 auto;
-  border: 1px solid color-mix(in srgb, var(--gx-surface-text-color) 28%, transparent);
-  border-radius: var(--gx-widget-radius);
+  border: 1px solid color-mix(in srgb, var(--shiftcharts-surface-text-color) 28%, transparent);
+  border-radius: var(--shiftcharts-widget-radius);
   padding: 0.65rem 0.85rem;
   background: transparent;
   color: inherit;
@@ -81,12 +81,12 @@ button {
 }
 
 .family-matrix__header button:hover {
-  background: color-mix(in srgb, var(--gx-surface-text-color) 8%, transparent);
+  background: color-mix(in srgb, var(--shiftcharts-surface-text-color) 8%, transparent);
 }
 
 .family-matrix__eyebrow {
   margin: 0 0 0.4rem;
-  color: var(--gx-series-1);
+  color: var(--shiftcharts-series-1);
   font-size: 0.75rem;
   font-weight: 700;
   letter-spacing: 0.12em;
@@ -96,13 +96,13 @@ button {
 .family-matrix > section {
   max-inline-size: 88rem;
   margin: 0 auto 3rem;
-  padding-block-start: var(--gx-widget-padding);
-  border-block-start: 1px solid color-mix(in srgb, var(--gx-surface-text-color) 16%, transparent);
+  padding-block-start: var(--shiftcharts-widget-padding);
+  border-block-start: 1px solid color-mix(in srgb, var(--shiftcharts-surface-text-color) 16%, transparent);
 }
 
 .family-matrix__section-heading {
   align-items: end;
-  margin-block-end: var(--gx-widget-gap);
+  margin-block-end: var(--shiftcharts-widget-gap);
 }
 
 .family-matrix__section-heading > p {
@@ -119,16 +119,16 @@ button {
   display: grid;
   align-items: start;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--gx-widget-gap);
+  gap: var(--shiftcharts-widget-gap);
 }
 
 .family-matrix__card,
 .family-matrix__state,
 .family-matrix__coverage {
   min-inline-size: 0;
-  border: 1px solid color-mix(in srgb, var(--gx-surface-text-color) 18%, transparent);
-  border-radius: var(--gx-widget-radius);
-  background: color-mix(in srgb, var(--gx-surface-color) 94%, var(--gx-surface-text-color));
+  border: 1px solid color-mix(in srgb, var(--shiftcharts-surface-text-color) 18%, transparent);
+  border-radius: var(--shiftcharts-widget-radius);
+  background: color-mix(in srgb, var(--shiftcharts-surface-color) 94%, var(--shiftcharts-surface-text-color));
 }
 
 .family-matrix__card {
@@ -139,8 +139,8 @@ button {
   display: flex;
   align-items: start;
   justify-content: space-between;
-  gap: var(--gx-widget-gap);
-  padding: var(--gx-widget-padding-tight) var(--gx-widget-padding);
+  gap: var(--shiftcharts-widget-gap);
+  padding: var(--shiftcharts-widget-padding-tight) var(--shiftcharts-widget-padding);
 }
 
 .family-matrix__card-identity {
@@ -160,9 +160,9 @@ button {
 .family-matrix__card-header h3,
 .family-matrix__state h3 {
   margin: 0;
-  color: var(--gx-surface-text-color);
-  font-size: var(--gx-title-font-size);
-  font-weight: var(--gx-title-font-weight);
+  color: var(--shiftcharts-surface-text-color);
+  font-size: var(--shiftcharts-title-font-size);
+  font-weight: var(--shiftcharts-title-font-weight);
   line-height: 1.1;
 }
 
@@ -176,10 +176,10 @@ button {
 }
 
 .family-matrix__card-meta code {
-  border: 1px solid color-mix(in srgb, var(--gx-series-2) 36%, transparent);
-  border-radius: calc(var(--gx-widget-radius) / 2);
+  border: 1px solid color-mix(in srgb, var(--shiftcharts-series-2) 36%, transparent);
+  border-radius: calc(var(--shiftcharts-widget-radius) / 2);
   padding: 0.25rem 0.35rem;
-  color: var(--gx-series-2);
+  color: var(--shiftcharts-series-2);
   font-size: 0.625rem;
   line-height: 1;
 }
@@ -192,8 +192,8 @@ button {
 .family-matrix__card-summary {
   display: flex;
   align-items: center;
-  gap: var(--gx-widget-gap);
-  padding: 0 var(--gx-widget-padding) var(--gx-widget-padding-tight);
+  gap: var(--shiftcharts-widget-gap);
+  padding: 0 var(--shiftcharts-widget-padding) var(--shiftcharts-widget-padding-tight);
 }
 
 .family-matrix__card-summary > span {
@@ -223,13 +223,13 @@ button {
   position: relative;
   block-size: 11rem;
   min-block-size: 0;
-  padding: var(--gx-widget-padding-tight);
-  border-block-start: 1px solid color-mix(in srgb, var(--gx-surface-text-color) 12%, transparent);
-  background: var(--gx-surface-color);
+  padding: var(--shiftcharts-widget-padding-tight);
+  border-block-start: 1px solid color-mix(in srgb, var(--shiftcharts-surface-text-color) 12%, transparent);
+  background: var(--shiftcharts-surface-color);
 }
 
-.family-matrix__chart-frame .gx-chart,
-.family-matrix__state-body .gx-chart {
+.family-matrix__chart-frame .shiftcharts-chart,
+.family-matrix__state-body .shiftcharts-chart {
   inline-size: 100%;
   block-size: 100%;
 }
@@ -241,34 +241,34 @@ button {
   min-block-size: 0;
 }
 
-.family-matrix__chart-frame .gx-chart__svg,
-.family-matrix__state-body .gx-chart__svg {
+.family-matrix__chart-frame .shiftcharts-chart__svg,
+.family-matrix__state-body .shiftcharts-chart__svg {
   inline-size: 100%;
   block-size: 100%;
 }
 
-.family-matrix__chart-frame .gx-chart__caption {
-  padding: 0.35rem var(--gx-widget-padding-tight);
-  border-block-start: 1px solid color-mix(in srgb, var(--gx-surface-text-color) 12%, transparent);
-  background: var(--gx-surface-color);
+.family-matrix__chart-frame .shiftcharts-chart__caption {
+  padding: 0.35rem var(--shiftcharts-widget-padding-tight);
+  border-block-start: 1px solid color-mix(in srgb, var(--shiftcharts-surface-text-color) 12%, transparent);
+  background: var(--shiftcharts-surface-color);
   color: color-mix(in srgb, currentColor 58%, transparent);
 }
 
-.family-matrix__chart-frame .gx-data-table__summary {
+.family-matrix__chart-frame .shiftcharts-data-table__summary {
   font-size: 0.625rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
-.family-matrix__chart-frame .gx-data-table__table {
+.family-matrix__chart-frame .shiftcharts-data-table__table {
   font-size: 0.6875rem;
 }
 
-.family-matrix__chart-frame .gx-grid__line {
+.family-matrix__chart-frame .shiftcharts-grid__line {
   opacity: 0.55;
 }
 
-.family-matrix__chart-frame .gx-axis__tick-label {
+.family-matrix__chart-frame .shiftcharts-axis__tick-label {
   opacity: 0.72;
 }
 
@@ -299,7 +299,7 @@ button {
 .family-matrix__states {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--gx-widget-gap);
+  gap: var(--shiftcharts-widget-gap);
 }
 
 .family-matrix__state {
@@ -307,15 +307,15 @@ button {
 }
 
 .family-matrix__state h3 {
-  padding: var(--gx-widget-padding-tight) var(--gx-widget-padding);
+  padding: var(--shiftcharts-widget-padding-tight) var(--shiftcharts-widget-padding);
   text-transform: capitalize;
 }
 
 .family-matrix__state-body {
   block-size: 13rem;
   min-block-size: 0;
-  padding: var(--gx-widget-padding-tight);
-  border-block-start: 1px solid color-mix(in srgb, var(--gx-surface-text-color) 12%, transparent);
+  padding: var(--shiftcharts-widget-padding-tight);
+  border-block-start: 1px solid color-mix(in srgb, var(--shiftcharts-surface-text-color) 12%, transparent);
 }
 
 .family-matrix__error {
@@ -324,7 +324,7 @@ button {
   gap: 0.5rem;
   block-size: 100%;
   padding: 1.5rem;
-  border-inline-start: 0.3rem solid var(--gx-series-6);
+  border-inline-start: 0.3rem solid var(--shiftcharts-series-6);
 }
 
 .family-matrix__error span {
@@ -337,10 +337,10 @@ button {
   max-inline-size: 100%;
   overflow: hidden;
   resize: both;
-  border: 1px dashed var(--gx-series-3);
+  border: 1px dashed var(--shiftcharts-series-3);
 }
 
-.family-matrix__resize-probe .gx-auto-chart {
+.family-matrix__resize-probe .shiftcharts-auto-chart {
   inline-size: 100%;
 }
 
@@ -350,12 +350,12 @@ button {
 }
 
 .family-matrix__probe-note output {
-  color: var(--gx-series-3);
+  color: var(--shiftcharts-series-3);
   font-weight: 700;
 }
 
 .family-matrix__coverage {
-  padding: var(--gx-widget-padding);
+  padding: var(--shiftcharts-widget-padding);
 }
 
 .family-matrix__coverage ul {

@@ -11,5 +11,5 @@ export default defineConfig({
   dts: true,
   clean: true,
   platform: 'neutral',
-  exports: { devExports: true, customExports: cssExportsFor('@gx/tokens') },
+  exports: { devExports: true, customExports: cssExportsFor('@shiftcharts/tokens') },
 })

@@ -1,4 +1,4 @@
-import type { CellFrame, SeriesFrame } from '@gx/core'
+import type { CellFrame, SeriesFrame } from '@shiftcharts/core'
 
 type HeatmapFixtureCell = CellFrame & {
   readonly id?: string | undefined

@@ -2,8 +2,8 @@ import {
   GRID_COLUMNS,
   createLayoutSnapshot,
   validateWidgetLayouts,
-} from '@gx/core'
-import type { LayoutSnapshot, WidgetLayout, WidgetLayoutInput } from '@gx/core'
+} from '@shiftcharts/core'
+import type { LayoutSnapshot, WidgetLayout, WidgetLayoutInput } from '@shiftcharts/core'
 import {
   cloneLayout,
   correctBounds,
@@ -25,7 +25,7 @@ export type GridLayoutOptions = {
  * Convert the project-owned layout value into RGL's private working representation.
  *
  * This function is intentionally not exported: RGL types and property names must not become
- * part of the `@gx/grid` API. Every item is newly allocated before RGL receives it.
+ * part of the `@shiftcharts/grid` API. Every item is newly allocated before RGL receives it.
  */
 function toRglLayout(items: readonly WidgetLayout[]): RglLayoutItem[] {
   return items.map((item) => ({
@@ -65,7 +65,7 @@ function fromRglLayout(layout: RglLayout): readonly WidgetLayout[] {
 /**
  * Validate and normalise a layout through the pinned RGL core algorithms.
  *
- * The caller's values are canonicalised by `@gx/core` first, then copied again for RGL because
+ * The caller's values are canonicalised by `@shiftcharts/core` first, then copied again for RGL because
  * `correctBounds()` documents in-place mutation. The return value is a fresh, frozen array of
  * project-owned values and is deterministic for identical input.
  */
@@ -76,14 +76,14 @@ export function normalizeGridLayout(
   const items = validateWidgetLayouts(inputs)
   const working = cloneLayout(toRglLayout(items))
 
-  validateRglLayout(working, '@gx/grid layout')
+  validateRglLayout(working, '@shiftcharts/grid layout')
   correctBounds(working, { cols: GRID_COLUMNS })
 
   const normalized = options.compact === false
     ? working
     : getCompactor('vertical').compact(working, GRID_COLUMNS)
 
-  validateRglLayout(normalized, '@gx/grid normalized layout')
+  validateRglLayout(normalized, '@shiftcharts/grid normalized layout')
   return fromRglLayout(normalized)
 }
 

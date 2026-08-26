@@ -14,19 +14,19 @@ import { fileURLToPath } from 'node:url'
  * @type {Readonly<Record<string, readonly CssAsset[]>>}
  */
 export const CSS_ASSETS = Object.freeze({
-  '@gx/grid': Object.freeze([
+  '@shiftcharts/grid': Object.freeze([
     { exportPath: './widget-shell.css', source: 'src/widget-shell.css', dist: 'dist/widget-shell.css' },
     { exportPath: './widget-states.css', source: 'src/widget-states.css', dist: 'dist/widget-states.css' },
     { exportPath: './keyboard-grid.css', source: 'src/keyboard-grid.css', dist: 'dist/keyboard-grid.css' },
   ]),
-  '@gx/primitives': Object.freeze([
+  '@shiftcharts/primitives': Object.freeze([
     { exportPath: './chart.css', source: 'src/chart.css', dist: 'dist/chart.css' },
   ]),
-  '@gx/react': Object.freeze([
+  '@shiftcharts/react': Object.freeze([
     { exportPath: './auto-chart.css', source: 'src/auto-chart.css', dist: 'dist/auto-chart.css' },
     { exportPath: './interaction-overlay.css', source: 'src/interaction-overlay.css', dist: 'dist/interaction-overlay.css' },
   ]),
-  '@gx/tokens': Object.freeze([
+  '@shiftcharts/tokens': Object.freeze([
     { exportPath: './theme.css', source: 'src/themes/theme.css', dist: 'dist/themes/theme.css' },
     { exportPath: null, source: 'src/themes/typography.css', dist: 'dist/themes/typography.css' },
   ]),

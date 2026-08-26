@@ -1,6 +1,6 @@
 'use client'
 
-import type { ChartPlan, Series } from '@gx/core'
+import type { ChartPlan, Series } from '@shiftcharts/core'
 
 export type LegendControlProps = {
   readonly plan: ChartPlan
@@ -27,9 +27,9 @@ export function LegendControl({
   if (entries.length === 0) return null
 
   const rootClass = [
-    'gx-legend',
-    'gx-legend--control',
-    `gx-legend--${plan.legend.placement}`,
+    'shiftcharts-legend',
+    'shiftcharts-legend--control',
+    `shiftcharts-legend--${plan.legend.placement}`,
     className,
   ].filter(Boolean).join(' ')
   const position = plan.legend.placement === 'external' ? plan.legend.position : undefined
@@ -47,7 +47,7 @@ export function LegendControl({
         const visible = !hidden.has(item.id)
         return (
           <div
-            className="gx-legend__item"
+            className="shiftcharts-legend__item"
             data-series-id={item.id}
             data-series-index={index}
             key={item.id}
@@ -55,7 +55,7 @@ export function LegendControl({
           >
             <button
               aria-pressed={visible}
-              className="gx-legend__control"
+              className="shiftcharts-legend__control"
               onClick={() => onVisibilityChange(item.id, !visible)}
               onKeyDown={(event) => {
                 if (event.key !== 'Enter' && event.key !== ' ') return
@@ -64,8 +64,8 @@ export function LegendControl({
               }}
               type="button"
             >
-              <span className="gx-legend__symbol" aria-hidden="true" />
-              <span className="gx-legend__label">{label}</span>
+              <span className="shiftcharts-legend__symbol" aria-hidden="true" />
+              <span className="shiftcharts-legend__label">{label}</span>
             </button>
           </div>
         )

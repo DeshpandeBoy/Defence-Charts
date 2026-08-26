@@ -18,7 +18,7 @@
  * updating it, and a freshly-mounted node has no previous value to transition from.
  *
  * That last case is why this probe has case 12. `research/20-architecture.md` §7.4 sketches
- * `transition: d var(--gx-motion-duration) ease` on `.series` as though it obviously works.
+ * `transition: d var(--shiftcharts-motion-duration) ease` on `.series` as though it obviously works.
  * Every rung of the ladder renders through `<LinePath>`, which emits `d` as an attribute, and
  * `<Grid>`/`<Axis>` currently key their children by **pixel offset** — so on any resize the
  * key changes and every gridline is a new element. If case 12 says a replaced element does not
@@ -174,7 +174,7 @@ const CASES = [
     attr: 'r',
     from: '3',
     to: '9',
-    note: 'Already a token (--gx-point-radius) per 012. Does it also tween?',
+    note: 'Already a token (--shiftcharts-point-radius) per 012. Does it also tween?',
   },
   {
     id: 'g-transform',

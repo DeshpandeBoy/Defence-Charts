@@ -13,7 +13,7 @@
  *
  * ⚠ **This gate cannot be written in Vitest, and the reason is not convenience.**
  * `research/30-implementation-plan.md:279` says so directly: *"This one needs a real
- * browser — the fake cannot produce the loop error."* `FakeResizeObserver` in `@gx/testing`
+ * browser — the fake cannot produce the loop error."* `FakeResizeObserver` in `@shiftcharts/testing`
  * exists so tests can **drive** resize deterministically; a driven observer has no
  * re-entrancy, no delivery queue, and therefore no loop to complete undelivered. Asserting
  * "no loop error" against it would pass on a chart that loops in every browser — this
@@ -58,7 +58,7 @@
  *    missing binary wants `playwright install chromium`, a Linux box missing the shared
  *    libraries Chromium links against wants `--with-deps`.
  *
- * ⚠ **`GX_REQUIRE_BROWSER=1` turns that SKIP into a failure, and the CI job sets it.** In CI
+ * ⚠ **`SHIFTCHARTS_REQUIRE_BROWSER=1` turns that SKIP into a failure, and the CI job sets it.** In CI
  * a silent skip is a gate that is not running while looking exactly like a gate that passed —
  * the same species as the assertion-1 finding below, where a green line was printed over a
  * box growing without limit. Leniency is for the reader who is a developer; a runner has no
@@ -79,7 +79,7 @@
  * Through A4 the playground hand-wired its own `useElementSize` onto `.widget` and rendered
  * `<Chart>` straight into it, so *the box the sweep drags* and *the box the library observes*
  * were one element. At A5 the playground migrated to `<AutoChart>`, which brings its own
- * `.gx-auto-chart` wrapper — measured by the library, and carrying its own `overflow: hidden`
+ * `.shiftcharts-auto-chart` wrapper — measured by the library, and carrying its own `overflow: hidden`
  * as part of the containment contract. From that commit onward the two are different
  * elements, one nested in the other, with a clipping boundary between them.
  *
@@ -91,7 +91,7 @@
  * warned. The gate was green because it had stopped looking at the chart.
  *
  * So the split is explicit now: **judge the observed box, drag the outer one.**
- * `clientWidth/Height`, `scrollbar*` and `overflow*` come from `.gx-auto-chart`;
+ * `clientWidth/Height`, `scrollbar*` and `overflow*` come from `.shiftcharts-auto-chart`;
  * `offsetWidth/Height` stay on `.widget`, because that is what the drag asked for and what a
  * failure message must quote back; and assertion 2 watches **both**, because `.widget` has an
  * explicit `height` and would sit perfectly still while the wrapper inside it ran away.
@@ -105,7 +105,7 @@
  *    on `/resizeobserver loop/`. The direct observation, and by measurement the **weakest**
  *    of the four — see below.
  * 2. **The measured box never moves on its own.** Read both border boxes — `.widget`'s and
- *    `.gx-auto-chart`'s — wait three frames with no input, read them again. This is G11's own
+ *    `.shiftcharts-auto-chart`'s — wait three frames with no input, read them again. This is G11's own
  *    sentence — *"assert no plan field alters the measured box"* (`04-ci-gate-map.md:86`) —
  *    checked literally, and it fires whether or not the browser chose to emit anything.
  * 3. **No scrollbar gutter.** `offsetWidth - clientWidth - borderX`, and the block-axis
@@ -166,7 +166,7 @@ import { fileURLToPath } from 'node:url'
 
 const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
 
-export const ORIGIN = process.env.GX_PLAYGROUND_ORIGIN ?? 'http://localhost:5173/'
+export const ORIGIN = process.env.SHIFTCHARTS_PLAYGROUND_ORIGIN ?? 'http://localhost:5173/'
 
 /**
  * ⚠ Wide and tall on purpose. `.widget` is `max-width: 100%` inside `.lab__stage`, so the
@@ -223,12 +223,12 @@ const WAYPOINTS = [
  * ⚠ Set by `.github/workflows/ci.yml`'s `browser` job, and by nobody else by default. It is
  * the switch that makes a skip unreachable where a skip would be a lie. See the header.
  */
-const REQUIRE_BROWSER = process.env.GX_REQUIRE_BROWSER === '1'
+const REQUIRE_BROWSER = process.env.SHIFTCHARTS_REQUIRE_BROWSER === '1'
 
 /**
  * Resolve `playwright`.
  *
- * ⚠ **The scratch-install candidate is gone, and its absence is the point.** `/tmp/gx-drive`
+ * ⚠ **The scratch-install candidate is gone, and its absence is the point.** `/tmp/shiftcharts-drive`
  * existed because playwright could not be installed *inside* this workspace — `npm` walked up
  * into the pnpm root and failed ERESOLVE — so a copy outside the repo was the only way to run
  * this gate at all. `pnpm add -Dw` does not have that problem, and the specifier below now
@@ -237,7 +237,7 @@ const REQUIRE_BROWSER = process.env.GX_REQUIRE_BROWSER === '1'
  * one, which is a worse failure than the one it was working around: a browser gate is only
  * evidence if you know which browser it drove.
  *
- * ⚠ **`GX_PLAYWRIGHT_PATH` is checked first and *strictly*.** An explicit override that
+ * ⚠ **`SHIFTCHARTS_PLAYWRIGHT_PATH` is checked first and *strictly*.** An explicit override that
  * misses does not fall through to the declared copy — it fails. An instruction that silently
  * did nothing is this project's named failure species, and "the gate passed" is a poor way to
  * find out your override has a typo in it.
@@ -253,7 +253,7 @@ const REQUIRE_BROWSER = process.env.GX_REQUIRE_BROWSER === '1'
  *   | { ok: false, chromium: null, tried: string[], why: string, remedy: string }>}
  */
 export async function loadPlaywright() {
-  const override = process.env.GX_PLAYWRIGHT_PATH
+  const override = process.env.SHIFTCHARTS_PLAYWRIGHT_PATH
   const explicit = typeof override === 'string' && override !== ''
   const specifier = explicit ? override : 'playwright'
 
@@ -287,10 +287,10 @@ export async function loadPlaywright() {
     chromium: null,
     tried,
     why: explicit
-      ? `GX_PLAYWRIGHT_PATH is set to ${override}, and nothing there exports \`chromium\``
+      ? `SHIFTCHARTS_PLAYWRIGHT_PATH is set to ${override}, and nothing there exports \`chromium\``
       : '`playwright` is a pinned devDependency of this repo and did not resolve, which means' +
         ' the install is missing or incomplete rather than that the browser is opted out of',
-    remedy: explicit ? 'unset GX_PLAYWRIGHT_PATH, or point it at a real playwright' : 'pnpm install',
+    remedy: explicit ? 'unset SHIFTCHARTS_PLAYWRIGHT_PATH, or point it at a real playwright' : 'pnpm install',
   }
 }
 
@@ -346,7 +346,7 @@ export async function launchChromium(chromium) {
  * policies drifting apart — but importing `loadPlaywright()` alone shares only the *easy*
  * half. The half that matters is the one below: knowing that a resolved package and a
  * downloaded browser are different things, that only the second is a legitimate opt-out, and
- * that `GX_REQUIRE_BROWSER=1` revokes even that. A gate that imports the resolver and then
+ * that `SHIFTCHARTS_REQUIRE_BROWSER=1` revokes even that. A gate that imports the resolver and then
  * hand-rolls the launch gets the opaque `browserType.launch:` error this function exists to
  * translate, which is exactly the drift the shared import was meant to prevent.
  *
@@ -401,7 +401,7 @@ export async function openChromium(gate) {
 
     if (REQUIRE_BROWSER) {
       say(
-        '\nGX_REQUIRE_BROWSER=1 is set, so this is a failure rather than a skip: in CI a\n' +
+        '\nSHIFTCHARTS_REQUIRE_BROWSER=1 is set, so this is a failure rather than a skip: in CI a\n' +
           'silent skip is a gate that is not running while looking exactly like one that\n' +
           'passed, which is the failure species this whole file exists to catch.',
       )
@@ -409,7 +409,7 @@ export async function openChromium(gate) {
     }
     say(
       '\nExiting 0. A ~150 MB browser download is an opt-in, and a gate that hard-fails on a\n' +
-        'declined opt-in gets deleted rather than fixed. Set GX_REQUIRE_BROWSER=1 to make this\n' +
+        'declined opt-in gets deleted rather than fixed. Set SHIFTCHARTS_REQUIRE_BROWSER=1 to make this\n' +
         'a failure — `.github/workflows/ci.yml`\'s browser job does exactly that.',
     )
     process.exit(0)
@@ -453,7 +453,7 @@ export async function ensureDevServer() {
 
   const child = spawn(
     'npx',
-    ['--yes', 'pnpm@10.34.5', '--filter', '@gx/playground', 'dev'],
+    ['--yes', 'pnpm@10.34.5', '--filter', '@shiftcharts/playground', 'dev'],
     { cwd: REPO_ROOT, detached: true, stdio: ['ignore', 'pipe', 'pipe'] },
   )
 
@@ -496,7 +496,7 @@ export async function ensureDevServer() {
  *
  * ## ⚠ Two boxes, and reading the wrong one is how this gate went blind once
  *
- * `.widget` is the box the sweep **drags**. `.gx-auto-chart` — since A5, the wrapper
+ * `.widget` is the box the sweep **drags**. `.shiftcharts-auto-chart` — since A5, the wrapper
  * `<AutoChart>` puts around itself — is the box the library **observes**, and it carries its
  * own `overflow: hidden`. Those were the same element before A5 and are not now, so a
  * containment number read from `.widget` is read from the outside of a clipping boundary:
@@ -507,7 +507,7 @@ export async function ensureDevServer() {
  * quietly doesn't — living inside the gate written to catch it.
  *
  * So: **judge the observed box, drag the outer one.** `clientWidth/Height`, `scrollbar*` and
- * `overflow*` come from `.gx-auto-chart` when it is there; `offsetWidth/Height` stay on
+ * `overflow*` come from `.shiftcharts-auto-chart` when it is there; `offsetWidth/Height` stay on
  * `.widget`, because that is the number the drag asked for and the number a failure message
  * has to quote back. `observedFound` records which happened, and a vacuity check downstream
  * refuses to believe a green run that never located the wrapper — a revert of the playground
@@ -521,16 +521,16 @@ function readWidget() {
   const driven = document.querySelector('.widget')
   if (driven === null) return null
 
-  const observed = driven.querySelector('.gx-auto-chart')
+  const observed = driven.querySelector('.shiftcharts-auto-chart')
   const el = observed ?? driven
 
   const cs = getComputedStyle(el)
   const borderX = parseFloat(cs.borderLeftWidth) + parseFloat(cs.borderRightWidth)
   const borderY = parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
 
-  const figure = el.querySelector('.gx-chart')
-  const svg = el.querySelector('.gx-chart__svg')
-  const caption = el.querySelector('.gx-chart__caption')
+  const figure = el.querySelector('.shiftcharts-chart')
+  const svg = el.querySelector('.shiftcharts-chart__svg')
+  const caption = el.querySelector('.shiftcharts-chart__caption')
   const observedRect = el.getBoundingClientRect()
   const captionRect = caption?.getBoundingClientRect() ?? null
   const captionInside =
@@ -671,7 +671,7 @@ export function judge(s) {
   const out = []
   // Named in every message, because "the measured box" stopped being one element at A5 and
   // a reader chasing a 21 px overflow needs to know which box it spilled out of.
-  const box = s.observedFound ? '.gx-auto-chart' : '.widget'
+  const box = s.observedFound ? '.shiftcharts-auto-chart' : '.widget'
   if (s.scrollbarX > 0 || s.scrollbarY > 0) {
     out.push({
       step: s.step,
@@ -688,7 +688,7 @@ export function judge(s) {
       kind: 'overflow',
       detail:
         `content overflows ${box} by ${s.overflowX}×${unattributedY} px at ` +
-        `${s.w}×${s.h} (block budget ${s.captionBudget} px = .gx-chart__caption) — ` +
+        `${s.w}×${s.h} (block budget ${s.captionBudget} px = .shiftcharts-chart__caption) — ` +
         `one \`overflow: auto\` away from a scrollbar`,
     })
   }
@@ -765,7 +765,7 @@ if (invokedDirectly) {
     page.on('pageerror', (e) => record(String(e)))
 
     await page.goto(ORIGIN, { waitUntil: 'load' })
-    await page.waitForSelector('.widget .gx-chart', { timeout: 20_000 })
+    await page.waitForSelector('.widget .shiftcharts-chart', { timeout: 20_000 })
 
     const widget = await page.locator('.widget')
     let step = 0
@@ -912,7 +912,7 @@ if (invokedDirectly) {
       )
     }
     // ⚠ The check that keeps the previous paragraph's mistake from being made twice. Every
-    // containment number above is read from `.gx-auto-chart` when it exists and from
+    // containment number above is read from `.shiftcharts-auto-chart` when it exists and from
     // `.widget` when it does not — and the fallback is a *strictly weaker* measurement,
     // taken outside a clipping boundary, that reports zero overflow for overflow that is
     // really there. If the playground ever stops rendering
@@ -920,7 +920,7 @@ if (invokedDirectly) {
     // of quietly grading a different box.
     if (samples.length > 0 && !samples.some((s) => s.observedFound)) {
       vacuous.push(
-        'no `.gx-auto-chart` was ever found inside `.widget` — every number above was read ' +
+        'no `.shiftcharts-auto-chart` was ever found inside `.widget` — every number above was read ' +
           'from the outer box, which is not the box the library observes',
       )
     }
@@ -961,7 +961,7 @@ if (invokedDirectly) {
 
   const peakOverflow = samples.reduce((max, s) => Math.max(max, s.overflowY), 0)
   const judgedBox = samples.every((s) => s.observedFound)
-    ? '.gx-auto-chart'
+    ? '.shiftcharts-auto-chart'
     : '.widget (no wrapper found at every step)'
   console.log(
     `containment gate (G11): ${samples.length} sizes swept, ${changes} rung changes, ` +

@@ -5,7 +5,7 @@
  * forbidden from saying *where*: no field may be named `width`, `height` or `margin`, and
  * `PlotBox` is *"not a `ChartPlan` field and never will be"* (`./layout.ts`). So a plan alone
  * cannot be rendered. This module supplies the missing half, and it is the only module in
- * `@gx/core` that sees actual values.
+ * `@shiftcharts/core` that sees actual values.
  *
  * ## Two invariants this file exists to hold
  *
@@ -219,7 +219,7 @@ export type SeriesFrame = {
   readonly id: string
   /** Falls back to `id` when the series carries no label, so the renderer never branches. */
   readonly label: string
-  /** 0-based, and the index into the `--gx-series-N` colour ramp. */
+  /** 0-based, and the index into the `--shiftcharts-series-N` colour ramp. */
   readonly index: number
   /** Optional KPI metadata copied into the serialisable frame. */
   readonly unit: string | null
@@ -606,7 +606,7 @@ function computeTicks(
  * fits the value display by *budget*, not by rank — `valueTypeScale: 'fit'` means "as large
  * as the band allows" — so no rank supplies the font size here. What a rank supplies is a
  * measured advance table, and `FontMetrics.byRank` is measured per variable-font instance:
- * rank A is the 700-weight instance, which is the weight `--gx-value-label-font-weight`
+ * rank A is the 700-weight instance, which is the weight `--shiftcharts-value-label-font-weight`
  * paints at. Measuring a bold number against the 400-weight table under-estimates its
  * width, and under-estimating width is the direction `./text.ts` §6.1 forbids.
  */
@@ -614,7 +614,7 @@ const VALUE_RANK: TypeRank = 'A'
 
 /**
  * ⚠ **The legibility floor, taken from core rather than from a token.** 10 px agrees
- * numerically with `--gx-label-font-size-min`. It is read from the policy's E rank rather
+ * numerically with `--shiftcharts-label-font-size-min`. It is read from the policy's E rank rather
  * than a module constant, because this number is folded into a layout decision — how many
  * values are shown — so a custom typography policy must change both the resolver and frame.
  */
@@ -959,7 +959,7 @@ export function resolveFrame(
   // every mark position depend on remembering to add the origin exactly once.
   const mark = plan.marks.primary
   if (mark.kind === 'funnel' && data.length > 1) {
-    throw new Error('@gx/core: funnel requires exactly one series of ordered stages.')
+    throw new Error('@shiftcharts/core: funnel requires exactly one series of ordered stages.')
   }
   const xd = xDomain(data, mark.kind === 'cell' ? plan.aggregate.temporalBin : 'none')
   const yd = yDomain(data, mark)
@@ -1289,7 +1289,7 @@ function heatmapCells(
   for (const point of series.points) {
     const rawColumn = xValue(point)
     if (rawColumns.has(rawColumn)) {
-      throw new Error(`@gx/core: heatmap series '${series.id}' has duplicate cell '${rawColumn}'.`)
+      throw new Error(`@shiftcharts/core: heatmap series '${series.id}' has duplicate cell '${rawColumn}'.`)
     }
     rawColumns.add(rawColumn)
     const column = heatmapXValue(point.x, temporalBin)
@@ -1297,7 +1297,7 @@ function heatmapCells(
     if (index === undefined) continue
     if (values.has(column)) {
       if (temporalBin !== 'weekly') {
-        throw new Error(`@gx/core: heatmap series '${series.id}' has duplicate cell '${column}'.`)
+        throw new Error(`@shiftcharts/core: heatmap series '${series.id}' has duplicate cell '${column}'.`)
       }
       const previous = values.get(column)!
       const current = point.y !== null && Number.isFinite(point.y) ? point.y : null
@@ -1345,7 +1345,7 @@ function funnelFrame(
     .map((point, index) => {
       const x = xValue(point)
       if (!Number.isFinite(x)) {
-        throw new Error(`@gx/core: funnel stage ${index} requires a finite x value.`)
+        throw new Error(`@shiftcharts/core: funnel stage ${index} requires a finite x value.`)
       }
       return { point, x, index }
     })
@@ -1354,11 +1354,11 @@ function funnelFrame(
   const seen = new Set<number>()
   for (const entry of ordered) {
     if (seen.has(entry.x)) {
-      throw new Error(`@gx/core: funnel series '${series.id}' has duplicate stage '${entry.x}'.`)
+      throw new Error(`@shiftcharts/core: funnel series '${series.id}' has duplicate stage '${entry.x}'.`)
     }
     seen.add(entry.x)
     if (entry.point.y !== null && (!Number.isFinite(entry.point.y) || entry.point.y < 0)) {
-      throw new Error(`@gx/core: funnel stage '${entry.x}' requires a finite non-negative value.`)
+      throw new Error(`@shiftcharts/core: funnel stage '${entry.x}' requires a finite non-negative value.`)
     }
   }
 
@@ -1514,7 +1514,7 @@ function donutArcs(
   for (const [order, point] of series.points.entries()) {
     if (point.y === null) continue
     if (!Number.isFinite(point.y) || point.y < 0) {
-      throw new Error(`@gx/core: donut series "${series.id}" requires finite non-negative values.`)
+      throw new Error(`@shiftcharts/core: donut series "${series.id}" requires finite non-negative values.`)
     }
     if (point.y === 0) continue
     const key = point.x instanceof Date ? `date:${point.x.getTime()}` : `number:${point.x}`

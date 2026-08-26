@@ -5,8 +5,8 @@
     // that tests the boundary rather than living inside it: `FakeResizeObserver`, the
     // jsdom-throws assertions, and the determinism preconditions all need them.
     //
-    // Safe because nothing depends on `@gx/testing` in the other direction — gate G1's
-    // `core-sits-below-everything` rule forbids `@gx/core` importing it, so a DOM type
+    // Safe because nothing depends on `@shiftcharts/testing` in the other direction — gate G1's
+    // `core-sits-below-everything` rule forbids `@shiftcharts/core` importing it, so a DOM type
     // reachable here can never become a DOM type reachable from the resolver.
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["node"]

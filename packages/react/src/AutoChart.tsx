@@ -9,7 +9,7 @@
  * hands that to `planChart()`, and passes the result to `<Chart>`. The previous class lives
  * here because a live measurement is stateful; `planChart()` and `SizeContext` remain pure and
  * serialisable. Every decision about what a chart at this size should contain was made in
- * `@gx/core` by modules that have never seen the DOM.
+ * `@shiftcharts/core` by modules that have never seen the DOM.
  *
  * That is also the design constraint. Anything this component *decides* is a decision made
  * on the client, in a package that ships JavaScript, outside every test that runs without a
@@ -53,15 +53,15 @@
  * than nothing.
  */
 
-import type { ChartType, PlanOverrides, PlanPolicy, Series, SizeClass, SizeContext } from '@gx/core'
+import type { ChartType, PlanOverrides, PlanPolicy, Series, SizeClass, SizeContext } from '@shiftcharts/core'
 import {
   describeShape,
   planChart,
   resolveSizeClass,
   resolveSizeClassWithDeadband,
   sizeContextFromPixels,
-} from '@gx/core'
-import { Chart } from '@gx/primitives'
+} from '@shiftcharts/core'
+import { Chart } from '@shiftcharts/primitives'
 import { useEffect, useMemo, useState } from 'react'
 
 import type { Size } from './useElementSize.ts'
@@ -73,13 +73,13 @@ export type AutoChartProps = {
   readonly data: readonly Series[]
   /** Required. It is the chart's accessible name; there is no sensible default for it. */
   readonly title: string
-  /** ⚠ `| undefined` throughout — see `ChartProps` in `@gx/primitives` for why. */
+  /** ⚠ `| undefined` throughout — see `ChartProps` in `@shiftcharts/primitives` for why. */
   readonly description?: string | undefined
   readonly policy?: Partial<PlanPolicy> | undefined
   readonly overrides?: PlanOverrides | undefined
   /**
    * The square cell a standalone chart is measured in. **Tier C** — ours and unsourced.
-   * A chart inside `@gx/grid` never uses it, because its real `cols`/`rows` footprint is
+   * A chart inside `@shiftcharts/grid` never uses it, because its real `cols`/`rows` footprint is
    * authoritative. `DEFAULT_NOMINAL_CELL_SIZE` is 100.
    */
   readonly nominalCellSize?: number | undefined
@@ -190,7 +190,7 @@ export function AutoChart({
   return (
     <div
       ref={ref}
-      className={className === undefined ? 'gx-auto-chart' : `gx-auto-chart ${className}`}
+      className={className === undefined ? 'shiftcharts-auto-chart' : `shiftcharts-auto-chart ${className}`}
     >
       {/*
         ⚠ The chart is the wrapper's **only** child, and that is structural rather than

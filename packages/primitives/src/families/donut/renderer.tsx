@@ -22,19 +22,19 @@ const renderNone: MarkRenderer = () => null
 export const renderDonut: MarkRenderer = ({ frame, plan }) => {
   const mark = plan.marks.primary
   if (mark.kind !== 'arc') {
-    throw new Error(`@gx/primitives: donut renderer requires an arc mark; received '${mark.kind}'.`)
+    throw new Error(`@shiftcharts/primitives: donut renderer requires an arc mark; received '${mark.kind}'.`)
   }
   if (!mark.donut) {
-    throw new Error('@gx/primitives: non-donut arc/pie rendering is not implemented.')
+    throw new Error('@shiftcharts/primitives: non-donut arc/pie rendering is not implemented.')
   }
   if (plan.marks.renderer !== 'svg') {
-    throw new Error('@gx/primitives: donut canvas rendering is not implemented; refusing to rasterize arcs.')
+    throw new Error('@shiftcharts/primitives: donut canvas rendering is not implemented; refusing to rasterize arcs.')
   }
 
   // The runtime guard is intentional even though the current TypeScript seam requires `arcs`: it
   // gives an explicit integration failure if an older/shared frame reaches this family renderer.
   if (!Array.isArray(frame.arcs)) {
-    throw new Error('@gx/primitives: donut rendering requires shared SeriesFrame.arcs geometry.')
+    throw new Error('@shiftcharts/primitives: donut rendering requires shared SeriesFrame.arcs geometry.')
   }
   if (frame.arcs.length === 0) return null
 
@@ -46,7 +46,7 @@ export const renderDonut: MarkRenderer = ({ frame, plan }) => {
         const isOther = arc.other || arc.label === 'Other'
         return (
           <path
-            className={classes('gx-arc', isOther && 'gx-arc--other')}
+            className={classes('shiftcharts-arc', isOther && 'shiftcharts-arc--other')}
             data-slice-id={arc.id}
             data-slice-index={index}
             data-slice-kind={isOther ? 'other' : 'value'}
@@ -67,24 +67,24 @@ function validateArc(
   ids: Set<string>,
 ): void {
   if (typeof arc.id !== 'string' || arc.id.length === 0) {
-    throw new Error(`@gx/primitives: donut slice ${index} requires a stable non-empty id.`)
+    throw new Error(`@shiftcharts/primitives: donut slice ${index} requires a stable non-empty id.`)
   }
   if (ids.has(arc.id)) {
-    throw new Error(`@gx/primitives: donut slice id '${arc.id}' is duplicated.`)
+    throw new Error(`@shiftcharts/primitives: donut slice id '${arc.id}' is duplicated.`)
   }
   ids.add(arc.id)
 
   if (typeof arc.label !== 'string' || arc.label.length === 0) {
-    throw new Error(`@gx/primitives: donut slice '${arc.id}' requires a non-empty label.`)
+    throw new Error(`@shiftcharts/primitives: donut slice '${arc.id}' requires a non-empty label.`)
   }
   if (!Number.isFinite(arc.value) || arc.value < 0) {
-    throw new Error(`@gx/primitives: donut slice '${arc.id}' requires a finite non-negative value.`)
+    throw new Error(`@shiftcharts/primitives: donut slice '${arc.id}' requires a finite non-negative value.`)
   }
   if (!Number.isFinite(arc.share) || arc.share < 0 || arc.share > 1) {
-    throw new Error(`@gx/primitives: donut slice '${arc.id}' has an invalid share.`)
+    throw new Error(`@shiftcharts/primitives: donut slice '${arc.id}' has an invalid share.`)
   }
   if (!Number.isFinite(arc.startAngle) || !Number.isFinite(arc.endAngle) || arc.endAngle <= arc.startAngle) {
-    throw new Error(`@gx/primitives: donut slice '${arc.id}' has invalid angle geometry.`)
+    throw new Error(`@shiftcharts/primitives: donut slice '${arc.id}' has invalid angle geometry.`)
   }
   if (
     !Number.isFinite(arc.cx) ||
@@ -95,10 +95,10 @@ function validateArc(
     arc.outerRadius <= 0 ||
     arc.innerRadius > arc.outerRadius
   ) {
-    throw new Error(`@gx/primitives: donut slice '${arc.id}' has invalid radius geometry.`)
+    throw new Error(`@shiftcharts/primitives: donut slice '${arc.id}' has invalid radius geometry.`)
   }
   if (typeof arc.d !== 'string' || arc.d.length === 0) {
-    throw new Error(`@gx/primitives: donut slice '${arc.id}' requires shared local path geometry.`)
+    throw new Error(`@shiftcharts/primitives: donut slice '${arc.id}' requires shared local path geometry.`)
   }
 }
 

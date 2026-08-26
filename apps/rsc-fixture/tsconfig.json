@@ -6,9 +6,9 @@
   // hand, which is the trade: no silent edits, at the cost of having to keep up.
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    // The DOM is allowed in an app and banned in `@gx/core`; see the playground's tsconfig
+    // The DOM is allowed in an app and banned in `@shiftcharts/core`; see the playground's tsconfig
     // for why that asymmetry is the point. Nothing in `app/` touches the DOM — this fixture
-    // has no client component at all — but `@gx/primitives` is compiled through this config
+    // has no client component at all — but `@shiftcharts/primitives` is compiled through this config
     // and its own tsconfig declares the DOM lib.
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     // ⚠ `react-jsx`, not `preserve`. Next 16 lists this as a *required* value

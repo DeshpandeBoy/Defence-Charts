@@ -1,4 +1,4 @@
-import type { ProgressFrame } from '@gx/core'
+import type { ProgressFrame } from '@shiftcharts/core'
 
 const HORIZONTAL_TRACK = Object.freeze({ x: 12, y: 28, width: 176, height: 12 })
 const HORIZONTAL_FILL = Object.freeze({ x: 12, y: 28, width: 88, height: 12 })

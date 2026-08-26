@@ -7,7 +7,7 @@
  * becoming a plausible-looking completion mark.
  */
 
-import { formatYLabel, type ProgressFrame } from '@gx/core'
+import { formatYLabel, type ProgressFrame } from '@shiftcharts/core'
 
 import type { MarkRenderer, MarkRendererRegistration } from '../../renderer-seam.ts'
 import { classes, roundCoord, translate } from '../../svg.ts'
@@ -33,16 +33,16 @@ const renderNone: MarkRenderer = () => null
 export const renderProgress: MarkRenderer = ({ frame, plan }) => {
   const mark = plan.marks.primary
   if (mark.kind !== 'progress') {
-    throw new Error(`@gx/primitives: progress renderer requires a progress mark; received '${mark.kind}'.`)
+    throw new Error(`@shiftcharts/primitives: progress renderer requires a progress mark; received '${mark.kind}'.`)
   }
 
   const progress = frame.progress
   if (progress === null) {
-    throw new Error('@gx/primitives: progress rendering requires shared SeriesFrame.progress geometry.')
+    throw new Error('@shiftcharts/primitives: progress rendering requires shared SeriesFrame.progress geometry.')
   }
   if (progress.orientation !== mark.orientation) {
     throw new Error(
-      `@gx/primitives: progress orientation '${progress.orientation}' does not match mark '${mark.orientation}'.`,
+      `@shiftcharts/primitives: progress orientation '${progress.orientation}' does not match mark '${mark.orientation}'.`,
     )
   }
 
@@ -54,13 +54,13 @@ export const renderProgress: MarkRenderer = ({ frame, plan }) => {
 
   return (
     <g
-      className={classes('gx-progress', `gx-progress--${progress.orientation}`, `gx-progress--${state}`)}
+      className={classes('shiftcharts-progress', `shiftcharts-progress--${progress.orientation}`, `shiftcharts-progress--${state}`)}
       {...attributes}
     >
       {progress.orientation === 'horizontal' ? (
         <>
           <rect
-            className="gx-progress__track"
+            className="shiftcharts-progress__track"
             data-progress-part="track"
             x={roundCoord(progress.track!.x)}
             y={roundCoord(progress.track!.y)}
@@ -69,7 +69,7 @@ export const renderProgress: MarkRenderer = ({ frame, plan }) => {
           />
           {progress.fill === null ? null : (
             <rect
-              className="gx-progress__fill"
+              className="shiftcharts-progress__fill"
               data-progress-part="fill"
               x={roundCoord(progress.fill.x)}
               y={roundCoord(progress.fill.y)}
@@ -81,13 +81,13 @@ export const renderProgress: MarkRenderer = ({ frame, plan }) => {
       ) : (
         <g transform={translate(progress.cx!, progress.cy!)}>
           <path
-            className="gx-progress__track"
+            className="shiftcharts-progress__track"
             data-progress-part="track"
             d={progress.trackPath!}
           />
           {progress.fillPath === null ? null : (
             <path
-              className="gx-progress__fill"
+              className="shiftcharts-progress__fill"
               data-progress-part="fill"
               d={progress.fillPath}
             />
@@ -96,7 +96,7 @@ export const renderProgress: MarkRenderer = ({ frame, plan }) => {
       )}
       {valueLabel === null || stateLabel !== null ? null : (
         <text
-          className="gx-progress__value"
+          className="shiftcharts-progress__value"
           data-progress-part="value"
           data-progress-value={valueLabel}
           x={roundCoord(stateTextX(progress))}
@@ -107,7 +107,7 @@ export const renderProgress: MarkRenderer = ({ frame, plan }) => {
       )}
       {stateLabel === null ? null : (
         <text
-          className="gx-progress__state"
+          className="shiftcharts-progress__state"
           data-progress-part="state"
           x={roundCoord(stateTextX(progress))}
           y={roundCoord(stateTextY(progress))}
@@ -197,34 +197,34 @@ function validateProgress(progress: ProgressFrame): void {
     ['overTarget', progress.overTarget],
   ] as const) {
     if (value !== null && !Number.isFinite(value)) {
-      throw new Error(`@gx/primitives: progress ${name} must be finite or null.`)
+      throw new Error(`@shiftcharts/primitives: progress ${name} must be finite or null.`)
     }
   }
 
   if (progress.ratio !== null && (progress.ratio < 0 || progress.ratio > 1)) {
-    throw new Error('@gx/primitives: progress ratio must be clamped between 0 and 1.')
+    throw new Error('@shiftcharts/primitives: progress ratio must be clamped between 0 and 1.')
   }
 
   if (progress.orientation === 'horizontal') {
     if (progress.track === null) {
-      throw new Error('@gx/primitives: horizontal progress requires shared track rectangle geometry.')
+      throw new Error('@shiftcharts/primitives: horizontal progress requires shared track rectangle geometry.')
     }
     validateRect(progress.track, 'track')
     if (progress.fill !== null) validateRect(progress.fill, 'fill')
     if (progress.trackPath !== null || progress.fillPath !== null || progress.cx !== null || progress.cy !== null) {
-      throw new Error('@gx/primitives: horizontal progress cannot carry radial path geometry.')
+      throw new Error('@shiftcharts/primitives: horizontal progress cannot carry radial path geometry.')
     }
     return
   }
 
   if (progress.trackPath === null || progress.cx === null || progress.cy === null) {
-    throw new Error('@gx/primitives: radial progress requires shared track path and centre geometry.')
+    throw new Error('@shiftcharts/primitives: radial progress requires shared track path and centre geometry.')
   }
   if (progress.trackPath.length === 0) {
-    throw new Error('@gx/primitives: radial progress requires a non-empty track path.')
+    throw new Error('@shiftcharts/primitives: radial progress requires a non-empty track path.')
   }
   if (progress.fillPath !== null && progress.fillPath.length === 0) {
-    throw new Error('@gx/primitives: radial progress fill path must be non-empty or null.')
+    throw new Error('@shiftcharts/primitives: radial progress fill path must be non-empty or null.')
   }
   if (
     progress.innerRadius === null ||
@@ -235,10 +235,10 @@ function validateProgress(progress: ProgressFrame): void {
     progress.outerRadius <= 0 ||
     progress.innerRadius > progress.outerRadius
   ) {
-    throw new Error('@gx/primitives: radial progress requires valid inner and outer radii.')
+    throw new Error('@shiftcharts/primitives: radial progress requires valid inner and outer radii.')
   }
   if (progress.track !== null || progress.fill !== null) {
-    throw new Error('@gx/primitives: radial progress cannot carry horizontal rectangle geometry.')
+    throw new Error('@shiftcharts/primitives: radial progress cannot carry horizontal rectangle geometry.')
   }
 }
 
@@ -251,7 +251,7 @@ function validateRect(rect: { readonly x: number; readonly y: number; readonly w
     rect.width < 0 ||
     rect.height < 0
   ) {
-    throw new Error(`@gx/primitives: progress ${name} rectangle has invalid geometry.`)
+    throw new Error(`@shiftcharts/primitives: progress ${name} rectangle has invalid geometry.`)
   }
 }
 

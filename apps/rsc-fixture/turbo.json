@@ -8,7 +8,7 @@
        * ⚠ Both keys are overridden because the root definitions are shaped for a package that
        * emits `dist/` from `src/`, and this app does neither. A package `turbo.json`
        * *replaces* a task definition rather than merging into it, so `dependsOn` is restated
-       * here — dropping it would let a fixture build start before `@gx/core` had one.
+       * here — dropping it would let a fixture build start before `@shiftcharts/core` had one.
        *
        * ⚠ The `outputs` miss is the dangerous half, and it fails silently. With the root's
        * `dist/**` and no `.next/**`, turbo would happily record a cache hit for a build whose

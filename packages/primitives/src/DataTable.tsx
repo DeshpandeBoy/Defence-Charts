@@ -26,7 +26,7 @@ import {
   formatXLabel,
   formatYLabel,
   type Series,
-} from '@gx/core'
+} from '@shiftcharts/core'
 
 import { classes } from './svg.ts'
 
@@ -61,8 +61,8 @@ export function DataTable({ data, plan, caption, progress = false, heatmap = fal
     )
 
   return (
-    <details className={classes('gx-data-table', className)} open={plan.initiallyExpanded}>
-      <summary className="gx-data-table__summary">{caption}</summary>
+    <details className={classes('shiftcharts-data-table', className)} open={plan.initiallyExpanded}>
+      <summary className="shiftcharts-data-table__summary">{caption}</summary>
       {table}
     </details>
   )
@@ -73,7 +73,7 @@ function DonutTable({ data, caption }: { readonly data: readonly Series[]; reado
   const total = points.reduce((sum, point) => sum + (point.y === null ? 0 : Math.max(0, point.y)), 0)
 
   return (
-    <table className="gx-data-table__table">
+    <table className="shiftcharts-data-table__table">
       <caption>{caption}</caption>
       <thead>
         <tr>
@@ -111,7 +111,7 @@ function FullTable({ data, caption }: { data: readonly Series[]; caption: string
   const byX = data.map((s) => new Map(s.points.map((p) => [key(p.x), p.y])))
 
   return (
-    <table className="gx-data-table__table">
+    <table className="shiftcharts-data-table__table">
       <caption>{caption}</caption>
       <thead>
         <tr>
@@ -165,7 +165,7 @@ function SummaryTable({
       (series.status !== undefined && series.status !== null),
   )
   return (
-    <table className="gx-data-table__table">
+    <table className="shiftcharts-data-table__table">
       <caption>{caption}</caption>
       <thead>
         <tr>
@@ -238,7 +238,7 @@ function FunnelTable({ data, caption }: { readonly data: readonly Series[]; read
   const first = stages.find((point) => point.y !== null && Number.isFinite(point.y))?.y ?? null
 
   return (
-    <table className="gx-data-table__table">
+    <table className="shiftcharts-data-table__table">
       <caption>{caption}</caption>
       <thead>
         <tr>

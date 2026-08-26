@@ -101,53 +101,53 @@ function isFiniteNonNegativeInteger(value: number): boolean {
 
 function assertDataShape(shape: DataShape): void {
   if (!isFiniteNonNegativeInteger(shape.series)) {
-    throw new Error('@gx/core: heatmap shape.series must be a finite non-negative integer.')
+    throw new Error('@shiftcharts/core: heatmap shape.series must be a finite non-negative integer.')
   }
   if (!isFiniteNonNegativeInteger(shape.categories)) {
-    throw new Error('@gx/core: heatmap shape.categories must be a finite non-negative integer.')
+    throw new Error('@shiftcharts/core: heatmap shape.categories must be a finite non-negative integer.')
   }
   if (!isFiniteNonNegativeInteger(shape.points)) {
-    throw new Error('@gx/core: heatmap shape.points must be a finite non-negative integer.')
+    throw new Error('@shiftcharts/core: heatmap shape.points must be a finite non-negative integer.')
   }
   if (!isFiniteNonNegativeInteger(shape.labelMaxChars)) {
-    throw new Error('@gx/core: heatmap shape.labelMaxChars must be a finite non-negative integer.')
+    throw new Error('@shiftcharts/core: heatmap shape.labelMaxChars must be a finite non-negative integer.')
   }
   if (typeof shape.hasNegative !== 'boolean' || typeof shape.temporal !== 'boolean') {
-    throw new Error('@gx/core: heatmap shape flags must be booleans.')
+    throw new Error('@shiftcharts/core: heatmap shape flags must be booleans.')
   }
 
   // An empty state has no x values from which to infer temporal-ness. A populated activity
   // heatmap must be temporal; numeric/non-temporal shapes belong to another family or frame
   // contract and must fail explicitly instead of receiving a misleading weekday grid.
   if (shape.points > 0 && !shape.temporal) {
-    throw new Error('@gx/core: heatmap requires temporal data when points are present.')
+    throw new Error('@shiftcharts/core: heatmap requires temporal data when points are present.')
   }
 }
 
 function assertContext(ctx: SizeContext): void {
   if (!SIZE_CLASSES.includes(ctx.sizeClass)) {
-    throw new Error(`@gx/core: heatmap does not support size class '${String(ctx.sizeClass)}'.`)
+    throw new Error(`@shiftcharts/core: heatmap does not support size class '${String(ctx.sizeClass)}'.`)
   }
   if (!isFiniteNonNegative(ctx.width) || !isFiniteNonNegative(ctx.height)) {
-    throw new Error('@gx/core: heatmap context dimensions must be finite and non-negative.')
+    throw new Error('@shiftcharts/core: heatmap context dimensions must be finite and non-negative.')
   }
   if (!isFiniteNonNegativeInteger(ctx.cols) || !isFiniteNonNegativeInteger(ctx.rows)) {
-    throw new Error('@gx/core: heatmap context grid dimensions must be finite non-negative integers.')
+    throw new Error('@shiftcharts/core: heatmap context grid dimensions must be finite non-negative integers.')
   }
   if (!ASPECTS.includes(ctx.aspect)) {
-    throw new Error(`@gx/core: heatmap does not support aspect '${String(ctx.aspect)}'.`)
+    throw new Error(`@shiftcharts/core: heatmap does not support aspect '${String(ctx.aspect)}'.`)
   }
 }
 
 function assertPolicy(policy: PlanPolicy): void {
   if (!isFiniteNonNegativeInteger(policy.pointBudget)) {
-    throw new Error('@gx/core: heatmap point/cell budget must be a finite non-negative integer.')
+    throw new Error('@shiftcharts/core: heatmap point/cell budget must be a finite non-negative integer.')
   }
   if (!Number.isFinite(policy.minCellSize) || policy.minCellSize <= 0) {
-    throw new Error('@gx/core: heatmap nominal cell floor must be a finite positive number.')
+    throw new Error('@shiftcharts/core: heatmap nominal cell floor must be a finite positive number.')
   }
   if (!isFiniteNonNegativeInteger(policy.legendMaxEntries) || policy.legendMaxEntries < 1) {
-    throw new Error('@gx/core: heatmap legend capacity must be a finite positive integer.')
+    throw new Error('@shiftcharts/core: heatmap legend capacity must be a finite positive integer.')
   }
 }
 
@@ -355,7 +355,7 @@ function heatmapSemantics(
 
 function planHeatmap(input: FamilyPlannerInput<HeatmapChartType>): HeatmapPlan {
   if (input.type !== 'heatmap') {
-    throw new Error(`@gx/core: heatmap planner does not accept chart type '${input.type}'.`)
+    throw new Error(`@shiftcharts/core: heatmap planner does not accept chart type '${input.type}'.`)
   }
   assertDataShape(input.shape)
   assertContext(input.ctx)

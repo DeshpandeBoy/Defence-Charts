@@ -5,17 +5,17 @@ description: Fetch application data, map it to canonical Series, and let AutoCha
 
 ## 1. Map your API rows
 
-GX never fetches, caches, or understands your endpoint fields. Your application translates them
+ShiftCharts never fetches, caches, or understands your endpoint fields. Your application translates them
 into the serializable `Series` contract.
 
 ```tsx title="RevenueChart.tsx"
 'use client'
 
-import type { Series } from '@gx/core'
-import { AutoChart } from '@gx/react'
-import '@gx/tokens/theme.css'
-import '@gx/primitives/chart.css'
-import '@gx/react/auto-chart.css'
+import type { Series } from '@shiftcharts/core'
+import { AutoChart } from '@shiftcharts/react'
+import '@shiftcharts/tokens/theme.css'
+import '@shiftcharts/primitives/chart.css'
+import '@shiftcharts/react/auto-chart.css'
 
 type RevenueRow = {
   period: string
@@ -68,7 +68,7 @@ The wrapper must receive its height from layout, not from the chart it contains.
   contain: size;
 }
 
-.revenue-chart .gx-auto-chart {
+.revenue-chart .shiftcharts-auto-chart {
   block-size: 100%;
 }
 ```
@@ -81,7 +81,7 @@ hydration, `ResizeObserver` reports the real box.
 **Your application:** loading, errors, empty states, API field names, row-to-series mapping, and the
 container's size.
 
-**GX:** size observation, `SizeContext`, `DataShape`, `ChartPlan`, scales, coordinates, SVG, labels,
+**ShiftCharts:** size observation, `SizeContext`, `DataShape`, `ChartPlan`, scales, coordinates, SVG, labels,
 and the optional data table.
 
 Next, read the [containment rule](/docs/concepts/containment) before putting this inside a flex or

@@ -4,7 +4,7 @@ Confirmed on 2026-08-22. These are settled; downstream research assumes them.
 
 | # | Decision | Choice | Consequence |
 |---|---|---|---|
-| 1 | Distribution | **Open source, npm, scoped packages** (`@scope/core`, `@scope/grid`, `@scope/charts-*`, `@scope/tokens`) | Public monorepo, permissive licence, tree-shakeable subpath exports, Changesets releases. |
+| 1 | Distribution | **Open source, npm, scoped packages under `@shiftcharts/*`**. Brand: **ShiftCharts**. Tagline: **“Charts that shift with their space.”** | Public monorepo, permissive licence, tree-shakeable subpath exports, Changesets releases. User-confirmed 2026-08-26. |
 | 2 | Library boundary | **Presentational only** | Consumer passes already-shaped data. No fetching, no SQL, no AI, no persistence. Smallest surface, widest reuse. |
 | 3 | Grid model | **12 columns x unlimited rows** | Matches the `x/y/width/height` grid-unit model. Widget size is `(w,h)` in cells; grid grows vertically. |
 | 4 | Theming | **CSS custom properties + TypeScript token types** | Every visual constant is a `var(--...)` overridable per-widget; typed tokens for JS-side needs. No runtime style provider, no Tailwind dependency, RSC-safe. |

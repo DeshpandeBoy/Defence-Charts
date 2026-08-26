@@ -1,4 +1,4 @@
-import type { FunnelFrame, FunnelStageFrame } from '@gx/core'
+import type { FunnelFrame, FunnelStageFrame } from '@shiftcharts/core'
 
 const stages: readonly FunnelStageFrame[] = Object.freeze([
   Object.freeze({

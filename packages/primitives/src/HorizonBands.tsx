@@ -18,7 +18,7 @@
  * differently, which is conventional and which no amount of geometry can express.
  */
 
-import type { HorizonBand } from '@gx/core'
+import type { HorizonBand } from '@shiftcharts/core'
 
 import { classes } from './svg.ts'
 
@@ -33,7 +33,7 @@ export function HorizonBands({ bands, className }: HorizonBandsProps) {
       {bands.map((b) =>
         b.d === '' ? null : (
           <path
-            className={classes('gx-band', className)}
+            className={classes('shiftcharts-band', className)}
             key={`${b.sign}-${b.band}`}
             d={b.d}
             data-band={b.band}

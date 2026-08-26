@@ -42,7 +42,7 @@ const BANNED_PACKAGES = ['happy-dom']
  *
  * That matters here more than in most repos, because these test files quote config keys
  * and token names back at the reader as documentation. The failure mode is specific: a
- * `@gx/core` test discussing the DOM-measurement ban acquires a DOM, and the ban's own
+ * `@shiftcharts/core` test discussing the DOM-measurement ban acquires a DOM, and the ban's own
  * test starts evaluating in the environment it exists to prohibit.
  *
  * So: the directive is legal in the first three lines of a file — enough for both the

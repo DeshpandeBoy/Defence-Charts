@@ -1,13 +1,7 @@
 name: Release
 
-# ⚠ Triggers on push to `main` only. As of this workflow's creation, `main` is a single
-# disconnected "Initial commit" with no shared history with the branch all real development
-# happens on (`Anti-gravity-and-other-Agent-changes`) — see `git merge-base` returning nothing
-# between them. This workflow is therefore intentionally dormant: it cannot fire for real work
-# until that history is reconciled (a merge/rebase onto `main`, decided and performed
-# deliberately, not by this file) and P0.3 (public name/npm scope) is resolved. Wiring it now,
-# inert, lets the mechanics (Changesets version PR, trusted-publish job shape) be reviewed and
-# fixed before either of those blockers clears, rather than after.
+# `main` is the release branch. P0.5 preserved its original initial commit by merging that
+# disconnected history into the ShiftCharts development lineage before this workflow was enabled.
 on:
   push:
     branches: [main]
@@ -17,14 +11,15 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  # ⚠ `id-token: write` is the exact, sole requirement npm's trusted-publishing docs state for
+  # `id-token: write` is the GitHub-side requirement for npm trusted publishing.
   # OIDC provenance (confirmed 2026-08-24 against docs.npmjs.com and the GitHub Changelog GA
   # announcement — see `research/agent-work/claude/CR-E04-publication-current-state.md`). No
   # `NPM_TOKEN` secret is configured or read anywhere in this file, on purpose: trusted
   # publishing's whole point is that a long-lived registry token is not needed. Both conditions
   # npm requires for automatic provenance — a public repository publishing public packages — are
-  # already true here (`publishConfig.access: "public"` on every package; this repository is
-  # public).
+  # already true in the repository (`publishConfig.access: "public"` on every package). The
+  # matching trusted-publisher entries still have to be created for `@shiftcharts/*` on npm before
+  # the first publish job can exchange the token.
   contents: write
   id-token: write
   pull-requests: write

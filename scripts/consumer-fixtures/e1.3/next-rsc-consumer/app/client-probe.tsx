@@ -1,7 +1,7 @@
 'use client'
 
-import type { Series } from '@gx/core'
-import { AutoChart } from '@gx/react'
+import type { Series } from '@shiftcharts/core'
+import { AutoChart } from '@shiftcharts/react'
 
 export default function ClientProbe({ data }: { data: readonly Series[] }) {
   return (

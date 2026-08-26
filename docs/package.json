@@ -1,5 +1,5 @@
 {
-  "name": "@gx/docs",
+  "name": "@shiftcharts/docs",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -17,10 +17,10 @@
     "@fortawesome/fontawesome-svg-core": "^7.0.1",
     "@fortawesome/free-solid-svg-icons": "^7.0.1",
     "@fortawesome/react-fontawesome": "^3.0.2",
-    "@gx/core": "workspace:*",
-    "@gx/primitives": "workspace:*",
-    "@gx/react": "workspace:*",
-    "@gx/tokens": "workspace:*",
+    "@shiftcharts/core": "workspace:*",
+    "@shiftcharts/primitives": "workspace:*",
+    "@shiftcharts/react": "workspace:*",
+    "@shiftcharts/tokens": "workspace:*",
     "cnfast": "^0.1.0",
     "fumadocs-core": "16.15.1",
     "fumadocs-mdx": "15.3.1",
@@ -39,6 +39,6 @@
     "tailwindcss": "^4.3.3",
     "typescript": "6.0.3",
     "eslint": "^9.39.5",
-    "eslint-config-next": "16.3.2"
+    "eslint-config-next": "16.3.3"
   }
 }

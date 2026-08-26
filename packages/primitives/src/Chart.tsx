@@ -45,7 +45,7 @@ import {
   resolvePolicy,
   type Series,
   type SizeContext,
-} from '@gx/core'
+} from '@shiftcharts/core'
 import { useId, useMemo } from 'react'
 
 import { Axis } from './Axis.tsx'
@@ -88,7 +88,7 @@ export type ChartProps = {
    * string` and forwards it has a `string | undefined` in hand, and passing that to a
    * `description?: string` is an error — so the wrapper is pushed toward conditional
    * spreads, which is ceremony in service of a distinction the runtime does not make.
-   * `@gx/react`'s `<AutoChart>` is the first wrapper here and it hit this immediately.
+   * `@shiftcharts/react`'s `<AutoChart>` is the first wrapper here and it hit this immediately.
    *
    * So on props, `?: T | undefined` is the correct spelling and bare `?: T` is the
    * accidental one. React's own `@types/react` writes it this way throughout.
@@ -128,7 +128,7 @@ export function Chart({
 
   return (
     <figure
-      className={classes('gx-chart', className)}
+      className={classes('shiftcharts-chart', className)}
       data-size-class={plan.sizeClass}
       data-chart-type={plan.type}
       /*
@@ -155,7 +155,7 @@ export function Chart({
       data-persist-gridlines={plan.motion.persistGridlines ? '' : undefined}
     >
       <svg
-        className="gx-chart__svg"
+        className="shiftcharts-chart__svg"
         role="graphics-document"
         aria-labelledby={titleId}
         aria-describedby={description === undefined ? undefined : descId}
@@ -194,7 +194,7 @@ export function Chart({
             policy={resolvedPolicy}
           />
         ) : (
-          <g className="gx-compact-plot" data-compact-plot="" transform={compactKey.plotTransform}>
+          <g className="shiftcharts-compact-plot" data-compact-plot="" transform={compactKey.plotTransform}>
             <PlotContent
               base={base}
               frame={frame}
@@ -216,7 +216,7 @@ export function Chart({
 
             ⚠ Mounted unconditionally, and `frame.value` is `null` whenever the plan asked for
             no value display. The branch lives in the component rather than here so that the
-            single reading of `narrative.valueDisplay` stays in `@gx/core` — a second one here
+            single reading of `narrative.valueDisplay` stays in `@shiftcharts/core` — a second one here
             could disagree with the one that sized the band. */}
         <ValueDisplay value={frame.value} />
       </svg>
@@ -231,7 +231,7 @@ export function Chart({
       ) : null}
 
       {plan.dataTable.present ? (
-        <figcaption className="gx-chart__caption">
+        <figcaption className="shiftcharts-chart__caption">
           <DataTable
             data={data}
             plan={plan.dataTable}
@@ -326,7 +326,7 @@ function SeriesMarks({
   readonly labelOffsets: ReadonlyMap<string, number>
 }) {
   return (
-    <g className="gx-series" data-series-id={frame.id} data-series-index={frame.index}>
+    <g className="shiftcharts-series" data-series-id={frame.id} data-series-index={frame.index}>
       <title>{frame.label}</title>
       {renderBuiltInMark({ frame, plan, policy })}
       <PointMarks

@@ -6,7 +6,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createWidgetLayout } from '@gx/core'
+import { createWidgetLayout } from '@shiftcharts/core'
 import {
   beginKeyboardSession,
   cancelKeyboardSession,
@@ -53,7 +53,7 @@ function renderKeyboardGrid(
 }
 
 function control(mode: 'move' | 'resize'): HTMLButtonElement {
-  const element = container.querySelector<HTMLButtonElement>(`[data-gx-keyboard-control="${mode}"]`)
+  const element = container.querySelector<HTMLButtonElement>(`[data-shiftcharts-keyboard-control="${mode}"]`)
   if (element === null) throw new Error(`missing ${mode} control`)
   return element
 }
@@ -167,8 +167,8 @@ describe('KeyboardGrid controls', () => {
   it('does not expose editing affordances in read-only mode', () => {
     renderKeyboardGrid({ mode: 'read-only' })
 
-    expect(container.querySelector('[data-gx-keyboard-control]')).toBeNull()
+    expect(container.querySelector('[data-shiftcharts-keyboard-control]')).toBeNull()
     expect(container.querySelector('[aria-live]')).toBeNull()
-    expect(container.querySelector('[data-gx-keyboard-mode="read-only"]')).not.toBeNull()
+    expect(container.querySelector('[data-shiftcharts-keyboard-mode="read-only"]')).not.toBeNull()
   })
 })

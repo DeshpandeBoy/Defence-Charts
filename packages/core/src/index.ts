@@ -1,5 +1,5 @@
 /**
- * `@gx/core` — the brain. Pure, isomorphic, and deliberately ignorant of both React
+ * `@shiftcharts/core` — the brain. Pure, isomorphic, and deliberately ignorant of both React
  * and the DOM.
  *
  * ⚠ Two bans hold in this package and are enforced, not merely documented:

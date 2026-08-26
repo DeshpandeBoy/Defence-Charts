@@ -1,7 +1,7 @@
 /**
  * `useElementSize` — the seam where the DOM enters this library, and the only one.
  *
- * ⚠ **This is the counterpart to gate G2, not an exception to it.** `@gx/core` is banned
+ * ⚠ **This is the counterpart to gate G2, not an exception to it.** `@shiftcharts/core` is banned
  * from every DOM measurement API, with `"types": []` in its tsconfig so the lib is not even
  * in scope, because a resolver that measures cannot run on a server. That ban is only
  * coherent if *something* measures, and this is that something. The plan is a pure function
@@ -77,7 +77,7 @@ export type Size = { readonly width: number; readonly height: number }
 /**
  * One box measurement, structurally.
  *
- * ⚠ Declared here rather than imported from `@gx/testing`, so that `@gx/react` carries no
+ * ⚠ Declared here rather than imported from `@shiftcharts/testing`, so that `@shiftcharts/react` carries no
  * dependency on the test package and the real `ResizeObserverEntry` satisfies it without a
  * cast. Both the DOM type and the fake are assignable to this; that is the whole job of the
  * type. `contentBoxSize` is optional because the fallback path is real — older engines
@@ -98,7 +98,7 @@ export type ElementObserver = {
 /**
  * Builds the observer. Defaults to the real one.
  *
- * A factory rather than a constructor type, because `@gx/testing`'s `FakeResizeObserver`
+ * A factory rather than a constructor type, because `@shiftcharts/testing`'s `FakeResizeObserver`
  * takes its callback positionally and a factory lets a test write
  * `(cb) => new FakeResizeObserver(cb)` without the two signatures having to agree.
  */
@@ -120,7 +120,7 @@ export type UseElementSizeOptions = {
    * which is the flash this exists to remove. Nothing is honest; a guess is not.
    *
    * ⚠ `| undefined` is spelled out, and the reason is `exactOptionalPropertyTypes`. See
-   * `ChartProps` in `@gx/primitives` for the long version: a wrapper that received this
+   * `ChartProps` in `@shiftcharts/primitives` for the long version: a wrapper that received this
    * prop optionally cannot forward it without it, and `<AutoChart>` is that wrapper.
    */
   readonly initialSize?: Size | undefined

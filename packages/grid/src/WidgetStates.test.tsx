@@ -28,7 +28,7 @@ function mount(node: ReactElement): void {
 }
 
 function stateRoot(): HTMLDivElement {
-  const element = container.querySelector<HTMLDivElement>('.gx-widget-states')
+  const element = container.querySelector<HTMLDivElement>('.shiftcharts-widget-states')
   if (element === null) throw new Error('Expected WidgetStates root')
   return element
 }
@@ -45,13 +45,13 @@ describe('WidgetStates', () => {
     mount(<WidgetStates state={state} />)
 
     const rootElement = stateRoot()
-    const status = rootElement.querySelector('[data-gx-widget-state-slot="status"]')
-    expect(rootElement.getAttribute('data-gx-widget-state')).toBe(state)
+    const status = rootElement.querySelector('[data-shiftcharts-widget-state-slot="status"]')
+    expect(rootElement.getAttribute('data-shiftcharts-widget-state')).toBe(state)
     expect(rootElement.getAttribute('aria-busy')).toBe(state === 'loading' ? 'true' : null)
     expect(status?.getAttribute('role')).toBe(role)
     expect(status?.getAttribute('aria-live')).toBe(liveMode)
     expect(status?.getAttribute('aria-atomic')).toBe('true')
-    expect(rootElement.querySelector('[data-gx-widget-state-slot="label"]')?.textContent).toBe(message)
+    expect(rootElement.querySelector('[data-shiftcharts-widget-state-slot="label"]')?.textContent).toBe(message)
   })
 
   it('keeps the same wrapper and slot structure while the host changes state', () => {
@@ -62,8 +62,8 @@ describe('WidgetStates', () => {
     )
 
     const before = stateRoot()
-    const beforeSlots = [...before.querySelectorAll<HTMLElement>('[data-gx-widget-state-slot]')]
-    expect(beforeSlots.map((slot) => slot.dataset.gxWidgetStateSlot)).toEqual(SLOT_ORDER)
+    const beforeSlots = [...before.querySelectorAll<HTMLElement>('[data-shiftcharts-widget-state-slot]')]
+    expect(beforeSlots.map((slot) => slot.dataset.shiftchartsWidgetStateSlot)).toEqual(SLOT_ORDER)
 
     act(() =>
       root.render(
@@ -74,12 +74,12 @@ describe('WidgetStates', () => {
     )
 
     const after = stateRoot()
-    const afterSlots = [...after.querySelectorAll<HTMLElement>('[data-gx-widget-state-slot]')]
+    const afterSlots = [...after.querySelectorAll<HTMLElement>('[data-shiftcharts-widget-state-slot]')]
     expect(after).toBe(before)
     expect(afterSlots).toEqual(beforeSlots)
-    expect(afterSlots.map((slot) => slot.dataset.gxWidgetStateSlot)).toEqual(SLOT_ORDER)
+    expect(afterSlots.map((slot) => slot.dataset.shiftchartsWidgetStateSlot)).toEqual(SLOT_ORDER)
     expect(after.querySelector('[data-testid="host-content"]')?.textContent).toBe('Chart content')
-    expect(after.querySelector('[data-gx-widget-state-slot="action"]')?.textContent).toBe('Details')
+    expect(after.querySelector('[data-shiftcharts-widget-state-slot="action"]')?.textContent).toBe('Details')
   })
 
   it('keeps host message, description, action, class, and content untouched', () => {
@@ -102,11 +102,11 @@ describe('WidgetStates', () => {
 
     const rootElement = stateRoot()
     const action = rootElement.querySelector('button')
-    expect(rootElement.className).toBe('gx-widget-states host-state-style')
-    expect(rootElement.querySelector('[data-gx-widget-state-slot="label"]')?.textContent).toBe(
+    expect(rootElement.className).toBe('shiftcharts-widget-states host-state-style')
+    expect(rootElement.querySelector('[data-shiftcharts-widget-state-slot="label"]')?.textContent).toBe(
       'Could not load revenue',
     )
-    expect(rootElement.querySelector('[data-gx-widget-state-slot="description"]')?.textContent).toBe(
+    expect(rootElement.querySelector('[data-shiftcharts-widget-state-slot="description"]')?.textContent).toBe(
       'Try again after checking the selected period.',
     )
     expect(rootElement.querySelector('[data-testid="host-value"]')?.textContent).toBe('Previous value')
@@ -133,10 +133,10 @@ describe('WidgetStates', () => {
     for (const state of states) {
       mount(<WidgetStates state={state} />)
       const rootElement = stateRoot()
-      expect(rootElement.dataset.gxWidgetState).toBe(state)
+      expect(rootElement.dataset.shiftchartsWidgetState).toBe(state)
       expect(
-        [...rootElement.querySelectorAll<HTMLElement>('[data-gx-widget-state-slot]')].map(
-          (slot) => slot.dataset.gxWidgetStateSlot,
+        [...rootElement.querySelectorAll<HTMLElement>('[data-shiftcharts-widget-state-slot]')].map(
+          (slot) => slot.dataset.shiftchartsWidgetStateSlot,
         ),
       ).toEqual(SLOT_ORDER)
     }

@@ -1,4 +1,4 @@
-import type { WidgetLayout } from '@gx/core'
+import type { WidgetLayout } from '@shiftcharts/core'
 
 import { applyGridProposal } from './constraints.ts'
 import type { GridLayoutProposal } from './constraints.ts'

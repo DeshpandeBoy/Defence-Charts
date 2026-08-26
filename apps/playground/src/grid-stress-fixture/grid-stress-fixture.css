@@ -17,22 +17,22 @@ body {
   min-inline-size: 1220px;
 }
 
-[data-gx-stress='grid'] {
+[data-shiftcharts-stress='grid'] {
   min-block-size: 100%;
   padding: 16px;
 }
 
-.gx-grid-stress__slot {
+.shiftcharts-grid-stress__slot {
   block-size: 100%;
   min-inline-size: 0;
   min-block-size: 0;
 }
 
-.gx-grid-stress__slot > .gx-widget-shell {
+.shiftcharts-grid-stress__slot > .shiftcharts-widget-shell {
   block-size: 100%;
 }
 
-.gx-grid-stress__slot .gx-auto-chart {
+.shiftcharts-grid-stress__slot .shiftcharts-auto-chart {
   min-inline-size: 0;
   min-block-size: 0;
 }

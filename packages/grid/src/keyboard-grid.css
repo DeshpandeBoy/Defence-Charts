@@ -1,59 +1,59 @@
-@layer gx.theme {
-  .gx-keyboard-grid {
+@layer shiftcharts.theme {
+  .shiftcharts-keyboard-grid {
     position: relative;
     block-size: 100%;
     min-inline-size: 0;
     min-block-size: 0;
   }
 
-  .gx-keyboard-grid__content {
+  .shiftcharts-keyboard-grid__content {
     block-size: 100%;
     min-inline-size: 0;
     min-block-size: 0;
   }
 
-  .gx-keyboard-grid[data-gx-keyboard-mode="read-only"] [data-gx-drag-handle] {
+  .shiftcharts-keyboard-grid[data-shiftcharts-keyboard-mode="read-only"] [data-shiftcharts-drag-handle] {
     display: none;
   }
 
-  .gx-keyboard-grid__controls {
+  .shiftcharts-keyboard-grid__controls {
     position: absolute;
     z-index: 1;
     inset-block-start: 0;
     inset-inline-end: 0;
     display: flex;
-    gap: var(--gx-widget-padding-tight);
-    padding: var(--gx-widget-padding-tight);
-    border-radius: var(--gx-widget-radius-inner);
-    background: var(--gx-surface-color);
-    color: var(--gx-surface-text-color);
+    gap: var(--shiftcharts-widget-padding-tight);
+    padding: var(--shiftcharts-widget-padding-tight);
+    border-radius: var(--shiftcharts-widget-radius-inner);
+    background: var(--shiftcharts-surface-color);
+    color: var(--shiftcharts-surface-text-color);
   }
 
-  .gx-keyboard-grid__control {
-    min-inline-size: calc(var(--gx-widget-padding-tight) * 4);
-    min-block-size: calc(var(--gx-widget-padding-tight) * 2);
-    padding: var(--gx-widget-padding-tight);
-    border: var(--gx-line-stroke-width) solid var(--gx-axis-color);
-    border-radius: var(--gx-widget-radius-inner);
-    background: var(--gx-surface-color);
+  .shiftcharts-keyboard-grid__control {
+    min-inline-size: calc(var(--shiftcharts-widget-padding-tight) * 4);
+    min-block-size: calc(var(--shiftcharts-widget-padding-tight) * 2);
+    padding: var(--shiftcharts-widget-padding-tight);
+    border: var(--shiftcharts-line-stroke-width) solid var(--shiftcharts-axis-color);
+    border-radius: var(--shiftcharts-widget-radius-inner);
+    background: var(--shiftcharts-surface-color);
     color: inherit;
     cursor: pointer;
     font: inherit;
   }
 
-  .gx-keyboard-grid__control:hover,
-  .gx-keyboard-grid__control[aria-pressed="true"] {
-    background: var(--gx-surface-text-color);
-    color: var(--gx-surface-color);
+  .shiftcharts-keyboard-grid__control:hover,
+  .shiftcharts-keyboard-grid__control[aria-pressed="true"] {
+    background: var(--shiftcharts-surface-text-color);
+    color: var(--shiftcharts-surface-color);
   }
 
-  .gx-keyboard-grid__control:focus-visible {
-    outline: var(--gx-line-stroke-width) solid currentColor;
-    outline-offset: calc(var(--gx-line-stroke-width) * 2);
+  .shiftcharts-keyboard-grid__control:focus-visible {
+    outline: var(--shiftcharts-line-stroke-width) solid currentColor;
+    outline-offset: calc(var(--shiftcharts-line-stroke-width) * 2);
   }
 
-  .gx-keyboard-grid__instructions,
-  .gx-keyboard-grid__live {
+  .shiftcharts-keyboard-grid__instructions,
+  .shiftcharts-keyboard-grid__live {
     position: absolute;
     inline-size: 0;
     block-size: 0;
@@ -63,20 +63,20 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .gx-keyboard-grid__control {
+    .shiftcharts-keyboard-grid__control {
       transition: none;
     }
   }
 
   @media (forced-colors: active) {
-    .gx-keyboard-grid__controls,
-    .gx-keyboard-grid__control {
+    .shiftcharts-keyboard-grid__controls,
+    .shiftcharts-keyboard-grid__control {
       border-color: ButtonText;
       background: Canvas;
       color: ButtonText;
     }
 
-    .gx-keyboard-grid__control[aria-pressed="true"] {
+    .shiftcharts-keyboard-grid__control[aria-pressed="true"] {
       background: Highlight;
       color: HighlightText;
     }

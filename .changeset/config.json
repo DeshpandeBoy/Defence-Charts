@@ -8,7 +8,7 @@
   "fixed": [],
   "linked": [],
   "access": "public",
-  "baseBranch": "Anti-gravity-and-other-Agent-changes",
+  "baseBranch": "main",
   "updateInternalDependents": "always",
   "ignore": []
 }

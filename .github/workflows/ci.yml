@@ -57,7 +57,7 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
-      - name: Lint (ESLint 9 — includes gate G2, DOM-measurement ban in @gx/core)
+      - name: Lint (ESLint 9 — includes gate G2, DOM-measurement ban in @shiftcharts/core)
         if: '!cancelled()'
         run: pnpm lint
 
@@ -70,7 +70,7 @@ jobs:
         if: '!cancelled()'
         run: pnpm lint:docs
 
-      - name: Gate G1 — @gx/core imports no React
+      - name: Gate G1 — @shiftcharts/core imports no React
         if: '!cancelled()'
         run: pnpm lint:deps
 
@@ -128,7 +128,7 @@ jobs:
         run: pnpm lint:boundary
 
       # ⚠ AFTER the build, and unlike its token sibling above it cannot move earlier: this
-      # generator imports the compiled `@gx/core` to reach `FittingTypography`.
+      # generator imports the compiled `@shiftcharts/core` to reach `FittingTypography`.
       - name: Gate G17 (typography) — fitting typography CSS matches its typed plan input
         if: '!cancelled()'
         run: pnpm lint:typography
@@ -167,7 +167,7 @@ jobs:
       # on one gets deleted rather than fixed. A runner has no such opt-out: a silent skip
       # here would be a gate that is not running while looking exactly like a gate that
       # passed. With this set, a Chromium download that quietly failed exits 1 and says so.
-      GX_REQUIRE_BROWSER: '1'
+      SHIFTCHARTS_REQUIRE_BROWSER: '1'
 
     steps:
       # ⚠ Byte-identical to `verify`'s setup block, deliberately. Two browser gates failing
@@ -230,9 +230,9 @@ jobs:
       # ⚠ **No build step here, and that was checked rather than assumed.** The obvious
       # instinct is to add `pnpm build`, since this job cannot inherit `verify`'s artefacts.
       # Neither gate needs it: `check-rsc.mjs` runs its own
-      # `turbo --filter @gx/rsc-fixture build` before serving the fixture (turbo's `^build`
+      # `turbo --filter @shiftcharts/rsc-fixture build` before serving the fixture (turbo's `^build`
       # pulls the workspace packages it depends on with it), and `check-containment.mjs`
-      # spawns the playground under `vite dev`, which serves `@gx/core` from source because
+      # spawns the playground under `vite dev`, which serves `@shiftcharts/core` from source because
       # its `exports` map points at `src/`. A build step here would be two minutes spent
       # producing `dist/` that nothing in this job reads.
       #

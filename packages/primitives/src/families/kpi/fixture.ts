@@ -1,4 +1,4 @@
-import type { Series, ValueFrame } from '@gx/core'
+import type { Series, ValueFrame } from '@shiftcharts/core'
 
 /**
  * A deterministic post-frame KPI input for primitive contract tests.

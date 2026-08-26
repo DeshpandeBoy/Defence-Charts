@@ -1,5 +1,5 @@
 {
-  "name": "gx-e1-3-next-rsc-consumer",
+  "name": "shiftcharts-e1-3-next-rsc-consumer",
   "private": true,
   "type": "module",
   "scripts": {
@@ -7,12 +7,12 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@gx/core": "file:__GX_TARBALL_ROOT__/gx-core-0.0.0.tgz",
-    "@gx/grid": "file:__GX_TARBALL_ROOT__/gx-grid-0.0.0.tgz",
-    "@gx/primitives": "file:__GX_TARBALL_ROOT__/gx-primitives-0.0.0.tgz",
-    "@gx/react": "file:__GX_TARBALL_ROOT__/gx-react-0.0.0.tgz",
-    "@gx/testing": "file:__GX_TARBALL_ROOT__/gx-testing-0.0.0.tgz",
-    "@gx/tokens": "file:__GX_TARBALL_ROOT__/gx-tokens-0.0.0.tgz",
+    "@shiftcharts/core": "file:__SHIFTCHARTS_TARBALL_ROOT__/shiftcharts-core-0.0.0.tgz",
+    "@shiftcharts/grid": "file:__SHIFTCHARTS_TARBALL_ROOT__/shiftcharts-grid-0.0.0.tgz",
+    "@shiftcharts/primitives": "file:__SHIFTCHARTS_TARBALL_ROOT__/shiftcharts-primitives-0.0.0.tgz",
+    "@shiftcharts/react": "file:__SHIFTCHARTS_TARBALL_ROOT__/shiftcharts-react-0.0.0.tgz",
+    "@shiftcharts/testing": "file:__SHIFTCHARTS_TARBALL_ROOT__/shiftcharts-testing-0.0.0.tgz",
+    "@shiftcharts/tokens": "file:__SHIFTCHARTS_TARBALL_ROOT__/shiftcharts-tokens-0.0.0.tgz",
     "next": "16.3.2",
     "react": "19.2.8",
     "react-dom": "19.2.8"

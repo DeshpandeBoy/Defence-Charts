@@ -1,9 +1,9 @@
 {
-  "name": "@gx/testing",
+  "name": "@shiftcharts/testing",
   "version": "0.0.0",
   "type": "module",
   "license": "MIT",
-  "description": "Dev-facing markup assertions and a deterministic ResizeObserver test fake for @gx chart consumers.",
+  "description": "Markup assertions and a deterministic ResizeObserver test fake for ShiftCharts consumers.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DeshpandeBoy/Defence-Charts.git",

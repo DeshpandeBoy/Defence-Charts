@@ -2,7 +2,7 @@
  * One series' line.
  *
  * ⚠ **No d3 import in this package.** The `d` string arrives already built by
- * `@gx/core`'s `resolveFrame()`, which pins d3-shape's `.digits(2)` so the same data
+ * `@shiftcharts/core`'s `resolveFrame()`, which pins d3-shape's `.digits(2)` so the same data
  * produces the same characters on every run. Building the path here would put a numeric
  * generator on both sides of the RSC boundary and give the server and the client two
  * chances to disagree about a float.
@@ -24,5 +24,5 @@ export function LinePath({ d, className }: LinePathProps) {
   // "nothing was defined". Both render nothing; neither is an error. An empty `<path d="">`
   // would still be an element in G14's snapshot, so it is not emitted.
   if (d === null || d === '') return null
-  return <path className={classes('gx-line', className)} d={d} />
+  return <path className={classes('shiftcharts-line', className)} d={d} />
 }

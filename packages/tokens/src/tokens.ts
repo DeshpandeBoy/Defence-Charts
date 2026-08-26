@@ -15,8 +15,8 @@
  *
  * ## What this file is NOT allowed to do
  *
- * ⚠ **No `var()` chain may be flattened.** `--gx-surface-text-color: var(--gx-ramp-neutral-9)` and
- * `--gx-motion-stage-delay: var(--gx-motion-stage-delay-rescale)` are *indirections on
+ * ⚠ **No `var()` chain may be flattened.** `--shiftcharts-surface-text-color: var(--shiftcharts-ramp-neutral-9)` and
+ * `--shiftcharts-motion-stage-delay: var(--shiftcharts-motion-stage-delay-rescale)` are *indirections on
  * purpose* — the whole re-theming mechanism is re-pointing one of them. `raw/06` §6.10 warns
  * that much of the tree is `var()` chains rather than literals and that flattening them
  * silently deletes the mechanism. Values here are opaque strings copied through verbatim, so
@@ -37,7 +37,7 @@
  * ⚠ Nothing below may use an `enum`, a `namespace`, or a parameter property. The generator
  * imports this file **directly, with no build step**, on Node's native type stripping — the
  * same principle `scripts/check-tokens.mjs` states as *"a lint gate that needs the build to
- * work cannot check the build"*. `scripts/generate-typography-css.mjs` has to build `@gx/core`
+ * work cannot check the build"*. `scripts/generate-typography-css.mjs` has to build `@shiftcharts/core`
  * first; this one does not, which is why the root `engines.node` floor moved to the release
  * that made type stripping unflagged.
  */
@@ -76,7 +76,7 @@ export type Tier =
   | 'untiered'
 
 export type Token = {
-  /** Without the `--gx-` prefix; `toCustomProperty()` in `./index.ts` adds it. */
+  /** Without the `--shiftcharts-` prefix; `toCustomProperty()` in `./index.ts` adds it. */
   readonly name: string
   /**
    * The CSS value, verbatim. A `var()` chain stays a `var()` chain and a `calc()` stays a
@@ -120,7 +120,7 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
       { name: 'widget-padding', value: '16px', tier: 'A-lit', source: 'Apple HIG: "the standard margin width for widgets — 16 points for most widgets"' },
       { name: 'widget-padding-tight', value: '11px', tier: 'A-lit', source: 'Apple HIG: "setting margins of 11 points can work well"' },
       { name: 'widget-radius', value: '0', tier: 'C', source: 'DESIGN.md:196 — Rail Square Corner Rule' },
-      { name: 'widget-radius-inner', value: 'max(0px, calc(var(--gx-widget-radius) - var(--gx-widget-padding)))', tier: 'A-lit', source: 'Apple `ContainerRelativeShape` — "an inset version of the current container shape"' },
+      { name: 'widget-radius-inner', value: 'max(0px, calc(var(--shiftcharts-widget-radius) - var(--shiftcharts-widget-padding)))', tier: 'A-lit', source: 'Apple `ContainerRelativeShape` — "an inset version of the current container shape"' },
       { name: 'widget-gap', value: '16px', tier: 'C', source: 'No published source for a bento gutter (§4.5)' },
       { name: 'widget-shadow', value: 'none', tier: 'C', source: 'DESIGN.md:190 — Rail elevation tokens resolve to nothing' },
     ],
@@ -152,11 +152,11 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
       'token takes the vocabulary. `charcoal` is not a `<group>` in raw/06 §6.0 and `ramp` is.',
       '',
       '⚠ **1 is darkest and 9 is lightest, absolutely, and the ramp does NOT flip with the',
-      'ground.** The theme picks an index instead; see `--gx-surface-text-color`.',
+      'ground.** The theme picks an index instead; see `--shiftcharts-surface-text-color`.',
       '',
       '⚠ **The 100…900 spelling these carried until B1 slice 2 was a Material-style *weight*',
       'scale, and the renumbering to 1…9 is not cosmetic.** raw/06 §6.0 fixes `<modifier>` as',
-      '`-1`…`-n`, and its own ramps are `--gx-ramp-seq-1..9` and `--gx-ramp-div-1..11` — one',
+      '`-1`…`-n`, and its own ramps are `--shiftcharts-ramp-seq-1..9` and `--shiftcharts-ramp-div-1..11` — one',
       'index per stop, counted. A 100…900 scale implies interpolation between named stops that',
       'this ramp does not offer. The direction is preserved exactly: 100→1, 900→9.',
     ].join('\n'),
@@ -177,7 +177,7 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
     tokens: [
       {
         name: 'surface-text-color',
-        value: 'var(--gx-ramp-neutral-9)',
+        value: 'var(--shiftcharts-ramp-neutral-9)',
         tier: 'B',
         source: 'A4 — a contrast failure measured in a browser, not reasoned about.',
         note: [
@@ -186,8 +186,8 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
           '⚠ **The ramp is absolute and the theme picks an index — this is where the picking',
           'happens, and until A4 nothing did it.** The ramp is documented as 1 darkest to 9',
           'lightest, which means it does *not* flip with the ground; a world that flips the ground',
-          'and not the ink writes light-on-light. The `chart.css` in @gx/primitives set',
-          '`color: var(--gx-ramp-neutral-9)` directly, so on the light ground every axis label, every',
+          'and not the ink writes light-on-light. The `chart.css` in @shiftcharts/primitives set',
+          '`color: var(--shiftcharts-ramp-neutral-9)` directly, so on the light ground every axis label, every',
           'tick and every gridline rendered at #e2e5e8 on #f4f3ef — about 1.1:1, present in the DOM,',
           'present in the a11y tree, and invisible. The chart drew its lines and lost its entire',
           'reading apparatus.',
@@ -213,7 +213,7 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
       '',
       '⚠ This once claimed gridlines were *"safe in BOTH themes by construction"*. They are safe by',
       'construction only against the ink — `currentColor` inherits, it does not choose. The',
-      'construction that makes the claim true is `--gx-surface-text-color` above.',
+      'construction that makes the claim true is `--shiftcharts-surface-text-color` above.',
     ].join('\n'),
     tokens: [
       {
@@ -280,7 +280,7 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
   {
     title: 'Marks',
     note: [
-      'Added at A4, when @gx/primitives first needed them.',
+      'Added at A4, when @shiftcharts/primitives first needed them.',
       '',
       '⚠ **These are tokens and the four constants in layout.ts are NOT, and the dividing line is',
       'whether the resolver already subtracted the number.** Tick length feeds `xAxisBand()`, so a',
@@ -289,7 +289,7 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
       'outright. See CHROME_METRICS in packages/core/src/layout.ts.',
       '',
       '`r` is a real CSS property in SVG2 and browsers shipped it, which is what makes',
-      '`--gx-point-radius` a token rather than an attribute — decision 012.',
+      '`--shiftcharts-point-radius` a token rather than an attribute — decision 012.',
     ].join('\n'),
     tokens: [
       {
@@ -308,7 +308,7 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
         name: 'area-opacity',
         value: '0.2',
         tier: 'A-impl',
-        source: 'Nivo `areaOpacity: 0.2`. **Spectrum uses `0.8`** — the gap is stacking: 0.2 assumes overlap, 0.8 assumes stacked/non-overlapping. Consider `--gx-area-opacity-stacked: 0.8` as a second token',
+        source: 'Nivo `areaOpacity: 0.2`. **Spectrum uses `0.8`** — the gap is stacking: 0.2 assumes overlap, 0.8 assumes stacked/non-overlapping. Consider `--shiftcharts-area-opacity-stacked: 0.8` as a second token',
       },
       {
         name: 'horizon-band-opacity',
@@ -318,14 +318,14 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
         aside: 'The horizon ramp multiplies this by band index — see chart.css.',
       },
       { name: 'line-stroke-width-muted', value: '0.5px', tier: 'A-impl', source: 'Carbon: "re-style line segments to use 0.5px stroke and hide circles representing data points" (during an axis break)' },
-      { name: 'line-stroke-width-hover', value: 'calc(var(--gx-line-stroke-width) + 0.5px)', tier: 'A-impl', source: 'Spectrum `HOVER_STROKE_OFFSET = 0.5`' },
+      { name: 'line-stroke-width-hover', value: 'calc(var(--shiftcharts-line-stroke-width) + 0.5px)', tier: 'A-impl', source: 'Spectrum `HOVER_STROKE_OFFSET = 0.5`' },
       { name: 'line-cap', value: 'round', tier: 'A-impl', source: 'Highcharts `plotOptions.series.linecap: \'round\'`' },
       { name: 'line-join', value: 'round', tier: 'C', source: 'ECharts defaults `join: \'bevel\'`; `round` is ours and disagrees with the only verified source — label it C' },
       { name: 'line-miter-limit', value: '10', tier: 'A-impl', source: 'ECharts `miterLimit: 10` (also the SVG default)' },
       { name: 'line-dash', value: 'none', tier: 'A-impl', source: 'Highcharts `dashStyle: \'Solid\'`; ECharts `type: \'solid\'`' },
       { name: 'line-dash-offset', value: '0', tier: 'A-impl', source: 'ECharts `dashOffset: 0`' },
       { name: 'line-crisp', value: '1', tier: 'A-impl', source: 'Highcharts `crisp: true`' },
-      { name: 'area-stroke-width', value: 'var(--gx-line-stroke-width)', tier: 'C', source: 'ours' },
+      { name: 'area-stroke-width', value: 'var(--shiftcharts-line-stroke-width)', tier: 'C', source: 'ours' },
       { name: 'bar-gap-inner', value: '0.1', tier: 'A-impl', source: 'Highcharts `plotOptions.column.pointPadding: 0.1`. Field spread: Nivo `innerPadding: 0`, Recharts `barGap: 4px`, ECharts `barGap: \'20%\'`' },
       { name: 'bar-gap-outer', value: '0.2', tier: 'A-impl', source: 'Highcharts `groupPadding: 0.2`. Spread: Nivo `padding: 0.1`, Recharts `barCategoryGap: \'10%\'`, ECharts auto' },
       { name: 'bar-radius', value: '3px', tier: 'A-impl', source: 'Highcharts `column.borderRadius: 3`. Spread: Nivo `0`, Spectrum `CORNER_RADIUS = 6`, Recharts/ECharts accept a 4-tuple with no default' },
@@ -335,12 +335,12 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
       { name: 'bar-max-categories', value: '24', tier: 'A-lit', source: 'Blascheck et al. InfoVis 2018 (via `05`)' },
       {
         name: 'point-radius-hover',
-        value: 'var(--gx-point-radius)',
+        value: 'var(--shiftcharts-point-radius)',
         tier: 'C',
         source: 'Spectrum scales point **area** by tier (`36/64/100`), not on hover; the no-op reuses the resting radius',
       },
       { name: 'point-stroke-width', value: '0', tier: 'A-impl', source: 'Highcharts `marker.lineWidth: 0`; Nivo `pointBorderWidth: 0`. **Vega and Spectrum both use `2`** — the split is scatter (no stroke) vs line-with-markers (stroke to separate the dot from the line)' },
-      { name: 'point-stroke-color', value: 'var(--gx-surface-color)', tier: 'A-impl', source: 'Highcharts `marker.lineColor: var(--highcharts-background-color)` — stroke the marker in the *background* colour so it knocks out the line behind it. A verified idiom worth copying exactly' },
+      { name: 'point-stroke-color', value: 'var(--shiftcharts-surface-color)', tier: 'A-impl', source: 'Highcharts `marker.lineColor: var(--highcharts-background-color)` — stroke the marker in the *background* colour so it knocks out the line behind it. A verified idiom worth copying exactly' },
       { name: 'point-shape', value: 'circle', tier: 'A-impl', source: 'Vega `legend.symbolType: \'circle\'`' },
       { name: 'point-auto-hide-threshold', value: '2', tier: 'A-impl', source: 'Highcharts `marker.enabledThreshold: 2` — hide markers when the horizontal distance between the two closest points falls below N × `marker.radius`. A conceal rule shipped as a number' },
       { name: 'arc-inner-radius', value: '0', tier: 'A-impl', source: 'Highcharts `pie.innerSize: 0`; Nivo `innerRadius: 0`' },
@@ -369,12 +369,12 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
     tokens: [
       {
         name: 'series-color',
-        value: 'var(--gx-series-1)',
+        value: 'var(--shiftcharts-series-1)',
         tier: 'B',
         source: 'Ours — the indirection is the mechanism, not the value.',
         note: [
           'The colour a mark paints with. Defaults to the first emission line and is re-bound per',
-          'series by the `chart.css` in @gx/primitives, so a single-series chart can be recoloured by',
+          'series by the `chart.css` in @shiftcharts/primitives, so a single-series chart can be recoloured by',
           'setting one property on the figure rather than by reaching into a data attribute.',
         ].join('\n'),
       },
@@ -385,7 +385,7 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
     note: [
       'The fit-insensitive part. Everything whose value is a function of the font metrics is',
       'generated into `typography.css` by scripts/generate-typography-css.mjs instead, from the',
-      '`FittingTypography` in @gx/core — those tokens have no row here because their value is',
+      '`FittingTypography` in @shiftcharts/core — those tokens have no row here because their value is',
       'computed rather than chosen.',
     ].join('\n'),
     tokens: [
@@ -440,7 +440,7 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
       { name: 'value-label-halo-width', value: '2px', tier: 'B', source: 'Spread **1–4**: Highcharts `textOutline: \'1px contrast\'`, Nivo `annotations.text.outlineWidth: 2`, Spectrum `DIRECT_LABEL_BACKGROUND_STROKE_WIDTH = 4`' },
       { name: 'value-label-skip-width', value: '0', tier: 'A-impl', source: 'Nivo `labelSkipWidth: 0` — conceal labels below a bar-width threshold' },
       { name: 'value-label-skip-height', value: '0', tier: 'A-impl', source: 'Nivo `labelSkipHeight: 0` — conceal labels below a bar-height threshold' },
-      { name: 'value-label-halo-color', value: 'var(--gx-surface-color)', tier: 'B', source: 'Nivo `outlineColor: \'#ffffff\'`; Highcharts `\'contrast\'` (computed)' },
+      { name: 'value-label-halo-color', value: 'var(--shiftcharts-surface-color)', tier: 'B', source: 'Nivo `outlineColor: \'#ffffff\'`; Highcharts `\'contrast\'` (computed)' },
       { name: 'value-label-halo-opacity', value: '1', tier: 'A-impl', source: 'Nivo `outlineOpacity: 1`' },
     ],
   },
@@ -449,27 +449,27 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
     note: [
       'Added at A6.',
       '',
-      '⚠ **There is no `--gx-motion-enabled`, and its absence is the same decision as the missing',
+      '⚠ **There is no `--shiftcharts-motion-enabled`, and its absence is the same decision as the missing',
       '`enabled` field on `MotionPlan`.** `40-chart-plan.md` §4: the server cannot read',
       '`prefers-reduced-motion`, so a token derived from it would differ between the server render',
       'and the client one. The plan carries the structural facts; the media query in the',
-      '`chart.css` of @gx/primitives decides whether anything runs. Polarity there is',
+      '`chart.css` of @shiftcharts/primitives decides whether anything runs. Polarity there is',
       '`no-preference`, so the still chart is the baseline and motion is the addition.',
       '',
-      '⚠ `--gx-motion-duration` is the ACTIVE one and is re-bound per figure from',
+      '⚠ `--shiftcharts-motion-duration` is the ACTIVE one and is re-bound per figure from',
       '`data-motion-duration`, which `<Chart>` echoes from `plan.motion.durationClass`. The default',
       'is the fast end: a chart that somehow renders without the attribute moves less, rather than',
       'more, than it should.',
       '',
       '⚠ **The stage delay is derived per class HERE, and must never be written as',
-      '`calc(var(--gx-motion-duration) / 2)`.** It was, and it was wrong in a way nothing caught: a',
+      '`calc(var(--shiftcharts-motion-duration) / 2)`.** It was, and it was wrong in a way nothing caught: a',
       'custom property is substituted where it is *declared*, and the result is what inherits.',
-      'Declared on `:root`, `calc(var(--gx-motion-duration) / 2)` resolves against the `:root`',
+      'Declared on `:root`, `calc(var(--shiftcharts-motion-duration) / 2)` resolves against the `:root`',
       'value — the rescale 300ms — and the token that inherits down to every figure is the already-',
-      'computed `calc(300ms / 2)`. `chart.css` then rebinds `--gx-motion-duration: 1000ms` on the',
+      'computed `calc(300ms / 2)`. `chart.css` then rebinds `--shiftcharts-motion-duration: 1000ms` on the',
       'recompose figure and the delay does not follow, because there is no longer a `var()` left in',
       'it to re-resolve. Measured in Chromium: a recompose chart reported',
-      '`--gx-motion-stage-delay: calc(300ms / 2)` and staged its marks 150ms behind a 1000ms chrome',
+      '`--shiftcharts-motion-stage-delay: calc(300ms / 2)` and staged its marks 150ms behind a 1000ms chrome',
       'move, instead of 500ms behind. Naming both halves up front means each `calc()` resolves',
       'against a literal, so neither depends on which element it is read from. **G19 asserts the',
       'resulting gap.**',
@@ -495,13 +495,13 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
       },
       {
         name: 'motion-stage-delay-rescale',
-        value: 'calc(var(--gx-motion-duration-rescale) / 2)',
+        value: 'calc(var(--shiftcharts-motion-duration-rescale) / 2)',
         tier: 'C',
         source: '10-responsive-ladder.md §7 specifies *that* a change is staged and gives no timing for the overlap. Assumed half-duration.',
       },
       {
         name: 'motion-stage-delay-recompose',
-        value: 'calc(var(--gx-motion-duration-recompose) / 2)',
+        value: 'calc(var(--shiftcharts-motion-duration-recompose) / 2)',
         tier: 'C',
         source: '10-responsive-ladder.md §7 specifies *that* a change is staged and gives no timing for the overlap. Assumed half-duration.',
         note: [
@@ -513,13 +513,13 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
       },
       {
         name: 'motion-duration',
-        value: 'var(--gx-motion-duration-rescale)',
+        value: 'var(--shiftcharts-motion-duration-rescale)',
         tier: 'B',
         source: 'Ours — the active binding, re-pointed per figure by chart.css.',
       },
       {
         name: 'motion-stage-delay',
-        value: 'var(--gx-motion-stage-delay-rescale)',
+        value: 'var(--shiftcharts-motion-stage-delay-rescale)',
         tier: 'B',
         source: 'Ours — the active binding, re-pointed per figure by chart.css.',
       },
@@ -548,7 +548,7 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
       },
       {
         name: 'plot-padding',
-        value: 'calc(var(--gx-size-gap) * 2)',
+        value: 'calc(var(--shiftcharts-size-gap) * 2)',
         tier: 'C',
         source: 'Ours. Legacy token retained for compatibility.',
       },
@@ -595,7 +595,7 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
       { name: 'tooltip-chip-gap', value: '7px', tier: 'A-impl', source: 'Nivo `tooltip.chip.marginRight: 7`' },
       { name: 'tooltip-delay', value: '350ms', tier: 'A-impl', source: 'Spectrum `TOOLTIP_DELAY = 350`' },
       { name: 'tooltip-hide-delay', value: '500ms', tier: 'A-impl', source: 'Highcharts `hideDelay: 500`' },
-      { name: 'tooltip-snap', value: '10px', tier: 'A-impl', source: 'Highcharts `tooltip.snap` — values `10` and `25`; **which is mouse and which is touch is UNVERIFIED**. Ship the larger as `--gx-tooltip-snap-coarse` under `@media (pointer: coarse)`' },
+      { name: 'tooltip-snap', value: '10px', tier: 'A-impl', source: 'Highcharts `tooltip.snap` — values `10` and `25`; **which is mouse and which is touch is UNVERIFIED**. Ship the larger as `--shiftcharts-tooltip-snap-coarse` under `@media (pointer: coarse)`' },
       { name: 'crosshair-width', value: '1px', tier: 'A-impl', source: 'Highcharts `crosshair.width: 1`; Nivo `crosshair.line.strokeWidth: 1`' },
       { name: 'crosshair-color', value: '#ccc', tier: 'A-impl', source: 'Highcharts `crosshair.color: \'#cccccc\'` (Nivo `#000` at 0.75 opacity)' },
       { name: 'crosshair-opacity', value: '0.75', tier: 'A-impl', source: 'Nivo `crosshair.line.strokeOpacity: 0.75`' },
@@ -686,9 +686,9 @@ export const THEME_VARIANTS: readonly ThemeVariant[] = [
       { name: 'surface-color', value: '#f4f3ef', tier: 'C', source: 'DESIGN.md:63' },
       {
         name: 'surface-text-color',
-        value: 'var(--gx-ramp-neutral-2)',
+        value: 'var(--shiftcharts-ramp-neutral-2)',
         tier: 'B',
-        source: 'A4 — see `--gx-surface-text-color` above.',
+        source: 'A4 — see `--shiftcharts-surface-text-color` above.',
         aside: '21.0:1 on the ground.',
       },
       { name: 'series-1', value: '#084962', tier: 'B', source: 'DESIGN.md:52', aside: 'H-beta   ·  8.84' },
@@ -704,7 +704,7 @@ export const THEME_VARIANTS: readonly ThemeVariant[] = [
     note: 'Neutral dark escape hatch: true-neutral ramp and evenly spaced categorical hues.',
     overrides: [
       { name: 'surface-color', value: '#181818', tier: 'C', source: 'B1 neutral palette derivation: neutral dark ground' },
-      { name: 'surface-text-color', value: 'var(--gx-ramp-neutral-8)', tier: 'C', source: 'B1 neutral palette derivation: dark-ground text index' },
+      { name: 'surface-text-color', value: 'var(--shiftcharts-ramp-neutral-8)', tier: 'C', source: 'B1 neutral palette derivation: dark-ground text index' },
       ...NEUTRAL_DARK_SURFACE_OVERRIDES,
       ...NEUTRAL_DARK_SERIES,
     ],
@@ -714,7 +714,7 @@ export const THEME_VARIANTS: readonly ThemeVariant[] = [
     note: 'Neutral light escape hatch: true-neutral ramp and evenly spaced categorical hues.',
     overrides: [
       { name: 'surface-color', value: '#f7f7f7', tier: 'C', source: 'B1 neutral palette derivation: neutral light ground' },
-      { name: 'surface-text-color', value: 'var(--gx-ramp-neutral-3)', tier: 'C', source: 'B1 neutral palette derivation: light-ground text index' },
+      { name: 'surface-text-color', value: 'var(--shiftcharts-ramp-neutral-3)', tier: 'C', source: 'B1 neutral palette derivation: light-ground text index' },
       ...NEUTRAL_LIGHT_SURFACE_OVERRIDES,
       ...NEUTRAL_LIGHT_SERIES,
     ],

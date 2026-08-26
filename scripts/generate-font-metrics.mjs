@@ -15,8 +15,8 @@
  * ## Re-running it
  *
  * ```sh
- * mkdir -p /tmp/gx-fonts
- * curl -sSLo /tmp/gx-fonts/RobotoFlex.ttf \
+ * mkdir -p /tmp/shiftcharts-fonts
+ * curl -sSLo /tmp/shiftcharts-fonts/RobotoFlex.ttf \
  *   'https://raw.githubusercontent.com/google/fonts/main/ofl/robotoflex/RobotoFlex%5BGRAD%2CXOPQ%2CXTRA%2CYOPQ%2CYTAS%2CYTDE%2CYTFI%2CYTLC%2CYTUC%2Copsz%2Cslnt%2Cwdth%2Cwght%5D.ttf'
  * node scripts/generate-font-metrics.mjs --write
  * ```
@@ -45,10 +45,10 @@ import { fileURLToPath } from 'node:url'
 const TARGET = fileURLToPath(new URL('../packages/core/src/font-metrics.generated.ts', import.meta.url))
 
 /** Where the fonts are expected to sit. Override with `--fonts <dir>`. */
-const DEFAULT_FONT_DIR = '/tmp/gx-fonts'
+const DEFAULT_FONT_DIR = '/tmp/shiftcharts-fonts'
 
 /** Override with `--python <path>`. */
-const DEFAULT_PYTHON = process.env['GX_PYTHON'] ?? 'python3'
+const DEFAULT_PYTHON = process.env['SHIFTCHARTS_PYTHON'] ?? 'python3'
 
 /**
  * The reference face, pinned by content hash.
@@ -414,7 +414,7 @@ function runPython(python, config) {
     child.stdout.on('data', (c) => out.push(c))
     child.stderr.on('data', (c) => err.push(c))
     child.on('error', (e) =>
-      reject(new Error(`could not run ${python}: ${e.message}\nSet GX_PYTHON or pass --python.`)),
+      reject(new Error(`could not run ${python}: ${e.message}\nSet SHIFTCHARTS_PYTHON or pass --python.`)),
     )
     child.on('close', (code) => {
       if (code !== 0) {

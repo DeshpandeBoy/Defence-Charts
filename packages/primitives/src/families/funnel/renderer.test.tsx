@@ -1,4 +1,4 @@
-import { DEFAULT_POLICY } from '@gx/core'
+import { DEFAULT_POLICY } from '@shiftcharts/core'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
@@ -36,7 +36,7 @@ describe('funnel family renderer', () => {
   it('renders stage geometry, stable IDs, values, and labels from the shared frame', () => {
     const html = renderToStaticMarkup(renderFunnel(input))
 
-    expect(html).toContain('class="gx-funnel gx-funnel--vertical gx-funnel--stages"')
+    expect(html).toContain('class="shiftcharts-funnel shiftcharts-funnel--vertical shiftcharts-funnel--stages"')
     expect(html).toContain('data-funnel-series-id="checkout"')
     expect(html).toContain('data-funnel-stage-id="checkout:landing"')
     expect(html).toContain('data-stage-id="checkout:details"')
@@ -46,7 +46,7 @@ describe('funnel family renderer', () => {
     expect(html).toContain('>Details: value 800<')
     expect(html).toContain('x="40"')
     expect(html).toContain('width="128"')
-    expect((html.match(/class="gx-funnel-stage gx-funnel-stage__mark"/g) ?? []).length).toBe(3)
+    expect((html.match(/class="shiftcharts-funnel-stage shiftcharts-funnel-stage__mark"/g) ?? []).length).toBe(3)
   })
 
   it('renders the Tile summary without inventing stage rectangles', () => {
@@ -63,7 +63,7 @@ describe('funnel family renderer', () => {
     expect(html).toContain('data-funnel-part="summary"')
     expect(html).toContain('data-funnel-overall-conversion="0.25"')
     expect(html).toContain('>Overall conversion: 25%<')
-    expect(html).not.toContain('gx-funnel-stage__mark')
+    expect(html).not.toContain('shiftcharts-funnel-stage__mark')
   })
 
   it('renders Canvas drop-off and Stage breakdown as visible text', () => {

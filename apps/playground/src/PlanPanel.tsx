@@ -1,5 +1,5 @@
-import type { ChartPlan, ChromeSpec, PlotBox, Series, SizeContext } from '@gx/core'
-import { DEFAULT_POLICY, describeShape, planChart, resolvePlotBox } from '@gx/core'
+import type { ChartPlan, ChromeSpec, PlotBox, Series, SizeContext } from '@shiftcharts/core'
+import { DEFAULT_POLICY, describeShape, planChart, resolvePlotBox } from '@shiftcharts/core'
 
 import { demoSeries } from './demo.ts'
 

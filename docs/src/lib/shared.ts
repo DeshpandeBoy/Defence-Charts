@@ -1,4 +1,4 @@
-export const appName = 'GX';
+export const appName = 'ShiftCharts';
 export const docsRoute = '/docs';
 export const docsImageRoute = '/og/docs';
 export const docsContentRoute = '/llms.mdx/docs';

@@ -36,7 +36,7 @@
  * doubles — which is the loop, one step of it, caught without a browser.
  */
 
-import { FakeResizeObserver } from '@gx/testing'
+import { FakeResizeObserver } from '@shiftcharts/testing'
 import { act, useRef, type ReactNode } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'

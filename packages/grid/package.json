@@ -1,9 +1,9 @@
 {
-  "name": "@gx/grid",
+  "name": "@shiftcharts/grid",
   "version": "0.0.0",
   "type": "module",
   "license": "MIT",
-  "description": "Client-side 12-column widget grid, shell, keyboard controls, interaction lifecycle, and stable layout adapters.",
+  "description": "ShiftCharts 12-column widget grid, shell, keyboard controls, and stable layout adapters.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DeshpandeBoy/Defence-Charts.git",
@@ -36,7 +36,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@gx/core": "workspace:*",
+    "@shiftcharts/core": "workspace:*",
     "react-grid-layout": "2.2.4"
   },
   "peerDependencies": {

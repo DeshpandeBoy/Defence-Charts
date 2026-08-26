@@ -26,7 +26,7 @@ describe('heatmap family renderer', () => {
   it('renders every finite shared-frame cell with supplied identity and value metadata', () => {
     const html = renderToStaticMarkup(renderHeatmap(input))
 
-    expect((html.match(/class="gx-cell gx-heatmap-cell"/g) ?? []).length).toBe(4)
+    expect((html.match(/class="shiftcharts-cell shiftcharts-heatmap-cell"/g) ?? []).length).toBe(4)
     expect(html).toContain('data-cell-id="activity:missing"')
     expect(html).toContain('data-cell-id="activity:extreme"')
     expect(html).toContain('data-cell-series-id="activity"')
@@ -60,7 +60,7 @@ describe('heatmap family renderer', () => {
     } as unknown as MarkRendererInput
     const html = renderToStaticMarkup(renderHeatmap(duplicate))
 
-    expect((html.match(/class="gx-cell gx-heatmap-cell"/g) ?? []).length).toBe(2)
+    expect((html.match(/class="shiftcharts-cell shiftcharts-heatmap-cell"/g) ?? []).length).toBe(2)
     expect(html).toContain('data-cell-id="activity:cell:0"')
     expect(html).toContain('data-cell-id="activity:cell:1"')
     expect(html).toContain('data-heatmap-cell-id="activity:cell:0"')
@@ -81,7 +81,7 @@ describe('heatmap family renderer', () => {
     } as unknown as MarkRendererInput
     const html = renderToStaticMarkup(renderHeatmap(geometryOnly))
 
-    expect((html.match(/class="gx-cell gx-heatmap-cell"/g) ?? []).length).toBe(4)
+    expect((html.match(/class="shiftcharts-cell shiftcharts-heatmap-cell"/g) ?? []).length).toBe(4)
     expect(html).toContain('data-heatmap-cell-id="activity:cell:0"')
     expect(html).not.toContain('data-heatmap-state=')
     expect(html).not.toContain('data-heatmap-value=')

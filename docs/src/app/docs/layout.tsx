@@ -12,7 +12,7 @@ export default function Layout({ children }: LayoutProps<'/docs'>) {
       sidebar={{
         collapsible: true,
         banner: (
-          <div key="implementation-status" className="gx-docs-status">
+          <div key="implementation-status" className="shiftcharts-docs-status">
             <FontAwesomeIcon icon={faCircleCheck} aria-hidden="true" />
             <span>A1–A6 and B1–B3 implemented</span>
           </div>

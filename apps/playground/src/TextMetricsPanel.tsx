@@ -1,5 +1,5 @@
-import type { TypeRank } from '@gx/core'
-import { DEFAULT_TYPOGRAPHY, measureText, RANK_FONT_SIZE, ROBOTO_FLEX_METRICS } from '@gx/core'
+import type { TypeRank } from '@shiftcharts/core'
+import { DEFAULT_TYPOGRAPHY, measureText, RANK_FONT_SIZE, ROBOTO_FLEX_METRICS } from '@shiftcharts/core'
 import { useLayoutEffect, useRef, useState } from 'react'
 
 const RANKS: readonly TypeRank[] = ['A', 'B', 'C', 'D', 'E']
@@ -33,7 +33,7 @@ export function TextMetricsPanel() {
   useLayoutEffect(() => {
     const element = textRef.current
     if (element === null) return
-    // ⚠ `getComputedTextLength()` is banned inside `@gx/core` by gate **G2** and is fine
+    // ⚠ `getComputedTextLength()` is banned inside `@shiftcharts/core` by gate **G2** and is fine
     // here. That asymmetry is the whole architecture: the app may measure, the resolver may
     // not. The number below is what this browser painted; the number above is what a server
     // with no browser predicted from the same string.
@@ -187,7 +187,7 @@ export function TextMetricsPanel() {
  * signature being looked for.
  *
  * ⚠ Canvas measurement here, `getComputedTextLength()` above, and neither is available to
- * `@gx/core` — gate **G2** bans both from the resolver. The app may measure; the thing whose
+ * `@shiftcharts/core` — gate **G2** bans both from the resolver. The app may measure; the thing whose
  * output must be identical on a server and in a browser may not.
  */
 function isFaceInstalled(family: string, fontSize: number, weight: number): boolean {

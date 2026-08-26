@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { createLayoutSnapshot, serializeLayoutSnapshot } from '@gx/core'
+import { createLayoutSnapshot, serializeLayoutSnapshot } from '@shiftcharts/core'
 import {
   normalizeGridLayout,
   normalizeLayoutSnapshot,

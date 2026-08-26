@@ -1,4 +1,4 @@
-# `@gx/playground` — the resize lab
+# `@shiftcharts/playground` — the resize lab
 
 Not shipped, not published, not a demo. It exists to answer one question that the test
 suite cannot: **what has actually been built, and does it behave the way the research says
@@ -6,7 +6,7 @@ it should when you drag a corner?**
 
 ```bash
 pnpm install
-pnpm dev            # or: pnpm --filter @gx/playground dev
+pnpm dev            # or: pnpm --filter @shiftcharts/playground dev
 ```
 
 Then open <http://localhost:5173>.
@@ -22,7 +22,7 @@ are on the D track.
 
 A container with `resize: both` and nothing else deciding its size, measured by a
 `ResizeObserver`. Every number in the right-hand panel is a pure function of the two
-numbers that observer reports, computed by `@gx/core` — a package that has never seen the
+numbers that observer reports, computed by `@shiftcharts/core` — a package that has never seen the
 DOM and is forbidden from doing so by gate **G2**.
 
 That seam is the architecture, and this page is where you can watch it hold:
@@ -88,12 +88,12 @@ Windows-only, unobtainable here, and never estimated.
 `scripts/check-tokens.mjs` scans `packages/` only, so `src/playground.css` sits outside the
 raw-hex ban by construction. That is intentional — the chrome of a development tool is not
 product surface. The line to watch: **the moment anything in this app starts describing how
-a chart looks, it belongs in `@gx/tokens` and under the gate.**
+a chart looks, it belongs in `@shiftcharts/tokens` and under the gate.**
 
-The theme itself is imported through its published export (`@gx/tokens/theme.css`) rather
+The theme itself is imported through its published export (`@shiftcharts/tokens/theme.css`) rather
 than reimplemented, so a broken export map shows up here as a page with no colour instead of
 as a private copy carrying on regardless.
 
-`useElementSize.ts` is a near-twin of the hook that lands in `@gx/react` at **A5**, minus
+`useElementSize.ts` is a near-twin of the hook that lands in `@shiftcharts/react` at **A5**, minus
 the containment work — see its docblock for why that omission is currently safe and when it
 stops being so.

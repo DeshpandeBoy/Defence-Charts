@@ -512,7 +512,7 @@ describe('series identity', () => {
  * `valueBand()` subtracts a strip off the top of the plot at Micro and Tile, `resolveFrame()`
  * used it as the plot's `y` origin, and nothing put a glyph in it — so the entire content of
  * the Micro rung (`marks.primary.kind: 'none'`, `regionOrder: ['value','table']`) was a value
- * display that did not exist. An empty `<svg>` with three empty `<g class="gx-series">` is
+ * display that did not exist. An empty `<svg>` with three empty `<g class="shiftcharts-series">` is
  * the failure species this project keeps naming: a thing that looks like it works and quietly
  * doesn't. Every test below is one half of "the band now has something in it, and it fits".
  */

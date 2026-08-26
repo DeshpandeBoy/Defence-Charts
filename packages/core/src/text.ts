@@ -3,7 +3,7 @@
  *
  * Transcribed from `research/41-text-metrics.md` §5–§6.
  *
- * ⚠ This file is the reason gate **G2** exists. `@gx/core` may not call
+ * ⚠ This file is the reason gate **G2** exists. `@shiftcharts/core` may not call
  * `getComputedTextLength`, `getBBox`, `getTotalLength` or `getBoundingClientRect`, and
  * the ban is enforced three ways rather than trusted: an ESLint rule, `"types": []` in
  * this package's tsconfig so the DOM lib is not even in scope, and G15's ban on happy-dom.

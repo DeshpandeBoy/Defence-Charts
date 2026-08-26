@@ -1,15 +1,15 @@
-# @gx/docs
+# @shiftcharts/docs
 
 The documentation site. A [Next.js](https://nextjs.org) app on
 [Fumadocs](https://fumadocs.dev), and a workspace member like any other — it consumes
-`@gx/core`, `@gx/primitives`, `@gx/react` and `@gx/tokens` through `workspace:*`, so what it
+`@shiftcharts/core`, `@shiftcharts/primitives`, `@shiftcharts/react` and `@shiftcharts/tokens` through `workspace:*`, so what it
 demonstrates is the library as built, not a copy of it.
 
 ```bash
-pnpm --filter @gx/docs dev        # http://localhost:3000
-pnpm --filter @gx/docs build
-pnpm --filter @gx/docs typecheck
-pnpm --filter @gx/docs lint
+pnpm --filter @shiftcharts/docs dev        # http://localhost:3000
+pnpm --filter @shiftcharts/docs build
+pnpm --filter @shiftcharts/docs typecheck
+pnpm --filter @shiftcharts/docs lint
 ```
 
 `pnpm build` and `pnpm typecheck` at the root reach this package through turbo; `pnpm lint`
@@ -36,7 +36,7 @@ purpose.
 `eslint.config.js` at the root ignores `docs/**`, with the reasoning stated there: running the
 library's house rules over a fumadocs scaffold applies rules to code nobody here wrote, and the
 first thing it reports is a `consistent-type-imports` complaint about generated-shaped template
-code. `docs/eslint.config.mjs` and `pnpm --filter @gx/docs lint` are the run that means
+code. `docs/eslint.config.mjs` and `pnpm --filter @shiftcharts/docs lint` are the run that means
 something here.
 
 ### 2. It owns its `tsconfig.json` — and Next rewrites that file

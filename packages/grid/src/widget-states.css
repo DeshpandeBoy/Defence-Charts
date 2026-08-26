@@ -1,5 +1,5 @@
-@layer gx.theme {
-  .gx-widget-states {
+@layer shiftcharts.theme {
+  .shiftcharts-widget-states {
     position: relative;
     display: grid;
     grid-template-columns: minmax(0, 1fr);
@@ -10,79 +10,79 @@
     min-inline-size: 0;
     min-block-size: 0;
     overflow: hidden;
-    color: var(--gx-surface-text-color);
+    color: var(--shiftcharts-surface-text-color);
   }
 
-  .gx-widget-states__content,
-  .gx-widget-states__status {
+  .shiftcharts-widget-states__content,
+  .shiftcharts-widget-states__status {
     grid-area: content;
     min-inline-size: 0;
     min-block-size: 0;
   }
 
-  .gx-widget-states__content {
+  .shiftcharts-widget-states__content {
     overflow: auto;
   }
 
-  .gx-widget-states__status {
+  .shiftcharts-widget-states__status {
     z-index: 1;
     display: grid;
     align-content: center;
     justify-items: center;
-    gap: var(--gx-widget-gap);
+    gap: var(--shiftcharts-widget-gap);
     box-sizing: border-box;
     min-block-size: 100%;
-    padding: var(--gx-widget-padding);
-    background: var(--gx-surface-color);
+    padding: var(--shiftcharts-widget-padding);
+    background: var(--shiftcharts-surface-color);
     text-align: center;
   }
 
-  .gx-widget-states__message {
+  .shiftcharts-widget-states__message {
     display: grid;
-    gap: var(--gx-widget-padding-tight);
+    gap: var(--shiftcharts-widget-padding-tight);
     min-inline-size: 0;
     max-inline-size: 100%;
   }
 
-  .gx-widget-states__label,
-  .gx-widget-states__description {
+  .shiftcharts-widget-states__label,
+  .shiftcharts-widget-states__description {
     margin: 0;
   }
 
-  .gx-widget-states__label {
-    font-size: var(--gx-subtitle-font-size);
-    font-weight: var(--gx-subtitle-font-weight);
+  .shiftcharts-widget-states__label {
+    font-size: var(--shiftcharts-subtitle-font-size);
+    font-weight: var(--shiftcharts-subtitle-font-weight);
   }
 
-  .gx-widget-states__description {
-    color: var(--gx-axis-color);
-    font-size: var(--gx-label-font-size);
-    font-weight: var(--gx-label-font-weight);
+  .shiftcharts-widget-states__description {
+    color: var(--shiftcharts-axis-color);
+    font-size: var(--shiftcharts-label-font-size);
+    font-weight: var(--shiftcharts-label-font-weight);
   }
 
-  .gx-widget-states__action {
+  .shiftcharts-widget-states__action {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: var(--gx-widget-padding-tight);
+    gap: var(--shiftcharts-widget-padding-tight);
     min-inline-size: 0;
   }
 
-  .gx-widget-states[data-gx-widget-state='stale'] .gx-widget-states__status {
+  .shiftcharts-widget-states[data-shiftcharts-widget-state='stale'] .shiftcharts-widget-states__status {
     align-self: start;
     justify-self: stretch;
     grid-template-columns: minmax(0, 1fr) auto;
     min-block-size: auto;
-    padding-block: var(--gx-widget-padding-tight);
-    padding-inline: var(--gx-widget-padding);
+    padding-block: var(--shiftcharts-widget-padding-tight);
+    padding-inline: var(--shiftcharts-widget-padding);
     text-align: start;
   }
 
-  .gx-widget-states[data-gx-widget-state='stale'] .gx-widget-states__message {
+  .shiftcharts-widget-states[data-shiftcharts-widget-state='stale'] .shiftcharts-widget-states__message {
     align-content: center;
   }
 
-  .gx-widget-states[data-gx-widget-state='stale'] .gx-widget-states__action {
+  .shiftcharts-widget-states[data-shiftcharts-widget-state='stale'] .shiftcharts-widget-states__action {
     justify-content: end;
   }
 }

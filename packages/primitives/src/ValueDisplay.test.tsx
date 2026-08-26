@@ -4,7 +4,7 @@
  * ⚠ **What this file is really asserting is that the band is not empty.** At Micro the plan
  * is `marks.primary.kind: 'none'` with `regionOrder: ['value','table']`, so the value display
  * *is* the chart; before this component existed the rung rendered an `<svg>` with three empty
- * `<g class="gx-series">` in it and every geometry test in the suite passed. A test that only
+ * `<g class="shiftcharts-series">` in it and every geometry test in the suite passed. A test that only
  * checked attribute spellings would have kept passing too, which is why the first assertion
  * below is that a Micro frame produces a `<text>` at all.
  *
@@ -25,7 +25,7 @@ import {
   resolveFrame,
   type Series,
   sizeContextFromPixels,
-} from '@gx/core'
+} from '@shiftcharts/core'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
@@ -121,34 +121,34 @@ describe('the Micro rung, whose entire content this is', () => {
   const html = render(valueOf(60, 24))
 
   it('paints a value', () => {
-    const values = parseElements(html).filter((el) => el.attrs['class'] === 'gx-value')
+    const values = parseElements(html).filter((el) => el.attrs['class'] === 'shiftcharts-value')
     expect(values).toHaveLength(1)
     expect(values[0]?.tag).toBe('text')
     expect(html).toContain('>27<')
   })
 
   it('separates series context from the dominant metric in the SVG reading', () => {
-    const context = parseElements(html).find((el) => el.attrs['class'] === 'gx-value__context gx-value__label')
-    const metric = parseElements(html).find((el) => el.attrs['class'] === 'gx-value__metric')
+    const context = parseElements(html).find((el) => el.attrs['class'] === 'shiftcharts-value__context shiftcharts-value__label')
+    const metric = parseElements(html).find((el) => el.attrs['class'] === 'shiftcharts-value__metric')
 
     expect(context?.tag).toBe('tspan')
     expect(metric?.tag).toBe('tspan')
     expect(html).toMatch(
-      /<text[^>]*class="gx-value"[^>]*aria-label="ALPHA 27"[^>]*>.*gx-value__context.*ALPHA.*gx-value__metric.*27/s,
+      /<text[^>]*class="shiftcharts-value"[^>]*aria-label="ALPHA 27"[^>]*>.*shiftcharts-value__context.*ALPHA.*shiftcharts-value__metric.*27/s,
     )
   })
 
   it('takes its coordinates and its size from the frame, unmodified', () => {
     const value = valueOf(60, 24)
     const entry = value?.entries[0]
-    const painted = parseElements(html).find((el) => el.attrs['class'] === 'gx-value')
+    const painted = parseElements(html).find((el) => el.attrs['class'] === 'shiftcharts-value')
     expect(Number(painted?.attrs['x'])).toBeCloseTo(entry?.x ?? 0, 2)
     expect(Number(painted?.attrs['y'])).toBeCloseTo(entry?.y ?? 0, 2)
     expect(Number(painted?.attrs['font-size'])).toBeCloseTo(value?.fontSize ?? 0, 2)
   })
 
   it('says how many values it could not show', () => {
-    const marker = parseElements(html).find((el) => el.attrs['class'] === 'gx-value__overflow')
+    const marker = parseElements(html).find((el) => el.attrs['class'] === 'shiftcharts-value__overflow')
     expect(marker?.attrs['data-hidden']).toBe('2')
     expect(html).toContain('>+2<')
   })
@@ -160,10 +160,10 @@ describe('the delta', () => {
   const html = render(valueOf(240, 80))
 
   it('is a tspan inside the value, not a second text element', () => {
-    const deltas = parseElements(html).filter((el) => el.attrs['class'] === 'gx-value__delta')
+    const deltas = parseElements(html).filter((el) => el.attrs['class'] === 'shiftcharts-value__delta')
     expect(deltas.length).toBeGreaterThan(0)
     for (const d of deltas) expect(d.tag).toBe('tspan')
-    expect(html).toMatch(/<text[^>]*class="gx-value"[^>]*>[^<]*<tspan/)
+    expect(html).toMatch(/<text[^>]*class="shiftcharts-value"[^>]*>[^<]*<tspan/)
   })
 
   it('carries the direction as data, for a theme that has a palette for it', () => {
@@ -174,7 +174,7 @@ describe('the delta', () => {
     ]
     const directions = directionFixtures.flatMap(([id, values]) =>
       parseElements(render(valueOf(240, 80, [series(id, values)])))
-        .filter((el) => el.attrs['class'] === 'gx-value__delta')
+        .filter((el) => el.attrs['class'] === 'shiftcharts-value__delta')
         .map((el) => el.attrs['data-direction']),
     )
     // alpha 30→27 falls, beta 11→12 rises, gamma 6→4 falls.
@@ -182,7 +182,7 @@ describe('the delta', () => {
   })
 
   /**
-   * ⚠ The separating space is part of the string `@gx/core` measured. A `dx` on the tspan
+   * ⚠ The separating space is part of the string `@shiftcharts/core` measured. A `dx` on the tspan
    * would move the glyphs without moving the width the column was fitted against — the text
    * would be wider than the space reserved for it, and nothing would look broken until two
    * values touched.
@@ -193,13 +193,13 @@ describe('the delta', () => {
   })
 
   it('is absent at a rung that asks for the value alone', () => {
-    expect(render(valueOf(60, 24))).not.toContain('gx-value__delta')
+    expect(render(valueOf(60, 24))).not.toContain('shiftcharts-value__delta')
   })
 })
 
 // --- The binding rules -------------------------------------------------------------------
 
-describe('the three rules of @gx/primitives', () => {
+describe('the three rules of @shiftcharts/primitives', () => {
   const ALLOWED = new Set([
     'class',
     'x',
@@ -270,7 +270,7 @@ describe('a number belongs to a series', () => {
       series('c', [-2, 1, -5]),
     ]
     const painted = parseElements(render(valueOf(200, 100, data))).filter(
-      (el) => el.attrs['class'] === 'gx-value',
+      (el) => el.attrs['class'] === 'shiftcharts-value',
     )
     expect(painted.map((el) => el.attrs['data-series-id'])).toEqual(['b', 'c'])
     expect(painted.map((el) => el.attrs['data-series-index'])).toEqual(['1', '2'])
@@ -282,7 +282,7 @@ describe('a number belongs to a series', () => {
       series('b', [4, 6, 5]),
       series('c', [-2, 1, -5]),
     ]))).filter(
-      (el) => el.attrs['class'] === 'gx-value',
+      (el) => el.attrs['class'] === 'shiftcharts-value',
     )
     expect(painted.map((el) => el.attrs['data-series-id'])).toEqual(['a', 'b', 'c'])
   })
@@ -328,7 +328,7 @@ describe('a forced value display is obeyed, not approximated', () => {
     })
     const value = resolveFrame(forced, THREE, ctx).value
     const html = render(value)
-    expect(parseElements(html).filter((el) => el.attrs['class'] === 'gx-value')).toHaveLength(3)
+    expect(parseElements(html).filter((el) => el.attrs['class'] === 'shiftcharts-value')).toHaveLength(3)
     expect(Number(value?.fontSize)).toBeGreaterThan(0)
     expect(Number(value?.fontSize)).toBeLessThanOrEqual(32)
   })

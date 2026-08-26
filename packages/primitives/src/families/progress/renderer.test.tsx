@@ -30,7 +30,7 @@ describe('progress family renderer', () => {
   it('renders horizontal track and fill geometry with stable semantic attributes', () => {
     const html = renderToStaticMarkup(renderProgress(input))
 
-    expect(html).toContain('class="gx-progress gx-progress--horizontal gx-progress--partial"')
+    expect(html).toContain('class="shiftcharts-progress shiftcharts-progress--horizontal shiftcharts-progress--partial"')
     expect(html).toContain('data-progress-series-id="completion"')
     expect(html).toContain('data-progress-orientation="horizontal"')
     expect(html).toContain('data-progress-current="50"')
@@ -53,12 +53,12 @@ describe('progress family renderer', () => {
     } as unknown as MarkRendererInput
     const html = renderToStaticMarkup(renderProgress(radial))
 
-    expect(html).toContain('class="gx-progress gx-progress--radial gx-progress--over-target"')
+    expect(html).toContain('class="shiftcharts-progress shiftcharts-progress--radial shiftcharts-progress--over-target"')
     expect(html).toContain('data-progress-over-target="25"')
     expect(html).toContain('data-progress-state="over-target"')
     expect(html).toContain('transform="translate(64, 64)"')
-    expect((html.match(/class="gx-progress__track"/g) ?? []).length).toBe(1)
-    expect((html.match(/class="gx-progress__fill"/g) ?? []).length).toBe(1)
+    expect((html.match(/class="shiftcharts-progress__track"/g) ?? []).length).toBe(1)
+    expect((html.match(/class="shiftcharts-progress__fill"/g) ?? []).length).toBe(1)
     expect(html).toContain('data-progress-part="state"')
     expect(html).toContain('>Over target<')
   })
@@ -76,7 +76,7 @@ describe('progress family renderer', () => {
     expect(html).toContain('data-progress-part="state"')
     expect(html).toContain('>Target unavailable<')
     expect(html).toContain('data-progress-part="track"')
-    expect(html).not.toContain('class="gx-progress__fill"')
+    expect(html).not.toContain('class="shiftcharts-progress__fill"')
   })
 
   it('fails explicitly when the shared frame geometry is absent or invalid', () => {

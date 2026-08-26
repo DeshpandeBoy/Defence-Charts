@@ -14,7 +14,7 @@ import { openChromium } from './check-containment.mjs'
 /* eslint-disable no-undef -- DOM globals below are serialized into Playwright page callbacks. */
 
 const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
-const ORIGIN = process.env.GX_INTERACTION_ORIGIN ?? 'http://127.0.0.1:5185/'
+const ORIGIN = process.env.SHIFTCHARTS_INTERACTION_ORIGIN ?? 'http://127.0.0.1:5185/'
 const RESULT_PATH = fileURLToPath(new URL('./results/i1.5-interaction-browser.latest.json', import.meta.url))
 const VIEWPORT = { width: 1500, height: 1400 }
 const TOLERANCE = 3
@@ -49,7 +49,7 @@ async function ensureServer() {
       '--yes',
       'pnpm@10.34.5',
       '--filter',
-      '@gx/playground',
+      '@shiftcharts/playground',
       'exec',
       'vite',
       '--config',
@@ -90,7 +90,7 @@ async function settle(page) {
 
 async function waitForChart(page, selector) {
   await page.goto(ORIGIN, { waitUntil: 'load' })
-  await page.waitForSelector(selector + ' .gx-auto-chart .gx-interaction__target', { timeout: 20_000 })
+  await page.waitForSelector(selector + ' .shiftcharts-auto-chart .shiftcharts-interaction__target', { timeout: 20_000 })
   await settle(page)
 }
 
@@ -99,7 +99,7 @@ function tooltipData(page, selector) {
 }
 
 async function openAtCenter(page, selector) {
-  const target = page.locator(selector + ' .gx-interaction__target')
+  const target = page.locator(selector + ' .shiftcharts-interaction__target')
   const box = await target.boundingBox()
   if (box === null) throw new Error(selector + ': interaction target has no box')
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
@@ -114,11 +114,11 @@ async function assertTooltipContained(page, selector, label) {
 }
 
 async function runStaticContract(page) {
-  const observed = await page.locator('[data-gx-static-chart]').evaluate((root) => ({
-    interaction: root.querySelector('.gx-interaction') !== null,
-    controlLegend: root.querySelector('.gx-legend--control') !== null,
+  const observed = await page.locator('[data-shiftcharts-static-chart]').evaluate((root) => ({
+    interaction: root.querySelector('.shiftcharts-interaction') !== null,
+    controlLegend: root.querySelector('.shiftcharts-legend--control') !== null,
     pressedNodes: root.querySelectorAll('[aria-pressed]').length,
-    staticLegend: root.querySelector('.gx-legend') !== null,
+    staticLegend: root.querySelector('.shiftcharts-legend') !== null,
     svg: root.querySelector('svg[role="graphics-document"]') !== null,
   }))
   if (observed.interaction || observed.controlLegend || observed.pressedNodes !== 0) {
@@ -131,8 +131,8 @@ async function runStaticContract(page) {
 }
 
 async function runPanelKeyboardAndHover(page) {
-  const selector = '[data-gx-resizable-chart]'
-  const target = page.locator(selector + ' .gx-interaction__target')
+  const selector = '[data-shiftcharts-resizable-chart]'
+  const target = page.locator(selector + ' .shiftcharts-interaction__target')
   await target.focus()
   await page.keyboard.press('Enter')
   await page.waitForSelector(selector + ' [role="tooltip"]')
@@ -145,7 +145,7 @@ async function runPanelKeyboardAndHover(page) {
   if (first.mode !== 'fixed' || first.seriesId !== 'alpha' || first.pointIndex !== '0') {
     throw new Error('keyboard accessible equivalent did not open the first stable datum: ' + JSON.stringify(first))
   }
-  const focusAfterOpen = await page.evaluate(() => document.activeElement?.classList.contains('gx-interaction__target'))
+  const focusAfterOpen = await page.evaluate(() => document.activeElement?.classList.contains('shiftcharts-interaction__target'))
   if (!focusAfterOpen) throw new Error('focus left the datum interaction target after keyboard open')
 
   await page.keyboard.press('ArrowRight')
@@ -167,7 +167,7 @@ async function runPanelKeyboardAndHover(page) {
 
   await page.keyboard.press('Escape')
   await page.locator(selector + ' [role="tooltip"]').waitFor({ state: 'detached' })
-  const focusAfterEscape = await page.evaluate(() => document.activeElement?.classList.contains('gx-interaction__target'))
+  const focusAfterEscape = await page.evaluate(() => document.activeElement?.classList.contains('shiftcharts-interaction__target'))
   if (!focusAfterEscape) throw new Error('Escape dismissed the tooltip but did not retain focus on the target')
 
   await openAtCenter(page, selector)
@@ -192,8 +192,8 @@ async function runPanelKeyboardAndHover(page) {
 }
 
 async function runResizeWithOpenOverlay(page) {
-  const selector = '[data-gx-resizable-chart]'
-  const target = page.locator(selector + ' .gx-interaction__target')
+  const selector = '[data-shiftcharts-resizable-chart]'
+  const target = page.locator(selector + ' .shiftcharts-interaction__target')
   await target.focus()
   await page.keyboard.press('Enter')
   await page.waitForSelector(selector + ' [role="tooltip"]')
@@ -204,9 +204,9 @@ async function runResizeWithOpenOverlay(page) {
   }))
   if (before.mode !== 'fixed') throw new Error('resize scenario did not begin in Panel/fixed mode')
 
-  await page.locator('[data-gx-resize-toggle]').click()
-  await page.waitForFunction(() => document.querySelector('[data-gx-resizable-chart]')?.getAttribute('data-gx-size-class') === 'canvas')
-  await page.waitForFunction(() => document.querySelector('[data-gx-resizable-chart] [role="tooltip"]')?.getAttribute('data-tooltip-mode') === 'fluid')
+  await page.locator('[data-shiftcharts-resize-toggle]').click()
+  await page.waitForFunction(() => document.querySelector('[data-shiftcharts-resizable-chart]')?.getAttribute('data-shiftcharts-size-class') === 'canvas')
+  await page.waitForFunction(() => document.querySelector('[data-shiftcharts-resizable-chart] [role="tooltip"]')?.getAttribute('data-tooltip-mode') === 'fluid')
   const after = await tooltipData(page, selector).evaluate((node) => ({
     mode: node.getAttribute('data-tooltip-mode'),
     seriesId: node.getAttribute('data-series-id'),
@@ -216,40 +216,40 @@ async function runResizeWithOpenOverlay(page) {
     throw new Error('open overlay lost stable identity during resize: ' + JSON.stringify({ before, after }))
   }
   await assertTooltipContained(page, selector, 'resized Canvas')
-  await page.locator(selector + ' .gx-interaction__target').focus()
+  await page.locator(selector + ' .shiftcharts-interaction__target').focus()
   await page.keyboard.press('Escape')
   await page.locator(selector + ' [role="tooltip"]').waitFor({ state: 'detached' })
-  await page.locator('[data-gx-resize-toggle]').click()
-  await page.waitForFunction(() => document.querySelector('[data-gx-resizable-chart]')?.getAttribute('data-gx-size-class') === 'panel')
+  await page.locator('[data-shiftcharts-resize-toggle]').click()
+  await page.waitForFunction(() => document.querySelector('[data-shiftcharts-resizable-chart]')?.getAttribute('data-shiftcharts-size-class') === 'panel')
 
   return { before, after, modeAfterResize: after.mode, identityPreserved: true }
 }
 
 async function runLegendKeyboard(page) {
-  const root = page.locator('[data-gx-legend-control]')
-  const buttons = root.locator('button.gx-legend__control')
+  const root = page.locator('[data-shiftcharts-legend-control]')
+  const buttons = root.locator('button.shiftcharts-legend__control')
   if (await buttons.count() !== 5) throw new Error('controlled legend did not expose all stable series entries')
 
-  const ids = await root.locator('.gx-legend__item').evaluateAll((items) => (
+  const ids = await root.locator('.shiftcharts-legend__item').evaluateAll((items) => (
     items.map((item) => item.getAttribute('data-series-id'))
   ))
   if (JSON.stringify(ids) !== JSON.stringify(['alpha', 'bravo', 'charlie', 'delta', 'echo'])) {
     throw new Error('legend series order changed: ' + JSON.stringify(ids))
   }
 
-  const bravo = root.locator('[data-series-id="bravo"] .gx-legend__control')
+  const bravo = root.locator('[data-series-id="bravo"] .shiftcharts-legend__control')
   await bravo.focus()
   await page.keyboard.press('Space')
-  await page.waitForFunction(() => document.querySelector('[data-gx-legend-control] [data-series-id="bravo"] button')?.getAttribute('aria-pressed') === 'false')
-  const hidden = await root.locator('[data-series-id="bravo"] .gx-legend__control').getAttribute('aria-pressed')
+  await page.waitForFunction(() => document.querySelector('[data-shiftcharts-legend-control] [data-series-id="bravo"] button')?.getAttribute('aria-pressed') === 'false')
+  const hidden = await root.locator('[data-series-id="bravo"] .shiftcharts-legend__control').getAttribute('aria-pressed')
   const focused = await page.evaluate(() => document.activeElement?.closest('[data-series-id]')?.getAttribute('data-series-id'))
-  const state = await page.locator('[data-gx-interaction-state]').textContent()
+  const state = await page.locator('[data-shiftcharts-interaction-state]').textContent()
   if (hidden !== 'false' || focused !== 'bravo' || !state?.includes('hidden-series:bravo')) {
     throw new Error('legend keyboard toggle did not preserve visible entry/focus/local state: ' + JSON.stringify({ hidden, focused, state }))
   }
 
   await page.keyboard.press('Enter')
-  await page.waitForFunction(() => document.querySelector('[data-gx-legend-control] [data-series-id="bravo"] button')?.getAttribute('aria-pressed') === 'true')
+  await page.waitForFunction(() => document.querySelector('[data-shiftcharts-legend-control] [data-series-id="bravo"] button')?.getAttribute('aria-pressed') === 'true')
   return { entries: ids, toggledSeriesId: 'bravo', hiddenEntryRetained: true, focusRetained: true }
 }
 
@@ -258,14 +258,14 @@ async function runTouch(browser) {
   const page = await context.newPage()
   const errors = captureErrors(page)
   try {
-    await waitForChart(page, '[data-gx-tap-chart]')
-    const target = page.locator('[data-gx-tap-chart] .gx-interaction__target')
+    await waitForChart(page, '[data-shiftcharts-tap-chart]')
+    const target = page.locator('[data-shiftcharts-tap-chart] .shiftcharts-interaction__target')
     const box = await target.boundingBox()
     if (box === null) throw new Error('touch target has no box')
     const point = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
     await page.touchscreen.tap(point.x, point.y)
-    await page.waitForSelector('[data-gx-tap-chart] [role="tooltip"]')
-    const opened = await tooltipData(page, '[data-gx-tap-chart]').evaluate((node) => ({
+    await page.waitForSelector('[data-shiftcharts-tap-chart] [role="tooltip"]')
+    const opened = await tooltipData(page, '[data-shiftcharts-tap-chart]').evaluate((node) => ({
       mode: node.getAttribute('data-tooltip-mode'),
       seriesId: node.getAttribute('data-series-id'),
       pointIndex: node.getAttribute('data-point-index'),
@@ -274,7 +274,7 @@ async function runTouch(browser) {
       throw new Error('touch tap did not lock a fixed tooltip: ' + JSON.stringify(opened))
     }
     await page.touchscreen.tap(point.x, point.y)
-    await page.locator('[data-gx-tap-chart] [role="tooltip"]').waitFor({ state: 'detached' })
+    await page.locator('[data-shiftcharts-tap-chart] [role="tooltip"]').waitFor({ state: 'detached' })
     if (errors.console.length > 0 || errors.page.length > 0) {
       throw new Error('touch context runtime errors: ' + JSON.stringify(errors))
     }
@@ -289,14 +289,14 @@ async function runMediaContract(browser, label, options) {
   const page = await context.newPage()
   const errors = captureErrors(page)
   try {
-    await waitForChart(page, '[data-gx-resizable-chart]')
-    const target = page.locator('[data-gx-resizable-chart] .gx-interaction__target')
+    await waitForChart(page, '[data-shiftcharts-resizable-chart]')
+    const target = page.locator('[data-shiftcharts-resizable-chart] .shiftcharts-interaction__target')
     await target.focus()
     await page.keyboard.press('Enter')
-    await page.waitForSelector('[data-gx-resizable-chart] [role="tooltip"]')
+    await page.waitForSelector('[data-shiftcharts-resizable-chart] [role="tooltip"]')
     const observed = await page.evaluate(() => {
-      const tooltip = document.querySelector('[data-gx-resizable-chart] [role="tooltip"]')
-      const legend = document.querySelector('[data-gx-legend-control] .gx-legend__control')
+      const tooltip = document.querySelector('[data-shiftcharts-resizable-chart] [role="tooltip"]')
+      const legend = document.querySelector('[data-shiftcharts-legend-control] .shiftcharts-legend__control')
       const tooltipStyle = tooltip === null ? null : getComputedStyle(tooltip)
       const legendStyle = legend === null ? null : getComputedStyle(legend)
       return {
@@ -358,7 +358,7 @@ async function runGate() {
   })
 
   try {
-    await waitForChart(page, '[data-gx-resizable-chart]')
+    await waitForChart(page, '[data-shiftcharts-resizable-chart]')
     const staticContract = await runStaticContract(page)
     const panel = await runPanelKeyboardAndHover(page)
     const resize = await runResizeWithOpenOverlay(page)

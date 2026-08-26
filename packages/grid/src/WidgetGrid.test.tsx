@@ -49,7 +49,7 @@ vi.mock('react-grid-layout/react', () => ({
   },
 }))
 
-import type { LayoutSnapshot, WidgetLayout } from '@gx/core'
+import type { LayoutSnapshot, WidgetLayout } from '@shiftcharts/core'
 import { WidgetGrid } from './WidgetGrid.tsx'
 
 declare global {
@@ -111,7 +111,7 @@ describe('WidgetGrid controlled wrapper', () => {
       { i: 'sales', x: 0, y: 0, w: 4, h: 2, isResizable: false },
       { i: 'margin', x: 4, y: 0, w: 4, h: 1 },
     ])
-    expect([...container.querySelectorAll('[data-gx-widget-id]')].map((node) => node.getAttribute('data-gx-widget-id')))
+    expect([...container.querySelectorAll('[data-shiftcharts-widget-id]')].map((node) => node.getAttribute('data-shiftcharts-widget-id')))
       .toEqual(['sales', 'margin'])
     expect([...container.querySelectorAll('[data-item]')].map((node) => node.getAttribute('data-item')))
       .toEqual(['sales', 'margin'])
@@ -136,7 +136,7 @@ describe('WidgetGrid controlled wrapper', () => {
 
     expect((latest().layout ?? []).map((item) => item.i)).toEqual(['margin', 'sales'])
     expect(new Set(firstKeys)).toEqual(new Set((latest().layout ?? []).map((item) => item.i)))
-    expect([...container.querySelectorAll('[data-gx-widget-id]')].map((node) => node.getAttribute('data-gx-widget-id')))
+    expect([...container.querySelectorAll('[data-shiftcharts-widget-id]')].map((node) => node.getAttribute('data-shiftcharts-widget-id')))
       .toEqual(['margin', 'sales'])
   })
 
@@ -154,7 +154,7 @@ describe('WidgetGrid controlled wrapper', () => {
     const onLayoutCommit = vi.fn<(snapshot: LayoutSnapshot) => void>()
     const onLayoutChange = vi.fn<(snapshot: LayoutSnapshot) => void>()
     mount(INITIAL_LAYOUT, { onLayoutCommit, onLayoutChange })
-    const move = container.querySelector<HTMLButtonElement>('[data-gx-keyboard-control="move"]')
+    const move = container.querySelector<HTMLButtonElement>('[data-shiftcharts-keyboard-control="move"]')
     if (move === null) throw new Error('missing keyboard move control')
 
     act(() => move.focus())
@@ -176,7 +176,7 @@ describe('WidgetGrid controlled wrapper', () => {
   it('restores the initial public snapshot and initiating focus on keyboard cancel', () => {
     const onLayoutCancel = vi.fn<(snapshot: LayoutSnapshot) => void>()
     mount(INITIAL_LAYOUT, { onLayoutCancel })
-    const move = container.querySelector<HTMLButtonElement>('[data-gx-keyboard-control="move"]')
+    const move = container.querySelector<HTMLButtonElement>('[data-shiftcharts-keyboard-control="move"]')
     if (move === null) throw new Error('missing keyboard move control')
 
     act(() => move.focus())
@@ -195,7 +195,7 @@ describe('WidgetGrid controlled wrapper', () => {
   it('removes keyboard editing affordances in read-only mode', () => {
     mount(INITIAL_LAYOUT, { mode: 'read-only' })
 
-    expect(container.querySelector('[data-gx-keyboard-control]')).toBeNull()
+    expect(container.querySelector('[data-shiftcharts-keyboard-control]')).toBeNull()
     expect(container.querySelector('[aria-live]')).toBeNull()
   })
 
@@ -204,8 +204,8 @@ describe('WidgetGrid controlled wrapper', () => {
 
     expect(latest().dragConfig).toEqual({
       enabled: true,
-      handle: '[data-gx-drag-handle]',
-      cancel: '[data-gx-grid-cancel], [data-gx-grid-cancel] *, button, a, input, textarea, select, [role="button"]',
+      handle: '[data-shiftcharts-drag-handle]',
+      cancel: '[data-shiftcharts-grid-cancel], [data-shiftcharts-grid-cancel] *, button, a, input, textarea, select, [role="button"]',
     })
   })
 

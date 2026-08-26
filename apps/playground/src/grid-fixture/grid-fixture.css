@@ -100,7 +100,7 @@ button {
   cursor: grabbing;
 }
 
-.grid-fixture[data-gx-mode='read-only'] [data-gx-pointer-handle] {
+.grid-fixture[data-shiftcharts-mode='read-only'] [data-shiftcharts-pointer-handle] {
   display: none;
 }
 
@@ -125,7 +125,7 @@ button {
   font-variant-numeric: tabular-nums;
 }
 
-[data-gx-widget-id] {
+[data-shiftcharts-widget-id] {
   min-inline-size: 0;
   min-block-size: 0;
 }

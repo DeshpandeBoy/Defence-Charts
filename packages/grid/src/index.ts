@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * `@gx/grid` — the 12-column dashboard shell.
+ * `@shiftcharts/grid` — the 12-column dashboard shell.
  *
  * ⚠ The grid reports box size to a widget and **never** decides what the widget shows.
  * That direction is the whole architecture: the moment the grid knows about chart
@@ -16,8 +16,8 @@
  * Basedash lacks — land with the shell itself.
  */
 
-export { GRID_COLUMNS } from '@gx/core'
-export type { LayoutSnapshot, WidgetLayout, WidgetLayoutInput } from '@gx/core'
+export { GRID_COLUMNS } from '@shiftcharts/core'
+export type { LayoutSnapshot, WidgetLayout, WidgetLayoutInput } from '@shiftcharts/core'
 export {
   normalizeGridLayout,
   normalizeLayoutSnapshot,

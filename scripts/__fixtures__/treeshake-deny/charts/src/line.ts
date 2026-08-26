@@ -6,7 +6,7 @@
  * the line renderer — so `import { lineChart }` ships both. Nothing breaks. Nothing is
  * slower. The size claim is simply no longer true.
  *
- * ⚠ Note the manifest still says `"sideEffects": false`, exactly as `@gx/core` does. This
+ * ⚠ Note the manifest still says `"sideEffects": false`, exactly as `@shiftcharts/core` does. This
  * leak is a genuine value dependency, so no manifest flag and no bundler setting removes
  * it. The first version of this fixture used a side-effecting registry module instead, and
  * it was measured to be the *wrong* red: with `"sideEffects": false` declared, rolldown

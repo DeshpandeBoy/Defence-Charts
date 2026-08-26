@@ -4,9 +4,9 @@ import {
   resolveSizeClass,
   sizeContextFromPixels,
   type Series,
-} from '@gx/core'
-import { Chart } from '@gx/primitives'
-import { AutoChart, useElementSize } from '@gx/react'
+} from '@shiftcharts/core'
+import { Chart } from '@shiftcharts/primitives'
+import { AutoChart, useElementSize } from '@shiftcharts/react'
 import { useMemo, useState, type ReactNode } from 'react'
 
 import {
@@ -23,17 +23,17 @@ import {
   type FamilyType,
 } from './matrix.ts'
 
-declare const __GX_FAMILY_MATRIX_REPOSITORY_ROOT__: string
+declare const __SHIFTCHARTS_FAMILY_MATRIX_REPOSITORY_ROOT__: string
 
 export function FamilyMatrixApp() {
   const [light, setLight] = useState(false)
 
   return (
     <main
-      className={light ? 'family-matrix gx-theme-neutral-light' : 'family-matrix gx-theme-neutral'}
+      className={light ? 'family-matrix shiftcharts-theme-neutral-light' : 'family-matrix shiftcharts-theme-neutral'}
       data-family-matrix=""
-      data-family-matrix-source={__GX_FAMILY_MATRIX_REPOSITORY_ROOT__}
-      data-gx-theme={light ? 'neutral-light' : 'neutral'}
+      data-family-matrix-source={__SHIFTCHARTS_FAMILY_MATRIX_REPOSITORY_ROOT__}
+      data-shiftcharts-theme={light ? 'neutral-light' : 'neutral'}
     >
       <header className="family-matrix__header">
         <div>

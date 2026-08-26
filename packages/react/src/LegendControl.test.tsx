@@ -2,7 +2,7 @@
  * @vitest-environment jsdom
  */
 
-import { describeShape, planChart, sizeContextFromPixels, type Series } from '@gx/core'
+import { describeShape, planChart, sizeContextFromPixels, type Series } from '@shiftcharts/core'
 import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -54,7 +54,7 @@ describe('controlled legend visibility', () => {
     mount(['beta'])
     const buttons = [...container.querySelectorAll('button')]
     expect(
-      [...container.querySelectorAll('.gx-legend__item')].map(
+      [...container.querySelectorAll('.shiftcharts-legend__item')].map(
         (item) => (item as HTMLElement).dataset.seriesId,
       ),
     ).toEqual(['alpha', 'beta', 'gamma', 'delta', 'epsilon'])

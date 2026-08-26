@@ -4,11 +4,11 @@
  * ⚠ This gate asserts an **exact set**, not a presence. Both directions are failures and
  * they fail in opposite ways:
  *
- *   missing where required → `@gx/react` and `@gx/grid` stop being client components.
+ *   missing where required → `@shiftcharts/react` and `@shiftcharts/grid` stop being client components.
  *                            Every consumer's RSC page starts trying to run hooks on the
  *                            server. Loud, and someone notices within a day.
  *
- *   present where forbidden → `@gx/primitives` stops being RSC-safe. The page still
+ *   present where forbidden → `@shiftcharts/primitives` stops being RSC-safe. The page still
  *                             renders, still looks right, still passes every test — and
  *                             quietly ships JavaScript for a chart that was supposed to
  *                             need none. Nobody notices, because there is nothing to see.
@@ -35,8 +35,8 @@ const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
 /**
  * The render boundary, declared once, as data.
  *
- * ⚠ Decision 7. `@gx/primitives` being on the `false` side is the whole point of the
- * package existing separately from `@gx/react` — it is what lets `<Chart plan={…}>`
+ * ⚠ Decision 7. `@shiftcharts/primitives` being on the `false` side is the whole point of the
+ * package existing separately from `@shiftcharts/react` — it is what lets `<Chart plan={…}>`
  * render inside a server component with zero client JavaScript.
  */
 const EXPECTED = {
@@ -109,19 +109,19 @@ if (invokedDirectly) {
   if (unbuilt.length > 0 || wrong.length > 0) {
     console.error('boundary gate (G3): the "use client" set does not match\n')
     for (const r of unbuilt) {
-      console.error(`  @gx/${r.pkg}  not built — run \`pnpm build\` before this gate`)
+      console.error(`  @shiftcharts/${r.pkg}  not built — run \`pnpm build\` before this gate`)
     }
     for (const r of wrong) {
       const verb = r.expected ? 'MISSING from' : 'PRESENT in'
       const why = r.expected
         ? 'the client boundary has collapsed — consumers will run hooks on the server'
         : 'RSC safety has been lost — this package now ships JS to every page that uses it'
-      console.error(`  @gx/${r.pkg}  "use client" ${verb} dist/index.js — ${why}`)
+      console.error(`  @shiftcharts/${r.pkg}  "use client" ${verb} dist/index.js — ${why}`)
     }
     console.error('\nSee research/maps/04-ci-gate-map.md G3 and decision 7.')
     process.exit(1)
   }
 
-  const client = results.filter((r) => r.expected).map((r) => `@gx/${r.pkg}`)
+  const client = results.filter((r) => r.expected).map((r) => `@shiftcharts/${r.pkg}`)
   console.log(`boundary gate (G3): ${results.length} packages, client boundary = ${client.join(', ')}.`)
 }

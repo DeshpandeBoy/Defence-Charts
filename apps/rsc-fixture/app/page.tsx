@@ -1,17 +1,17 @@
-import type { Series, SizeContext } from '@gx/core'
-import { describeShape, planChart, sizeContextFromPixels } from '@gx/core'
-import { Chart } from '@gx/primitives'
+import type { Series, SizeContext } from '@shiftcharts/core'
+import { describeShape, planChart, sizeContextFromPixels } from '@shiftcharts/core'
+import { Chart } from '@shiftcharts/primitives'
 // ⚠ A side-effect import, and the chart is invisible without it. Nothing in `Chart.tsx`
 // references this file, so importing the component pulls in no styles at all: every stroke
 // resolves to `none` and every fill to the SVG default. `apps/playground/src/main.tsx` makes
 // the same import for the same reason and says so at length. This is that half, on the
 // server side — and it is also the half that proves Next hoists a package stylesheet into the
 // document from a server component, with no client runtime to inject it.
-import '@gx/primitives/chart.css'
-// ⚠ `chart.css` spends `var(--gx-*)` and defines none of them; this file is where they come
-// from, and it also opens the `gx.theme` cascade layer that `chart.css` writes into. Without
+import '@shiftcharts/primitives/chart.css'
+// ⚠ `chart.css` spends `var(--shiftcharts-*)` and defines none of them; this file is where they come
+// from, and it also opens the `shiftcharts.theme` cascade layer that `chart.css` writes into. Without
 // it every custom property is unresolved and the SVG is, again, correct and invisible.
-import '@gx/tokens/theme.css'
+import '@shiftcharts/tokens/theme.css'
 
 /**
  * Gate **G4** — the RSC fixture.
@@ -69,23 +69,23 @@ import '@gx/tokens/theme.css'
  * client, under `<AutoChart>`'s `ResizeObserver`. Nothing to fix — worth knowing before
  * someone tunes that dependency list for a server workload it does not affect.
  *
- * ## ⚠ `gx-chart__svg` appears TWICE in the response, and only one is markup
+ * ## ⚠ `shiftcharts-chart__svg` appears TWICE in the response, and only one is markup
  *
  * `grep -c` counts lines and says 1; `grep -o | wc -l` counts occurrences and says 2. The
  * second is inside Next's inlined RSC Flight payload — the `self.__next_f.push([...])` script
  * that lets a *client-side navigation* re-use this tree without a round trip. It is the
- * serialised React element, a JSON string carrying `className: "gx-chart__svg"`, i.e. **data
+ * serialised React element, a JSON string carrying `className: "shiftcharts-chart__svg"`, i.e. **data
  * describing the already-rendered output**, not chart code. Next inlines it on every App
- * Router page and its presence says nothing about whether `@gx/primitives` shipped to the
+ * Router page and its presence says nothing about whether `@shiftcharts/primitives` shipped to the
  * browser.
  *
  * The question G4 actually wants answered is asked of `.next/static/chunks/**`, and there the
- * answer is clean: **no `.js` chunk contains `gx-chart`, `gx-series`, `graphics-document`,
+ * answer is clean: **no `.js` chunk contains `shiftcharts-chart`, `shiftcharts-series`, `graphics-document`,
  * `planChart`, `resolveFrame` or any series id.** The only static asset that mentions the
  * chart at all is the CSS chunk, which is correct — `chart.css` and `theme.css` *must* reach
  * the browser. The route's client-reference manifest lists **eight** client modules, all of
  * them Next's own router internals (`layout-router`, `client-page`, `error-boundary`, …), and
- * zero `@gx/*`.
+ * zero `@shiftcharts/*`.
  *
  * ## Why the size is a literal and there is no `<AutoChart>`
  *
@@ -98,14 +98,14 @@ import '@gx/tokens/theme.css'
  * minimum (`resolveSizeClass`). Chosen as the richest rung on purpose. Counted in the served
  * HTML rather than predicted from the plan, the `<svg>` is 7,773 bytes and contains: 3 line
  * paths, 35 `<circle>` point marks, 21 `<text>` nodes, 18 `<rect>` gridlines and tick marks
- * including `gx-grid__zero`, both axes with rules and tick labels, direct series labels and
+ * including `shiftcharts-grid__zero`, both axes with rules and tick labels, direct series labels and
  * value labels — followed by the `<details>` data table in the `<figcaption>`. A fixture at
  * Micro would pass G4 while rendering an empty `<svg>`.
  *
  * ⚠ Two things the plan turns on at Stage are **absent** from that markup, and neither is a
  * bug in this fixture. `axes.y2` is resolved (`valueLegibleRung`: Stage plus more than one
  * series) and `Chart.tsx` draws `axes.x` and `axes.y` only — the secondary axis lands with the
- * milestone that renders it. And no `gx-area` appears, because `resolveFrame` gives this plan
+ * milestone that renders it. And no `shiftcharts-area` appears, because `resolveFrame` gives this plan
  * no area geometry to draw. Stated so that a G4 assertion is not written against a `<path>`
  * count somebody expected rather than the one the page emits.
  *
@@ -113,14 +113,14 @@ import '@gx/tokens/theme.css'
  *
  * A temporal axis formats through `d3-time-format`, whose output is a function of the process
  * timezone. CI pins `TZ=UTC`, so a temporal fixture would work — right up until someone runs
- * `pnpm --filter @gx/rsc-fixture start` on a laptop in Berlin and gets different tick labels
+ * `pnpm --filter @shiftcharts/rsc-fixture start` on a laptop in Berlin and gets different tick labels
  * than the gate expects. Numeric x formats through `d3-format`, which has no such dependency.
  * The chart is slightly less realistic and the gate is considerably less flaky, and for a
  * fixture that is the correct side of the trade.
  *
  * ⚠ **This page is a Server Component and must stay one.** If it ever needs interactivity,
  * the client component goes in a *sibling* file and beside a different chart — pushing
- * `"use client"` up into this file, or into `@gx/primitives`, would make G4 green by deleting
+ * `"use client"` up into this file, or into `@shiftcharts/primitives`, would make G4 green by deleting
  * the thing G4 measures.
  */
 

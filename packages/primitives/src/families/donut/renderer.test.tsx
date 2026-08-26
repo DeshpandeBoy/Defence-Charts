@@ -26,7 +26,7 @@ describe('donut family renderer', () => {
   it('renders every supplied slice with stable IDs and a visible Other bucket', () => {
     const html = renderToStaticMarkup(renderDonut(input))
 
-    expect((html.match(/class="gx-arc/g) ?? []).length).toBe(3)
+    expect((html.match(/class="shiftcharts-arc/g) ?? []).length).toBe(3)
     expect(html).toContain('data-slice-id="sales:north"')
     expect(html).toContain('data-slice-id="sales:south"')
     expect(html).toContain('data-slice-id="sales:other"')

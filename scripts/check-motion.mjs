@@ -10,7 +10,7 @@
  * block could be deleted and the entire node suite would stay green.
  *
  * ⚠ **It drives the playground, not a fixture, and that is the load-bearing choice.** A gate
- * that builds its own `<rect class="gx-grid__line">` asserts that a stylesheet animates a
+ * that builds its own `<rect class="shiftcharts-grid__line">` asserts that a stylesheet animates a
  * string the gate itself wrote — it stays green through a rename, a restructure, or a
  * `<Grid>` that stops emitting gridlines entirely. The failure mode `43-theming.md` §6.3
  * names — *"a gate never observed to fail is not a gate"* — arrives here as a gate that
@@ -21,7 +21,7 @@
  *
  *   1. Chrome interpolates. A gridline's `y` passes through a value that is neither where it
  *      started nor where it ends.
- *   2. Marks interpolate, and *later*. Stage 2 carries `--gx-motion-stage-delay`, so early in
+ *   2. Marks interpolate, and *later*. Stage 2 carries `--shiftcharts-motion-stage-delay`, so early in
  *      the transition the chrome has moved and the marks have not.
  *   3. `prefers-reduced-motion: reduce` suppresses all of it. Not "runs faster" — the query
  *      in `chart.css` is `no-preference`, so under the preference the rules do not exist and
@@ -49,7 +49,7 @@ import { ensureDevServer, openChromium, ORIGIN } from './check-containment.mjs'
  *
  * ⚠ **It has to outlast the stage delay, or assertion 2 tests the wrong thing.** The first
  * version sampled 8 frames — about 130ms — and asserted "not every frame equalled the final
- * `d`". Stage 2 waits `--gx-motion-stage-delay`, which is half the duration, so at the
+ * `d`". Stage 2 waits `--shiftcharts-motion-stage-delay`, which is half the duration, so at the
  * recompose class the marks have not *started* moving inside that window. Every sample
  * equalled the START value, the assertion passed, and it would have passed identically if the
  * marks had snapped at 500ms with no tween at all. 900ms crosses the delay and catches stage 2
@@ -118,10 +118,10 @@ async function setSize(page, size, settleMs) {
       widget.style.width = `${next.width}px`
       widget.style.height = `${next.height}px`
       await new Promise((resolve) => setTimeout(resolve, settle))
-      const chart = document.querySelector('.gx-chart')
-      const line = document.querySelector('.gx-line')
+      const chart = document.querySelector('.shiftcharts-chart')
+      const line = document.querySelector('.shiftcharts-line')
 
-      // ⚠ Read off `transition-delay`, never off `--gx-motion-stage-delay`. A custom
+      // ⚠ Read off `transition-delay`, never off `--shiftcharts-motion-stage-delay`. A custom
       // property's computed value is the token stream, so the broken version of this reported
       // the literal string `calc(300ms / 2)` — which looks like a delay, parses as nothing,
       // and tells you nothing about which duration it divided. `transition-delay` is a real
@@ -136,7 +136,7 @@ async function setSize(page, size, settleMs) {
         error: null,
         sizeClass: chart === null ? null : chart.getAttribute('data-size-class'),
         durationClass: chart === null ? null : chart.getAttribute('data-motion-duration'),
-        gridlines: document.querySelectorAll('.gx-grid__line').length,
+        gridlines: document.querySelectorAll('.shiftcharts-grid__line').length,
         stageDelayMs: style === null ? null : ms(style.transitionDelay),
         stageDurationMs: style === null ? null : ms(style.transitionDuration),
       }
@@ -168,8 +168,8 @@ async function resizeAndSample(page, size, windowMs, settleMs) {
       // The properties watched, one per stage. `y` on a gridline is stage 1; `d` on the
       // series path is stage 2. Both were measured to interpolate in decision 016.
       const readAll = () => {
-        const grid = document.querySelector('.gx-grid__line')
-        const line = document.querySelector('.gx-line')
+        const grid = document.querySelector('.shiftcharts-grid__line')
+        const line = document.querySelector('.shiftcharts-line')
         if (grid === null || line === null) return null
         return {
           gridY: getComputedStyle(grid).getPropertyValue('y'),
@@ -229,7 +229,7 @@ async function run(browser, reduce) {
   })
   const page = await context.newPage()
   await page.goto(ORIGIN, { waitUntil: 'networkidle' })
-  await page.waitForSelector('.gx-chart__svg', { timeout: 20_000 })
+  await page.waitForSelector('.shiftcharts-chart__svg', { timeout: 20_000 })
 
   // ⚠ Settle at FROM for the FULL envelope, not a token amount. Getting to FROM is itself a
   // resize, and it runs the same transition — at the recompose class that is a 1000ms move
@@ -341,7 +341,7 @@ try {
     //
     // But it does NOT catch the delay being declared *wrongly*, because observed and declared
     // then collapse together and agree with each other. Verified by breaking it on purpose:
-    // with `--gx-motion-stage-delay: calc(var(--gx-motion-duration) / 2)` back on `:root`,
+    // with `--shiftcharts-motion-stage-delay: calc(var(--shiftcharts-motion-duration) / 2)` back on `:root`,
     // every recompose figure took a 150ms delay derived from the 300ms rescale duration it
     // inherited, and this gate reported *"a 150ms gap against 150ms declared"* and exited 0.
     // Consistent, and wrong by a factor of three.
@@ -364,7 +364,7 @@ try {
           'is axis and ticks and stage 2 is marks.',
       )
     } else if (declared === null) {
-      failures.push('could not read a resolved transition-delay from .gx-line.')
+      failures.push('could not read a resolved transition-delay from .shiftcharts-line.')
     } else if (Math.abs(marksAt - chromeAt - declared) > DELAY_TOLERANCE_MS) {
       failures.push(
         `the stage gap was ${Math.round(marksAt - chromeAt)}ms but the stylesheet declares ` +
@@ -374,7 +374,7 @@ try {
       failures.push(
         `the delay is ${Math.round(declared)}ms against a ${Math.round(duration)}ms ` +
           `${moving.durationClass} duration — under ${MIN_DELAY_RATIO} of it, so it is almost ` +
-          'certainly derived from the other duration class. `--gx-motion-stage-delay` must be ' +
+          'certainly derived from the other duration class. `--shiftcharts-motion-stage-delay` must be ' +
           'rebound in the [data-motion-duration] rules; derived once on :root it resolves ' +
           'against the root duration and inherits down already computed.',
       )

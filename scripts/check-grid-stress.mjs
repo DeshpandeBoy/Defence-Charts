@@ -17,7 +17,7 @@ import { openChromium } from './check-containment.mjs'
 /* eslint-disable no-undef -- these globals are serialized into Playwright page callbacks. */
 
 const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
-const ORIGIN = process.env.GX_GRID_STRESS_ORIGIN ?? 'http://127.0.0.1:5185/'
+const ORIGIN = process.env.SHIFTCHARTS_GRID_STRESS_ORIGIN ?? 'http://127.0.0.1:5185/'
 const VIEWPORT = { width: 1440, height: 900 }
 const COUNTS = [1, 10, 50, 100, 200]
 const WARMUP_ITERATIONS = 2
@@ -42,7 +42,7 @@ async function ensureStressServer() {
       '--yes',
       'pnpm@10.34.5',
       '--filter',
-      '@gx/playground',
+      '@shiftcharts/playground',
       'exec',
       'vite',
       '--config',
@@ -82,13 +82,13 @@ async function settle(page) {
 }
 
 async function waitForFixture(page) {
-  await page.waitForSelector('[data-gx-stress="grid"][data-gx-stress-ready="true"]', { timeout: 20_000 })
-  await page.waitForFunction(() => typeof window.__gxStress?.setWidgetCount === 'function', null, { timeout: 20_000 })
+  await page.waitForSelector('[data-shiftcharts-stress="grid"][data-shiftcharts-stress-ready="true"]', { timeout: 20_000 })
+  await page.waitForFunction(() => typeof window.__shiftchartsStress?.setWidgetCount === 'function', null, { timeout: 20_000 })
 }
 
 async function setWidgetCount(page, count) {
   return page.evaluate(async (nextCount) => {
-    const api = window.__gxStress
+    const api = window.__shiftchartsStress
     if (api === undefined) throw new Error('grid stress API is not ready')
     return api.setWidgetCount(nextCount)
   }, count)
@@ -96,7 +96,7 @@ async function setWidgetCount(page, count) {
 
 async function resetMetrics(page) {
   await page.evaluate(() => {
-    const api = window.__gxStress
+    const api = window.__shiftchartsStress
     if (api === undefined) throw new Error('grid stress API is not ready')
     api.resetMetrics()
   })
@@ -104,7 +104,7 @@ async function resetMetrics(page) {
 
 async function readMetrics(page) {
   return page.evaluate(() => {
-    const api = window.__gxStress
+    const api = window.__shiftchartsStress
     if (api === undefined) throw new Error('grid stress API is not ready')
     return api.readMetrics()
   })
@@ -112,15 +112,15 @@ async function readMetrics(page) {
 
 async function readFixtureState(page) {
   return page.evaluate(() => {
-    const root = document.querySelector('[data-gx-stress="grid"]')
+    const root = document.querySelector('[data-shiftcharts-stress="grid"]')
     if (root === null) throw new Error('grid stress root is missing')
-    const slots = Array.from(root.querySelectorAll('[data-gx-stress-slot]'))
+    const slots = Array.from(root.querySelectorAll('[data-shiftcharts-stress-slot]'))
     return {
-      count: Number(root.getAttribute('data-gx-stress-count')),
-      inputFingerprint: root.getAttribute('data-gx-stress-input-fingerprint'),
-      supportedCounts: root.getAttribute('data-gx-stress-supported-counts'),
+      count: Number(root.getAttribute('data-shiftcharts-stress-count')),
+      inputFingerprint: root.getAttribute('data-shiftcharts-stress-input-fingerprint'),
+      supportedCounts: root.getAttribute('data-shiftcharts-stress-supported-counts'),
       domItemCount: slots.length,
-      ids: slots.map((slot) => slot.getAttribute('data-gx-stress-slot')),
+      ids: slots.map((slot) => slot.getAttribute('data-shiftcharts-stress-slot')),
       rootScrollHeight: root.scrollHeight,
     }
   })

@@ -110,7 +110,7 @@ export function parseGranularityTable(markdown) {
 
 /**
  * @typedef {object} Disposition
- * @property {string[]} [tokens] `--gx-*` names (without the prefix) that cover this knob. Cite
+ * @property {string[]} [tokens] `--shiftcharts-*` names (without the prefix) that cover this knob. Cite
  *   `raw/06` §6.2–6.9's own names — this manifest does not mint new ones.
  * @property {string[]} [planPaths] Dotted paths into `ChartPlan` (`packages/core/src/plan.ts`)
  *   that carry this knob's decision at the plan level, not just at the token level.
@@ -170,9 +170,9 @@ export const DISPOSITIONS = {
     declined: {
       reason:
         'Ticks are drawn as `<line>` geometry; `x1`/`y1`/`x2`/`y2` are not CSS-settable in any ' +
-        'browser, so a `--gx-tick-length` custom property could be declared but could never move ' +
+        'browser, so a `--shiftcharts-tick-length` custom property could be declared but could never move ' +
         'the mark from a stylesheet — "a geometry token ships, is documented, and does nothing" ' +
-        '(gate G14). `raw/06` §6.3 still records `--gx-tick-length: 5px` as a rendering constant; ' +
+        '(gate G14). `raw/06` §6.3 still records `--shiftcharts-tick-length: 5px` as a rendering constant; ' +
         'it is not a themeable token and this manifest does not list it as one.',
       source: 'research/decisions/012-no-line-element-for-tokened-geometry.md',
     },

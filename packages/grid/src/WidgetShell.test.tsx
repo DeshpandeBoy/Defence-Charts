@@ -41,13 +41,13 @@ describe('WidgetShell', () => {
       </WidgetShell>,
     )
 
-    expect(container.querySelector('section')?.getAttribute('data-gx-widget-id')).toBe('sales')
-    expect(container.querySelector('[data-gx-theme="light"]')).not.toBeNull()
-    expect(container.querySelector('.gx-widget-shell__title')?.textContent).toBe('Sales')
-    expect(container.querySelector('.gx-widget-shell__context')?.textContent).toBe('Q3')
-    expect(container.querySelector('.gx-widget-shell__actions')?.textContent).toBe('Export')
-    expect(container.querySelector('.gx-widget-shell__content')?.textContent).toBe('Chart content')
-    expect(container.querySelector('.gx-widget-shell__footer')?.textContent).toBe('Updated now')
+    expect(container.querySelector('section')?.getAttribute('data-shiftcharts-widget-id')).toBe('sales')
+    expect(container.querySelector('[data-shiftcharts-theme="light"]')).not.toBeNull()
+    expect(container.querySelector('.shiftcharts-widget-shell__title')?.textContent).toBe('Sales')
+    expect(container.querySelector('.shiftcharts-widget-shell__context')?.textContent).toBe('Q3')
+    expect(container.querySelector('.shiftcharts-widget-shell__actions')?.textContent).toBe('Export')
+    expect(container.querySelector('.shiftcharts-widget-shell__content')?.textContent).toBe('Chart content')
+    expect(container.querySelector('.shiftcharts-widget-shell__footer')?.textContent).toBe('Updated now')
   })
 
   it('gives the shell and drag handle accessible names', () => {
@@ -58,7 +58,7 @@ describe('WidgetShell', () => {
     )
 
     const section = container.querySelector('section')
-    const handle = container.querySelector('button[data-gx-drag-handle]')
+    const handle = container.querySelector('button[data-shiftcharts-drag-handle]')
     expect(section?.getAttribute('aria-label')).toBe('Widget margin')
     expect(handle?.getAttribute('aria-label')).toBe('Reorder margin')
     expect(handle?.getAttribute('title')).toBe('Reorder margin')
@@ -75,10 +75,10 @@ describe('WidgetShell', () => {
       </WidgetShell>,
     )
 
-    expect(container.querySelectorAll('[data-gx-grid-cancel]').length).toBe(4)
-    expect(container.querySelector('[data-gx-widget-content]')?.className).toBe(
-      'gx-widget-shell__content',
+    expect(container.querySelectorAll('[data-shiftcharts-grid-cancel]').length).toBe(4)
+    expect(container.querySelector('[data-shiftcharts-widget-content]')?.className).toBe(
+      'shiftcharts-widget-shell__content',
     )
-    expect(container.querySelector('[data-gx-drag-handle]')).not.toBeNull()
+    expect(container.querySelector('[data-shiftcharts-drag-handle]')).not.toBeNull()
   })
 })

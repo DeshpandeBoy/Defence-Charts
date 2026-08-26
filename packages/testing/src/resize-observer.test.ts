@@ -10,7 +10,7 @@
  * caught it.
  *
  * ⚠ `readSize()` restates the consumer's read order rather than importing it.
- * `apps/playground/src/useElementSize.ts` is a React hook and `@gx/react`'s `useElementSize`
+ * `apps/playground/src/useElementSize.ts` is a React hook and `@shiftcharts/react`'s `useElementSize`
  * lands at **A5**; importing either would give this file a DOM and a package dependency it
  * must not have, and would make the test circular besides — a hook reading the wrong field
  * and a fake emitting the wrong field agree with each other, and agree greenly. Six lines of

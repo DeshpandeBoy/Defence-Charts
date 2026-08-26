@@ -1,8 +1,8 @@
 'use client';
 
-import type { Series } from '@gx/core';
-import { describeShape, planChart, sizeContextFromPixels } from '@gx/core';
-import { AutoChart, useElementSize } from '@gx/react';
+import type { Series } from '@shiftcharts/core';
+import { describeShape, planChart, sizeContextFromPixels } from '@shiftcharts/core';
+import { AutoChart, useElementSize } from '@shiftcharts/react';
 import { faUpRightAndDownLeftFromCenter } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { useRef, useState } from 'react';
@@ -79,7 +79,7 @@ export function ResizeLab() {
       <header className="resize-lab__header">
         <div>
           <h2 id="resize-lab-title">Resize the same data</h2>
-          <p>Drag the lower-right handle. GX changes the information contract, not just the pixels.</p>
+          <p>Drag the lower-right handle. ShiftCharts changes the information contract, not just the pixels.</p>
         </div>
         <output className="resize-lab__size" aria-live="polite">
           <strong>{plan.sizeClass}</strong>

@@ -6,7 +6,7 @@ import {
   sizeContextFromPixels,
   type ChartPlan,
   type Series,
-} from '@gx/core'
+} from '@shiftcharts/core'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
@@ -68,8 +68,8 @@ describe('D0.1 renderer seam', () => {
     const html = renderToStaticMarkup(
       <svg>{renderBuiltInMark({ frame: frame!, plan, policy: resolvePolicy() })}</svg>,
     )
-    expect(html).toContain('class="gx-line"')
-    expect(html).not.toContain('class="gx-area"')
+    expect(html).toContain('class="shiftcharts-line"')
+    expect(html).not.toContain('class="shiftcharts-area"')
   })
 
   it('renders registered bar geometry from the shared frame cell seam', () => {
@@ -80,8 +80,8 @@ describe('D0.1 renderer seam', () => {
     const html = renderToStaticMarkup(
       <svg>{renderBuiltInMark({ frame: frame!, plan, policy: resolvePolicy() })}</svg>,
     )
-    expect(html).toContain('class="gx-bar"')
-    expect(html).not.toContain('class="gx-line"')
+    expect(html).toContain('class="shiftcharts-bar"')
+    expect(html).not.toContain('class="shiftcharts-line"')
   })
 
   it('renders registered scatter points from the shared frame point seam', () => {
@@ -92,7 +92,7 @@ describe('D0.1 renderer seam', () => {
     const html = renderToStaticMarkup(
       <svg>{renderBuiltInMark({ frame: frame!, plan, policy: resolvePolicy() })}</svg>,
     )
-    expect(html).toContain('class="gx-point gx-scatter-point"')
+    expect(html).toContain('class="shiftcharts-point shiftcharts-scatter-point"')
     expect(html).toContain('data-scatter-index="0"')
   })
 
@@ -104,7 +104,7 @@ describe('D0.1 renderer seam', () => {
     const html = renderToStaticMarkup(
       <svg>{renderBuiltInMark({ frame: frame!, plan, policy: resolvePolicy() })}</svg>,
     )
-    expect(html).toContain('class="gx-arc"')
+    expect(html).toContain('class="shiftcharts-arc"')
     expect(html).toContain('data-slice-id="sales:number:0"')
   })
 
@@ -117,10 +117,10 @@ describe('D0.1 renderer seam', () => {
     const html = renderToStaticMarkup(
       <svg>{renderBuiltInMark({ frame: frame!, plan, policy: resolvePolicy() })}</svg>,
     )
-    expect(html).toContain('class="gx-progress')
+    expect(html).toContain('class="shiftcharts-progress')
     expect(html).toContain('data-progress-current="50"')
     expect(html).toContain('data-progress-target="100"')
-    expect(html).not.toContain('gx-line')
+    expect(html).not.toContain('shiftcharts-line')
   })
 
   it('preserves the explicit unsupported-mark failure path', () => {
@@ -148,9 +148,9 @@ describe('D0.1 renderer seam', () => {
     const html = renderToStaticMarkup(
       <svg>{renderBuiltInMark({ frame: frame!, plan, policy: resolvePolicy() })}</svg>,
     )
-    expect(html).toContain('class="gx-cell gx-heatmap-cell"')
+    expect(html).toContain('class="shiftcharts-cell shiftcharts-heatmap-cell"')
     expect(html).toContain('data-heatmap-cell-id="activity:1767225600000"')
-    expect(html).not.toContain('gx-line')
+    expect(html).not.toContain('shiftcharts-line')
   })
 
   it('renders registered funnel stages from the shared frame seam', () => {
@@ -165,10 +165,10 @@ describe('D0.1 renderer seam', () => {
     const html = renderToStaticMarkup(
       <svg>{renderBuiltInMark({ frame: frame!, plan, policy: resolvePolicy() })}</svg>,
     )
-    expect(html).toContain('class="gx-funnel gx-funnel--vertical gx-funnel--dropoff"')
+    expect(html).toContain('class="shiftcharts-funnel shiftcharts-funnel--vertical shiftcharts-funnel--dropoff"')
     expect(html).toContain('data-funnel-stage-id="funnel:0"')
     expect(html).toContain('data-funnel-stage-value="100"')
     expect(html).toContain('data-funnel-stage-conversion="0.4"')
-    expect(html).not.toContain('gx-line')
+    expect(html).not.toContain('shiftcharts-line')
   })
 })

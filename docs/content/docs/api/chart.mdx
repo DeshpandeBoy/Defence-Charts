@@ -4,11 +4,11 @@ description: Hook-free rendering for a plan, canonical values, and the same Size
 ---
 
 ```tsx
-import { Chart } from '@gx/primitives'
+import { Chart } from '@shiftcharts/primitives'
 ```
 
 `Chart` is state-free, effect-free, and ref-free. It can render in a React Server Component with no
-GX client bundle.
+ShiftCharts client bundle.
 
 ## Props
 
@@ -26,7 +26,7 @@ GX client bundle.
 ## Render tree
 
 ```text
-figure.gx-chart
+figure.shiftcharts-chart
 |- svg[role="graphics-document"]
 |  |- title / desc
 |  |- grid, marks, axes, labels, value display

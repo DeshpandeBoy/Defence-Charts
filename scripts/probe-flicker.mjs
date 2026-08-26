@@ -39,7 +39,7 @@
  *
  * ## Why this boundary
  *
- * `sizeContextFromPixels()` in `@gx/core` is `Math.floor(width / 100)`, so every rung boundary
+ * `sizeContextFromPixels()` in `@shiftcharts/core` is `Math.floor(width / 100)`, so every rung boundary
  * sits on an exact hundred and the classifier has **no tolerance at all**. Held at five rows,
  * the chart's own box crossing 600 px is the Panel → Canvas edge: `FAMILY_MINIMA` gives Canvas
  * at 6×5 and Panel at 3×3, so the sixth column is what flips it. That is a `recompose` change,
@@ -98,14 +98,14 @@ async function probeBoundary(page) {
         // Two frames for the ResizeObserver and React's commit, then a beat.
         await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)))
         await new Promise((r) => setTimeout(r, 60))
-        const chart = document.querySelector('.gx-chart')
-        const auto = document.querySelector('.gx-auto-chart') ?? chart
+        const chart = document.querySelector('.shiftcharts-chart')
+        const auto = document.querySelector('.shiftcharts-auto-chart') ?? chart
         rows.push({
           widget: w,
           measured: auto === null ? null : Math.round(auto.getBoundingClientRect().width * 100) / 100,
           rung: chart === null ? null : chart.getAttribute('data-size-class'),
-          gridlines: document.querySelectorAll('.gx-grid__line').length,
-          ticks: document.querySelectorAll('.gx-axis__tick').length,
+          gridlines: document.querySelectorAll('.shiftcharts-grid__line').length,
+          ticks: document.querySelectorAll('.shiftcharts-axis__tick').length,
         })
       }
       return { rows, error: null }
@@ -132,7 +132,7 @@ async function probeWobble(page, spec) {
       widget.style.width = `${centre - amplitude}px`
       await new Promise((r) => setTimeout(r, 2200))
 
-      const line = document.querySelector('.gx-line')
+      const line = document.querySelector('.shiftcharts-line')
       const ms = (v) => {
         const n = Number.parseFloat(v)
         return Number.isNaN(n) ? null : n * 1000
@@ -151,7 +151,7 @@ async function probeWobble(page, spec) {
           // Cosine so the trace starts at the trough it settled at, with no step at t=0.
           const w = Math.round(centre - amplitude * Math.cos((2 * Math.PI * hz * t) / 1000))
           widget.style.width = `${w}px`
-          const c = document.querySelector('.gx-chart')
+          const c = document.querySelector('.shiftcharts-chart')
           samples.push({ t, w, rung: c === null ? null : c.getAttribute('data-size-class') })
           if (t < durationMs) requestAnimationFrame(tick)
           else resolve(undefined)
@@ -182,7 +182,7 @@ async function probeMount(page, centre) {
 
       const census = () => {
         const counts = {}
-        const svg = document.querySelector('.gx-chart__svg')
+        const svg = document.querySelector('.shiftcharts-chart__svg')
         if (svg === null) return counts
         for (const el of svg.querySelectorAll('*')) {
           const name = el.getAttribute('class')
@@ -200,7 +200,7 @@ async function probeMount(page, centre) {
       await new Promise((resolve) => {
         const tick = () => {
           const t = performance.now() - t0
-          const point = document.querySelector('.gx-point')
+          const point = document.querySelector('.shiftcharts-point')
           if (point !== null) opacities.push(getComputedStyle(point).opacity)
           if (t < 700) requestAnimationFrame(tick)
           else resolve(undefined)
@@ -261,7 +261,7 @@ try {
   const context = await browser.newContext({ viewport: { width: 1400, height: 900 } })
   const page = await context.newPage()
   await page.goto(ORIGIN, { waitUntil: 'networkidle' })
-  await page.waitForSelector('.gx-chart__svg', { timeout: 20_000 })
+  await page.waitForSelector('.shiftcharts-chart__svg', { timeout: 20_000 })
 
   const boundary = await probeBoundary(page)
   if (boundary.error !== null && boundary.error !== undefined) throw new Error(boundary.error)
@@ -361,7 +361,7 @@ try {
   )
   const distinct = [...new Set(mount.opacities)]
   console.log(
-    `\n     Opacity of the first .gx-point over ${mount.opacities.length} frames after it ` +
+    `\n     Opacity of the first .shiftcharts-point over ${mount.opacities.length} frames after it ` +
       `mounted:\n       ${distinct.join(', ')}`,
   )
   console.log(

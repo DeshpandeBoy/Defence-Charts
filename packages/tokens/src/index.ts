@@ -1,5 +1,5 @@
 /**
- * `@gx/tokens` — the TypeScript face of the theme.
+ * `@shiftcharts/tokens` — the TypeScript face of the theme.
  *
  * ⚠ **The direction reversed at B1, and the docblock this replaces had it backwards.** It
  * said this file would be *"generated from the CSS"*. What actually generates is the CSS:
@@ -13,35 +13,35 @@
  */
 
 /**
- * Every `--gx-*` custom property the shipped themes declare.
+ * Every `--shiftcharts-*` custom property the shipped themes declare.
  *
  * ⚠ **Generated, and it had to become generated.** Hand-maintained, this array reached B1
  * missing all seven A6 motion tokens — live in `theme.css`, referenced by `chart.css`,
  * asserted by gate G19, and absent from the list that claims to be *every* token. Nothing
  * failed, because nothing compared the two. `pnpm lint:tokens` now does, in both directions:
- * G7's membership rule rejects a `var(--gx-*)` naming a token that does not exist, and
+ * G7's membership rule rejects a `var(--shiftcharts-*)` naming a token that does not exist, and
  * `pnpm lint:tokens:drift` rejects a list that has fallen behind the stylesheet.
  */
-export { GX_TOKENS } from './tokens.generated.ts'
+export { SHIFTCHARTS_TOKENS } from './tokens.generated.ts'
 
-// ⚠ `import type` even though `GX_TOKENS` is a value: it is used here only inside a
+// ⚠ `import type` even though `SHIFTCHARTS_TOKENS` is a value: it is used here only inside a
 // `typeof` query, so the binding is erased. A plain import would be a second runtime
 // reference to the generated module and would defeat gate G5 — importing one token name
 // would pull the whole list into a consumer's bundle.
-import type { GX_TOKENS } from './tokens.generated.ts'
+import type { SHIFTCHARTS_TOKENS } from './tokens.generated.ts'
 
-export type GxTokenName = (typeof GX_TOKENS)[number]
+export type ShiftChartsTokenName = (typeof SHIFTCHARTS_TOKENS)[number]
 
 /**
- * The full custom-property spelling, e.g. `--gx-series-1`.
+ * The full custom-property spelling, e.g. `--shiftcharts-series-1`.
  *
- * ⚠ The `--gx-` prefix appears here as a template-literal type and once more in the
+ * ⚠ The `--shiftcharts-` prefix appears here as a template-literal type and once more in the
  * generator. `raw/06` §6.0 verified those are the only two places it is not simply the
  * first path segment, which is what makes the eventual rename cheap.
  */
-export type GxCustomProperty = `--gx-${GxTokenName}`
+export type ShiftChartsCustomProperty = `--shiftcharts-${ShiftChartsTokenName}`
 
-export const toCustomProperty = (name: GxTokenName): GxCustomProperty => `--gx-${name}`
+export const toCustomProperty = (name: ShiftChartsTokenName): ShiftChartsCustomProperty => `--shiftcharts-${name}`
 
 /**
  * The four shipping theme combinations: {Rail, Neutral} × {dark, light}.
@@ -50,6 +50,6 @@ export const toCustomProperty = (name: GxTokenName): GxCustomProperty => `--gx-$
  * `rail-dark` has no entry there because it *is* `:where(:root)` — the default world needs no
  * override block. `THEME_VARIANTS` holds the deltas; this holds the four selectable worlds.
  */
-export const GX_THEMES = ['rail-dark', 'rail-light', 'neutral', 'neutral-light'] as const
+export const SHIFTCHARTS_THEMES = ['rail-dark', 'rail-light', 'neutral', 'neutral-light'] as const
 
-export type GxTheme = (typeof GX_THEMES)[number]
+export type ShiftChartsTheme = (typeof SHIFTCHARTS_THEMES)[number]

@@ -32,39 +32,39 @@ export function WidgetShell({
   style,
 }: WidgetShellProps): ReactElement {
   const generatedTitleId = useId()
-  const titleId = `gx-widget-title-${generatedTitleId.replaceAll(':', '')}`
-  const shellClassName = className === undefined ? 'gx-widget-shell' : `gx-widget-shell ${className}`
+  const titleId = `shiftcharts-widget-title-${generatedTitleId.replaceAll(':', '')}`
+  const shellClassName = className === undefined ? 'shiftcharts-widget-shell' : `shiftcharts-widget-shell ${className}`
 
   return (
     <section
       className={shellClassName}
-      data-gx-widget-id={widgetId}
-      {...(theme === undefined ? {} : { 'data-gx-theme': theme })}
+      data-shiftcharts-widget-id={widgetId}
+      {...(theme === undefined ? {} : { 'data-shiftcharts-theme': theme })}
       {...(style === undefined ? {} : { style })}
       {...(title === undefined ? { 'aria-label': `Widget ${widgetId}` } : { 'aria-labelledby': titleId })}
     >
-      <header className="gx-widget-shell__header">
-        <div className="gx-widget-shell__heading" data-gx-grid-cancel="true">
+      <header className="shiftcharts-widget-shell__header">
+        <div className="shiftcharts-widget-shell__heading" data-shiftcharts-grid-cancel="true">
           {title === undefined ? null : (
-            <h2 className="gx-widget-shell__title" id={titleId}>
+            <h2 className="shiftcharts-widget-shell__title" id={titleId}>
               {title}
             </h2>
           )}
           {context === undefined ? null : (
-            <div className="gx-widget-shell__context" data-gx-grid-cancel="true">
+            <div className="shiftcharts-widget-shell__context" data-shiftcharts-grid-cancel="true">
               {context}
             </div>
           )}
         </div>
         {actions === undefined ? null : (
-          <div className="gx-widget-shell__actions" data-gx-grid-cancel="true">
+          <div className="shiftcharts-widget-shell__actions" data-shiftcharts-grid-cancel="true">
             {actions}
           </div>
         )}
         <button
           type="button"
-          className="gx-widget-shell__drag-handle"
-          data-gx-drag-handle="true"
+          className="shiftcharts-widget-shell__drag-handle"
+          data-shiftcharts-drag-handle="true"
           aria-label={dragHandleLabel}
           title={dragHandleLabel}
         >
@@ -72,14 +72,14 @@ export function WidgetShell({
         </button>
       </header>
       <div
-        className="gx-widget-shell__content"
-        data-gx-grid-cancel="true"
-        data-gx-widget-content="true"
+        className="shiftcharts-widget-shell__content"
+        data-shiftcharts-grid-cancel="true"
+        data-shiftcharts-widget-content="true"
       >
         {children}
       </div>
       {footer === undefined ? null : (
-        <footer className="gx-widget-shell__footer" data-gx-grid-cancel="true">
+        <footer className="shiftcharts-widget-shell__footer" data-shiftcharts-grid-cancel="true">
           {footer}
         </footer>
       )}

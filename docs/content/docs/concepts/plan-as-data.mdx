@@ -1,13 +1,13 @@
 ---
 title: Plan as data
-description: GX separates deciding what to draw from drawing it.
+description: ShiftCharts separates deciding what to draw from drawing it.
 ---
 
 `planChart()` is pure. Given the same chart type, `SizeContext`, `DataShape`, policy, and overrides,
 it returns the same plain `ChartPlan`.
 
 ```ts
-import { describeShape, planChart, sizeContextFromPixels } from '@gx/core'
+import { describeShape, planChart, sizeContextFromPixels } from '@shiftcharts/core'
 
 const ctx = sizeContextFromPixels(640, 320)
 const shape = describeShape(data)

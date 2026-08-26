@@ -7,13 +7,13 @@
  * back to another mark family.
  */
 
-import type { FunnelFrame, FunnelStageFrame, PlanPolicy, TypeRank } from '@gx/core'
-import { measureText } from '@gx/core'
+import type { FunnelFrame, FunnelStageFrame, PlanPolicy, TypeRank } from '@shiftcharts/core'
+import { measureText } from '@shiftcharts/core'
 
 import type { MarkRenderer, MarkRendererRegistration } from '../../renderer-seam.ts'
 import { classes, roundCoord } from '../../svg.ts'
 
-/** Matches `--gx-legend-label-font-size` (`chart.css`), which `.gx-funnel-stage__text` uses. */
+/** Matches `--shiftcharts-legend-label-font-size` (`chart.css`), which `.shiftcharts-funnel-stage__text` uses. */
 const STAGE_TEXT_RANK: TypeRank = 'D'
 
 const renderNone: MarkRenderer = () => null
@@ -23,33 +23,33 @@ export const renderFunnel: MarkRenderer = (input) => {
   const { frame, plan, policy } = input
 
   if (plan.type !== 'funnel') {
-    throw new Error(`@gx/primitives: funnel renderer requires a funnel plan; received '${String(plan.type)}'.`)
+    throw new Error(`@shiftcharts/primitives: funnel renderer requires a funnel plan; received '${String(plan.type)}'.`)
   }
 
   const mark = plan.marks.primary
   if (mark.kind !== 'funnel') {
-    throw new Error(`@gx/primitives: funnel renderer requires a funnel mark; received '${mark.kind}'.`)
+    throw new Error(`@shiftcharts/primitives: funnel renderer requires a funnel mark; received '${mark.kind}'.`)
   }
 
   if (plan.marks.renderer !== 'svg') {
     throw new Error(
-      `@gx/primitives: funnel renderer mode '${String(plan.marks.renderer)}' is not implemented; refusing to rasterize stages.`,
+      `@shiftcharts/primitives: funnel renderer mode '${String(plan.marks.renderer)}' is not implemented; refusing to rasterize stages.`,
     )
   }
 
   if (typeof frame !== 'object' || frame === null) {
-    throw new Error('@gx/primitives: funnel rendering requires a shared series frame.')
+    throw new Error('@shiftcharts/primitives: funnel rendering requires a shared series frame.')
   }
   if (typeof frame.id !== 'string' || frame.id.length === 0) {
-    throw new Error('@gx/primitives: funnel rendering requires a stable non-empty series id.')
+    throw new Error('@shiftcharts/primitives: funnel rendering requires a stable non-empty series id.')
   }
 
   const funnel = frame.funnel
   if (funnel === null || funnel === undefined || typeof funnel !== 'object') {
-    throw new Error('@gx/primitives: funnel rendering requires shared SeriesFrame.funnel geometry.')
+    throw new Error('@shiftcharts/primitives: funnel rendering requires shared SeriesFrame.funnel geometry.')
   }
   if (!Array.isArray(funnel.stages)) {
-    throw new Error('@gx/primitives: funnel rendering requires shared FunnelFrame.stages geometry.')
+    throw new Error('@shiftcharts/primitives: funnel rendering requires shared FunnelFrame.stages geometry.')
   }
 
   validateFunnel(funnel)
@@ -60,7 +60,7 @@ export const renderFunnel: MarkRenderer = (input) => {
 
   return (
     <g
-      className={classes('gx-funnel', `gx-funnel--${mark.orientation}`, `gx-funnel--${mark.detail}`)}
+      className={classes('shiftcharts-funnel', `shiftcharts-funnel--${mark.orientation}`, `shiftcharts-funnel--${mark.detail}`)}
       data-funnel-detail={mark.detail}
       data-funnel-orientation={mark.orientation}
       data-funnel-overall-conversion={ratioAttribute(funnel.overallConversion)}
@@ -88,7 +88,7 @@ function renderSummary(funnel: FunnelFrame) {
   const anchor = funnel.stages[0]
   return (
     <text
-      className={classes('gx-funnel__summary', 'gx-funnel-label')}
+      className={classes('shiftcharts-funnel__summary', 'shiftcharts-funnel-label')}
       data-funnel-overall-conversion={ratioAttribute(funnel.overallConversion)}
       data-funnel-part="summary"
       x={anchor === undefined ? undefined : roundCoord(anchor.x + anchor.width / 2)}
@@ -108,7 +108,7 @@ function renderStage(
   const text = fitStageText(stage, detail, policy)
   return (
     <g
-      className="gx-funnel-stage-container"
+      className="shiftcharts-funnel-stage-container"
       data-funnel-stage-conversion={ratioAttribute(stage.conversion)}
       data-funnel-stage-dropoff={ratioAttribute(stage.dropoff)}
       data-funnel-stage-id={stage.id}
@@ -120,7 +120,7 @@ function renderStage(
       key={stage.id}
     >
       <rect
-        className={classes('gx-funnel-stage', 'gx-funnel-stage__mark')}
+        className={classes('shiftcharts-funnel-stage', 'shiftcharts-funnel-stage__mark')}
         data-funnel-part="stage"
         height={roundCoord(stage.height)}
         width={roundCoord(stage.width)}
@@ -128,7 +128,7 @@ function renderStage(
         y={roundCoord(stage.y)}
       />
       <text
-        className={classes('gx-funnel-label', 'gx-funnel-stage__text')}
+        className={classes('shiftcharts-funnel-label', 'shiftcharts-funnel-stage__text')}
         data-funnel-part="stage-text"
         data-funnel-stage-id={stage.id}
         x={roundCoord(orientation === 'horizontal' ? stage.x : stage.x + stage.width / 2)}
@@ -172,13 +172,13 @@ function validateFunnel(funnel: FunnelFrame): void {
     funnel.overallConversion !== null &&
     (!Number.isFinite(funnel.overallConversion) || funnel.overallConversion < 0 || funnel.overallConversion > 1)
   ) {
-    throw new Error('@gx/primitives: funnel overall conversion must be between 0 and 1 or null.')
+    throw new Error('@shiftcharts/primitives: funnel overall conversion must be between 0 and 1 or null.')
   }
 
   const ids = new Set<string>()
   for (const [index, stage] of funnel.stages.entries()) {
     if (typeof stage !== 'object' || stage === null) {
-      throw new Error(`@gx/primitives: funnel stage ${index} has invalid shared geometry.`)
+      throw new Error(`@shiftcharts/primitives: funnel stage ${index} has invalid shared geometry.`)
     }
     validateStage(stage, index, ids)
   }
@@ -186,18 +186,18 @@ function validateFunnel(funnel: FunnelFrame): void {
 
 function validateStage(stage: FunnelStageFrame, index: number, ids: Set<string>): void {
   if (typeof stage.id !== 'string' || stage.id.length === 0) {
-    throw new Error(`@gx/primitives: funnel stage ${index} requires a stable non-empty id.`)
+    throw new Error(`@shiftcharts/primitives: funnel stage ${index} requires a stable non-empty id.`)
   }
   if (ids.has(stage.id)) {
-    throw new Error(`@gx/primitives: funnel stage id '${stage.id}' is duplicated.`)
+    throw new Error(`@shiftcharts/primitives: funnel stage id '${stage.id}' is duplicated.`)
   }
   ids.add(stage.id)
 
   if (typeof stage.label !== 'string' || stage.label.length === 0) {
-    throw new Error(`@gx/primitives: funnel stage '${stage.id}' requires a non-empty label.`)
+    throw new Error(`@shiftcharts/primitives: funnel stage '${stage.id}' requires a non-empty label.`)
   }
   if (!Number.isInteger(stage.index) || stage.index < 0) {
-    throw new Error(`@gx/primitives: funnel stage '${stage.id}' requires a non-negative integer index.`)
+    throw new Error(`@shiftcharts/primitives: funnel stage '${stage.id}' requires a non-negative integer index.`)
   }
   for (const [name, value] of [
     ['value', stage.value],
@@ -206,11 +206,11 @@ function validateStage(stage: FunnelStageFrame, index: number, ids: Set<string>)
     ['dropoff', stage.dropoff],
   ] as const) {
     if (value !== null && !Number.isFinite(value)) {
-      throw new Error(`@gx/primitives: funnel stage '${stage.id}' ${name} must be finite or null.`)
+      throw new Error(`@shiftcharts/primitives: funnel stage '${stage.id}' ${name} must be finite or null.`)
     }
   }
   if (!Number.isFinite(stage.value) || stage.value < 0) {
-    throw new Error(`@gx/primitives: funnel stage '${stage.id}' value must be finite and non-negative.`)
+    throw new Error(`@shiftcharts/primitives: funnel stage '${stage.id}' value must be finite and non-negative.`)
   }
   validateRatio(stage.share, `stage '${stage.id}' share`)
   validateRatio(stage.conversion, `stage '${stage.id}' conversion`)
@@ -223,17 +223,17 @@ function validateStage(stage: FunnelStageFrame, index: number, ids: Set<string>)
     ['height', stage.height],
   ] as const) {
     if (!Number.isFinite(value)) {
-      throw new Error(`@gx/primitives: funnel stage '${stage.id}' ${name} geometry must be finite.`)
+      throw new Error(`@shiftcharts/primitives: funnel stage '${stage.id}' ${name} geometry must be finite.`)
     }
   }
   if (stage.width < 0 || stage.height < 0) {
-    throw new Error(`@gx/primitives: funnel stage '${stage.id}' geometry cannot have negative size.`)
+    throw new Error(`@shiftcharts/primitives: funnel stage '${stage.id}' geometry cannot have negative size.`)
   }
 }
 
 function validateRatio(value: number | null, name: string): void {
   if (value !== null && (!Number.isFinite(value) || value < 0 || value > 1)) {
-    throw new Error(`@gx/primitives: funnel ${name} must be between 0 and 1 or null.`)
+    throw new Error(`@shiftcharts/primitives: funnel ${name} must be between 0 and 1 or null.`)
   }
 }
 

@@ -3,7 +3,7 @@
  *
  * ⚠ **`<circle>` is safe where `<line>` is not, and the difference is the whole of decision
  * 012.** SVG2 promoted `cx`, `cy` and `r` to CSS properties and browsers shipped them; it did
- * *not* promote `x1`/`y1`/`x2`/`y2`. So `r` can be a token — `circle { r: var(--gx-point-radius) }`
+ * *not* promote `x1`/`y1`/`x2`/`y2`. So `r` can be a token — `circle { r: var(--shiftcharts-point-radius) }`
  * both parses and works — and no `r` attribute is emitted here. `cx`/`cy` stay attributes
  * because they are data.
  *
@@ -15,7 +15,7 @@
  * while `mode` is `'none'` — the points exist, they are simply not painted.
  */
 
-import type { PointPlan, PointPos, SeriesFrame } from '@gx/core'
+import type { PointPlan, PointPos, SeriesFrame } from '@shiftcharts/core'
 
 import { classes, roundCoord } from './svg.ts'
 
@@ -68,7 +68,7 @@ export function PointMarks({
         if (p === undefined) return null
         return (
           <circle
-            className={classes('gx-point', className)}
+            className={classes('shiftcharts-point', className)}
             // ⚠ **`i` indexes `points`, not `visible`, and that is what makes it a stable key
             // — leave it alone.** A6 re-keyed `<Grid>` and `<Axis>` away from index-like keys
             // because theirs were derived from *pixel* positions and churned on every resize.

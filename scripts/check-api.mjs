@@ -17,12 +17,12 @@
  * declaration reachable from a public one — was written and run against this tree first.
  * It produced four reports of which one was a bug:
  *
- *   `Callback`      @gx/testing  → real. It is `FakeResizeObserver`'s constructor
+ *   `Callback`      @shiftcharts/testing  → real. It is `FakeResizeObserver`'s constructor
  *                                 parameter type. A consumer cannot spell it.
- *   `AxisScale`     @gx/core     → false. It is a `const` annotation inside
+ *   `AxisScale`     @shiftcharts/core     → false. It is a `const` annotation inside
  *                                 `resolveFrame`'s **body**. Function bodies are not API.
- *   `DeepPartialOf` @gx/core     → false. It exists only as an operand of the conditional
- *   `IsUnion`       @gx/core       type `DeepPartial<T>`. The `.d.ts` rollup emits both
+ *   `DeepPartialOf` @shiftcharts/core     → false. It exists only as an operand of the conditional
+ *   `IsUnion`       @shiftcharts/core       type `DeepPartial<T>`. The `.d.ts` rollup emits both
  *                                 in-file, so `DeepPartial<ChartPlan>` resolves for a
  *                                 consumer exactly as it does here — and no consumer is
  *                                 ever in a position to write either name.
@@ -37,8 +37,8 @@
  * Neither is something a consumer writes. What a consumer writes is a parameter type, a
  * return type, a property type, a heritage clause, a type argument.
  *
- * ⚠ THE ORIGIN RULE. `@gx/primitives` exports `ChartProps`, whose every field is a
- * `@gx/core` type. Those are not primitives' to re-export, and demanding it would produce
+ * ⚠ THE ORIGIN RULE. `@shiftcharts/primitives` exports `ChartProps`, whose every field is a
+ * `@shiftcharts/core` type. Those are not primitives' to re-export, and demanding it would produce
  * thirty-five bogus reports on that package alone. A referenced type is fine when it comes
  * from:
  *
@@ -79,14 +79,14 @@ const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
  * ⚠ **An entry here is a claim that the symbol's *shape* is hand-written even though its
  * *contents* are not**, and both entries meet it: the generator template that emits them is
  * source, reviewed like any other. `ROBOTO_FLEX_METRICS` is a font-metrics table;
- * `GX_TOKENS` is the list of every declared `--gx-*`, added at B1 when it stopped being
+ * `SHIFTCHARTS_TOKENS` is the list of every declared `--shiftcharts-*`, added at B1 when it stopped being
  * hand-maintained — it had drifted seven tokens behind the stylesheet by then, which is the
  * argument for generating it rather than against exporting it.
  *
  * The rule is still worth having around them. What it catches is a generated module whose
  * export *set* moves: regenerate, and the public API changed with no diff anyone read.
  */
-const GENERATED_ALLOWLIST = new Set(['ROBOTO_FLEX_METRICS', 'GX_TOKENS'])
+const GENERATED_ALLOWLIST = new Set(['ROBOTO_FLEX_METRICS', 'SHIFTCHARTS_TOKENS'])
 
 /**
  * @typedef {{ pkg: string, symbol: string, file: string }} ExportSubject

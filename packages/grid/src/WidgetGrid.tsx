@@ -6,13 +6,13 @@ import {
   createWidgetId,
   createWidgetLayout,
   serializeLayoutSnapshot,
-} from '@gx/core'
+} from '@shiftcharts/core'
 import type {
   LayoutSnapshot,
   WidgetId,
   WidgetLayout,
   WidgetLayoutInput,
-} from '@gx/core'
+} from '@shiftcharts/core'
 import {
   useCallback,
   useEffect,
@@ -197,7 +197,7 @@ export function WidgetGrid({
   const children = useMemo(
     () =>
       displayLayout.map((item) => (
-        <div key={item.id} data-gx-widget-id={item.id}>
+        <div key={item.id} data-shiftcharts-widget-id={item.id}>
           <KeyboardGrid
             item={item}
             layout={displayLayout}
@@ -239,8 +239,8 @@ export function WidgetGrid({
   const dragConfig = useMemo(
     () => ({
       enabled: mode === 'edit',
-      handle: '[data-gx-drag-handle]',
-      cancel: '[data-gx-grid-cancel], [data-gx-grid-cancel] *, button, a, input, textarea, select, [role="button"]',
+      handle: '[data-shiftcharts-drag-handle]',
+      cancel: '[data-shiftcharts-grid-cancel], [data-shiftcharts-grid-cancel] *, button, a, input, textarea, select, [role="button"]',
     }),
     [mode],
   )

@@ -70,7 +70,7 @@ describe('fake timers fake frames and nothing else', () => {
 
 describe('the default environment has no DOM', () => {
   it('exposes no document', () => {
-    // ⚠ Gate **G2** bans DOM measurement in `@gx/core`. Handing core's tests a DOM gives
+    // ⚠ Gate **G2** bans DOM measurement in `@shiftcharts/core`. Handing core's tests a DOM gives
     // them the ability to violate the rule the gate exists to enforce, and the violation
     // would pass. Files that genuinely need one opt in per-file with the environment
     // docblock — see `scripts/check-determinism.mjs` for why the phrase is not spelled
@@ -79,7 +79,7 @@ describe('the default environment has no DOM', () => {
   })
 
   it('exposes no ResizeObserver, so a test must inject the fake', () => {
-    // `@gx/testing` hands out a FakeResizeObserver rather than assigning to globalThis.
+    // `@shiftcharts/testing` hands out a FakeResizeObserver rather than assigning to globalThis.
     // A leaked stub makes one file's failure surface in another — the slowest bug to
     // locate, because the failing test is not the broken one.
     expect(globalThis.ResizeObserver).toBeUndefined()

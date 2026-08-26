@@ -13,14 +13,14 @@ const renderNone: MarkRenderer = () => null
 
 const renderScatter: MarkRenderer = ({ frame, plan }) => {
   if (plan.marks.renderer === 'canvas') {
-    throw new Error('@gx/primitives: scatter canvas rendering is not implemented; refusing to sample points.')
+    throw new Error('@shiftcharts/primitives: scatter canvas rendering is not implemented; refusing to sample points.')
   }
 
   return (
     <>
       {frame.points.map((point, index) => (
         <circle
-          className={classes('gx-point', 'gx-scatter-point')}
+          className={classes('shiftcharts-point', 'shiftcharts-scatter-point')}
           data-scatter-index={index}
           key={`${frame.id}:${index}`}
           cx={roundCoord(point.x)}

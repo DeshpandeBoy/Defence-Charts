@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 'use strict'
 
-const NETWORK_ERROR = '[gx package gates] network access is disabled'
+const NETWORK_ERROR = '[ShiftCharts package gates] network access is disabled'
 
 function denyNetwork() {
   throw new Error(NETWORK_ERROR)
@@ -30,4 +30,4 @@ replace(tls, ['connect'])
 replace(dns, ['lookup'])
 if (dns.promises) replace(dns.promises, ['lookup', 'resolve', 'resolve4', 'resolve6'])
 if (typeof globalThis.fetch === 'function') globalThis.fetch = denyNetwork
-process.env.GX_NETWORK_GUARD_ACTIVE = '1'
+process.env.SHIFTCHARTS_NETWORK_GUARD_ACTIVE = '1'

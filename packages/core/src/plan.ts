@@ -60,7 +60,7 @@ export type SizeClass = 'micro' | 'tile' | 'strip' | 'panel' | 'canvas' | 'stage
  * baseline makes `shape.hasNegative` matter more.
  *
  * ⚠ `'pie'` is deliberately absent. It is a presentation variant of `'donut'`, not a
- * type: one token (`--gx-donut-inner-radius`) at `0`.
+ * type: one token (`--shiftcharts-donut-inner-radius`) at `0`.
  */
 export type ChartType =
   | 'line'
@@ -309,7 +309,7 @@ export type LegendPlan =
  *
  * ⚠ `trigger: 'none'` at Micro/Tile does NOT mean the widget is inert. §5.4: *"Whole
  * widget is one tap target."* That is a shell/grid behaviour, not a chart behaviour, and
- * it is deliberately outside this plan — `@gx/grid` owns it. The plan describes what
+ * it is deliberately outside this plan — `@shiftcharts/grid` owns it. The plan describes what
  * happens INSIDE the box (§1.3).
  */
 export type InteractionPlan = {
@@ -499,7 +499,7 @@ export type ChartPlan = {
    *
    * *Two types, two jobs:* `planChart` accepts what it can **resolve**; `ChartPlan`
    * carries what anyone can **produce**. Closed here too, a third-party or paid planner
-   * could not emit a valid plan without editing `@gx/core` — there would be no seam at
+   * could not emit a valid plan without editing `@shiftcharts/core` — there would be no seam at
    * all. `research/60-commercial-model.md` §3 costs that out: two lines today, a major
    * version once D fills in the other eight types and first publish makes `ChartType` a
    * G6-guarded public surface. Worth doing even if no paid tier is ever built, because it

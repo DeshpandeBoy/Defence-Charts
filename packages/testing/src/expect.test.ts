@@ -13,7 +13,7 @@
  * runs at `environment: 'node'` alongside `determinism.test.ts` — see the module docblock in
  * `./expect.ts` for why that is deliberate and load-bearing rather than incidental.
  *
- * ⚠ The markup below is **hand-written, not rendered**. `@gx/primitives` is the thing these
+ * ⚠ The markup below is **hand-written, not rendered**. `@shiftcharts/primitives` is the thing these
  * helpers exist to check, so generating the fixtures from it would make the test circular: a
  * renderer that emits three decimals and a helper that accepts them would agree, and agree
  * greenly. The strings here encode the contract in `research/30-implementation-plan.md` A4
@@ -34,8 +34,8 @@ import {
 /** Wrap SVG children in the `<figure>`/`<svg>` shell every helper expects to find. */
 function chart(children: string): string {
   return (
-    '<figure class="gx-chart">' +
-    '<svg class="gx-chart__svg" role="graphics-document" aria-labelledby="c-title" viewBox="0 0 300 200">' +
+    '<figure class="shiftcharts-chart">' +
+    '<svg class="shiftcharts-chart__svg" role="graphics-document" aria-labelledby="c-title" viewBox="0 0 300 200">' +
     '<title id="c-title">Revenue</title>' +
     children +
     '</svg>' +
@@ -44,7 +44,7 @@ function chart(children: string): string {
 }
 
 function series(id: string, children: string, index = 0): string {
-  return `<g class="gx-series" data-series-id="${id}" data-series-index="${String(index)}">${children}</g>`
+  return `<g class="shiftcharts-series" data-series-id="${id}" data-series-index="${String(index)}">${children}</g>`
 }
 
 /** Ticks as visx-shaped translated groups — the placement `readTickOffset()` prefers. */
@@ -53,14 +53,14 @@ function axis(which: 'x' | 'y', ticks: readonly (readonly [string, number])[]): 
     .map(([label, offset]) => {
       const t = which === 'x' ? `translate(${String(offset)},0)` : `translate(0,${String(offset)})`
       return (
-        `<g class="gx-axis__tick" data-value="${label}" transform="${t}">` +
-        '<rect class="gx-axis__tick-mark"/>' +
-        `<text class="gx-axis__tick-label">${label}</text>` +
+        `<g class="shiftcharts-axis__tick" data-value="${label}" transform="${t}">` +
+        '<rect class="shiftcharts-axis__tick-mark"/>' +
+        `<text class="shiftcharts-axis__tick-label">${label}</text>` +
         '</g>'
       )
     })
     .join('')
-  return `<g class="gx-axis gx-axis--${which}" data-axis="${which}">${inner}</g>`
+  return `<g class="shiftcharts-axis shiftcharts-axis--${which}" data-axis="${which}">${inner}</g>`
 }
 
 const X_AXIS = axis('x', [
@@ -77,7 +77,7 @@ const Y_AXIS = axis('y', [
   ['40', 0],
 ])
 
-const LINE = series('revenue', '<path class="gx-line" d="M0,180L80,90L160,45L240,0"/>')
+const LINE = series('revenue', '<path class="shiftcharts-line" d="M0,180L80,90L160,45L240,0"/>')
 
 describe('parseChart', () => {
   it('round-trips figure-rooted markup into the right namespaces', () => {
@@ -90,7 +90,7 @@ describe('parseChart', () => {
     expect(parsed.root.localName).toBe('figure')
     expect(parsed.root.namespaceURI).toBe('http://www.w3.org/1999/xhtml')
     expect(parsed.svg.namespaceURI).toBe('http://www.w3.org/2000/svg')
-    expect(parsed.one('path.gx-line').namespaceURI).toBe('http://www.w3.org/2000/svg')
+    expect(parsed.one('path.shiftcharts-line').namespaceURI).toBe('http://www.w3.org/2000/svg')
   })
 
   it('preserves the capital B in viewBox', () => {
@@ -103,7 +103,7 @@ describe('parseChart', () => {
   it('rejects markup with no <svg> rather than reporting an empty chart', () => {
     // A component that threw and a component that drew nothing look identical three
     // assertions later, as "expected 4 ticks, found 0".
-    expect(() => parseChart('<figure class="gx-chart"></figure>')).toThrow(/no <svg>/)
+    expect(() => parseChart('<figure class="shiftcharts-chart"></figure>')).toThrow(/no <svg>/)
   })
 
   it('rejects markup with no elements at all', () => {
@@ -112,13 +112,13 @@ describe('parseChart', () => {
 
   it('names what the chart does contain when a selector matches nothing', () => {
     // The failure message is the product — see the `describeShape()` docblock.
-    expect(() => parseChart(chart(LINE)).one('path.gx-area')).toThrow(/gx-line/)
+    expect(() => parseChart(chart(LINE)).one('path.shiftcharts-area')).toThrow(/shiftcharts-line/)
   })
 })
 
 describe('expectLine', () => {
   it('accepts a two-decimal path', () => {
-    const line = expectLine(chart(series('a', '<path class="gx-line" d="M0,0L1.23,2.35L3,4"/>')))
+    const line = expectLine(chart(series('a', '<path class="shiftcharts-line" d="M0,0L1.23,2.35L3,4"/>')))
     expect(line.d).toBe('M0,0L1.23,2.35L3,4')
     expect(line.segments).toBe(1)
   })
@@ -129,7 +129,7 @@ describe('expectLine', () => {
     // both strings. The chart renders identically; only the snapshots drift, on a last digit
     // that varies by platform.
     expect(() =>
-      expectLine(chart(series('a', '<path class="gx-line" d="M0,0L1.235,2.346L3,4"/>'))),
+      expectLine(chart(series('a', '<path class="shiftcharts-line" d="M0,0L1.235,2.346L3,4"/>'))),
     ).toThrow(/3 decimal places/)
   })
 
@@ -137,7 +137,7 @@ describe('expectLine', () => {
     // Checked against the raw string, because tokenising destroys them: `a` and `t` are path
     // commands, so `NaN` and `Infinity` shred into fragments that no longer look wrong.
     for (const poison of ['M0,0LNaN,4', 'M0,0Lundefined,4', 'M0,0L-Infinity,4']) {
-      expect(() => expectLine(chart(series('a', `<path class="gx-line" d="${poison}"/>`)))).toThrow(
+      expect(() => expectLine(chart(series('a', `<path class="shiftcharts-line" d="${poison}"/>`)))).toThrow(
         /NaN|undefined|Infinity/,
       )
     }
@@ -145,7 +145,7 @@ describe('expectLine', () => {
 
   it('rejects a path that does not open with an absolute moveto', () => {
     expect(() =>
-      expectLine(chart(series('a', '<path class="gx-line" d="L10,10L20,20"/>'))),
+      expectLine(chart(series('a', '<path class="shiftcharts-line" d="L10,10L20,20"/>'))),
     ).toThrow(/does not start with/)
   })
 
@@ -153,20 +153,20 @@ describe('expectLine', () => {
     // ⚠ `e` is deliberately absent from the command class in `assertPathData()`. If it were
     // included, `1e5` would tokenise as `1` and `5` — two valid coordinates — and a path
     // carrying a number no `.digits(2)` generator can produce would pass.
-    expect(() => expectLine(chart(series('a', '<path class="gx-line" d="M0,0L1e5,4"/>')))).toThrow(
+    expect(() => expectLine(chart(series('a', '<path class="shiftcharts-line" d="M0,0L1e5,4"/>')))).toThrow(
       /not a plain decimal number/,
     )
   })
 
   it('rejects an empty or absent d', () => {
-    expect(() => expectLine(chart(series('a', '<path class="gx-line" d=""/>')))).toThrow(/empty/)
-    expect(() => expectLine(chart(series('a', '<path class="gx-line"/>')))).toThrow(/has no `d`/)
+    expect(() => expectLine(chart(series('a', '<path class="shiftcharts-line" d=""/>')))).toThrow(/empty/)
+    expect(() => expectLine(chart(series('a', '<path class="shiftcharts-line"/>')))).toThrow(/has no `d`/)
   })
 
   it('scopes to a named series and lists the ones that exist when it is missing', () => {
     const html = chart(
-      series('a', '<path class="gx-line" d="M0,0L10,10"/>') +
-        series('b', '<path class="gx-line" d="M0,5L10,15"/>', 1),
+      series('a', '<path class="shiftcharts-line" d="M0,0L10,10"/>') +
+        series('b', '<path class="shiftcharts-line" d="M0,5L10,15"/>', 1),
     )
     expect(expectLine(html, { series: 'b' }).d).toBe('M0,5L10,15')
     expect(() => expectLine(html, { series: 'c' })).toThrow(/"a", "b"/)
@@ -174,14 +174,14 @@ describe('expectLine', () => {
 
   it('counts segments as gaps + 1, and rejects a wrong count', () => {
     // A twelve-point series with one null in the middle has twelve points and two segments.
-    const gapped = chart(series('a', '<path class="gx-line" d="M0,0L10,10M30,30L40,40"/>'))
+    const gapped = chart(series('a', '<path class="shiftcharts-line" d="M0,0L10,10M30,30L40,40"/>'))
     expect(expectLine(gapped, { segments: 2 }).segments).toBe(2)
     expect(() => expectLine(gapped, { segments: 1 })).toThrow(/drew 2 segment/)
   })
 
   it('rejects a chart with no line at all', () => {
-    expect(() => expectLine(chart(series('a', '<path class="gx-area" d="M0,0Z"/>')))).toThrow(
-      /no `path.gx-line`/,
+    expect(() => expectLine(chart(series('a', '<path class="shiftcharts-area" d="M0,0Z"/>')))).toThrow(
+      /no `path.shiftcharts-line`/,
     )
   })
 })
@@ -213,8 +213,8 @@ describe('expectAxisTicks', () => {
     // A renderer that emits `<text> Jan </text>` draws a label with a leading space. Trimming
     // here would make the helper agree with markup a browser renders differently.
     const padded = chart(
-      '<g class="gx-axis gx-axis--x" data-axis="x">' +
-        '<g class="gx-axis__tick"><text class="gx-axis__tick-label"> Jan </text></g>' +
+      '<g class="shiftcharts-axis shiftcharts-axis--x" data-axis="x">' +
+        '<g class="shiftcharts-axis__tick"><text class="shiftcharts-axis__tick-label"> Jan </text></g>' +
         '</g>',
     )
     expect(() => expectAxisTicks(padded, 'x', { labels: ['Jan'] })).toThrow(/label at index 0/)
@@ -223,7 +223,7 @@ describe('expectAxisTicks', () => {
   it('reports a missing axis as absent, not as empty', () => {
     // An axis the ladder turned off is gone from the tree. Saying so points a reader at the
     // rung; "0 ticks" points them at the tick generator.
-    expect(() => expectAxisTicks(chart(LINE), 'y')).toThrow(/no `g.gx-axis--y`/)
+    expect(() => expectAxisTicks(chart(LINE), 'y')).toThrow(/no `g.shiftcharts-axis--y`/)
     expect(() => expectAxisTicks(html, 'y')).not.toThrow()
   })
 
@@ -239,8 +239,8 @@ describe('expectAxisTicks', () => {
     // ⚠ The DOM contract A4 was handed does not pin down where the offset lives, so the
     // fallback chain is exercised rather than assumed. See `readTickOffset()`.
     const positioned = chart(
-      '<g class="gx-axis gx-axis--x" data-axis="x">' +
-        '<g class="gx-axis__tick"><rect class="gx-axis__tick-mark" x="42"/></g>' +
+      '<g class="shiftcharts-axis shiftcharts-axis--x" data-axis="x">' +
+        '<g class="shiftcharts-axis__tick"><rect class="shiftcharts-axis__tick-mark" x="42"/></g>' +
         '</g>',
     )
     expect(expectAxisTicks(positioned, 'x')[0]?.offset).toBe(42)
@@ -250,16 +250,16 @@ describe('expectAxisTicks', () => {
     // The silent-zero failure mode again: `Number(null)` is 0, and an unpositioned tick that
     // reports 0 is indistinguishable from a tick genuinely at the origin.
     const bare = chart(
-      '<g class="gx-axis gx-axis--x" data-axis="x"><g class="gx-axis__tick"></g></g>',
+      '<g class="shiftcharts-axis shiftcharts-axis--x" data-axis="x"><g class="shiftcharts-axis__tick"></g></g>',
     )
     expect(expectAxisTicks(bare, 'x')[0]?.offset).toBeNull()
   })
 })
 
 describe('expectPoints', () => {
-  const dots = '<circle class="gx-point" data-index="0" cx="0" cy="180"/>' +
-    '<circle class="gx-point" data-index="1" cx="80" cy="90"/>' +
-    '<circle class="gx-point" data-index="2" cx="160" cy="45"/>'
+  const dots = '<circle class="shiftcharts-point" data-index="0" cx="0" cy="180"/>' +
+    '<circle class="shiftcharts-point" data-index="1" cx="80" cy="90"/>' +
+    '<circle class="shiftcharts-point" data-index="2" cx="160" cy="45"/>'
 
   it('accepts a count and returns finite positions', () => {
     const points = expectPoints(chart(series('a', dots)), { series: 'a', count: 3 })
@@ -269,7 +269,7 @@ describe('expectPoints', () => {
 
   it('⚠ rejects a wrong count and points at the plan rather than the geometry', () => {
     expect(() => expectPoints(chart(series('a', dots)), { count: 4 })).toThrow(
-      /has 3 `circle.gx-point`, expected 4/,
+      /has 3 `circle.shiftcharts-point`, expected 4/,
     )
     expect(() => expectPoints(chart(series('a', dots)), { count: 4 })).toThrow(
       /marks.points.mode/,
@@ -280,18 +280,18 @@ describe('expectPoints', () => {
     // A point the frame failed to position and a point genuinely at the origin both render
     // at the plot origin. Requiring the attribute is the only thing that separates them.
     expect(() =>
-      expectPoints(chart(series('a', '<circle class="gx-point" cy="10"/>'))),
+      expectPoints(chart(series('a', '<circle class="shiftcharts-point" cy="10"/>'))),
     ).toThrow(/has no `cx`/)
   })
 
   it('rejects a non-finite coordinate', () => {
     expect(() =>
-      expectPoints(chart(series('a', '<circle class="gx-point" cx="NaN" cy="10"/>'))),
+      expectPoints(chart(series('a', '<circle class="shiftcharts-point" cx="NaN" cy="10"/>'))),
     ).toThrow(/not a finite number/)
   })
 
   it('reports a missing data-index as null rather than as zero', () => {
-    const points = expectPoints(chart(series('a', '<circle class="gx-point" cx="1" cy="2"/>')))
+    const points = expectPoints(chart(series('a', '<circle class="shiftcharts-point" cx="1" cy="2"/>')))
     expect(points[0]?.index).toBeNull()
   })
 })
@@ -345,8 +345,8 @@ describe('expectScale', () => {
 
   it('names the fallback chain when no tick carries a readable offset', () => {
     const bare = chart(
-      '<g class="gx-axis gx-axis--x" data-axis="x">' +
-        '<g class="gx-axis__tick"></g><g class="gx-axis__tick"></g>' +
+      '<g class="shiftcharts-axis shiftcharts-axis--x" data-axis="x">' +
+        '<g class="shiftcharts-axis__tick"></g><g class="shiftcharts-axis__tick"></g>' +
         '</g>',
     )
     expect(() => expectScale(bare, 'x', { min: 0, max: 100 })).toThrow(/no readable offset/)
@@ -358,14 +358,14 @@ describe('expectElementSet', () => {
     // ⚠ jsdom wraps a fragment in html/head/body. Walking from the document root would put
     // three elements nobody rendered into every snapshot.
     const set = expectElementSet(
-      chart(series('a', '<circle class="gx-point" cx="1" cy="2"/><circle class="gx-point" cx="3" cy="4"/>')),
+      chart(series('a', '<circle class="shiftcharts-point" cx="1" cy="2"/><circle class="shiftcharts-point" cx="3" cy="4"/>')),
     )
     expect(set).toEqual([
-      'circle#gx-point',
-      'circle#gx-point',
-      'figure#gx-chart',
-      'g#gx-series',
-      'svg#gx-chart__svg',
+      'circle#shiftcharts-point',
+      'circle#shiftcharts-point',
+      'figure#shiftcharts-chart',
+      'g#shiftcharts-series',
+      'svg#shiftcharts-chart__svg',
       'title',
     ])
     expect(set).not.toContain('html')
@@ -376,18 +376,18 @@ describe('expectElementSet', () => {
     // `localName`, not `tagName`: the parser hands back FIGURE in uppercase and svg in
     // lowercase, and a snapshot built from `tagName` sorts the two families apart.
     const set = expectElementSet(chart(X_AXIS))
-    expect(set).toContain('g#gx-axis.gx-axis--x')
-    expect(set.filter((e) => e === 'g#gx-axis__tick')).toHaveLength(4)
+    expect(set).toContain('g#shiftcharts-axis.shiftcharts-axis--x')
+    expect(set.filter((e) => e === 'g#shiftcharts-axis__tick')).toHaveLength(4)
   })
 
   it('⚠ rejects a <line> carrying x1/y1/x2/y2', () => {
     // DECISION 012, EXECUTED. Those four attributes are not CSS-settable in any browser and
-    // none is planned, so `line { y2: var(--gx-tick-length) }` parses, passes the token gate,
+    // none is planned, so `line { y2: var(--shiftcharts-tick-length) }` parses, passes the token gate,
     // builds, warns about nothing, and does not change the tick's length. Vega renders 28 of
     // these; Observable Plot renders 0.
     const tickedWithLines = chart(
-      '<g class="gx-axis gx-axis--x" data-axis="x">' +
-        '<g class="gx-axis__tick"><line class="gx-axis__tick-mark" x1="0" y1="0" x2="0" y2="6"/></g>' +
+      '<g class="shiftcharts-axis shiftcharts-axis--x" data-axis="x">' +
+        '<g class="shiftcharts-axis__tick"><line class="shiftcharts-axis__tick-mark" x1="0" y1="0" x2="0" y2="6"/></g>' +
         '</g>',
     )
     expect(() => expectElementSet(tickedWithLines)).toThrow(/not CSS-settable/)
@@ -401,19 +401,19 @@ describe('expectElementSet', () => {
   it('leaves a geometry-free <line> legal, as decision 012 says it should', () => {
     // The ban is on tokened geometry, not on the element. A `<line>` no token controls stays
     // legal, and a check that forbade the tag outright would be enforcing a rule nobody made.
-    expect(expectElementSet(chart('<line class="gx-decoration"/>'))).toContain(
-      'line#gx-decoration',
+    expect(expectElementSet(chart('<line class="shiftcharts-decoration"/>'))).toContain(
+      'line#shiftcharts-decoration',
     )
   })
 
   it('is a multiset, so a dropped mark is a diff', () => {
     const three = expectElementSet(
-      chart(series('a', '<circle class="gx-point" cx="1" cy="2"/>'.repeat(3))),
+      chart(series('a', '<circle class="shiftcharts-point" cx="1" cy="2"/>'.repeat(3))),
     )
     const two = expectElementSet(
-      chart(series('a', '<circle class="gx-point" cx="1" cy="2"/>'.repeat(2))),
+      chart(series('a', '<circle class="shiftcharts-point" cx="1" cy="2"/>'.repeat(2))),
     )
     expect(three).not.toEqual(two)
-    expect(three.filter((e) => e === 'circle#gx-point')).toHaveLength(3)
+    expect(three.filter((e) => e === 'circle#shiftcharts-point')).toHaveLength(3)
   })
 })

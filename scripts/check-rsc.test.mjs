@@ -157,8 +157,8 @@ describe('the bundle scan', () => {
     const { leaks } = await scanForChartCode(files, FIXTURES)
     expect(leaks.map((l) => l.marker).sort()).toEqual([
       'graphics-document',
-      'gx-chart__caption',
-      'gx-chart__svg',
+      'shiftcharts-chart__caption',
+      'shiftcharts-chart__svg',
     ])
     expect(leaks[0]?.file).toBe('rsc-leak/chunks/page-7c40aa.js')
   })
@@ -166,7 +166,7 @@ describe('the bundle scan', () => {
   it('quotes enough of the surrounding bytes to tell code from a stray mention', async () => {
     const files = await collectClientScripts(`${FIXTURES}rsc-leak`)
     const { leaks } = await scanForChartCode(files, FIXTURES)
-    const svg = leaks.find((l) => l.marker === 'gx-chart__svg')
+    const svg = leaks.find((l) => l.marker === 'shiftcharts-chart__svg')
     expect(svg?.excerpt).toContain('className')
     expect(svg?.excerpt).not.toMatch(/\n/)
   })

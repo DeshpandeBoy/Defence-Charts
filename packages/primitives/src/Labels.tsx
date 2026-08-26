@@ -21,7 +21,7 @@ import {
   type PlanPolicy,
   type Rect,
   type SeriesFrame,
-} from '@gx/core'
+} from '@shiftcharts/core'
 
 import { classes, roundCoord } from './svg.ts'
 
@@ -58,7 +58,7 @@ export function Labels({
           const offset = offsets?.get(seriesLabelKey(series.id)) ?? 0
           return Number.isFinite(offset) ? (
             <text
-              className={classes('gx-label', className)}
+              className={classes('shiftcharts-label', className)}
               data-label-kind="series"
               data-halo={labelHalo !== 'none' ? labelHalo : undefined}
               x={roundCoord(last.x - policy.regionGap)}
@@ -77,7 +77,7 @@ export function Labels({
         if (!Number.isFinite(offset)) return null
         return (
           <text
-            className={classes('gx-value-label', className)}
+            className={classes('shiftcharts-value-label', className)}
             data-label-kind="value"
             data-halo={labelHalo !== 'none' ? labelHalo : undefined}
             key={i}

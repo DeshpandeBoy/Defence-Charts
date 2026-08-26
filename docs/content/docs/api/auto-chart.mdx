@@ -4,7 +4,7 @@ description: The client boundary that measures a box, resolves a plan, and rende
 ---
 
 ```tsx
-import { AutoChart } from '@gx/react'
+import { AutoChart } from '@shiftcharts/react'
 ```
 
 `AutoChart` carries the package's `"use client"` boundary. It observes one wrapper, derives
@@ -59,7 +59,7 @@ resolver and can force a decided plan field. It is not a second spelling of a th
 example, changing `marks.pointBudget` after resolution does not re-run the renderer decision.
 
 Threshold defaults carry provenance in the core policy source: A-lit is published perception or
-platform research, A-impl is a verified library convention, B is an evidence-consistent GX choice,
+platform research, A-impl is a verified library convention, B is an evidence-consistent ShiftCharts choice,
 and C is an explicit unsourced design choice. Presentation values such as color, stroke, radius,
 and opacity remain CSS custom properties; they never feed `planChart()`.
 
@@ -67,7 +67,7 @@ and opacity remain CSS custom properties; they never feed `planChart()`.
 | --- | ---: | --- |
 | `tickTargetSpacingX` | `100px` | A-lit — Talbot 2010 |
 | `plotHeightOptimal` | `24px` | A-lit — Heer 2009 |
-| `aggregateAfter` | `8` | B — GX choice consistent with legend scannability research |
+| `aggregateAfter` | `8` | B — ShiftCharts choice consistent with legend scannability research |
 | `pointBudget` | `2000` | C — rendering budget, not a perception claim |
 | `minCellSize` | `8px` | C — explicit future heatmap cell-floor choice (`@future`) |
 | `valueRegionMaxShare` | `0.5` | C — explicit unsourced layout budget |
@@ -75,4 +75,4 @@ and opacity remain CSS custom properties; they never feed `planChart()`.
 
 ## Container contract
 
-Give `.gx-auto-chart` a real block size. See [Containment](/docs/concepts/containment).
+Give `.shiftcharts-auto-chart` a real block size. See [Containment](/docs/concepts/containment).

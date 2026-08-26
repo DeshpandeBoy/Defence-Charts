@@ -6,7 +6,7 @@ const withMDX = createMDX();
 const config = {
   agentRules: false,
   reactStrictMode: true,
-  transpilePackages: ['@gx/core', '@gx/primitives', '@gx/react'],
+  transpilePackages: ['@shiftcharts/core', '@shiftcharts/primitives', '@shiftcharts/react'],
 };
 
 export default withMDX(config);

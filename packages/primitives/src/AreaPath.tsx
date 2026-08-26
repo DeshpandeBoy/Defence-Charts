@@ -20,5 +20,5 @@ export type AreaPathProps = {
 
 export function AreaPath({ d, className }: AreaPathProps) {
   if (d === null || d === '') return null
-  return <path className={classes('gx-area', className)} d={d} />
+  return <path className={classes('shiftcharts-area', className)} d={d} />
 }

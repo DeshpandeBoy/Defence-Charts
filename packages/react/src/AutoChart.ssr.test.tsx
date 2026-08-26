@@ -8,7 +8,7 @@
  * `document`, a ref's `.getBoundingClientRect()`, or a layout effect's return value, it would
  * fail on the first render below rather than in a consumer's RSC page six months later.
  *
- * ⚠ This is the same proof `@gx/primitives`' `Chart.test.tsx` makes for the hook-free tree,
+ * ⚠ This is the same proof `@shiftcharts/primitives`' `Chart.test.tsx` makes for the hook-free tree,
  * repeated one layer up where the hooks actually are. It does **not** prove a bundler cannot
  * break the boundary — that is gate **G4**, the Next.js App Router fixture with JS disabled,
  * deferred to share a CI browser job with G11's browser half. This is the half that costs
@@ -21,9 +21,9 @@
  * which is precisely the flash `initialSize` exists to remove.
  */
 
-import { describeShape, planChart, resolveSizeClass, sizeContextFromPixels } from '@gx/core'
-import type { Series } from '@gx/core'
-import { Chart } from '@gx/primitives'
+import { describeShape, planChart, resolveSizeClass, sizeContextFromPixels } from '@shiftcharts/core'
+import type { Series } from '@shiftcharts/core'
+import { Chart } from '@shiftcharts/primitives'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
@@ -66,7 +66,7 @@ describe('with no declared size, the server emits the wrapper and stops', () => 
   const html = renderToStaticMarkup(<AutoChart type="line" data={DATA} title="Revenue" id="t" />)
 
   it('emits the wrapper', () => {
-    expect(html).toContain('class="gx-auto-chart"')
+    expect(html).toContain('class="shiftcharts-auto-chart"')
   })
 
   it('emits no chart, because it has no idea what size to draw one at', () => {
@@ -79,7 +79,7 @@ describe('with no declared size, the server emits the wrapper and stops', () => 
     // guess at a rung, and it is a guess the consumer's own CSS is better placed to make —
     // they are the ones who know how tall the container is. `overflow: hidden` and
     // `display: block` are all `auto-chart.css` asserts about this element.
-    expect(html).toBe('<div class="gx-auto-chart"></div>')
+    expect(html).toBe('<div class="shiftcharts-auto-chart"></div>')
   })
 })
 
@@ -90,7 +90,7 @@ describe('with a declared size, the server emits a real chart at that rung', () 
   )
 
   it('emits an svg inside the wrapper', () => {
-    expect(html).toContain('class="gx-auto-chart"')
+    expect(html).toContain('class="shiftcharts-auto-chart"')
     expect(html).toContain('<svg')
     expect(html).toContain('role="graphics-document"')
   })
@@ -108,7 +108,7 @@ describe('with a declared size, the server emits a real chart at that rung', () 
     const ctx = sizeContextFromPixels(SIZE.width, SIZE.height)
     const plan = planChart('line', ctx, describeShape(DATA))
     const direct = renderToStaticMarkup(
-      <div className="gx-auto-chart">
+      <div className="shiftcharts-auto-chart">
         <Chart plan={plan} data={DATA} ctx={ctx} title="Revenue" id="t" />
       </div>,
     )
@@ -116,7 +116,7 @@ describe('with a declared size, the server emits a real chart at that rung', () 
   })
 
   it('does not serialize the client interaction layer into the static path', () => {
-    expect(html).not.toContain('gx-interaction')
+    expect(html).not.toContain('shiftcharts-interaction')
   })
 
   it('honours nominalCellSize, so a standalone chart can be told what a cell is', () => {
@@ -164,7 +164,7 @@ describe('with a declared size, the server emits a real chart at that rung', () 
         id="t"
       />,
     )
-    expect(themed).toContain('class="gx-auto-chart dashboard-tile"')
+    expect(themed).toContain('class="shiftcharts-auto-chart dashboard-tile"')
   })
 })
 
@@ -180,14 +180,14 @@ describe('the contract the resolver holds is the contract this holds', () => {
       />,
     )
     expect(html).toContain('data-chart-type="donut"')
-    expect(html).toContain('gx-arc')
+    expect(html).toContain('shiftcharts-arc')
   })
 
   it('renders the registered donut type even with no size', () => {
     // `planChart()` still runs synchronously on the first render, before a ResizeObserver
     // supplies a measured box; registered families must remain safe on this path.
     const html = renderToStaticMarkup(<AutoChart type="donut" data={DATA} title="Revenue" id="t" />)
-    expect(html).toBe('<div class="gx-auto-chart"></div>')
+    expect(html).toBe('<div class="shiftcharts-auto-chart"></div>')
   })
 
   it('renders the registered KPI composition on the measured SSR path', () => {
@@ -201,8 +201,8 @@ describe('the contract the resolver holds is the contract this holds', () => {
       />,
     )
     expect(html).toContain('data-chart-type="kpi"')
-    expect(html).toContain('gx-value-display')
-    expect(html).toContain('gx-line')
+    expect(html).toContain('shiftcharts-value-display')
+    expect(html).toContain('shiftcharts-line')
   })
 
   it('renders the registered target-aware progress composition on the measured SSR path', () => {
@@ -216,7 +216,7 @@ describe('the contract the resolver holds is the contract this holds', () => {
       />,
     )
     expect(html).toContain('data-chart-type="progress"')
-    expect(html).toContain('gx-progress')
+    expect(html).toContain('shiftcharts-progress')
     expect(html).toContain('data-progress-current="74"')
     expect(html).toContain('data-progress-target="100"')
     expect(html).toContain('remaining 26')
@@ -233,8 +233,8 @@ describe('the contract the resolver holds is the contract this holds', () => {
       />,
     )
     expect(html).toContain('data-chart-type="heatmap"')
-    expect(html).toContain('gx-heatmap-cell')
+    expect(html).toContain('shiftcharts-heatmap-cell')
     expect(html).toContain('data-heatmap-value="10"')
-    expect(html).toContain('gx-data-table')
+    expect(html).toContain('shiftcharts-data-table')
   })
 })

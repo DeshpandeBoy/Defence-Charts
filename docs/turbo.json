@@ -9,7 +9,7 @@
        * the root `build` task is shaped for a package that emits `dist/` from `src/`, and this
        * site does neither. A package `turbo.json` *replaces* a task definition rather than
        * merging into it, so `dependsOn` is restated here — dropping it would let the docs build
-       * start before `@gx/core` had one.
+       * start before `@shiftcharts/core` had one.
        *
        * ⚠ The `outputs` miss is the half that fails silently, and this site has been carrying it:
        * with the root's `dist/**` and no `.next/**`, turbo records a **cache hit for a build

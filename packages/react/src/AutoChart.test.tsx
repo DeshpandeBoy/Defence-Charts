@@ -23,9 +23,9 @@
  * whatever the stylesheet says. It belongs to the browser half, and it is left there.
  */
 
-import { describeShape, planChart, resolveSizeClass, sizeContextFromPixels } from '@gx/core'
-import type { Series } from '@gx/core'
-import { FakeResizeObserver } from '@gx/testing'
+import { describeShape, planChart, resolveSizeClass, sizeContextFromPixels } from '@shiftcharts/core'
+import type { Series } from '@shiftcharts/core'
+import { FakeResizeObserver } from '@shiftcharts/testing'
 import { act, type ReactNode } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
@@ -118,7 +118,7 @@ function resize(width: number, height: number): void {
 
 /** The wrapper the component measures. */
 function wrapper(): HTMLElement {
-  const el = container.querySelector('.gx-auto-chart')
+  const el = container.querySelector('.shiftcharts-auto-chart')
   if (el === null) throw new Error('the wrapper never rendered')
   return el as HTMLElement
 }
@@ -176,7 +176,7 @@ describe('a measurement produces a chart at that measurement’s rung', () => {
 
     expect(wrapper().children).toHaveLength(1)
     expect(wrapper().firstElementChild?.tagName.toLowerCase()).toBe('figure')
-    expect(wrapper().querySelector('.gx-interaction')).not.toBeNull()
+    expect(wrapper().querySelector('.shiftcharts-interaction')).not.toBeNull()
   })
 
   it('keeps the chart as the wrapper’s only child', () => {
@@ -234,11 +234,11 @@ describe('a measurement produces a chart at that measurement’s rung', () => {
     // that proves the plan is being re-resolved rather than the svg being rescaled.
     mount(chart())
     resize(240, 80)
-    expect(wrapper().querySelector('.gx-line')).not.toBeNull()
+    expect(wrapper().querySelector('.shiftcharts-line')).not.toBeNull()
 
     resize(240, 44)
-    expect(wrapper().querySelector('.gx-line')).toBeNull()
-    expect(wrapper().querySelector('.gx-band')).not.toBeNull()
+    expect(wrapper().querySelector('.shiftcharts-line')).toBeNull()
+    expect(wrapper().querySelector('.shiftcharts-band')).not.toBeNull()
   })
 
   it('agrees exactly with planning the same box by hand', () => {

@@ -148,7 +148,7 @@ describe('the fixture that was rejected', () => {
   it('is defeated by a manifest that every package here already sets', async () => {
     // ⚠ The measurement, pinned. A side-effecting registry module is the textbook
     // tree-shaking defeat and it is the WRONG fixture for this repo: with
-    // `"sideEffects": false` declared — as @gx/core, @gx/testing and the deny fixture all
+    // `"sideEffects": false` declared — as @shiftcharts/core, @shiftcharts/testing and the deny fixture all
     // do — rolldown drops the registry and the probe comes back clean. The shipped fixture
     // uses a genuine value dependency, which no manifest field can remove.
     const { pkg, components: universe } = await fixtureProbe('treeshake-deny')
@@ -180,13 +180,13 @@ describe('symmetricDifference', () => {
 
 describe('the real tree', () => {
   it('reads value exports off the bundle, so types cost nothing', async () => {
-    // ⚠ `@gx/core`'s barrel exports 80 names; 34 of them can cost bytes. Reading the source
+    // ⚠ `@shiftcharts/core`'s barrel exports 80 names; 34 of them can cost bytes. Reading the source
     // instead would make this gate probe 46 type aliases that are erased before a bundler
     // ever sees them, and it would tie G5's correctness to G6's parser.
     const world = await discoverPackages(PACKAGES)
     const core = must(
-      world.find((p) => p.name === '@gx/core'),
-      '@gx/core in the workspace',
+      world.find((p) => p.name === '@shiftcharts/core'),
+      '@shiftcharts/core in the workspace',
     )
     const values = await exportedValues(core.barrel)
     expect(values).toContain('planChart')
@@ -212,8 +212,8 @@ describe('the real tree', () => {
     // `<LinePath>` carries one.
     const world = await discoverPackages(PACKAGES)
     const primitives = must(
-      world.find((p) => p.name === '@gx/primitives'),
-      '@gx/primitives in the workspace',
+      world.find((p) => p.name === '@shiftcharts/primitives'),
+      '@shiftcharts/primitives in the workspace',
     )
     const { components } = await probeSymbol(
       primitives.barrel,

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 
-import { describeShape, planChart, sizeContextFromPixels } from '@gx/core'
+import { describeShape, planChart, sizeContextFromPixels } from '@shiftcharts/core'
 
 import { Chart } from '../../Chart.tsx'
 
@@ -29,9 +29,9 @@ describe('KPI hook-free composition', () => {
     )
 
     expect(html).toContain('data-chart-type="kpi"')
-    expect(html).toContain('gx-value__unit')
+    expect(html).toContain('shiftcharts-value__unit')
     expect(html).toContain(' USD')
-    expect(html).toContain('gx-value__delta')
+    expect(html).toContain('shiftcharts-value__delta')
     expect(html).toContain('+4 (54)')
     expect(html).toContain('target 60')
     expect(html).toContain('status positive')

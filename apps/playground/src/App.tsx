@@ -1,12 +1,12 @@
-import type { SizeClass, SizeContext } from '@gx/core'
+import type { SizeClass, SizeContext } from '@shiftcharts/core'
 import {
   DEFAULT_POLICY,
   DEFAULT_NOMINAL_CELL_SIZE,
   resolveSizeClassWithDeadband,
   sizeContextFromPixels,
   tickCountForWidth,
-} from '@gx/core'
-import { AutoChart, useElementSize } from '@gx/react'
+} from '@shiftcharts/core'
+import { AutoChart, useElementSize } from '@shiftcharts/react'
 import { useEffect, useMemo, useState } from 'react'
 
 import { LadderStrip } from './LadderStrip.tsx'
@@ -28,7 +28,7 @@ import { TextMetricsPanel } from './TextMetricsPanel.tsx'
  * file used to own a local `useElementSize.ts`, call `sizeContextFromPixels()` on its output,
  * pass the result to `resolveForPlayground()`, and hand the plan to `<Chart>` — the measure /
  * plan / render pipeline, spelled out by the app. All three steps now live inside one
- * component in `@gx/react`, and the app supplies data and a box. Whatever this page still
+ * component in `@shiftcharts/react`, and the app supplies data and a box. Whatever this page still
  * computes, it computes to *display*, not to draw.
  *
  * ## ⚠ Two observers, on purpose, and the CSS rule that keeps them honest
@@ -40,7 +40,7 @@ import { TextMetricsPanel } from './TextMetricsPanel.tsx'
  *
  * Those are two different elements, so they are two different content boxes — and if they
  * ever disagreed, every number on the right would be describing a box the chart was not
- * planned for. One rule in `playground.css` pins them together: `.widget .gx-auto-chart`
+ * planned for. One rule in `playground.css` pins them together: `.widget .shiftcharts-auto-chart`
  * gets `block-size: 100%`. That is not a workaround. It is *precisely* the containment
  * contract `<AutoChart>`'s docblock states for every consumer — **give the wrapper a
  * height** — so the playground demonstrates the rule rather than dodging it. Delete that
@@ -95,7 +95,7 @@ export function App() {
         <p>
           Drag the handle at the widget’s bottom-right corner. Everything on the right is a
           pure function of the two numbers a <code>ResizeObserver</code> reports — computed
-          by <code>@gx/core</code>, which has never seen the DOM.
+          by <code>@shiftcharts/core</code>, which has never seen the DOM.
         </p>
         <p className="note">
           Milestone A6 / B1-B3. The chart is a single <code>&lt;AutoChart&gt;</code> — it measures

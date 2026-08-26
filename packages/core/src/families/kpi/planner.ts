@@ -45,7 +45,7 @@ function withValueRegion(plan: ChartPlan): readonly RegionName[] {
 
 function planKPI(input: FamilyPlannerInput<KPIChartType>): ChartPlan {
   if (input.type !== 'kpi') {
-    throw new Error(`@gx/core: KPI planner does not accept chart type '${input.type}'.`)
+    throw new Error(`@shiftcharts/core: KPI planner does not accept chart type '${input.type}'.`)
   }
 
   const seed = KPI_RUNGS[input.ctx.sizeClass]({

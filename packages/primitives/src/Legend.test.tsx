@@ -5,7 +5,7 @@ import {
   type ArcFrame,
   type CellFrame,
   type Series,
-} from '@gx/core'
+} from '@shiftcharts/core'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
@@ -135,8 +135,8 @@ describe('static legend', () => {
     expect(html).toContain('data-legend-family="heatmap"')
     expect(html).toContain('aria-label="Heatmap intensity"')
     expect((html.match(/data-heatmap-intensity=/g) ?? []).length).toBe(5)
-    expect(html).toContain('>Low</span><span class="gx-legend__detail">−2</span>')
-    expect(html).toContain('>High</span><span class="gx-legend__detail">18</span>')
+    expect(html).toContain('>Low</span><span class="shiftcharts-legend__detail">−2</span>')
+    expect(html).toContain('>High</span><span class="shiftcharts-legend__detail">18</span>')
     expect(html).not.toContain('data-series-id=')
   })
 

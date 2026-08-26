@@ -1,9 +1,9 @@
 {
-  "name": "@gx/primitives",
+  "name": "@shiftcharts/primitives",
   "version": "0.0.0",
   "type": "module",
   "license": "MIT",
-  "description": "Hook-free, RSC-safe SVG chart primitives and static line and area renderer.",
+  "description": "Hook-free, RSC-safe SVG renderers for the ShiftCharts Free-v1 chart catalogue.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DeshpandeBoy/Defence-Charts.git",
@@ -34,7 +34,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@gx/core": "workspace:*"
+    "@shiftcharts/core": "workspace:*"
   },
   "peerDependencies": {
     "react": "^19.0.0"

@@ -3,7 +3,7 @@
  *
  * `<rect>` for the same reason `<Axis>` uses one — decision 012. A gridline is the purest
  * case of the trap: it is one CSS length thick, that length is exactly the kind of thing a
- * theme wants to set, and `line { stroke-width: var(--gx-grid-width) }` would have worked,
+ * theme wants to set, and `line { stroke-width: var(--shiftcharts-grid-width) }` would have worked,
  * which is what makes reaching for `<line>` so natural here.
  *
  * ⚠ **The zero rule is the one coordinate in this package that arrives absolute.**
@@ -32,11 +32,11 @@
  *
  * ⚠ **No index suffix, and adding one back would reintroduce the bug.** An index changes when
  * the tick *count* changes, which is exactly the densify case this exists to survive.
- * Uniqueness comes from `computeTicks()` in `@gx/core`, which de-duplicates by value — d3's
+ * Uniqueness comes from `computeTicks()` in `@shiftcharts/core`, which de-duplicates by value — d3's
  * `scale.ticks()` can repeat a value when the domain span is tiny relative to its magnitude.
  */
 
-import { DEFAULT_POLICY, type ComputedTick, type PlanPolicy, type Rect } from '@gx/core'
+import { DEFAULT_POLICY, type ComputedTick, type PlanPolicy, type Rect } from '@shiftcharts/core'
 import type { CSSProperties } from 'react'
 
 import { classes, roundCoord, translate } from './svg.ts'
@@ -77,10 +77,10 @@ export function Grid({
   const yStyle = gridStyle(yDashPhase, yStrokeCap)
 
   return (
-    <g className={classes('gx-grid', className)} transform={translate(plot.x, plot.y)}>
+    <g className={classes('shiftcharts-grid', className)} transform={translate(plot.x, plot.y)}>
       {yTicks.map((tick) => (
         <rect
-          className="gx-grid__line"
+          className="shiftcharts-grid__line"
           data-axis="y"
           key={`y-${tick.value}`}
           data-dash-phase={yDashPhase}
@@ -94,7 +94,7 @@ export function Grid({
       ))}
       {xTicks.map((tick) => (
         <rect
-          className="gx-grid__line"
+          className="shiftcharts-grid__line"
           data-axis="x"
           key={`x-${tick.value}`}
           data-dash-phase={xDashPhase}
@@ -108,7 +108,7 @@ export function Grid({
       ))}
       {zeroLine === null ? null : (
         <rect
-          className="gx-grid__zero"
+          className="shiftcharts-grid__zero"
           x={0}
           // The single subtraction. See the module docblock.
           y={roundCoord(zeroLine - plot.y)}
@@ -122,7 +122,7 @@ export function Grid({
 
 function gridStyle(dashPhase: number, strokeCap: 'butt' | 'round' | 'square'): CSSProperties {
   return {
-    '--gx-grid-dash-offset': String(Number.isFinite(dashPhase) ? dashPhase : 0),
-    '--gx-grid-cap': strokeCap,
+    '--shiftcharts-grid-dash-offset': String(Number.isFinite(dashPhase) ? dashPhase : 0),
+    '--shiftcharts-grid-cap': strokeCap,
   } as CSSProperties
 }

@@ -129,7 +129,7 @@ function progressNarrative(
 
 function planProgress(input: FamilyPlannerInput<ProgressChartType>): ChartPlan {
   if (input.type !== 'progress') {
-    throw new Error(`@gx/core: progress planner does not accept chart type '${input.type}'.`)
+    throw new Error(`@shiftcharts/core: progress planner does not accept chart type '${input.type}'.`)
   }
 
   const seed = PROGRESS_RUNGS[input.ctx.sizeClass]({

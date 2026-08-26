@@ -6,17 +6,17 @@ description: Presentation uses CSS custom properties; plan-changing typography a
 Import the default Emission-Line Rail theme:
 
 ```ts
-import '@gx/tokens/theme.css'
+import '@shiftcharts/tokens/theme.css'
 ```
 
 Then scope ordinary presentation changes to one figure or dashboard region:
 
 ```css
 .finance-widget {
-  --gx-series-1: #b4e4fd;
-  --gx-line-stroke-width: 2px;
-  --gx-point-radius: 3px;
-  --gx-grid-opacity: 0.16;
+  --shiftcharts-series-1: #b4e4fd;
+  --shiftcharts-line-stroke-width: 2px;
+  --shiftcharts-point-radius: 3px;
+  --shiftcharts-grid-opacity: 0.16;
 }
 ```
 
@@ -43,7 +43,7 @@ re-render because they do not change the plan.
 ## B3: thresholds are typed policy, not CSS
 
 Responsive thresholds change what the chart decides to draw, so they live in `PlanPolicy` and travel
-through `<GxConfig>` or chart props as plain serialisable TypeScript values. B3 covers tick density,
+through `<ShiftChartsConfig>` or chart props as plain serialisable TypeScript values. B3 covers tick density,
 value-region height budgets, encoding substitution, point-renderer budgets, and standalone nominal
 cell conversion. They are applied before resolution and therefore remain identical across server
 rendering and hydration.
@@ -67,15 +67,15 @@ overrides must not be read by the planner. This boundary prevents a browser-only
 making the server and client choose different rungs.
 
 Every default threshold carries a provenance tier in the core source: A-lit for published research
-or standards, A-impl for verified shipped-library convention, B for an evidence-consistent GX
+or standards, A-impl for verified shipped-library convention, B for an evidence-consistent ShiftCharts
 derivation, and C for an explicit unsourced choice. Provenance tells you where a number came from;
 it does not turn a presentation token into a plan input.
 
 ## Light theme
 
-Use `data-gx-theme="rail-light"` on the root or `.gx-theme-rail-light` on a subtree. It uses the same
+Use `data-shiftcharts-theme="rail-light"` on the root or `.shiftcharts-theme-rail-light` on a subtree. It uses the same
 six physical wavelengths re-solved against a light ground.
 
-Use `data-gx-theme="neutral"`, `.gx-theme-neutral`, or the explicit light variant
-`data-gx-theme="neutral-light"` / `.gx-theme-neutral-light` when a field-convention visual world is
+Use `data-shiftcharts-theme="neutral"`, `.shiftcharts-theme-neutral`, or the explicit light variant
+`data-shiftcharts-theme="neutral-light"` / `.shiftcharts-theme-neutral-light` when a field-convention visual world is
 preferred. Neutral changes presentation only; it does not change the responsive plan.

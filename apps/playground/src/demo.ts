@@ -1,4 +1,4 @@
-import type { Series } from '@gx/core'
+import type { Series } from '@shiftcharts/core'
 
 /**
  * The playground's demo data.

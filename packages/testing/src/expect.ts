@@ -2,7 +2,7 @@
  * The `expect*` semantic assertion helpers — what a rendered chart is asserted to *be*,
  * rather than what its markup happens to say.
  *
- * `research/30-implementation-plan.md` A4 asks for these **alongside** `@gx/primitives`,
+ * `research/30-implementation-plan.md` A4 asks for these **alongside** `@shiftcharts/primitives`,
  * not after it, for a reason worth restating: Recharts runs 315 spec files on this pattern,
  * and every one of them was cheap to write because the vocabulary existed first. Write the
  * vocabulary after the charts multiply and each new chart type arrives with its own
@@ -72,9 +72,9 @@
  * `./jsdom.d.ts` declares the `'jsdom'` module ambiently, and an ambient declaration only
  * applies to programs that actually contain the file. `packages/testing/tsconfig.json`
  * includes `src/**\/*`, so it is in scope when *this* package typechecks — but nothing
- * imports a `.d.ts`, so when another package resolves `@gx/testing` to this source file
+ * imports a `.d.ts`, so when another package resolves `@shiftcharts/testing` to this source file
  * through its `exports` map, the declaration is left behind and TS7016 comes back in a
- * package that never mentioned jsdom. `@gx/react` is where that first happened.
+ * package that never mentioned jsdom. `@shiftcharts/react` is where that first happened.
  *
  * A triple-slash reference is the mechanism for exactly this: it pulls the declaration into
  * whatever program contains this module. It goes when `jsdom.d.ts` does.
@@ -101,7 +101,7 @@ export interface ParsedChart {
   /** The jsdom document. Escape hatch for an assertion this module has no vocabulary for. */
   readonly document: Document
   /**
-   * The outermost element of the markup handed in — normally `figure.gx-chart`.
+   * The outermost element of the markup handed in — normally `figure.shiftcharts-chart`.
    *
    * ⚠ Not `document.documentElement`. jsdom wraps a fragment in a full document, so
    * `<html>`, `<head>` and `<body>` exist whether or not the caller wrote them; walking from
@@ -180,7 +180,7 @@ export function parseChart(html: string): ParsedChart {
  * matched nothing.
  *
  * ⚠ "found none" on its own sends a reader to the renderer. "found none; the chart contains
- * `gx-area`, `gx-point`" sends them to the plan, which is where the decision that omitted the
+ * `shiftcharts-area`, `shiftcharts-point`" sends them to the plan, which is where the decision that omitted the
  * line actually lives. The distinction is most of this helper's value.
  */
 function describeShape(root: Element): string {
@@ -209,7 +209,7 @@ export interface ParsedLine {
 }
 
 export interface LineExpectation {
-  /** `data-series-id`. Omit to take the first `path.gx-line` anywhere in the chart. */
+  /** `data-series-id`. Omit to take the first `path.shiftcharts-line` anywhere in the chart. */
   readonly series?: string
   /** Expected `M` count — gap count + 1. See `ParsedLine.segments`. */
   readonly segments?: number
@@ -239,23 +239,23 @@ export function expectLine(html: string, expected: LineExpectation = {}): Parsed
   const scope = seriesScope(chart, expected.series)
   const where = expected.series === undefined ? 'the chart' : `series "${expected.series}"`
 
-  const element = scope.querySelector('path.gx-line')
+  const element = scope.querySelector('path.shiftcharts-line')
   if (element === null) {
     throw new Error(
-      `expectLine: no \`path.gx-line\` in ${where}.\n  it contains: ${describeShape(scope)}`,
+      `expectLine: no \`path.shiftcharts-line\` in ${where}.\n  it contains: ${describeShape(scope)}`,
     )
   }
 
   const d = element.getAttribute('d')
   if (d === null || d === '') {
     throw new Error(
-      `expectLine: \`path.gx-line\` in ${where} has ${d === null ? 'no' : 'an empty'} \`d\`. ` +
+      `expectLine: \`path.shiftcharts-line\` in ${where} has ${d === null ? 'no' : 'an empty'} \`d\`. ` +
         'A defined series always produces a path; an empty one means the frame resolved no ' +
         'points, which is a data or domain failure rather than a rendering one.',
     )
   }
 
-  assertPathData(d, `path.gx-line in ${where}`)
+  assertPathData(d, `path.shiftcharts-line in ${where}`)
 
   const segments = (d.match(/M/g) ?? []).length
   if (expected.segments !== undefined && segments !== expected.segments) {
@@ -270,7 +270,7 @@ export function expectLine(html: string, expected: LineExpectation = {}): Parsed
 }
 
 /**
- * The `d`-string contract, shared by `path.gx-line` and anything else that grows a check.
+ * The `d`-string contract, shared by `path.shiftcharts-line` and anything else that grows a check.
  *
  * ⚠ Uppercase `M` only. d3-shape emits absolute commands exclusively, so a lowercase `m`
  * means the path came from somewhere other than the pinned generators — worth failing on
@@ -314,7 +314,7 @@ function assertPathData(d: string, subject: string): void {
 // --- expectAxisTicks ----------------------------------------------------------------------
 
 /**
- * One tick as the **markup** describes it — which is not `ComputedTick` from `@gx/core`, and
+ * One tick as the **markup** describes it — which is not `ComputedTick` from `@shiftcharts/core`, and
  * deliberately so.
  *
  * ⚠ `ComputedTick` has a non-optional `label: string` and `offset: number`. A parsed tick's
@@ -326,7 +326,7 @@ export interface ParsedTick {
   readonly element: Element
   /** `data-value`, verbatim. `null` when the attribute is absent. */
   readonly value: string | null
-  /** The tick label's text, untrimmed. `null` when there is no `text.gx-axis__tick-label`. */
+  /** The tick label's text, untrimmed. `null` when there is no `text.shiftcharts-axis__tick-label`. */
   readonly label: string | null
   /** Px along the axis. `null` when no source below could supply one. */
   readonly offset: number | null
@@ -366,20 +366,20 @@ export function expectAxisTicks(
   }
 
   const chart = parseChart(html)
-  const group = chart.first(`g.gx-axis--${axis}`)
+  const group = chart.first(`g.shiftcharts-axis--${axis}`)
   if (group === null) {
-    const present = chart.all('g.gx-axis').map((el) => el.getAttribute('data-axis') ?? '?')
+    const present = chart.all('g.shiftcharts-axis').map((el) => el.getAttribute('data-axis') ?? '?')
     throw new Error(
-      `expectAxisTicks: no \`g.gx-axis--${axis}\` in the chart. Axis groups present: ` +
+      `expectAxisTicks: no \`g.shiftcharts-axis--${axis}\` in the chart. Axis groups present: ` +
         `${present.length === 0 ? 'none' : present.join(', ')}. An axis the plan turned off ` +
         'is absent rather than empty — check the rung before the renderer.',
     )
   }
 
-  const ticks = Array.from(group.querySelectorAll('g.gx-axis__tick'), (element) => ({
+  const ticks = Array.from(group.querySelectorAll('g.shiftcharts-axis__tick'), (element) => ({
     element,
     value: element.getAttribute('data-value'),
-    label: element.querySelector('text.gx-axis__tick-label')?.textContent ?? null,
+    label: element.querySelector('text.shiftcharts-axis__tick-label')?.textContent ?? null,
     offset: readTickOffset(element, axis),
   }))
 
@@ -438,7 +438,7 @@ function readTickOffset(tick: Element, axis: ChartAxis): number | null {
   }
 
   const attribute = axis === 'x' ? 'x' : 'y'
-  for (const selector of ['rect.gx-axis__tick-mark', 'text.gx-axis__tick-label']) {
+  for (const selector of ['rect.shiftcharts-axis__tick-mark', 'text.shiftcharts-axis__tick-label']) {
     const raw = tick.querySelector(selector)?.getAttribute(attribute)
     if (raw === null || raw === undefined) continue
     const value = Number(raw)
@@ -483,11 +483,11 @@ export function expectPoints(html: string, expected: PointsExpectation = {}): re
   const scope = seriesScope(chart, expected.series)
   const where = expected.series === undefined ? 'the chart' : `series "${expected.series}"`
 
-  const circles = Array.from(scope.querySelectorAll('circle.gx-point'))
+  const circles = Array.from(scope.querySelectorAll('circle.shiftcharts-point'))
 
   if (expected.count !== undefined && circles.length !== expected.count) {
     throw new Error(
-      `expectPoints: ${where} has ${String(circles.length)} \`circle.gx-point\`, expected ` +
+      `expectPoints: ${where} has ${String(circles.length)} \`circle.shiftcharts-point\`, expected ` +
         `${String(expected.count)}. The frame carries every defined point and <PointMarks> ` +
         'filters — so check `marks.points.mode` on the plan before the geometry.',
     )
@@ -511,7 +511,7 @@ function readRequiredCoordinate(
   const raw = circle.getAttribute(attribute)
   if (raw === null) {
     throw new Error(
-      `expectPoints: \`circle.gx-point\` #${String(position)} in ${where} has no \`${attribute}\`. ` +
+      `expectPoints: \`circle.shiftcharts-point\` #${String(position)} in ${where} has no \`${attribute}\`. ` +
         'SVG defaults it to 0, so an unpositioned point renders at the plot origin and looks ' +
         'like a datum rather than a bug.',
     )
@@ -519,7 +519,7 @@ function readRequiredCoordinate(
   const value = Number(raw)
   if (!Number.isFinite(value)) {
     throw new Error(
-      `expectPoints: \`circle.gx-point\` #${String(position)} in ${where} has ` +
+      `expectPoints: \`circle.shiftcharts-point\` #${String(position)} in ${where} has ` +
         `\`${attribute}="${raw}"\`, which is not a finite number. The browser drops the ` +
         'attribute and draws the circle at 0 — silently.',
     )
@@ -573,8 +573,8 @@ export function expectScale(html: string, axis: ChartAxis, bounds: ScaleBounds):
   if (first === null || first === undefined || last === null || last === undefined) {
     throw new Error(
       `expectScale: the ${axis} axis's ticks carry no readable offset. Looked for a ` +
-        '`transform="translate(…)"` on the tick group, then `x`/`y` on its `rect.gx-axis__tick-mark` ' +
-        'and `text.gx-axis__tick-label`. If the renderer positions ticks some fourth way, that is ' +
+        '`transform="translate(…)"` on the tick group, then `x`/`y` on its `rect.shiftcharts-axis__tick-mark` ' +
+        'and `text.shiftcharts-axis__tick-label`. If the renderer positions ticks some fourth way, that is ' +
         'a change of render-tree shape and belongs in a decision record.',
     )
   }
@@ -625,7 +625,7 @@ export function expectScale(html: string, axis: ChartAxis, bounds: ScaleBounds):
  * a specific list of geometry attributes to CSS properties — `cx`/`cy`/`r`/`rx`/`ry`,
  * `x`/`y`/`width`/`height`, and `d` — and those four attributes on `<line>` are the exception:
  * **not settable from CSS in any browser, with no proposal to change it.** So
- * `line { y2: var(--gx-tick-length) }` parses, passes gate **G7**'s token lint (a `var()` was
+ * `line { y2: var(--shiftcharts-tick-length) }` parses, passes gate **G7**'s token lint (a `var()` was
  * used), builds, warns about nothing, shows no devtools strikethrough — and does not change the
  * tick's length. A token can ship, be documented, be counted among the tokens, and do nothing.
  *
@@ -637,7 +637,7 @@ export function expectScale(html: string, axis: ChartAxis, bounds: ScaleBounds):
  * already exists.
  *
  * ⚠ **This check is stricter than decision 012's letter, and it has to be.** The decision bans
- * those attributes when *sourced from a `var(--gx-*)` value*, and leaves `<line>` legal for
+ * those attributes when *sourced from a `var(--shiftcharts-*)` value*, and leaves `<line>` legal for
  * geometry no token controls. By the time markup exists that provenance is gone: the attribute
  * holds a number, and nothing in the DOM says whether a token was meant to reach it. Decision
  * 012 anticipated this and asked for "the stronger form" — the element-set snapshot — for
@@ -647,7 +647,7 @@ export function expectScale(html: string, axis: ChartAxis, bounds: ScaleBounds):
  * ## The snapshot
  *
  * ⚠ Entries are `tag#class`, where `#` is a **separator and not CSS id syntax** —
- * `g#gx-axis.gx-axis--x` is a `<g>` carrying two classes, not an element with that id. These
+ * `g#shiftcharts-axis.shiftcharts-axis--x` is a `<g>` carrying two classes, not an element with that id. These
  * lines are read in a diff, not fed back to `querySelector`.
  *
  * ⚠ Tag names come from `localName`, not `tagName`, because the HTML parser hands back mixed
@@ -660,7 +660,7 @@ export function expectScale(html: string, axis: ChartAxis, bounds: ScaleBounds):
  * prevent for time. A snapshot that reorders itself on a reviewer's laptop is not a gate.
  *
  * ⚠ Counts from `parseChart().root` down, so the `<html>`/`<head>`/`<body>` jsdom synthesises
- * around a fragment never enter the snapshot. It is a **multiset**: three `circle#gx-point`
+ * around a fragment never enter the snapshot. It is a **multiset**: three `circle#shiftcharts-point`
  * elements produce three entries, so a dropped point mark is a diff rather than a nothing.
  */
 export function expectElementSet(html: string): readonly string[] {
@@ -714,12 +714,12 @@ export function expectElementSet(html: string): readonly string[] {
 function seriesScope(chart: ParsedChart, series: string | undefined): Element {
   if (series === undefined) return chart.svg
 
-  const groups = chart.all('g.gx-series')
+  const groups = chart.all('g.shiftcharts-series')
   const match = groups.find((el) => el.getAttribute('data-series-id') === series)
   if (match === undefined) {
     const ids = groups.map((el) => JSON.stringify(el.getAttribute('data-series-id')))
     throw new Error(
-      `no \`g.gx-series\` with \`data-series-id="${series}"\`. Series present: ` +
+      `no \`g.shiftcharts-series\` with \`data-series-id="${series}"\`. Series present: ` +
         `${ids.length === 0 ? 'none' : ids.join(', ')}.`,
     )
   }

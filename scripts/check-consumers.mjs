@@ -17,12 +17,12 @@ const FIXTURE_SOURCE_ROOT = join(REPO_ROOT, 'scripts', 'consumer-fixtures', 'e1.
 const PACKAGES_ROOT = join(REPO_ROOT, 'packages')
 
 export const PACKAGE_NAMES = Object.freeze([
-  '@gx/core',
-  '@gx/grid',
-  '@gx/primitives',
-  '@gx/react',
-  '@gx/testing',
-  '@gx/tokens',
+  '@shiftcharts/core',
+  '@shiftcharts/grid',
+  '@shiftcharts/primitives',
+  '@shiftcharts/react',
+  '@shiftcharts/testing',
+  '@shiftcharts/tokens',
 ])
 
 export const FIXTURE_NAMES = Object.freeze([
@@ -40,12 +40,12 @@ export const CSS_SPECIFIERS = Object.freeze(
 )
 
 const PACKAGE_BUILD_ORDER = Object.freeze([
-  '@gx/core',
-  '@gx/primitives',
-  '@gx/react',
-  '@gx/grid',
-  '@gx/testing',
-  '@gx/tokens',
+  '@shiftcharts/core',
+  '@shiftcharts/primitives',
+  '@shiftcharts/react',
+  '@shiftcharts/grid',
+  '@shiftcharts/testing',
+  '@shiftcharts/tokens',
 ])
 
 const EXTERNAL_PACKAGES = Object.freeze([
@@ -129,7 +129,7 @@ export async function assertFixtureSourceContract() {
   assert(!source.includes('workspace:'), 'fixture source contains a workspace protocol')
   assert(!source.includes('/packages/'), 'fixture source contains a repository package path')
   assert(!source.includes('/src/index.ts'), 'fixture source imports a package source entry')
-  assert(!source.includes('node_modules/@gx'), 'fixture source reaches into node_modules')
+  assert(!source.includes('node_modules/@shiftcharts'), 'fixture source reaches into node_modules')
 
   return {
     files: files.map((file) => relative(FIXTURE_SOURCE_ROOT, file)),
@@ -185,7 +185,7 @@ async function packPackages(root) {
   for (const packageName of PACKAGE_NAMES) {
     const shortName = PACKAGE_SHORT_NAMES[packageName]
     assert(
-      files.some((file) => file.startsWith('gx-' + shortName + '-')),
+      files.some((file) => file.startsWith('shiftcharts-' + shortName + '-')),
       'missing tarball for ' + packageName,
     )
   }
@@ -285,7 +285,7 @@ async function stageFixture(source, destination, packRoot) {
   await cp(source, destination, { recursive: true })
   const manifestPath = join(destination, 'package.json')
   const manifest = (await readFile(manifestPath, 'utf8')).replaceAll(
-    '__GX_TARBALL_ROOT__',
+    '__SHIFTCHARTS_TARBALL_ROOT__',
     packRoot,
   )
   await writeFile(manifestPath, manifest, 'utf8')
@@ -305,7 +305,7 @@ async function assertPackageResolution(fixtureRoot, packageName) {
 
   assert(entry.startsWith(realFixtureRoot), packageName + ' resolved outside the fixture')
   assert(
-    entry.includes(join('node_modules', '@gx', packageName.slice(packageName.indexOf('/') + 1))),
+    entry.includes(join('node_modules', '@shiftcharts', packageName.slice(packageName.indexOf('/') + 1))),
     packageName + ' is not an extracted packed install',
   )
   assert(entry.includes('/dist/'), packageName + ' did not resolve to dist')
@@ -355,16 +355,16 @@ async function assertInstalledPackageMaps(fixtureRoot) {
  */
 async function installPackedFixture(fixtureRoot, packRoot) {
   const nodeModules = join(fixtureRoot, 'node_modules')
-  const gxModules = join(nodeModules, '@gx')
-  await mkdir(gxModules, { recursive: true })
+  const shiftchartsModules = join(nodeModules, '@shiftcharts')
+  await mkdir(shiftchartsModules, { recursive: true })
   const tarballs = (await readdir(packRoot)).filter((file) => file.endsWith('.tgz'))
 
   for (const packageName of PACKAGE_NAMES) {
     const shortName = PACKAGE_SHORT_NAMES[packageName]
     if (shortName === undefined) throw new Error('unknown package: ' + packageName)
-    const tarball = tarballs.find((file) => file.startsWith('gx-' + shortName + '-'))
+    const tarball = tarballs.find((file) => file.startsWith('shiftcharts-' + shortName + '-'))
     if (tarball === undefined) throw new Error('missing tarball for ' + packageName)
-    const destination = join(gxModules, shortName)
+    const destination = join(shiftchartsModules, shortName)
     await mkdir(destination, { recursive: true })
     await execFileAsync('tar', [
       '-xzf',
@@ -461,7 +461,7 @@ async function assertNextRscOutput(fixtureRoot) {
   const serverHtml = html.find((value) => value.includes('Packed Next RSC chart'))
   const clientHtml = html.find((value) => value.includes('Packed Next client boundary'))
   if (serverHtml === undefined) throw new Error('Next server route did not render its RSC chart HTML')
-  assert(serverHtml.includes('gx-chart__svg'), 'Next RSC route has no chart SVG')
+  assert(serverHtml.includes('shiftcharts-chart__svg'), 'Next RSC route has no chart SVG')
   assert(serverHtml.includes('graphics-document'), 'Next RSC route has no graphics role')
   if (clientHtml === undefined) throw new Error('Next client-boundary route was not prerendered')
 
@@ -469,7 +469,7 @@ async function assertNextRscOutput(fixtureRoot) {
     (await allFiles(join(fixtureRoot, '.next', 'static'))).filter((file) => file.endsWith('.js')).map((file) => readFile(file, 'utf8')),
   )
   const clientBundle = javascript.join('\n')
-  assert(clientBundle.includes('gx-auto-chart'), 'Next client bundle lacks the explicit @gx/react boundary')
+  assert(clientBundle.includes('shiftcharts-auto-chart'), 'Next client bundle lacks the explicit @shiftcharts/react boundary')
   assert(!clientBundle.includes('workspace:'), 'Next client bundle retained workspace metadata')
   assert(!clientBundle.includes('/packages/core/'), 'Next client bundle contains a source package import')
   assert(!clientBundle.includes('/packages/react/'), 'Next client bundle contains a source client import')
@@ -505,7 +505,7 @@ async function installAndBuildFixture(fixtureRoot, fixtureName) {
  */
 export async function runConsumerProof() {
   const source = await assertFixtureSourceContract()
-  const temporaryRoot = await mkdtemp(join(tmpdir(), 'gx-e1-3-consumers-'))
+  const temporaryRoot = await mkdtemp(join(tmpdir(), 'shiftcharts-e1-3-consumers-'))
   const packRoot = join(temporaryRoot, 'tarballs')
   const consumerRoot = join(temporaryRoot, 'consumers')
   let succeeded = false

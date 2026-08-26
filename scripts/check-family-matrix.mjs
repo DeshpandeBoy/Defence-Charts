@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url'
 import { openChromium } from './check-containment.mjs'
 
 const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
-const ORIGIN = process.env.GX_FAMILY_MATRIX_ORIGIN ?? 'http://127.0.0.1:5186/'
+const ORIGIN = process.env.SHIFTCHARTS_FAMILY_MATRIX_ORIGIN ?? 'http://127.0.0.1:5186/'
 const EXPECTED_SOURCE = REPO_ROOT
 const RESULT_PATH = fileURLToPath(new URL('./results/d0.2-family-matrix.latest.json', import.meta.url))
 const SCREENSHOT_PATH = fileURLToPath(new URL('./results/d0.2-family-matrix.latest.png', import.meta.url))
@@ -32,7 +32,7 @@ async function ensureServer() {
       '--yes',
       'pnpm@10.34.5',
       '--filter',
-      '@gx/playground',
+      '@shiftcharts/playground',
       'exec',
       'vite',
       '--config',
@@ -44,7 +44,7 @@ async function ensureServer() {
       stdio: ['ignore', 'pipe', 'pipe'],
       env: {
         ...process.env,
-        GX_FAMILY_MATRIX_PORT: new URL(ORIGIN).port || '5186',
+        SHIFTCHARTS_FAMILY_MATRIX_PORT: new URL(ORIGIN).port || '5186',
       },
     },
   )
@@ -100,18 +100,18 @@ async function openFixture(page) {
   if (source !== EXPECTED_SOURCE) {
     throw new Error(
       'family matrix server belongs to a different checkout: expected ' + EXPECTED_SOURCE + ', got ' + (source ?? '<missing marker>') +
-        '. Start the fixture with GX_FAMILY_MATRIX_ORIGIN on an isolated port.',
+        '. Start the fixture with SHIFTCHARTS_FAMILY_MATRIX_ORIGIN on an isolated port.',
     )
   }
   await page.waitForSelector('[data-family-case="line-stage"] svg[role="graphics-document"]')
-  await page.waitForSelector('[data-family-case="bar-stage"] .gx-bar')
-  await page.waitForSelector('[data-family-case="scatter-stage"] .gx-scatter-point')
-  await page.waitForSelector('[data-family-case="donut-stage"] .gx-arc')
-  await page.waitForSelector('[data-family-case="kpi-stage"] .gx-value')
-  await page.waitForSelector('[data-family-case="progress-stage"] .gx-progress')
-  await page.waitForSelector('[data-family-case="heatmap-stage"] .gx-heatmap-cell')
-  await page.waitForSelector('[data-family-case="funnel-stage"] .gx-funnel-stage')
-  await page.waitForSelector('[data-family-resize-probe] .gx-auto-chart .gx-chart')
+  await page.waitForSelector('[data-family-case="bar-stage"] .shiftcharts-bar')
+  await page.waitForSelector('[data-family-case="scatter-stage"] .shiftcharts-scatter-point')
+  await page.waitForSelector('[data-family-case="donut-stage"] .shiftcharts-arc')
+  await page.waitForSelector('[data-family-case="kpi-stage"] .shiftcharts-value')
+  await page.waitForSelector('[data-family-case="progress-stage"] .shiftcharts-progress')
+  await page.waitForSelector('[data-family-case="heatmap-stage"] .shiftcharts-heatmap-cell')
+  await page.waitForSelector('[data-family-case="funnel-stage"] .shiftcharts-funnel-stage')
+  await page.waitForSelector('[data-family-resize-probe] .shiftcharts-auto-chart .shiftcharts-chart')
   await settle(page)
 }
 
@@ -133,56 +133,56 @@ async function runStaticMatrix(page) {
     facet: card.getAttribute('data-plan-facet'),
     svg: card.querySelector('svg[role="graphics-document"]') !== null,
     title: card.querySelector('svg title') !== null,
-    interactionMarkup: card.querySelector('.gx-interaction') !== null,
-    bars: card.querySelectorAll('.gx-bar').length,
-    scatterPoints: card.querySelectorAll('.gx-scatter-point').length,
-    arcs: card.querySelectorAll('.gx-arc').length,
-    otherArcs: card.querySelectorAll('.gx-arc--other').length,
-    sliceArcColors: [...card.querySelectorAll('.gx-arc[data-slice-index]')].map((arc) => ({
+    interactionMarkup: card.querySelector('.shiftcharts-interaction') !== null,
+    bars: card.querySelectorAll('.shiftcharts-bar').length,
+    scatterPoints: card.querySelectorAll('.shiftcharts-scatter-point').length,
+    arcs: card.querySelectorAll('.shiftcharts-arc').length,
+    otherArcs: card.querySelectorAll('.shiftcharts-arc--other').length,
+    sliceArcColors: [...card.querySelectorAll('.shiftcharts-arc[data-slice-index]')].map((arc) => ({
       index: Number(arc.getAttribute('data-slice-index')),
       kind: arc.getAttribute('data-slice-kind'),
       fill: getComputedStyle(arc).fill,
     })),
-    sliceKeyColors: [...card.querySelectorAll('.gx-compact-key__swatch[data-slice-index]')].map((swatch) => ({
+    sliceKeyColors: [...card.querySelectorAll('.shiftcharts-compact-key__swatch[data-slice-index]')].map((swatch) => ({
       index: Number(swatch.getAttribute('data-slice-index')),
       kind: swatch.getAttribute('data-slice-kind'),
       fill: getComputedStyle(swatch).fill,
     })),
-    sliceLegendColors: [...card.querySelectorAll('[data-legend-family="donut"] .gx-legend__item[data-slice-index]')].map((item) => ({
+    sliceLegendColors: [...card.querySelectorAll('[data-legend-family="donut"] .shiftcharts-legend__item[data-slice-index]')].map((item) => ({
       index: Number(item.getAttribute('data-slice-index')),
       kind: item.getAttribute('data-slice-kind'),
-      fill: getComputedStyle(item.querySelector('.gx-legend__symbol')).backgroundColor,
+      fill: getComputedStyle(item.querySelector('.shiftcharts-legend__symbol')).backgroundColor,
     })),
-    progress: card.querySelectorAll('.gx-progress').length,
-    progressFills: card.querySelectorAll('.gx-progress__fill').length,
-    progressStates: card.querySelectorAll('.gx-progress__state').length,
-    progressValue: card.querySelectorAll('.gx-progress__value').length,
-    progressValueText: card.querySelector('.gx-progress__value')?.textContent?.trim() ?? null,
-    progressOrientation: card.querySelector('.gx-progress')?.getAttribute('data-progress-orientation') ?? null,
-    heatmapCells: card.querySelectorAll('.gx-heatmap-cell').length,
-    heatmapMissing: card.querySelectorAll('.gx-heatmap-cell[data-heatmap-state="missing"]').length,
-    heatmapIntensity: card.querySelectorAll('.gx-heatmap-cell[data-heatmap-intensity]').length,
+    progress: card.querySelectorAll('.shiftcharts-progress').length,
+    progressFills: card.querySelectorAll('.shiftcharts-progress__fill').length,
+    progressStates: card.querySelectorAll('.shiftcharts-progress__state').length,
+    progressValue: card.querySelectorAll('.shiftcharts-progress__value').length,
+    progressValueText: card.querySelector('.shiftcharts-progress__value')?.textContent?.trim() ?? null,
+    progressOrientation: card.querySelector('.shiftcharts-progress')?.getAttribute('data-progress-orientation') ?? null,
+    heatmapCells: card.querySelectorAll('.shiftcharts-heatmap-cell').length,
+    heatmapMissing: card.querySelectorAll('.shiftcharts-heatmap-cell[data-heatmap-state="missing"]').length,
+    heatmapIntensity: card.querySelectorAll('.shiftcharts-heatmap-cell[data-heatmap-intensity]').length,
     heatmapLegendItems: card.querySelectorAll('[data-legend-family="heatmap"] [data-heatmap-intensity]').length,
     heatmapLegendText: card.querySelector('[data-legend-family="heatmap"]')?.textContent?.trim() ?? null,
-    yAxisLabels: [...card.querySelectorAll('.gx-axis--y .gx-axis__tick-label')].map((label) => label.textContent?.trim() ?? ''),
-    funnelStages: card.querySelectorAll('.gx-funnel-stage').length,
-    funnelLabels: card.querySelectorAll('.gx-funnel-stage__text').length,
-    funnelLabelTexts: [...card.querySelectorAll('.gx-funnel-stage__text')].map((label) => label.textContent?.trim() ?? ''),
+    yAxisLabels: [...card.querySelectorAll('.shiftcharts-axis--y .shiftcharts-axis__tick-label')].map((label) => label.textContent?.trim() ?? ''),
+    funnelStages: card.querySelectorAll('.shiftcharts-funnel-stage').length,
+    funnelLabels: card.querySelectorAll('.shiftcharts-funnel-stage__text').length,
+    funnelLabelTexts: [...card.querySelectorAll('.shiftcharts-funnel-stage__text')].map((label) => label.textContent?.trim() ?? ''),
     funnelValues: card.querySelectorAll('[data-funnel-stage-value]').length,
     funnelDropoffs: card.querySelectorAll('[data-funnel-stage-dropoff]').length,
     funnelSummary: card.querySelectorAll('[data-funnel-part="summary"]').length,
-    valueUnits: card.querySelectorAll('.gx-value__unit').length,
-    valueTargets: card.querySelectorAll('.gx-value__target').length,
-    valueStatuses: card.querySelectorAll('.gx-value__status').length,
-    valueProgress: card.querySelectorAll('.gx-value__progress').length,
-    valueText: card.querySelector('.gx-value')?.textContent?.trim() ?? null,
-    compactKeyLabels: [...card.querySelectorAll('.gx-compact-key__label')].map((label) => label.textContent?.trim() ?? ''),
+    valueUnits: card.querySelectorAll('.shiftcharts-value__unit').length,
+    valueTargets: card.querySelectorAll('.shiftcharts-value__target').length,
+    valueStatuses: card.querySelectorAll('.shiftcharts-value__status').length,
+    valueProgress: card.querySelectorAll('.shiftcharts-value__progress').length,
+    valueText: card.querySelector('.shiftcharts-value')?.textContent?.trim() ?? null,
+    compactKeyLabels: [...card.querySelectorAll('.shiftcharts-compact-key__label')].map((label) => label.textContent?.trim() ?? ''),
     legendFamily: card.querySelector('[data-legend-family]')?.getAttribute('data-legend-family') ?? null,
-    legendLabels: [...card.querySelectorAll('[data-legend-family] .gx-legend__label')].map((label) => label.textContent?.trim() ?? ''),
-    tableMetricHeaders: card.querySelectorAll('.gx-data-table__table th').length,
-    tableHasProgressSemantics: [...card.querySelectorAll('.gx-data-table__table th')].some((header) =>
+    legendLabels: [...card.querySelectorAll('[data-legend-family] .shiftcharts-legend__label')].map((label) => label.textContent?.trim() ?? ''),
+    tableMetricHeaders: card.querySelectorAll('.shiftcharts-data-table__table th').length,
+    tableHasProgressSemantics: [...card.querySelectorAll('.shiftcharts-data-table__table th')].some((header) =>
       ['Remaining', 'Over target', 'Progress state'].includes(header.textContent?.trim() ?? '')),
-    seriesIds: [...card.querySelectorAll('.gx-series[data-series-id]')].map((series) => series.getAttribute('data-series-id')),
+    seriesIds: [...card.querySelectorAll('.shiftcharts-series[data-series-id]')].map((series) => series.getAttribute('data-series-id')),
   })))
 
   if (observed.length !== 60) throw new Error('expected 60 line/area/bar/timebar/scatter/donut/kpi/progress/heatmap/funnel cards, got ' + observed.length)
@@ -378,7 +378,7 @@ async function runVisualInformation(browser, label, viewport) {
 
       return cards.map((card) => {
         const cardRect = card.getBoundingClientRect()
-        const summary = card.querySelector('.gx-data-table__summary')
+        const summary = card.querySelector('.shiftcharts-data-table__summary')
         const summaryRect = summary !== null && visible(summary) ? summary.getBoundingClientRect() : null
         const chartNodes = [...card.querySelectorAll(nodes)].filter(visible)
         const outOfCard = chartNodes
@@ -406,7 +406,7 @@ async function runVisualInformation(browser, label, viewport) {
               text: element.textContent?.trim() ?? '',
               rect: snapshot(rect),
             }))
-        const labels = [...card.querySelectorAll('.gx-label, .gx-value-label')]
+        const labels = [...card.querySelectorAll('.shiftcharts-label, .shiftcharts-value-label')]
           .filter(visible)
           .map((element) => ({ element, rect: element.getBoundingClientRect() }))
         const labelOverlaps = []
@@ -429,7 +429,7 @@ async function runVisualInformation(browser, label, viewport) {
         }
         const axisLabels = card.getAttribute('data-family-type') === 'heatmap' &&
           ['canvas', 'stage'].includes(card.getAttribute('data-family-rung') ?? '') && viewport.width <= 390
-          ? [...card.querySelectorAll('.gx-axis--x .gx-axis__tick-label')].filter(visible)
+          ? [...card.querySelectorAll('.shiftcharts-axis--x .shiftcharts-axis__tick-label')].filter(visible)
             .map((element) => ({ element, rect: element.getBoundingClientRect() }))
           : []
         const axisLabelOverlaps = []
@@ -501,7 +501,7 @@ async function runStates(page) {
   const observed = await page.locator('[data-family-state]').evaluateAll((states) => states.map((state) => ({
     state: state.getAttribute('data-family-state'),
     chart: state.querySelector('svg[role="graphics-document"]') !== null,
-    seriesCount: state.querySelectorAll('.gx-series[data-series-id]').length,
+    seriesCount: state.querySelectorAll('.shiftcharts-series[data-series-id]').length,
     alert: state.querySelector('[role="alert"]') !== null,
     text: state.textContent?.trim() ?? '',
   })))
@@ -519,17 +519,17 @@ async function runTheme(page) {
   const before = await page.evaluate(() => {
     const root = document.querySelector('[data-family-matrix]')
     return {
-      theme: root?.getAttribute('data-gx-theme'),
+      theme: root?.getAttribute('data-shiftcharts-theme'),
       surface: root === null ? '' : getComputedStyle(root).backgroundColor,
       text: root === null ? '' : getComputedStyle(root).color,
     }
   })
   await page.locator('[data-family-theme-toggle]').click()
-  await page.waitForFunction(() => document.querySelector('[data-family-matrix]')?.getAttribute('data-gx-theme') === 'neutral-light')
+  await page.waitForFunction(() => document.querySelector('[data-family-matrix]')?.getAttribute('data-shiftcharts-theme') === 'neutral-light')
   const light = await page.evaluate(() => {
     const root = document.querySelector('[data-family-matrix]')
     return {
-      theme: root?.getAttribute('data-gx-theme'),
+      theme: root?.getAttribute('data-shiftcharts-theme'),
       surface: root === null ? '' : getComputedStyle(root).backgroundColor,
       text: root === null ? '' : getComputedStyle(root).color,
     }
@@ -545,8 +545,8 @@ async function probe(page) {
   return page.locator('[data-family-resize-probe]').evaluate((probe) => ({
     width: Math.round(probe.getBoundingClientRect().width),
     height: Math.round(probe.getBoundingClientRect().height),
-    sizeClass: probe.querySelector('.gx-chart')?.getAttribute('data-size-class') ?? null,
-    seriesIds: [...probe.querySelectorAll('.gx-series[data-series-id]')].map((series) => series.getAttribute('data-series-id')),
+    sizeClass: probe.querySelector('.shiftcharts-chart')?.getAttribute('data-size-class') ?? null,
+    seriesIds: [...probe.querySelectorAll('.shiftcharts-series[data-series-id]')].map((series) => series.getAttribute('data-series-id')),
   }))
 }
 
@@ -557,7 +557,7 @@ async function setProbe(page, width, height, expectedClass) {
     probe.style.width = nextWidth + 'px'
     probe.style.height = nextHeight + 'px'
   }, { nextWidth: width, nextHeight: height })
-  await page.waitForFunction((sizeClass) => document.querySelector('[data-family-resize-probe] .gx-chart')?.getAttribute('data-size-class') === sizeClass, expectedClass)
+  await page.waitForFunction((sizeClass) => document.querySelector('[data-family-resize-probe] .shiftcharts-chart')?.getAttribute('data-size-class') === sizeClass, expectedClass)
   await settle(page)
   return probe(page)
 }
@@ -599,7 +599,7 @@ async function runMedia(browser, label, options) {
     const observed = await page.evaluate(() => {
       const chart = document.querySelector('[data-family-case="line-stage"]')
       const root = document.querySelector('[data-family-matrix]')
-      const line = chart?.querySelector('.gx-line')
+      const line = chart?.querySelector('.shiftcharts-line')
       const card = chart
       return {
         reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,

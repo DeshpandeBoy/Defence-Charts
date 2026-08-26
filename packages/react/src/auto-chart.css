@@ -1,5 +1,5 @@
 /*
- * @gx/react — the wrapper `<AutoChart>` measures.
+ * @shiftcharts/react — the wrapper `<AutoChart>` measures.
  *
  * ⚠ Three declarations, and every one of them is a containment measure rather than a
  * cosmetic choice. `research/30-implementation-plan.md` A5: *"a deadband cannot fix this
@@ -7,17 +7,17 @@
  * library can put it.
  *
  * ⚠ This file is NOT in the token gate's allowlist directory. Every colour and every length
- * it could contain would have to be a `var(--gx-*)`; it contains neither, which is the
+ * it could contain would have to be a `var(--shiftcharts-*)`; it contains neither, which is the
  * cheapest way to satisfy `scripts/check-tokens.mjs` and also the honest state of things —
  * a measurement wrapper has no appearance.
  *
- * ⚠ Cascade layer `gx.theme`, so everything here loses to any unlayered consumer rule. A
+ * ⚠ Cascade layer `shiftcharts.theme`, so everything here loses to any unlayered consumer rule. A
  * consumer who needs `overflow: visible` can have it, in one line, with no `!important` —
  * and takes on the loop themselves, which is the correct place for that decision to sit.
  */
 
-@layer gx.theme {
-  .gx-auto-chart {
+@layer shiftcharts.theme {
+  .shiftcharts-auto-chart {
     /*
      * ⚠ `block`, so the wrapper never acquires an inline-layout baseline gap. Left inline,
      * the box is a few px taller than the content it holds, and those few px are reported
@@ -34,7 +34,7 @@
      * goes away; the box grows back. That oscillates rather than converging, and it is
      * driven entirely by content the chart drew.
      *
-     * It is not hypothetical here. `@gx/primitives`' direct end-of-line series labels are
+     * It is not hypothetical here. `@shiftcharts/primitives`' direct end-of-line series labels are
      * drawn past the plot's right edge — `resolvePlotBox()` reserves a gutter on the left
      * and nothing on the right until the grid/chrome work grows one — so at Canvas and above there
      * is real overhang to clip. `hidden` converts that shortfall into visible clipping,

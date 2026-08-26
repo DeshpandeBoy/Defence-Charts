@@ -1,5 +1,5 @@
-import { describeShape, planChart, sizeContextFromPixels } from '@gx/core'
-import { Chart } from '@gx/primitives'
+import { describeShape, planChart, sizeContextFromPixels } from '@shiftcharts/core'
+import { Chart } from '@shiftcharts/primitives'
 
 import { DATA } from './data'
 

@@ -7,7 +7,7 @@
  * the cost showed up twice in one sitting: `theme.css` credited the gridline alpha to
  * Talbot 2010 from A1 onward when `10-responsive-ladder.md:373` attributes it to Heer &
  * Bostock — Talbot is the *tick-spacing* work and says nothing about alpha — and the
- * hand-maintained `GX_TOKENS` had fallen seven names behind the stylesheet, missing every
+ * hand-maintained `SHIFTCHARTS_TOKENS` had fallen seven names behind the stylesheet, missing every
  * A6 motion token. Neither is the kind of mistake review catches; both are the kind a
  * generator makes impossible.
  */
@@ -35,7 +35,7 @@ describe('the generated stylesheet', () => {
     // ⚠ The count, not just the equality above — a generator that dropped a whole group
     // would still be "current" with itself. This is the assertion that notices.
     const declared = [...(await collectDeclaredTokens(THEMES_DIR))]
-    const authored = TOKEN_GROUPS.flatMap((g) => g.tokens).map((t) => `--gx-${t.name}`)
+    const authored = TOKEN_GROUPS.flatMap((g) => g.tokens).map((t) => `--shiftcharts-${t.name}`)
     expect(new Set(authored).size).toBe(authored.length)
     expect(authored.every((name) => declared.includes(name))).toBe(true)
   })
@@ -51,14 +51,14 @@ describe('the generated name list', () => {
   /**
    * ⚠ **This is why the list is parsed off disk rather than derived from `tokens.ts`.**
    * `typography.css` is a *different* generator's output — `generate-typography-css.mjs`,
-   * from the fitted metrics in `@gx/core` — and its tokens are just as public. Deriving
+   * from the fitted metrics in `@shiftcharts/core` — and its tokens are just as public. Deriving
    * the list from the typed tree alone would silently exclude them, which is the same
    * seven-token hole in a new shape.
    */
   it('spans the other generator too', async () => {
-    const { GX_TOKENS } = await import('../packages/tokens/src/tokens.generated.ts')
+    const { SHIFTCHARTS_TOKENS } = await import('../packages/tokens/src/tokens.generated.ts')
     const authored = new Set(TOKEN_GROUPS.flatMap((g) => g.tokens).map((t) => t.name))
-    const fromTypography = GX_TOKENS.filter((name) => !authored.has(name))
+    const fromTypography = SHIFTCHARTS_TOKENS.filter((name) => !authored.has(name))
     expect(fromTypography).toContain('font-family')
     expect(fromTypography.length).toBeGreaterThan(0)
   })
@@ -76,7 +76,7 @@ describe('the theme variants', () => {
     const css = await readFile(CSS_TARGET, 'utf8')
     for (const variant of THEME_VARIANTS) {
       for (const token of variant.overrides) {
-        const line = `--gx-${token.name}: ${token.value};`
+        const line = `--shiftcharts-${token.name}: ${token.value};`
         expect(css.split(line).length - 1, `${token.name} should appear twice`).toBe(2)
       }
     }

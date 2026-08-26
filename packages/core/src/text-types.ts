@@ -79,7 +79,7 @@ export type VerticalMetrics = {
  * ⚠ **This is a plan input, not a hidden constant** (`research/41-text-metrics.md`). Six
  * CSS properties change the outcome of a fit-or-collide decision — `font-family`,
  * `font-size`, `font-weight`, `font-feature-settings`, `font-stretch`, `letter-spacing` —
- * so a consumer who overrides `--gx-font-family` with a wider face and cannot also move
+ * so a consumer who overrides `--shiftcharts-font-family` with a wider face and cannot also move
  * the metrics would get a planner that says the labels fit while the browser collides
  * them. That is decision 10's failure mode arriving through the other door, which is why
  * The metrics travel atomically with those rendered values as `PlanPolicy.typography`.
@@ -122,7 +122,7 @@ export type FontMetrics = {
   /**
    * Multiplier applied to every measurement, to absorb fallback-face drift.
    *
-   * ⚠ The library must not ship a multi-hundred-KB variable font, so `--gx-font-family`
+   * ⚠ The library must not ship a multi-hundred-KB variable font, so `--shiftcharts-font-family`
    * names the reference face with a system fallback stack — which means **a consumer who
    * does not load the reference face renders in a fallback face against a reference-face
    * table.** The error direction is the whole point: if the actual face is NARROWER than
@@ -139,7 +139,7 @@ export type FontMetrics = {
  * The complete typography input to a fit-or-collide decision.
  *
  * Atomic on purpose: `PlanPolicy` accepts this object whole, never as a deep partial.
- * `@gx/tokens` generates the corresponding CSS custom properties from the default object,
+ * `@shiftcharts/tokens` generates the corresponding CSS custom properties from the default object,
  * so these six values and the table measured under them have one authored source.
  */
 export type FittingTypography = {

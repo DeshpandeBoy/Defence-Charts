@@ -6,7 +6,7 @@
  * RGL grid, shell chrome, keyboard layer, and dashboard environment matrix.
  *
  * Browser acquisition is delegated to G11's `openChromium()`. That keeps package resolution,
- * Chromium launch diagnosis, `GX_REQUIRE_BROWSER=1`, and the local skip policy in one place.
+ * Chromium launch diagnosis, `SHIFTCHARTS_REQUIRE_BROWSER=1`, and the local skip policy in one place.
  */
 
 import { spawn } from 'node:child_process'
@@ -17,7 +17,7 @@ import { openChromium } from './check-containment.mjs'
 /* eslint-disable no-undef -- DOM globals below are serialized into Playwright page callbacks. */
 
 const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
-const ORIGIN = process.env.GX_GRID_ORIGIN ?? 'http://127.0.0.1:5184/'
+const ORIGIN = process.env.SHIFTCHARTS_GRID_ORIGIN ?? 'http://127.0.0.1:5184/'
 const VIEWPORT = { width: 1400, height: 1100 }
 const EXPECTED_IDS = ['target', 'anchor', 'right', 'bottom', 'side']
 const EXPECTED_FOOTPRINTS = ['1x1', '2x1', '3x1', '3x3', '6x5', '9x6']
@@ -119,7 +119,7 @@ async function ensureGridServer() {
       '--yes',
       'pnpm@10.34.5',
       '--filter',
-      '@gx/playground',
+      '@shiftcharts/playground',
       'exec',
       'vite',
       '--config',
@@ -160,13 +160,13 @@ async function settle(page) {
 
 async function readFixture(page) {
   return page.evaluate(() => {
-    const root = document.querySelector('[data-gx-fixture="grid"]')
+    const root = document.querySelector('[data-shiftcharts-fixture="grid"]')
     if (root === null) throw new Error('grid fixture root is missing')
-    const items = Array.from(root.querySelectorAll('[data-gx-slot]')).map((slot) => {
+    const items = Array.from(root.querySelectorAll('[data-shiftcharts-slot]')).map((slot) => {
       const gridItem = slot.closest('.react-grid-item')
-      const shell = slot.querySelector('.gx-widget-shell')
-      const content = slot.querySelector('[data-gx-widget-content]')
-      const auto = slot.querySelector('.gx-auto-chart')
+      const shell = slot.querySelector('.shiftcharts-widget-shell')
+      const content = slot.querySelector('[data-shiftcharts-widget-content]')
+      const auto = slot.querySelector('.shiftcharts-auto-chart')
       const rectOf = (element) => element === null ? null : (() => {
         const value = element.getBoundingClientRect()
         return {
@@ -181,8 +181,8 @@ async function readFixture(page) {
         }
       })()
       return {
-        id: slot.getAttribute('data-gx-slot'),
-        footprint: slot.getAttribute('data-gx-footprint'),
+        id: slot.getAttribute('data-shiftcharts-slot'),
+        footprint: slot.getAttribute('data-shiftcharts-footprint'),
         outer: rectOf(gridItem),
         shell: rectOf(shell),
         content: rectOf(content),
@@ -190,26 +190,26 @@ async function readFixture(page) {
         visible: gridItem !== null && rectOf(gridItem)?.width > 0 && rectOf(gridItem)?.height > 0,
       }
     })
-    const ancestor = document.querySelector('[data-gx-ancestor-box]')
+    const ancestor = document.querySelector('[data-shiftcharts-ancestor-box]')
     return {
-      mode: root.getAttribute('data-gx-mode'),
-      ancestor: root.getAttribute('data-gx-ancestor'),
-      hidden: root.getAttribute('data-gx-hidden'),
-      zeroSize: root.getAttribute('data-gx-zero-size'),
-      overflow: root.getAttribute('data-gx-overflow'),
-      transform: root.getAttribute('data-gx-transform'),
-      zoom: root.getAttribute('data-gx-zoom'),
-      direction: root.getAttribute('data-gx-direction'),
-      events: root.getAttribute('data-gx-events') ?? '',
+      mode: root.getAttribute('data-shiftcharts-mode'),
+      ancestor: root.getAttribute('data-shiftcharts-ancestor'),
+      hidden: root.getAttribute('data-shiftcharts-hidden'),
+      zeroSize: root.getAttribute('data-shiftcharts-zero-size'),
+      overflow: root.getAttribute('data-shiftcharts-overflow'),
+      transform: root.getAttribute('data-shiftcharts-transform'),
+      zoom: root.getAttribute('data-shiftcharts-zoom'),
+      direction: root.getAttribute('data-shiftcharts-direction'),
+      events: root.getAttribute('data-shiftcharts-events') ?? '',
       items,
       ancestorScrollWidth: ancestor?.scrollWidth ?? 0,
       ancestorClientWidth: ancestor?.clientWidth ?? 0,
       ancestorScrollHeight: ancestor?.scrollHeight ?? 0,
       ancestorClientHeight: ancestor?.clientHeight ?? 0,
-      resizeHandles: Array.from(document.querySelector('[data-gx-slot="target"]')?.closest('.react-grid-item')?.querySelectorAll('.react-resizable-handle') ?? []).map((element) => element.className),
-      keyboardControls: Array.from(document.querySelector('.gx-keyboard-grid:has([data-gx-slot="target"])')?.querySelectorAll('[data-gx-keyboard-control]') ?? []).map((element) => element.getAttribute('data-gx-keyboard-control')),
+      resizeHandles: Array.from(document.querySelector('[data-shiftcharts-slot="target"]')?.closest('.react-grid-item')?.querySelectorAll('.react-resizable-handle') ?? []).map((element) => element.className),
+      keyboardControls: Array.from(document.querySelector('.shiftcharts-keyboard-grid:has([data-shiftcharts-slot="target"])')?.querySelectorAll('[data-shiftcharts-keyboard-control]') ?? []).map((element) => element.getAttribute('data-shiftcharts-keyboard-control')),
       activeElement: document.activeElement instanceof HTMLElement
-        ? { tag: document.activeElement.tagName, keyboard: document.activeElement.getAttribute('data-gx-keyboard-control') }
+        ? { tag: document.activeElement.tagName, keyboard: document.activeElement.getAttribute('data-shiftcharts-keyboard-control') }
         : null,
     }
   })
@@ -266,9 +266,9 @@ async function settleAndCheck(page, reason, options = {}) {
 }
 
 async function clickFootprint(page, label) {
-  await page.locator(`button[data-gx-footprint="${label}"]`).click()
+  await page.locator(`button[data-shiftcharts-footprint="${label}"]`).click()
   await page.waitForFunction((expected) => (
-    document.querySelector('[data-gx-slot="target"]')?.getAttribute('data-gx-footprint') === expected
+    document.querySelector('[data-shiftcharts-slot="target"]')?.getAttribute('data-shiftcharts-footprint') === expected
   ), label)
   await settle(page)
   const sample = await readFixture(page)
@@ -298,7 +298,7 @@ async function drag(page, selector, dx, dy) {
 
 async function runPointerMatrix(page) {
   const initial = await readFixture(page)
-  if (initial.mode !== 'edit') await page.locator('[data-gx-mode-toggle]').click()
+  if (initial.mode !== 'edit') await page.locator('[data-shiftcharts-mode-toggle]').click()
   const mode = (await readFixture(page)).mode
   if (mode !== 'edit') throw new Error(`pointer matrix requires edit mode, got ${mode}`)
 
@@ -310,7 +310,7 @@ async function runPointerMatrix(page) {
   ]
   for (const [direction, dx, dy] of directions) {
     await clickFootprint(page, '3x3')
-    await drag(page, '[data-gx-pointer-handle]', dx, dy)
+    await drag(page, '[data-shiftcharts-pointer-handle]', dx, dy)
     const sample = await readFixture(page)
     if (!hasEvent(sample, 'drag-start') || !hasEvent(sample, 'drag-stop')) {
       throw new Error(`pointer drag ${direction} did not reach WidgetGrid callbacks: ${sample.events}`)
@@ -328,7 +328,7 @@ async function runPointerMatrix(page) {
 
   for (const [direction, dx, dy] of [['east-south', 82, 78], ['west-north', -82, -78]]) {
     await clickFootprint(page, '3x3')
-    await drag(page, '.react-grid-item:has([data-gx-slot="target"]) .react-resizable-handle-se', dx, dy)
+    await drag(page, '.react-grid-item:has([data-shiftcharts-slot="target"]) .react-resizable-handle-se', dx, dy)
     const sample = await readFixture(page)
     if (!hasEvent(sample, 'resize-start') || !hasEvent(sample, 'resize-stop')) {
       throw new Error(`pointer resize ${direction} did not reach WidgetGrid callbacks: ${sample.events}`)
@@ -342,9 +342,9 @@ async function runPointerMatrix(page) {
 
 async function runKeyboardMatrix(page) {
   await clickFootprint(page, '3x3')
-  const target = page.locator('.gx-keyboard-grid:has([data-gx-slot="target"])')
-  const move = target.locator('[data-gx-keyboard-control="move"]')
-  const resize = target.locator('[data-gx-keyboard-control="resize"]')
+  const target = page.locator('.shiftcharts-keyboard-grid:has([data-shiftcharts-slot="target"])')
+  const move = target.locator('[data-shiftcharts-keyboard-control="move"]')
+  const resize = target.locator('[data-shiftcharts-keyboard-control="resize"]')
   if (await move.count() !== 1 || await resize.count() !== 1) throw new Error('edit mode keyboard controls are missing')
 
   await move.focus()
@@ -380,65 +380,65 @@ async function runKeyboardMatrix(page) {
     throw new Error(`keyboard resize commit/focus failed: ${JSON.stringify(resizeCommitted)}`)
   }
 
-  await page.locator('[data-gx-mode-toggle]').click()
+  await page.locator('[data-shiftcharts-mode-toggle]').click()
   const readOnly = await readFixture(page)
   if (readOnly.mode !== 'read-only' || readOnly.keyboardControls.length !== 0) {
     throw new Error(`read-only mode still exposes editing controls: ${JSON.stringify(readOnly.keyboardControls)}`)
   }
-  await page.locator('[data-gx-mode-toggle]').click()
+  await page.locator('[data-shiftcharts-mode-toggle]').click()
   return { move: 'commit', resize: 'commit+cancel', readOnly: 'controls-hidden' }
 }
 
 async function runEnvironmentMatrix(page) {
   const results = []
 
-  await page.locator('[data-gx-hidden-toggle]').click()
-  await page.waitForFunction(() => document.querySelector('[data-gx-fixture="grid"]')?.getAttribute('data-gx-hidden') === 'true')
+  await page.locator('[data-shiftcharts-hidden-toggle]').click()
+  await page.waitForFunction(() => document.querySelector('[data-shiftcharts-fixture="grid"]')?.getAttribute('data-shiftcharts-hidden') === 'true')
   const hidden = await readFixture(page)
   if (hidden.items.some((item) => item.visible)) throw new Error('hidden tab retained visible grid items')
-  await page.locator('[data-gx-hidden-toggle]').click()
-  await page.waitForSelector('[data-gx-slot="target"] .gx-auto-chart')
+  await page.locator('[data-shiftcharts-hidden-toggle]').click()
+  await page.waitForSelector('[data-shiftcharts-slot="target"] .shiftcharts-auto-chart')
   await settleAndCheck(page, 'hidden tab restore')
   results.push('hidden-tab:pass')
 
-  await page.locator('[data-gx-zero-toggle]').click()
-  await page.waitForFunction(() => document.querySelector('[data-gx-fixture="grid"]')?.getAttribute('data-gx-zero-size') === 'true')
+  await page.locator('[data-shiftcharts-zero-toggle]').click()
+  await page.waitForFunction(() => document.querySelector('[data-shiftcharts-fixture="grid"]')?.getAttribute('data-shiftcharts-zero-size') === 'true')
   const zero = await readFixture(page)
   if (zero.ancestorClientHeight > TOLERANCE) throw new Error(`zero-size parent retained ${zero.ancestorClientHeight}px block size`)
-  await page.locator('[data-gx-zero-toggle]').click()
-  await page.waitForSelector('[data-gx-slot="target"] .gx-auto-chart')
+  await page.locator('[data-shiftcharts-zero-toggle]').click()
+  await page.waitForSelector('[data-shiftcharts-slot="target"] .shiftcharts-auto-chart')
   await settleAndCheck(page, 'zero-size parent restore')
   results.push('zero-size-parent:pass')
 
   for (const ancestor of ['grid', 'flex']) {
     const sample = await readFixture(page)
-    if (sample.ancestor !== ancestor) await page.locator('[data-gx-ancestor-toggle]').click()
-    await page.waitForFunction((expected) => document.querySelector('[data-gx-fixture="grid"]')?.getAttribute('data-gx-ancestor') === expected, ancestor)
+    if (sample.ancestor !== ancestor) await page.locator('[data-shiftcharts-ancestor-toggle]').click()
+    await page.waitForFunction((expected) => document.querySelector('[data-shiftcharts-fixture="grid"]')?.getAttribute('data-shiftcharts-ancestor') === expected, ancestor)
     await settleAndCheck(page, `${ancestor} ancestor`)
     results.push(`${ancestor}-ancestor:pass`)
   }
 
-  await page.locator('[data-gx-overflow-toggle]').click()
-  await page.waitForFunction(() => document.querySelector('[data-gx-fixture="grid"]')?.getAttribute('data-gx-overflow') === 'true')
+  await page.locator('[data-shiftcharts-overflow-toggle]').click()
+  await page.waitForFunction(() => document.querySelector('[data-shiftcharts-fixture="grid"]')?.getAttribute('data-shiftcharts-overflow') === 'true')
   const overflow = await settleAndCheck(page, 'overflow ancestor')
   assertNoScrollGrowth(overflow)
-  await page.locator('[data-gx-overflow-toggle]').click()
+  await page.locator('[data-shiftcharts-overflow-toggle]').click()
   results.push('overflow:pass')
 
   for (const mode of ['transform', 'zoom']) {
-    await page.locator(`[data-gx-${mode}-toggle]`).click()
-    await page.waitForFunction((key) => document.querySelector('[data-gx-fixture="grid"]')?.getAttribute(`data-gx-${key}`) === 'true', mode)
+    await page.locator(`[data-shiftcharts-${mode}-toggle]`).click()
+    await page.waitForFunction((key) => document.querySelector('[data-shiftcharts-fixture="grid"]')?.getAttribute(`data-shiftcharts-${key}`) === 'true', mode)
     const sample = await settleAndCheck(page, `${mode} ancestor`, { allowAncestorOverflow: mode === 'zoom' })
-    await page.locator(`[data-gx-${mode}-toggle]`).click()
+    await page.locator(`[data-shiftcharts-${mode}-toggle]`).click()
     results.push(mode === 'zoom'
       ? `zoom:pass-fixed-width-overflow:${sample.ancestorScrollWidth - sample.ancestorClientWidth}px`
       : `${mode}:pass`)
   }
 
-  await page.locator('[data-gx-rtl-toggle]').click()
-  await page.waitForFunction(() => document.querySelector('[data-gx-fixture="grid"]')?.getAttribute('data-gx-direction') === 'rtl')
+  await page.locator('[data-shiftcharts-rtl-toggle]').click()
+  await page.waitForFunction(() => document.querySelector('[data-shiftcharts-fixture="grid"]')?.getAttribute('data-shiftcharts-direction') === 'rtl')
   await settleAndCheck(page, 'rtl')
-  await page.locator('[data-gx-rtl-toggle]').click()
+  await page.locator('[data-shiftcharts-rtl-toggle]').click()
   results.push('rtl:pass')
   return results
 }
@@ -458,7 +458,7 @@ async function runContextMatrix(browser) {
     }],
     ['touch', { hasTouch: true, isMobile: true }, async (page) => {
       const before = await readFixture(page)
-      const handle = page.locator('[data-gx-pointer-handle]')
+      const handle = page.locator('[data-shiftcharts-pointer-handle]')
       const box = await handle.boundingBox()
       if (box === null) throw new Error('touch probe handle has no box')
       await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2)
@@ -477,7 +477,7 @@ async function runContextMatrix(browser) {
       context = await browser.newContext({ viewport: VIEWPORT, ...options })
       const page = await context.newPage()
       await page.goto(ORIGIN, { waitUntil: 'load' })
-      await page.waitForSelector('[data-gx-slot="target"] .gx-auto-chart', { timeout: 20_000 })
+      await page.waitForSelector('[data-shiftcharts-slot="target"] .shiftcharts-auto-chart', { timeout: 20_000 })
       await test(page)
       results.push(`${name}:pass`)
     } catch (error) {
@@ -495,7 +495,7 @@ async function runContextMatrix(browser) {
 
 async function runGate() {
   runPlantedNegativeAssertion()
-  if (process.env.GX_GRID_NEGATIVE_ONLY === '1') return { negativeOnly: true }
+  if (process.env.SHIFTCHARTS_GRID_NEGATIVE_ONLY === '1') return { negativeOnly: true }
 
   const { browser, from } = await openChromium('grid gate (C4.1)')
   const server = await ensureGridServer().catch(async (error) => {
@@ -513,7 +513,7 @@ async function runGate() {
       if (/resizeobserver loop/i.test(String(error))) loopErrors.push(String(error))
     })
     await page.goto(ORIGIN, { waitUntil: 'load' })
-    await page.waitForSelector('[data-gx-fixture="grid"] [data-gx-slot="target"] .gx-auto-chart', { timeout: 20_000 })
+    await page.waitForSelector('[data-shiftcharts-fixture="grid"] [data-shiftcharts-slot="target"] .shiftcharts-auto-chart', { timeout: 20_000 })
 
     const footprints = []
     for (const label of EXPECTED_FOOTPRINTS) {

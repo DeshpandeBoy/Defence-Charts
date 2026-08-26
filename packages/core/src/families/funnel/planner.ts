@@ -75,59 +75,59 @@ function isFiniteNonNegativeInteger(value: number): boolean {
 
 function assertDataShape(shape: DataShape): void {
   if (!isFiniteNonNegativeInteger(shape.series)) {
-    throw new Error('@gx/core: funnel shape.series must be a finite non-negative integer.')
+    throw new Error('@shiftcharts/core: funnel shape.series must be a finite non-negative integer.')
   }
   if (!isFiniteNonNegativeInteger(shape.categories)) {
-    throw new Error('@gx/core: funnel shape.categories must be a finite non-negative integer.')
+    throw new Error('@shiftcharts/core: funnel shape.categories must be a finite non-negative integer.')
   }
   if (!isFiniteNonNegativeInteger(shape.points)) {
-    throw new Error('@gx/core: funnel shape.points must be a finite non-negative integer.')
+    throw new Error('@shiftcharts/core: funnel shape.points must be a finite non-negative integer.')
   }
   if (!isFiniteNonNegativeInteger(shape.labelMaxChars)) {
-    throw new Error('@gx/core: funnel shape.labelMaxChars must be a finite non-negative integer.')
+    throw new Error('@shiftcharts/core: funnel shape.labelMaxChars must be a finite non-negative integer.')
   }
   if (typeof shape.hasNegative !== 'boolean' || typeof shape.temporal !== 'boolean') {
-    throw new Error('@gx/core: funnel shape flags must be booleans.')
+    throw new Error('@shiftcharts/core: funnel shape flags must be booleans.')
   }
   if (shape.hasNegative) {
-    throw new Error('@gx/core: funnel requires finite non-negative stage values.')
+    throw new Error('@shiftcharts/core: funnel requires finite non-negative stage values.')
   }
   if (shape.series > 1) {
-    throw new Error('@gx/core: funnel requires exactly one series of ordered stages.')
+    throw new Error('@shiftcharts/core: funnel requires exactly one series of ordered stages.')
   }
 
   // `describeShape()` reports distinct x positions as categories. For the one-series funnel,
   // points > categories is therefore duplicate-stage evidence. Do not silently aggregate or
   // choose an order here; the frame must also reject duplicates when it receives raw values.
   if (shape.series === 1 && shape.points > shape.categories) {
-    throw new Error('@gx/core: funnel requires one value per canonical stage; duplicate x values are ambiguous.')
+    throw new Error('@shiftcharts/core: funnel requires one value per canonical stage; duplicate x values are ambiguous.')
   }
   if (shape.series === 0 && (shape.points !== 0 || shape.categories !== 0)) {
-    throw new Error('@gx/core: funnel empty shapes must have zero points and categories.')
+    throw new Error('@shiftcharts/core: funnel empty shapes must have zero points and categories.')
   }
   if (shape.categories > shape.points) {
-    throw new Error('@gx/core: funnel shape.categories cannot exceed shape.points.')
+    throw new Error('@shiftcharts/core: funnel shape.categories cannot exceed shape.points.')
   }
 }
 
 function assertContext(ctx: SizeContext): void {
   if (!SIZE_CLASSES.includes(ctx.sizeClass)) {
-    throw new Error(`@gx/core: funnel does not support size class '${String(ctx.sizeClass)}'.`)
+    throw new Error(`@shiftcharts/core: funnel does not support size class '${String(ctx.sizeClass)}'.`)
   }
   if (!Number.isFinite(ctx.width) || ctx.width < 0 || !Number.isFinite(ctx.height) || ctx.height < 0) {
-    throw new Error('@gx/core: funnel context dimensions must be finite and non-negative.')
+    throw new Error('@shiftcharts/core: funnel context dimensions must be finite and non-negative.')
   }
   if (!isFiniteNonNegativeInteger(ctx.cols) || !isFiniteNonNegativeInteger(ctx.rows)) {
-    throw new Error('@gx/core: funnel context grid dimensions must be finite non-negative integers.')
+    throw new Error('@shiftcharts/core: funnel context grid dimensions must be finite non-negative integers.')
   }
   if (!ASPECTS.includes(ctx.aspect)) {
-    throw new Error(`@gx/core: funnel does not support aspect '${String(ctx.aspect)}'.`)
+    throw new Error(`@shiftcharts/core: funnel does not support aspect '${String(ctx.aspect)}'.`)
   }
 }
 
 function assertPolicy(policy: PlanPolicy): void {
   if (!isFiniteNonNegativeInteger(policy.pointBudget)) {
-    throw new Error('@gx/core: funnel point budget must be a finite non-negative integer.')
+    throw new Error('@shiftcharts/core: funnel point budget must be a finite non-negative integer.')
   }
 }
 
@@ -308,7 +308,7 @@ function regionOrder(
 
 function planFunnel(input: FamilyPlannerInput<FunnelChartType>): FunnelPlan {
   if (input.type !== 'funnel') {
-    throw new Error(`@gx/core: funnel planner does not accept chart type '${input.type}'.`)
+    throw new Error(`@shiftcharts/core: funnel planner does not accept chart type '${input.type}'.`)
   }
   assertDataShape(input.shape)
   assertContext(input.ctx)

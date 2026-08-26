@@ -1,10 +1,10 @@
 {
-  "name": "gx-monorepo",
+  "name": "shiftcharts-monorepo",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "license": "MIT",
-  "description": "Responsive, size-adaptive chart + dashboard-grid widget library. Research and design in research/.",
+  "description": "ShiftCharts — charts that shift with their space.",
   "engines": {
     "node": ">=22.18"
   },
@@ -21,7 +21,7 @@
     "dev": "turbo run dev",
     "typecheck": "turbo run typecheck",
     "lint": "eslint .",
-    "lint:docs": "pnpm --filter @gx/docs lint",
+    "lint:docs": "pnpm --filter @shiftcharts/docs lint",
     "lint:deps": "depcruise packages --config .dependency-cruiser.cjs",
     "lint:tokens": "node scripts/check-tokens.mjs",
     "lint:granularity": "node scripts/check-granularity.mjs",
@@ -39,7 +39,7 @@
     "probe:flicker": "node scripts/probe-flicker.mjs",
     "lint:typography": "node scripts/generate-typography-css.mjs",
     "lint:tokens:drift": "node scripts/generate-tokens-css.mjs",
-    "generate:typography": "pnpm --filter @gx/core build && node scripts/generate-typography-css.mjs --write",
+    "generate:typography": "pnpm --filter @shiftcharts/core build && node scripts/generate-typography-css.mjs --write",
     "generate:tokens": "node scripts/generate-tokens-css.mjs --write",
     "test": "vitest run",
     "verify": "pnpm typecheck && pnpm lint && pnpm lint:docs && pnpm lint:deps && pnpm lint:tokens && pnpm lint:granularity && pnpm lint:policy && pnpm lint:determinism && pnpm lint:api && pnpm lint:treeshake && pnpm test && pnpm verify:packages && pnpm lint:boundary && pnpm lint:typography && pnpm lint:tokens:drift",

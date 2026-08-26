@@ -3,12 +3,12 @@ title: Testing
 description: Drive resize deterministically and assert chart meaning instead of brittle markup order.
 ---
 
-`@gx/testing` provides deterministic observation and semantic markup helpers.
+`@shiftcharts/testing` provides deterministic observation and semantic markup helpers.
 
 ## ResizeObserver
 
 ```ts
-import { FakeResizeObserver } from '@gx/testing'
+import { FakeResizeObserver } from '@shiftcharts/testing'
 
 const observer = new FakeResizeObserver(callback)
 observer.observe(element)

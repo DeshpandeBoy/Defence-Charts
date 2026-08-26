@@ -17,12 +17,12 @@ const DENY_NETWORK = join(REPO_ROOT, 'scripts', 'deny-network.cjs')
 const CONSUMER_CHECK = join(REPO_ROOT, 'scripts', 'check-consumers.mjs')
 
 export const PACKAGE_NAMES = Object.freeze([
-  '@gx/core',
-  '@gx/grid',
-  '@gx/primitives',
-  '@gx/react',
-  '@gx/testing',
-  '@gx/tokens',
+  '@shiftcharts/core',
+  '@shiftcharts/grid',
+  '@shiftcharts/primitives',
+  '@shiftcharts/react',
+  '@shiftcharts/testing',
+  '@shiftcharts/tokens',
 ])
 
 const OFFLINE_ENV = Object.freeze({
@@ -86,7 +86,7 @@ export function noNetworkEnvironment() {
   return {
     ...OFFLINE_ENV,
     NODE_OPTIONS: nodeOptions,
-    GX_PACKAGE_GATES_NO_NETWORK: '1',
+    SHIFTCHARTS_PACKAGE_GATES_NO_NETWORK: '1',
   }
 }
 
@@ -114,7 +114,7 @@ async function packPackage(packageName, packRoot) {
 /** @param {string} packageName @param {string[]} tarballs */
 function tarballFor(packageName, tarballs) {
   const shortName = packageName.slice(packageName.indexOf('/') + 1)
-  const match = tarballs.find((file) => file.startsWith('gx-' + shortName + '-'))
+  const match = tarballs.find((file) => file.startsWith('shiftcharts-' + shortName + '-'))
   if (match === undefined) throw new Error(packageName + ': missing local packed tarball')
  return match
 }
@@ -178,7 +178,7 @@ async function assertPackageContent(packageName, tarball, extractedRoot) {
 /** @param {string} packageName @param {string} extractedRoot @param {string} consumerRoot */
 async function linkPackedPackage(packageName, extractedRoot, consumerRoot) {
   const shortName = packageName.slice(packageName.indexOf('/') + 1)
-  const packageLink = join(consumerRoot, 'node_modules', '@gx', shortName)
+  const packageLink = join(consumerRoot, 'node_modules', '@shiftcharts', shortName)
   await mkdir(dirname(packageLink), { recursive: true })
   try {
     await symlink(extractedRoot, packageLink, 'dir')
@@ -256,7 +256,7 @@ async function runAnalyzers(packageName, tarball, gatesRoot) {
 /** @returns {Promise<{ packages: number, contentFiles: number, css: number, consumerOutput: string, analyzerOutput: number }>} */
 export async function runPackageGates() {
   await assertBuiltInputs()
-  const gatesRoot = await mkdtemp(join(tmpdir(), 'gx-e1-4-package-gates-'))
+  const gatesRoot = await mkdtemp(join(tmpdir(), 'shiftcharts-e1-4-package-gates-'))
   const extractedRoot = join(gatesRoot, 'extracted')
   const consumerRoot = join(gatesRoot, 'css-consumer')
   await mkdir(extractedRoot, { recursive: true })

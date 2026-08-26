@@ -11,5 +11,5 @@ export default defineConfig({
   dts: true,
   clean: true,
   platform: 'browser',
-  exports: { devExports: true, customExports: cssExportsFor('@gx/react') },
+  exports: { devExports: true, customExports: cssExportsFor('@shiftcharts/react') },
 })

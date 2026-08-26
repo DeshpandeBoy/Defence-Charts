@@ -5,7 +5,7 @@ export function baseOptions(): BaseLayoutProps {
   return {
     nav: {
       title: (
-        <span className="gx-docs-brand">
+        <span className="shiftcharts-docs-brand">
           <strong>{appName}</strong>
           <span>documentation</span>
         </span>

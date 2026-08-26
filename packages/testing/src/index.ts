@@ -1,5 +1,5 @@
 /**
- * `@gx/testing` — dev-facing helpers. Plan snapshot matchers, a11y matchers, and our own
+ * `@shiftcharts/testing` — dev-facing helpers. Plan snapshot matchers, a11y matchers, and our own
  * `FakeResizeObserver`.
  *
  * ⚠ The fake is **injected**, never patched onto `globalThis` and left there. That is
@@ -10,7 +10,7 @@
  * ⚠ A1 scope: the `emit()` driver, which is the piece the ladder tests need first. It
  * carries no DOM dependency, so ladder tests run in bare Node.
  *
- * ⚠ A5 widens the entry to carry **both** box shapes, because `@gx/react`'s
+ * ⚠ A5 widens the entry to carry **both** box shapes, because `@shiftcharts/react`'s
  * `useElementSize` reads `contentBoxSize[0]` first and `contentRect` only as a fallback.
  * A fake that emitted `contentRect` alone drove every test down a branch no real browser
  * takes. See `FakeResizeObserverEntry` for the long version.
@@ -72,7 +72,7 @@ export interface FakeResizeObserverSize {
  * reports the **transformed** box: a widget inside a CSS `scale(0.5)` — a dashboard zoom
  * control, a print preview — is reported at its apparent size, so the resolver plans it for
  * a rung it does not occupy. `apps/playground/src/useElementSize.ts` is that read today and
- * `@gx/react`'s `useElementSize` at **A5** (`research/30-implementation-plan.md` A5) is the
+ * `@shiftcharts/react`'s `useElementSize` at **A5** (`research/30-implementation-plan.md` A5) is the
  * same read on the path that ships. A fake emitting `contentRect` alone therefore drove
  * every fake-driven test down a fallback branch a real browser never takes: full green over
  * code nobody runs. That is this project's recurring failure species — a thing that looks

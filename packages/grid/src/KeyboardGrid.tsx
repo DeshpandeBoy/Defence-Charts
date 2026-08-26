@@ -10,7 +10,7 @@ import {
   type ReactNode,
   type RefObject,
 } from 'react'
-import type { WidgetLayout } from '@gx/core'
+import type { WidgetLayout } from '@shiftcharts/core'
 
 import {
   beginKeyboardSession,
@@ -69,7 +69,7 @@ export function KeyboardGrid({
   const initiatingControlRef = useRef<HTMLButtonElement | null>(null)
   const restoreFocusRef = useRef(false)
   const instructionId = useId().replaceAll(':', '')
-  const liveId = `gx-keyboard-live-${instructionId}`
+  const liveId = `shiftcharts-keyboard-live-${instructionId}`
   const [session, setSession] = useState<KeyboardEditSession | null>(null)
   const [announcement, setAnnouncement] = useState('')
 
@@ -148,9 +148,9 @@ export function KeyboardGrid({
       <button
         ref={controlRef}
         type="button"
-        className="gx-keyboard-grid__control"
-        data-gx-keyboard-control={controlMode}
-        data-gx-grid-cancel="true"
+        className="shiftcharts-keyboard-grid__control"
+        data-shiftcharts-keyboard-control={controlMode}
+        data-shiftcharts-grid-cancel="true"
         aria-label={controlLabel(controlMode)}
         aria-describedby={instructionId}
         aria-keyshortcuts="Enter Space ArrowUp ArrowDown ArrowLeft ArrowRight Escape"
@@ -166,25 +166,25 @@ export function KeyboardGrid({
 
   return (
     <div
-      className="gx-keyboard-grid"
-      data-gx-keyboard-widget-id={item.id}
-      data-gx-keyboard-mode={mode}
-      data-gx-keyboard-active={session === null ? undefined : session.mode}
+      className="shiftcharts-keyboard-grid"
+      data-shiftcharts-keyboard-widget-id={item.id}
+      data-shiftcharts-keyboard-mode={mode}
+      data-shiftcharts-keyboard-active={session === null ? undefined : session.mode}
     >
       {mode === 'edit' ? (
         <>
-          <div className="gx-keyboard-grid__controls" aria-label={`Edit controls for widget ${item.id}`}>
+          <div className="shiftcharts-keyboard-grid__controls" aria-label={`Edit controls for widget ${item.id}`}>
             {renderControl('move', moveRef)}
             {renderControl('resize', resizeRef)}
           </div>
-          <span id={instructionId} className="gx-keyboard-grid__instructions">
+          <span id={instructionId} className="shiftcharts-keyboard-grid__instructions">
             Enter or Space starts {item.id} {session?.mode === 'resize' ? 'resizing' : 'moving'}. Arrow keys change one grid unit. Enter or Space commits. Escape cancels.
           </span>
         </>
       ) : null}
-      <div className="gx-keyboard-grid__content">{children}</div>
+      <div className="shiftcharts-keyboard-grid__content">{children}</div>
       {mode === 'edit' ? (
-        <span id={liveId} className="gx-keyboard-grid__live" role="status" aria-live="polite" aria-atomic="true">
+        <span id={liveId} className="shiftcharts-keyboard-grid__live" role="status" aria-live="polite" aria-atomic="true">
           {announcement}
         </span>
       ) : null}

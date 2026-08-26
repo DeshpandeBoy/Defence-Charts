@@ -1,19 +1,20 @@
 ---
 title: A chart should change what it says, not only how small it gets
-description: GX plans a different, honest chart for the space a widget actually has.
+description: ShiftCharts plans a different, honest chart for the space a widget actually has.
 ---
 
-GX is a presentational React chart library built around a **responsive information ladder**.
-When a widget gets smaller, GX can remove an unreadable axis, replace a line with a horizon
+ShiftCharts is a presentational React chart library built around a **responsive information ladder**.
+When a widget gets smaller, ShiftCharts can remove an unreadable axis, replace a line with a horizon
 encoding, move a legend, or state one value directly. It does not merely squeeze the same chart.
 
-The current implementation is complete through A1–A6 and B1–B3 for the `line` and `area` chart
-families. The dashboard grid and additional chart families remain planned work.
+The current implementation includes the responsive planner, controlled dashboard grid, interaction
+layer, and the Free-v1 chart catalogue: line, area, bar/timebar, donut, KPI, progress, scatter,
+heatmap, and funnel.
 
-<Callout type="warn" title="Private workspace today">
-  The implementation through B3 exists for the current line/area planner, but the packages are
-  still private and `@gx/*` is a placeholder scope. Examples on this site compile inside this
-  monorepo. Public npm installation waits for the project name and scope decision.
+<Callout type="info" title="Release candidate">
+  ShiftCharts and the `@shiftcharts/*` scope are final. Examples on this site compile against the
+  same workspace packages exercised by the packed React, Next.js RSC, and Vite consumer gates.
+  Public npm installation is enabled once the npm scope and trusted publisher are connected.
 </Callout>
 
 <ResizeLab />
@@ -23,9 +24,9 @@ families. The dashboard grid and additional chart families remain planned work.
 | Owner | Receives | Produces |
 | --- | --- | --- |
 | Your application | API rows, query results, local state | Canonical `Series[]` |
-| `@gx/core` | Size, data shape, policy, overrides | Serializable `ChartPlan` |
-| `@gx/primitives` | Plan, canonical values, same size context | Accessible SVG and data table |
-| `@gx/react` | A container with a real size | Measurement, planning, then `<Chart>` |
+| `@shiftcharts/core` | Size, data shape, policy, overrides | Serializable `ChartPlan` |
+| `@shiftcharts/primitives` | Plan, canonical values, same size context | Accessible SVG and data table |
+| `@shiftcharts/react` | A container with a real size | Measurement, planning, then `<Chart>` |
 
 The planner never sees actual values. `describeShape(data)` derives the counts and traits it
 needs; `resolveFrame(plan, data, ctx)` is where values become scales and coordinates.
@@ -37,7 +38,7 @@ needs; `resolveFrame(plan, data, ctx)` is where values become scales and coordin
     Use `AutoChart` when a client component should observe its own container.
   </Card>
   <Card title="Render on the server" href="/docs/guides/server-rendering">
-    Use `planChart` and hook-free `Chart` for a known box and zero GX client JavaScript.
+    Use `planChart` and hook-free `Chart` for a known box and zero ShiftCharts client JavaScript.
   </Card>
   <Card title="Understand the ladder" href="/docs/concepts/responsive-ladder">
     Read every size family as a complete information contract.
@@ -48,7 +49,7 @@ needs; `resolveFrame(plan, data, ctx)` is where values become scales and coordin
 
 | Milestone | Status | Result |
 | --- | --- | --- |
-| A1-A3 | Implemented | Monorepo, token gates, data contract, pure line/area planning |
+| A1-A3 | Implemented | Monorepo, token gates, data contract, pure responsive planning |
 | A2.1 | Implemented | Generated Roboto Flex metrics, deterministic text fitting, and synchronized typography tokens |
 | A4 | Implemented | Hook-free `<Chart>`, frame geometry, accessible SVG, semantic test helpers |
 | A5 | Implemented | `<AutoChart>`, `useElementSize`, containment checks, browser resize proof |
@@ -56,9 +57,9 @@ needs; `resolveFrame(plan, data, ctx)` is where values become scales and coordin
 | B1 | Implemented | Generated 198-token tree, provenance census, and Neutral dark/light escape-hatch themes |
 | B2 | Implemented | Axis, guide, point, halo, and density-threshold controls; all 30 surveyed knobs are dispositioned |
 | B3 | Implemented | Typed threshold/override split, provenance, acceptance coverage, and G20 granularity verification |
-| C | Planned | Twelve-column dashboard grid and widget chrome |
-| D | Planned | Bar, donut, KPI, scatter, heatmap, funnel, progress |
-| E | In progress | Fumadocs scaffold is built and being kept current; naming, publishing, and release automation remain |
+| C | Implemented | Controlled twelve-column grid, widget chrome, keyboard path, stress proof, and layout contracts |
+| D | Implemented | Bar/timebar, donut, KPI, progress, scatter, heatmap, funnel, and shared family matrix |
+| E | Release candidate | Built artifacts, package gates, consumer tarballs, Changesets, and trusted-publish workflow |
 
 Continue with [installation](/docs/getting-started/installation), then build
 [your first chart](/docs/getting-started/first-chart).

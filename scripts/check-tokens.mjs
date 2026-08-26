@@ -5,21 +5,21 @@
  * token tree.
  *
  * **Does every value go through a token?** Rejects raw colour and length literals and
- * gradients, requiring `var(--gx-*)` instead. Specified in `research/43-theming.md` §6; the
+ * gradients, requiring `var(--shiftcharts-*)` instead. Specified in `research/43-theming.md` §6; the
  * implementation choice and the evidence behind it are in
  * `research/decisions/015-token-gate-is-a-parser.md`.
  *
  * **Does every token exist?** ⚠ Added at **B1**, which `maps/04-ci-gate-map.md:94` always had
- * as G7's second delivery. An undefined `var(--gx-…)` resolves to nothing and fails silently —
+ * as G7's second delivery. An undefined `var(--shiftcharts-…)` resolves to nothing and fails silently —
  * `30-implementation-plan.md` §B1 asks for it as *"a build-time check, not a review item"*.
  * The first rule can only see that a `var()` was used; it never asked whether the name
  * resolved, so a token could be documented, referenced, and absent.
  *
  * **Is every token named the way the rule says?** ⚠ Added at **B1 slice 2**, alongside the
  * rename that made the tree conform. `raw/06` §6.0's grammar was a paragraph in a research file
- * for the whole of milestone A, and in that time the tree accumulated `--gx-ground`, `--gx-ink`,
- * `--gx-charcoal-900`, `--gx-corner-radius`, `--gx-elevation-raised`, `--gx-band-alpha` and
- * `--gx-gap` — seven first segments the rule does not contain. None was a mistake anyone made
+ * for the whole of milestone A, and in that time the tree accumulated `--shiftcharts-ground`, `--shiftcharts-ink`,
+ * `--shiftcharts-charcoal-900`, `--shiftcharts-corner-radius`, `--shiftcharts-elevation-raised`, `--shiftcharts-band-alpha` and
+ * `--shiftcharts-gap` — seven first segments the rule does not contain. None was a mistake anyone made
  * twice; they were made once each, at different times, which is what an unenforced convention
  * produces.
  *
@@ -35,8 +35,8 @@
  * three global regexes over whole-file text. Running that script against the rule §6.1
  * actually specifies produced SIX rejections of which TWO were correct:
  *
- *   `--gx-series-1: #b4e4fd`                       → flagged. It is a token definition.
- *   `--gx-label-font-size: 11px`                   → flagged. Same.
+ *   `--shiftcharts-series-1: #b4e4fd`                       → flagged. It is a token definition.
+ *   `--shiftcharts-label-font-size: 11px`                   → flagged. Same.
  *   `url("data:image/svg+xml;base64,AA#ffffffBB")` → flagged. That is base64 payload.
  *   `content: "#ff0000"`                           → flagged. That is string content.
  *
@@ -68,7 +68,7 @@ const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
  * is precisely where someone would drop a component style "just for now".
  */
 const ALLOWLIST_DIR = 'packages/tokens/src/themes'
-const TOKEN_PREFIX = '--gx-'
+const TOKEN_PREFIX = '--shiftcharts-'
 
 /**
  * Length units that count as literals. Viewport and container units are absent on
@@ -81,7 +81,7 @@ const LENGTH_UNITS = ['px', 'rem', 'em', 'pt', 'pc', 'in', 'cm', 'mm', 'q', 'ex'
  * ⚠ **Time units, added at A6 — and until then this gate could not see a duration at all.**
  *
  * `chart.css` carried `transition: opacity 120ms ease-out` from A4, in a file whose own
- * docblock promises that *"every colour and every length below is a `var(--gx-*)`"*. It was
+ * docblock promises that *"every colour and every length below is a `var(--shiftcharts-*)`"*. It was
  * true and it was insufficient: a duration is neither, so the one hardcoded value in the
  * package sat in the file the gate exists to protect and passed every run. A6 adds four
  * motion tokens, which multiplies the opportunity by four.
@@ -92,13 +92,13 @@ const LENGTH_UNITS = ['px', 'rem', 'em', 'pt', 'pc', 'in', 'cm', 'mm', 'q', 'ex'
  */
 const TIME_UNITS = ['ms', 's']
 
-/** `12px`, `1.5rem`, `.5em` — but never the `2` in `calc(var(--gx-size-gap) * 2)`. */
+/** `12px`, `1.5rem`, `.5em` — but never the `2` in `calc(var(--shiftcharts-size-gap) * 2)`. */
 const LENGTH_RE = new RegExp(
   String.raw`(?<![\w.#-])\d*\.?\d+(${LENGTH_UNITS.join('|')})\b`,
   'gi',
 )
 
-/** `120ms`, `0.5s`, `2s` — and never the `2` in `calc(var(--gx-motion-duration) / 2)`. */
+/** `120ms`, `0.5s`, `2s` — and never the `2` in `calc(var(--shiftcharts-motion-duration) / 2)`. */
 const TIME_RE = new RegExp(
   String.raw`(?<![\w.#-])\d*\.?\d+(${TIME_UNITS.join('|')})\b`,
   'gi',
@@ -111,7 +111,7 @@ const TIME_RE = new RegExp(
  * needs no token because zero is the absence of a length, not a choice of one. CSS extends
  * that to lengths and refuses it to times: `transition-delay: 0` is invalid, `0ms` is
  * required. The unit there is syntax the grammar demands, not a value anyone picked, so
- * rejecting it would force `--gx-motion-stage-delay-none: 0ms` into the token tree — a token
+ * rejecting it would force `--shiftcharts-motion-stage-delay-none: 0ms` into the token tree — a token
  * whose entire content is "nothing", existing to satisfy a parser.
  *
  * Tested numerically rather than by string, so `0.5s` and `0.0001s` are still violations and
@@ -120,12 +120,12 @@ const TIME_RE = new RegExp(
 const ZERO_TIME_RE = /^0*\.?0*$/
 
 /**
- * ⚠ **`var(--gx-foo` and NOT `var\(--gx-foo\)`.** The closing paren is deliberately not
- * matched, because a reference may legally carry a fallback — `var(--gx-size-gap, 4px)` — and a
+ * ⚠ **`var(--shiftcharts-foo` and NOT `var\(--shiftcharts-foo\)`.** The closing paren is deliberately not
+ * matched, because a reference may legally carry a fallback — `var(--shiftcharts-size-gap, 4px)` — and a
  * pattern anchored on `)` silently skips exactly the references most likely to be masking a
  * missing token, since the fallback is what hides the absence.
  */
-const VAR_REF_RE = /var\(\s*(--gx-[a-z0-9-]+)/gi
+const VAR_REF_RE = /var\(\s*(--shiftcharts-[a-z0-9-]+)/gi
 
 /**
  * The `<group>` vocabulary — the ONE closed set in the naming rule.
@@ -137,7 +137,7 @@ const VAR_REF_RE = /var\(\s*(--gx-[a-z0-9-]+)/gi
  * `numeric` reached through §6.5's own pointer at `raw/06:1761` and `alert` at `:1762`.
  * Measured, not assumed: 205 distinct names across those sections use 32 distinct first
  * segments, of which 13 are outside the published list. A literal gate fails on
- * `--gx-title-font-size`, which §6.5 specifies and this repo ships.
+ * `--shiftcharts-title-font-size`, which §6.5 specifies and this repo ships.
  *
  * So the set below is the **union actually in use**, and the direction that keeps it honest
  * is a test rather than a rule: `check-tokens.test.mjs` asserts every first segment `raw/06`
@@ -145,9 +145,9 @@ const VAR_REF_RE = /var\(\s*(--gx-[a-z0-9-]+)/gi
  * would reject. §6.0's own prose carries a ⚠ recording the contradiction.
  *
  * Two names are deliberately absent and must stay absent. `color` — `raw/06:1021` names
- * `--gx-color-1 … --gx-color-20` as *"the failure mode to avoid"*, a palette with no
+ * `--shiftcharts-color-1 … --shiftcharts-color-20` as *"the failure mode to avoid"*, a palette with no
  * semantics. `cat` — `raw/06:873`, an abbreviation that breaks §6.0's own no-abbreviations
- * rule and is superseded by `--gx-series-N` at `:1025`.
+ * rule and is superseded by `--shiftcharts-series-N` at `:1025`.
  */
 export const TOKEN_GROUPS = new Set([
   // The 19 published in §6.0.
@@ -161,7 +161,7 @@ export const TOKEN_GROUPS = new Set([
   'title', 'subtitle', 'value', 'font', 'numeric',
   // Colour, §3.7 — reached from §6.5:1731 rather than tabled in §6.
   'palette', 'alert',
-  // ⚠ Ours, and the only member with no `raw/06` basis at all: `--gx-annotation-*` is
+  // ⚠ Ours, and the only member with no `raw/06` basis at all: `--shiftcharts-annotation-*` is
   // specified by `research/42-typography.md:233` and already emitted by
   // `generate-typography-css.mjs`. A gate derived from `raw/06` alone rejects three tokens
   // this repo ships today.
@@ -172,7 +172,7 @@ export const TOKEN_GROUPS = new Set([
  * Segment spellings that are wrong rather than merely unfamiliar, each one observed.
  *
  * ⚠ **A ratchet, not a style guide.** Every entry here names something B1 slice 2 actually
- * removed — `--gx-grid-alpha`, `--gx-area-alpha` and `--gx-band-alpha` all shipped, and `alpha` is
+ * removed — `--shiftcharts-grid-alpha`, `--shiftcharts-area-alpha` and `--shiftcharts-band-alpha` all shipped, and `alpha` is
  * not a CSS property while `opacity` is. (Past tense, and deliberately not renamed with the tree.) Without this the rename is a one-time
  * tidy that decays; with it, reintroducing the old spelling fails CI with the replacement
  * named. `colour` is here for the same reason from the other direction: it is the spelling a
@@ -184,7 +184,7 @@ const BANNED_SEGMENTS = new Map([
   ['bg', 'background — §6.0 bans abbreviations CSS does not use'],
 ])
 
-/** The prefix without its dashes — `--gx-` → `gx`. */
+/** The prefix without its dashes — `--shiftcharts-` → `shiftcharts`. */
 const PREFIX_BODY = TOKEN_PREFIX.replaceAll('-', '')
 
 /**
@@ -192,13 +192,13 @@ const PREFIX_BODY = TOKEN_PREFIX.replaceAll('-', '')
  *
  * ⚠ **Only `<group>` is enforced, and that restraint is the finding rather than a shortcut.**
  * §6.0 marks exactly one segment *"closed set"*. Its `<element>` and `<property>` lists read as
- * closed but are illustrative, and §6.2–§6.9 prove it: `--gx-crosshair-label-font-size`
- * (`:1811`), `--gx-legend-symbol-gap` (`:1775`) and `--gx-tick-offset-band` (`:1625`) all use
- * element words outside the six, and `--gx-label-landmark-grade` has no CSS property called
+ * closed but are illustrative, and §6.2–§6.9 prove it: `--shiftcharts-crosshair-label-font-size`
+ * (`:1811`), `--shiftcharts-legend-symbol-gap` (`:1775`) and `--shiftcharts-tick-offset-band` (`:1625`) all use
+ * element words outside the six, and `--shiftcharts-label-landmark-grade` has no CSS property called
  * `grade` because `GRAD` is a variable-font axis. Enforcing the parentheticals would reject all
  * four. The mechanical rules below hold everywhere; the vocabulary holds in one position.
  *
- * @param {string} prop A full custom-property name, `--gx-…`.
+ * @param {string} prop A full custom-property name, `--shiftcharts-…`.
  * @returns {string | undefined} Why it is wrong, or `undefined` if it is fine.
  */
 export function inspectTokenName(prop) {
@@ -215,8 +215,8 @@ export function inspectTokenName(prop) {
   }
 
   // ⚠ The prefix *"never recurs anywhere else in a name"* (§6.0), and that clause is the
-  // whole reason a project rename is one regex. A single `--gx-widget-gx-radius` would turn
-  // `s/--gx-/--<new>-/g` into a rename that also silently rewrites a middle segment.
+  // whole reason a project rename is one regex. A single `--shiftcharts-widget-shiftcharts-radius` would turn
+  // `s/--shiftcharts-/--<new>-/g` into a rename that also silently rewrites a middle segment.
   for (const segment of segments) {
     if (segment === PREFIX_BODY) return `the prefix '${PREFIX_BODY}' recurs mid-name — raw/06 §6.0`
   }
@@ -230,11 +230,11 @@ export function inspectTokenName(prop) {
 }
 
 /**
- * Every `--gx-*` a theme actually declares — the membership set the rule below tests against.
+ * Every `--shiftcharts-*` a theme actually declares — the membership set the rule below tests against.
  *
  * ⚠ **Derived by parsing, never hand-listed.** Two generators write into this directory:
  * `generate-tokens-css.mjs` emits `theme.css` from typed TS, and `generate-typography-css.mjs`
- * emits `typography.css` from `@gx/core`'s font metrics. Neither knows about the other, so any
+ * emits `typography.css` from `@shiftcharts/core`'s font metrics. Neither knows about the other, so any
  * hand-kept union of the two would be a third copy free to drift from both. Reading what is
  * declared answers the question directly and cannot go stale.
  *
@@ -264,7 +264,7 @@ const HEX_RE = /(?<![\w-])#[\da-f]{3,8}(?![\w-])/gi
 /**
  * ⚠ `oklch|oklab|lab|lch|hwb|color` are the widening decision 015 turned on. The
  * trailing `\(` stops `color(` matching a bare `color:` property, and the leading
- * boundary stops `--gx-grid-color` and `background-color` matching.
+ * boundary stops `--shiftcharts-grid-color` and `background-color` matching.
  */
 const COLOR_FN_RE = /(?<![\w-])(rgba?|hsla?|hwb|lab|lch|oklab|oklch|color)\s*\(/gi
 
@@ -343,7 +343,7 @@ function findNamedColor(value) {
  *
  * @param {string} source CSS text.
  * @param {string} file   Repo-relative path — drives both the allowlist test and the report.
- * @param {Set<string>} [knownTokens] Every declared `--gx-*`. ⚠ **Omitting it disables the
+ * @param {Set<string>} [knownTokens] Every declared `--shiftcharts-*`. ⚠ **Omitting it disables the
  *   membership rule entirely**, which only a unit test exercising the other four rules in
  *   isolation may do. `checkTree()` always supplies it, and the CLI refuses to run on an empty
  *   set — a membership rule with nothing to be a member of passes everything.
@@ -375,13 +375,13 @@ export function inspectCss(source, file, knownTokens) {
     }
 
     // ⚠ **Membership runs BEFORE the allowlist return, and the order is the rule.** The
-    // themes directory is exempt from *literals*, not from resolving: `--gx-surface-text-color:
-    // var(--gx-ramp-neutral-9)` is a token definition whose own reference has to exist, and
+    // themes directory is exempt from *literals*, not from resolving: `--shiftcharts-surface-text-color:
+    // var(--shiftcharts-ramp-neutral-9)` is a token definition whose own reference has to exist, and
     // placing this after the return below would exempt the one file where a dangling
     // reference breaks every consumer at once.
     //
     // ⚠ **Declarations, not text — and this gate has the receipts.** Seven places in this
-    // repo quote `var(--gx-tick-length)` and `var(--gx-grid-width)` in prose, as decision
+    // repo quote `var(--shiftcharts-tick-length)` and `var(--shiftcharts-grid-width)` in prose, as decision
     // 012's counterexample of a token that parses and does nothing. Neither is declared
     // anywhere. A grep-shaped version of this rule reports both on its first run: two false
     // positives out of two findings, which is how a gate gets switched off in week one.
@@ -395,7 +395,7 @@ export function inspectCss(source, file, knownTokens) {
     }
 
     // ⚠ **The naming rule fires on the DECLARATION and never on a reference, which is what
-    // makes the report actionable.** A token is named once and read many times: `--gx-surface-text-color` had
+    // makes the report actionable.** A token is named once and read many times: `--shiftcharts-surface-text-color` had
     // eleven `var()` sites, so a reference-side check would print eleven findings for one line
     // anybody has to edit, and bury it. Declarations are also the only place a *new* bad name
     // can enter — you cannot reference a token nobody declared without the membership rule
@@ -521,7 +521,7 @@ if (invokedDirectly) {
   if (knownTokens.size === 0) {
     console.error(
       `token gate: 0 tokens declared under ${ALLOWLIST_DIR} — refusing to pass.\n` +
-        'Every var(--gx-*) would be a member of nothing and the membership rule would be inert.',
+        'Every var(--shiftcharts-*) would be a member of nothing and the membership rule would be inert.',
     )
     process.exit(1)
   }
@@ -531,7 +531,7 @@ if (invokedDirectly) {
     console.error(`token gate: ${violations.length} violation(s) across ${scanned} stylesheet(s)\n`)
     console.error(formatViolations(violations))
     console.error(
-      '\nEvery value goes through a --gx-* token, and every --gx-* token exists.' +
+      '\nEvery value goes through a --shiftcharts-* token, and every --shiftcharts-* token exists.' +
         '\nSee research/43-theming.md §6. To add one, edit packages/tokens/src/tokens.ts' +
         ' and run `pnpm generate:tokens` — theme.css is generated.',
     )

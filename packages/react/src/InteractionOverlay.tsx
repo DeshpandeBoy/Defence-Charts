@@ -8,8 +8,8 @@ import type {
   SizeContext,
   TooltipBox,
   TooltipPlacement,
-} from '@gx/core'
-import { formatXLabel, formatYLabel, placeTooltip, resolveFrame } from '@gx/core'
+} from '@shiftcharts/core'
+import { formatXLabel, formatYLabel, placeTooltip, resolveFrame } from '@shiftcharts/core'
 import { createPortal } from 'react-dom'
 import {
   useCallback,
@@ -76,7 +76,7 @@ export function InteractionOverlay({
 
   useIsomorphicLayoutEffect(() => {
     const root = containerRef.current
-    const nextHost = root?.querySelector<HTMLElement>('.gx-chart') ?? null
+    const nextHost = root?.querySelector<HTMLElement>('.shiftcharts-chart') ?? null
     setPortalHost(nextHost)
   }, [containerRef, ctx.width, ctx.height, plan.sizeClass])
 
@@ -231,10 +231,10 @@ function InteractionLayer({
   const status = active === null ? '' : buildStatus(header, rows, placement)
 
   return (
-    <div className="gx-interaction" data-trigger={plan.interaction.trigger}>
+    <div className="shiftcharts-interaction" data-trigger={plan.interaction.trigger}>
       <svg
         ref={svgRef}
-        className="gx-interaction__svg"
+        className="shiftcharts-interaction__svg"
         viewBox={'0 0 ' + frame.box.width + ' ' + frame.box.height}
         aria-label={title + ' interactive chart'}
       >
@@ -244,7 +244,7 @@ function InteractionLayer({
           </clipPath>
         </defs>
         {plan.interaction.crosshair && active !== null ? (
-          <g className="gx-interaction__crosshair" clipPath={'url(#' + clipId + ')'} aria-hidden="true">
+          <g className="shiftcharts-interaction__crosshair" clipPath={'url(#' + clipId + ')'} aria-hidden="true">
             <line
               x1={active.point.x}
               x2={active.point.x}
@@ -254,7 +254,7 @@ function InteractionLayer({
           </g>
         ) : null}
         <rect
-          className="gx-interaction__target"
+          className="shiftcharts-interaction__target"
           x={frame.plot.x}
           y={frame.plot.y}
           width={frame.plot.width}
@@ -279,7 +279,7 @@ function InteractionLayer({
         <div
           ref={tooltipRef}
           id={tooltipId}
-          className="gx-interaction__tooltip"
+          className="shiftcharts-interaction__tooltip"
           role="tooltip"
           data-tooltip-mode={placement.mode}
           data-tooltip-side={placement.side}
@@ -293,11 +293,11 @@ function InteractionLayer({
             blockSize: placement.height,
           }}
         >
-          <div className="gx-interaction__tooltip-header">{header}</div>
-          <div className="gx-interaction__tooltip-rows">
+          <div className="shiftcharts-interaction__tooltip-header">{header}</div>
+          <div className="shiftcharts-interaction__tooltip-rows">
             {visibleRows.map((row) => (
               <div
-                className="gx-interaction__tooltip-row"
+                className="shiftcharts-interaction__tooltip-row"
                 key={row.seriesId}
                 data-series-id={row.seriesId}
               >
@@ -306,14 +306,14 @@ function InteractionLayer({
               </div>
             ))}
             {placement.hiddenRowCount > 0 ? (
-              <div className="gx-interaction__tooltip-overflow">
+              <div className="shiftcharts-interaction__tooltip-overflow">
                 +{placement.hiddenRowCount} more
               </div>
             ) : null}
           </div>
         </div>
       ) : null}
-      <div className="gx-interaction__status" role="status" aria-live="polite">
+      <div className="shiftcharts-interaction__status" role="status" aria-live="polite">
         {status}
       </div>
     </div>

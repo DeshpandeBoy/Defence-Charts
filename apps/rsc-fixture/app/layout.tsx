@@ -9,7 +9,7 @@ import type { ReactNode } from 'react'
  * absence is the load-bearing part, which is why it is stated rather than left to be noticed.
  *
  * ⚠ **No stylesheet import, no font, no metadata, no `<head>` content.** Everything this
- * fixture renders should be attributable to `page.tsx` or to `@gx/primitives`. A layout that
+ * fixture renders should be attributable to `page.tsx` or to `@shiftcharts/primitives`. A layout that
  * pulled in a font would put a `<link>` and a preload chunk into the HTML that G4's client-
  * bundle half would then have to learn to ignore — and a gate with an exception list is a
  * gate that grows exceptions.

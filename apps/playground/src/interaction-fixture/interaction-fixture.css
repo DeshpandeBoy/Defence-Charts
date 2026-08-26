@@ -1,8 +1,8 @@
 :root {
   color-scheme: light;
   font-family: system-ui, sans-serif;
-  background: var(--gx-surface-color);
-  color: var(--gx-surface-text-color);
+  background: var(--shiftcharts-surface-color);
+  color: var(--shiftcharts-surface-text-color);
 }
 
 * {
@@ -51,8 +51,8 @@ button {
   border: 1px solid currentColor;
 }
 
-.interaction-fixture__chart-frame .gx-auto-chart,
-.interaction-fixture__static-frame .gx-chart {
+.interaction-fixture__chart-frame .shiftcharts-auto-chart,
+.interaction-fixture__static-frame .shiftcharts-chart {
   inline-size: 100%;
   block-size: 100%;
 }
@@ -68,12 +68,12 @@ button {
   padding-inline: 10px;
 }
 
-[data-gx-legend-control] {
+[data-shiftcharts-legend-control] {
   max-inline-size: 760px;
   min-block-size: 44px;
 }
 
-[data-gx-legend-control] .gx-legend {
+[data-shiftcharts-legend-control] .shiftcharts-legend {
   position: relative;
   inset: auto;
   max-block-size: none;
@@ -81,12 +81,12 @@ button {
   pointer-events: auto;
 }
 
-[data-gx-legend-control] .gx-legend--external[data-legend-position='right'] {
+[data-shiftcharts-legend-control] .shiftcharts-legend--external[data-legend-position='right'] {
   flex-direction: row;
   align-items: center;
 }
 
-[data-gx-interaction-state] {
+[data-shiftcharts-interaction-state] {
   display: block;
   margin-block-start: 28px;
   font-variant-numeric: tabular-nums;

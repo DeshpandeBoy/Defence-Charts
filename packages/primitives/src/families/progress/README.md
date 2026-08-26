@@ -1,6 +1,6 @@
 # Progress primitive contract
 
-The progress family consumes only the serialisable `SeriesFrame.progress` seam from `@gx/core`.
+The progress family consumes only the serialisable `SeriesFrame.progress` seam from `@shiftcharts/core`.
 The coordinator owns the current/target calculation and the responsive planner; this family owns
 the SVG geometry boundary:
 

@@ -33,29 +33,29 @@ const renderNone: MarkRenderer = () => null
 export const renderHeatmap: MarkRenderer = ({ frame, plan }) => {
   if (plan.type !== 'heatmap') {
     throw new Error(
-      `@gx/primitives: heatmap renderer requires a heatmap plan; received '${String(plan.type)}'.`,
+      `@shiftcharts/primitives: heatmap renderer requires a heatmap plan; received '${String(plan.type)}'.`,
     )
   }
 
   const mark = plan.marks.primary
   if (mark.kind !== 'cell') {
     throw new Error(
-      `@gx/primitives: heatmap renderer requires a cell mark; received '${mark.kind}'.`,
+      `@shiftcharts/primitives: heatmap renderer requires a cell mark; received '${mark.kind}'.`,
     )
   }
 
   if (plan.marks.renderer !== 'svg') {
     throw new Error(
-      `@gx/primitives: heatmap renderer mode '${String(plan.marks.renderer)}' is not implemented; refusing to rasterize cells.`,
+      `@shiftcharts/primitives: heatmap renderer mode '${String(plan.marks.renderer)}' is not implemented; refusing to rasterize cells.`,
     )
   }
 
   if (typeof frame.id !== 'string' || frame.id.length === 0) {
-    throw new Error('@gx/primitives: heatmap rendering requires a stable non-empty series id.')
+    throw new Error('@shiftcharts/primitives: heatmap rendering requires a stable non-empty series id.')
   }
 
   if (!Array.isArray(frame.cells)) {
-    throw new Error('@gx/primitives: heatmap rendering requires shared SeriesFrame.cells geometry.')
+    throw new Error('@shiftcharts/primitives: heatmap rendering requires shared SeriesFrame.cells geometry.')
   }
 
   const cellIds = frame.cells.map((cell, index) => {
@@ -64,7 +64,7 @@ export const renderHeatmap: MarkRenderer = ({ frame, plan }) => {
     return cellIdentity(frame.id, heatmapCell, index)
   })
   if (new Set(cellIds).size !== cellIds.length) {
-    throw new Error('@gx/primitives: heatmap cell identities must be unique within a series.')
+    throw new Error('@shiftcharts/primitives: heatmap cell identities must be unique within a series.')
   }
   if (frame.cells.length === 0) return null
 
@@ -75,7 +75,7 @@ export const renderHeatmap: MarkRenderer = ({ frame, plan }) => {
         const heatmapCell = cell as HeatmapCell
         return (
           <rect
-            className={classes('gx-cell', 'gx-heatmap-cell')}
+            className={classes('shiftcharts-cell', 'shiftcharts-heatmap-cell')}
             data-cell-id={id}
             data-cell-index={index}
             data-cell-series-id={frame.id}
@@ -117,7 +117,7 @@ export const renderHeatmap: MarkRenderer = ({ frame, plan }) => {
 
 function validateCell(cell: HeatmapCell, index: number): void {
   if (typeof cell !== 'object' || cell === null) {
-    throw new Error(`@gx/primitives: heatmap cell ${index} has invalid geometry.`)
+    throw new Error(`@shiftcharts/primitives: heatmap cell ${index} has invalid geometry.`)
   }
 
   for (const [name, value] of [
@@ -127,26 +127,26 @@ function validateCell(cell: HeatmapCell, index: number): void {
     ['height', cell.height],
   ] as const) {
     if (typeof value !== 'number' || !Number.isFinite(value)) {
-      throw new Error(`@gx/primitives: heatmap cell ${index} ${name} geometry must be finite.`)
+      throw new Error(`@shiftcharts/primitives: heatmap cell ${index} ${name} geometry must be finite.`)
     }
   }
 
   if (cell.width < 0 || cell.height < 0) {
-    throw new Error(`@gx/primitives: heatmap cell ${index} geometry cannot have negative size.`)
+    throw new Error(`@shiftcharts/primitives: heatmap cell ${index} geometry cannot have negative size.`)
   }
 
   if (cell.id !== undefined && (typeof cell.id !== 'string' || cell.id.length === 0)) {
-    throw new Error(`@gx/primitives: heatmap cell ${index} requires a stable non-empty id.`)
+    throw new Error(`@shiftcharts/primitives: heatmap cell ${index} requires a stable non-empty id.`)
   }
   if (cell.value !== undefined && cell.value !== null && !Number.isFinite(cell.value)) {
-    throw new Error(`@gx/primitives: heatmap cell ${index} value must be finite or null.`)
+    throw new Error(`@shiftcharts/primitives: heatmap cell ${index} value must be finite or null.`)
   }
   if (
     cell.intensity !== undefined &&
     cell.intensity !== null &&
     (!Number.isFinite(cell.intensity) || cell.intensity < 0 || cell.intensity > 1)
   ) {
-    throw new Error(`@gx/primitives: heatmap cell ${index} intensity must be between 0 and 1 or null.`)
+    throw new Error(`@shiftcharts/primitives: heatmap cell ${index} intensity must be between 0 and 1 or null.`)
   }
 }
 

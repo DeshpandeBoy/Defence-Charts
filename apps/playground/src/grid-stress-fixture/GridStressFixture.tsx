@@ -1,5 +1,5 @@
-import type { LayoutSnapshot, WidgetLayoutInput } from '@gx/core'
-import { AutoChart } from '@gx/react'
+import type { LayoutSnapshot, WidgetLayoutInput } from '@shiftcharts/core'
+import { AutoChart } from '@shiftcharts/react'
 import {
   useCallback,
   useEffect,
@@ -74,7 +74,7 @@ export type GridStressApi = {
 
 declare global {
   interface Window {
-    __gxStress?: GridStressApi
+    __shiftchartsStress?: GridStressApi
   }
 }
 
@@ -185,9 +185,9 @@ export function GridStressFixture(): ReactElement {
         return
       }
       try {
-        const root = document.querySelector('[data-gx-stress="grid"]')
+        const root = document.querySelector('[data-shiftcharts-stress="grid"]')
         if (root === null) throw new Error('stress fixture root is missing')
-        const items = Array.from(root.querySelectorAll('[data-gx-stress-slot]'))
+        const items = Array.from(root.querySelectorAll('[data-shiftcharts-stress-slot]'))
         let rootScrollHeight = root.scrollHeight
         for (const item of items) {
           // Reading every border box makes this a layout-complete sample rather than a React
@@ -220,9 +220,9 @@ export function GridStressFixture(): ReactElement {
 
   useEffect(() => {
     const api: GridStressApi = { setWidgetCount, resetMetrics, readMetrics }
-    window.__gxStress = api
+    window.__shiftchartsStress = api
     return () => {
-      if (window.__gxStress === api) delete window.__gxStress
+      if (window.__shiftchartsStress === api) delete window.__shiftchartsStress
     }
   }, [readMetrics, resetMetrics, setWidgetCount])
 
@@ -230,11 +230,11 @@ export function GridStressFixture(): ReactElement {
 
   return (
     <main
-      data-gx-stress="grid"
-      data-gx-stress-count={count}
-      data-gx-stress-ready="true"
-      data-gx-stress-input-fingerprint={fingerprint}
-      data-gx-stress-supported-counts={STRESS_COUNTS.join(',')}
+      data-shiftcharts-stress="grid"
+      data-shiftcharts-stress-count={count}
+      data-shiftcharts-stress-ready="true"
+      data-shiftcharts-stress-input-fingerprint={fingerprint}
+      data-shiftcharts-stress-supported-counts={STRESS_COUNTS.join(',')}
       style={rootStyle}
     >
       <WidgetGrid
@@ -243,9 +243,9 @@ export function GridStressFixture(): ReactElement {
         rowHeight={48}
         margin={[8, 8]}
         mode="read-only"
-        className="gx-grid-stress__grid"
+        className="shiftcharts-grid-stress__grid"
         renderItem={(item) => (
-          <div className="gx-grid-stress__slot" data-gx-stress-slot={item.id}>
+          <div className="shiftcharts-grid-stress__slot" data-shiftcharts-stress-slot={item.id}>
             <WidgetShell
               widgetId={item.id}
               title={item.id}

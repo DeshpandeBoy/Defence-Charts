@@ -1,5 +1,5 @@
 /*
- * @gx/primitives — the structural stylesheet.
+ * @shiftcharts/primitives — the structural stylesheet.
  *
  * ⚠ Every visual property in this package lives here and nowhere else. Rule 2 of
  * src/index.ts: no presentation attributes in the markup, because `<line stroke="#ddd">`
@@ -8,19 +8,19 @@
  * same discipline that makes per-widget theming work at all.
  *
  * ⚠ This file is NOT in the token gate's allowlist directory, which is the point. Every
- * colour and every length below is a `var(--gx-*)`; scripts/check-tokens.mjs rejects the
+ * colour and every length below is a `var(--shiftcharts-*)`; scripts/check-tokens.mjs rejects the
  * file otherwise. If a rule here needs a number that no token carries, the answer is a
- * token in @gx/tokens, not a literal here.
+ * token in @shiftcharts/tokens, not a literal here.
  *
- * ⚠ Cascade layer `gx.theme`, declared by theme.css. Everything here therefore loses to
+ * ⚠ Cascade layer `shiftcharts.theme`, declared by theme.css. Everything here therefore loses to
  * any unlayered consumer rule, which is what lets someone restyle a chart without an
  * `!important` and without knowing our selector specificity.
  */
 
-@layer gx.theme {
+@layer shiftcharts.theme {
   /* --- Root ------------------------------------------------------------------------- */
 
-  .gx-chart {
+  .shiftcharts-chart {
     /* A <figure> carries a UA margin. Unitless 0 is not a length literal. */
     margin: 0;
     /*
@@ -33,28 +33,28 @@
     display: block;
     block-size: 100%;
     min-block-size: 0;
-    line-height: var(--gx-label-line-height);
+    line-height: var(--shiftcharts-label-line-height);
     /* Enable container queries for the chart */
     container-type: inline-size;
-    container-name: gx-chart;
+    container-name: shiftcharts-chart;
     /*
-     * ⚠ `--gx-surface-text-color`, not a ramp index. Every mark in this file that is not a series colour
+     * ⚠ `--shiftcharts-surface-text-color`, not a ramp index. Every mark in this file that is not a series colour
      * inherits from here — tick labels, the axis rule, the tick marks, the gridlines (all
-     * `currentColor` by way of `--gx-axis-color` / `--gx-grid-color`), the value display.
+     * `currentColor` by way of `--shiftcharts-axis-color` / `--shiftcharts-grid-color`), the value display.
      * Naming a ramp index here nails the ink to one ground: this line read
-     * `var(--gx-ramp-neutral-9)` until A4, and on the light ground it drew #e2e5e8 on
+     * `var(--shiftcharts-ramp-neutral-9)` until A4, and on the light ground it drew #e2e5e8 on
      * #f4f3ef. The chart kept its lines, which are series-coloured, and silently lost
      * every axis, tick, label and gridline. Found by opening it in a browser, not by a
      * test — a contrast failure is invisible to every gate this project has.
      */
-    color: var(--gx-surface-text-color);
-    font-family: var(--gx-font-family);
-    font-feature-settings: var(--gx-font-feature-settings);
-    font-variant-numeric: var(--gx-numeric-variant);
-    font-optical-sizing: var(--gx-font-optical-sizing);
+    color: var(--shiftcharts-surface-text-color);
+    font-family: var(--shiftcharts-font-family);
+    font-feature-settings: var(--shiftcharts-font-feature-settings);
+    font-variant-numeric: var(--shiftcharts-numeric-variant);
+    font-optical-sizing: var(--shiftcharts-font-optical-sizing);
   }
 
-  .gx-chart__svg {
+  .shiftcharts-chart__svg {
     /*
      * ⚠ `display: block` removes the inline-layout baseline gap under the <svg>. Left
      * inline, the figure is a few px taller than the box it was measured at, and at A5
@@ -66,123 +66,123 @@
     overflow: visible;
   }
 
-  .gx-chart__caption {
+  .shiftcharts-chart__caption {
     position: absolute;
     inset-inline: 0;
     inset-block-end: 0;
     max-block-size: 100%;
     margin: 0;
     overflow: auto;
-    background-color: var(--gx-surface-color);
-    font-size: var(--gx-legend-label-font-size);
+    background-color: var(--shiftcharts-surface-color);
+    font-size: var(--shiftcharts-legend-label-font-size);
   }
 
   /* --- Legend --------------------------------------------------------------------- */
-  .gx-legend {
+  .shiftcharts-legend {
     position: absolute;
     z-index: 1;
     display: flex;
     align-items: center;
-    gap: var(--gx-legend-gap-row) var(--gx-legend-gap-column);
+    gap: var(--shiftcharts-legend-gap-row) var(--shiftcharts-legend-gap-column);
     max-inline-size: 100%;
     max-block-size: 100%;
     margin: 0;
-    padding: var(--gx-legend-padding);
+    padding: var(--shiftcharts-legend-padding);
     overflow: auto;
-    color: var(--gx-surface-text-color);
-    font-size: var(--gx-legend-label-font-size);
-    font-weight: var(--gx-legend-label-font-weight);
-    letter-spacing: var(--gx-legend-label-letter-spacing);
-    line-height: var(--gx-label-line-height);
+    color: var(--shiftcharts-surface-text-color);
+    font-size: var(--shiftcharts-legend-label-font-size);
+    font-weight: var(--shiftcharts-legend-label-font-weight);
+    letter-spacing: var(--shiftcharts-legend-label-letter-spacing);
+    line-height: var(--shiftcharts-label-line-height);
   }
 
-  .gx-legend--internal {
-    inset-block-start: var(--gx-size-gap);
-    inset-inline-start: var(--gx-size-gap);
+  .shiftcharts-legend--internal {
+    inset-block-start: var(--shiftcharts-size-gap);
+    inset-inline-start: var(--shiftcharts-size-gap);
     flex-wrap: wrap;
     pointer-events: none;
   }
 
-  .gx-legend--external[data-legend-position='top'] {
+  .shiftcharts-legend--external[data-legend-position='top'] {
     inset-block-start: 0;
     inset-inline: 0;
     flex-wrap: wrap;
   }
 
-  .gx-legend--external[data-legend-position='bottom'] {
+  .shiftcharts-legend--external[data-legend-position='bottom'] {
     inset-block-end: 0;
     inset-inline: 0;
     flex-wrap: wrap;
   }
 
-  .gx-legend--external[data-legend-position='left'] {
+  .shiftcharts-legend--external[data-legend-position='left'] {
     inset-block: 0;
     inset-inline-start: 0;
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .gx-legend--external[data-legend-position='right'] {
+  .shiftcharts-legend--external[data-legend-position='right'] {
     inset-block: 0;
     inset-inline-end: 0;
     flex-direction: column;
     align-items: flex-start;
   }
 
-  .gx-legend__item {
+  .shiftcharts-legend__item {
     display: inline-flex;
     flex: 0 0 auto;
     min-inline-size: 0;
     align-items: center;
-    gap: var(--gx-legend-symbol-gap);
+    gap: var(--shiftcharts-legend-symbol-gap);
     max-inline-size: 100%;
     color: inherit;
     font: inherit;
   }
 
-  .gx-legend__symbol {
+  .shiftcharts-legend__symbol {
     display: inline-block;
     flex: 0 0 auto;
-    inline-size: var(--gx-legend-symbol-size);
-    block-size: var(--gx-legend-symbol-size);
-    border: var(--gx-legend-symbol-stroke-width) solid var(--gx-series-color);
+    inline-size: var(--shiftcharts-legend-symbol-size);
+    block-size: var(--shiftcharts-legend-symbol-size);
+    border: var(--shiftcharts-legend-symbol-stroke-width) solid var(--shiftcharts-series-color);
     border-radius: 50%;
-    background-color: var(--gx-series-color);
+    background-color: var(--shiftcharts-series-color);
   }
 
-  .gx-legend__label {
+  .shiftcharts-legend__label {
     min-inline-size: 0;
-    max-inline-size: var(--gx-legend-label-limit);
+    max-inline-size: var(--shiftcharts-legend-label-limit);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .gx-legend__detail {
+  .shiftcharts-legend__detail {
     flex: 0 0 auto;
     color: currentColor;
   }
 
-  .gx-legend__item[data-series-index='0'] {
-    --gx-series-color: var(--gx-series-1);
+  .shiftcharts-legend__item[data-series-index='0'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-1);
   }
-  .gx-legend__item[data-series-index='1'] {
-    --gx-series-color: var(--gx-series-2);
+  .shiftcharts-legend__item[data-series-index='1'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-2);
   }
-  .gx-legend__item[data-series-index='2'] {
-    --gx-series-color: var(--gx-series-3);
+  .shiftcharts-legend__item[data-series-index='2'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-3);
   }
-  .gx-legend__item[data-series-index='3'] {
-    --gx-series-color: var(--gx-series-4);
+  .shiftcharts-legend__item[data-series-index='3'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-4);
   }
-  .gx-legend__item[data-series-index='4'] {
-    --gx-series-color: var(--gx-series-5);
+  .shiftcharts-legend__item[data-series-index='4'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-5);
   }
-  .gx-legend__item[data-series-index='5'] {
-    --gx-series-color: var(--gx-series-6);
+  .shiftcharts-legend__item[data-series-index='5'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-6);
   }
 
-  .gx-legend--control .gx-legend__control {
+  .shiftcharts-legend--control .shiftcharts-legend__control {
     appearance: none;
     border: 0;
     border-radius: 0;
@@ -190,7 +190,7 @@
     cursor: pointer;
     display: inline-flex;
     align-items: center;
-    gap: var(--gx-legend-symbol-gap);
+    gap: var(--shiftcharts-legend-symbol-gap);
     max-inline-size: 100%;
     padding: 0;
     color: inherit;
@@ -198,33 +198,33 @@
     text-align: start;
   }
 
-  .gx-legend--control .gx-legend__control[aria-pressed='false'] {
-    opacity: var(--gx-motion-fade-factor);
+  .shiftcharts-legend--control .shiftcharts-legend__control[aria-pressed='false'] {
+    opacity: var(--shiftcharts-motion-fade-factor);
   }
 
-  .gx-legend--control .gx-legend__control:focus-visible {
-    outline: var(--gx-line-stroke-width) solid currentColor;
-    outline-offset: calc(var(--gx-line-stroke-width) * 2);
+  .shiftcharts-legend--control .shiftcharts-legend__control:focus-visible {
+    outline: var(--shiftcharts-line-stroke-width) solid currentColor;
+    outline-offset: calc(var(--shiftcharts-line-stroke-width) * 2);
   }
 
   @media (prefers-reduced-motion: no-preference) {
-    .gx-legend--control .gx-legend__control {
-      transition: opacity var(--gx-motion-duration-hover) var(--gx-motion-easing);
+    .shiftcharts-legend--control .shiftcharts-legend__control {
+      transition: opacity var(--shiftcharts-motion-duration-hover) var(--shiftcharts-motion-easing);
     }
   }
 
   @media (forced-colors: active) {
-    .gx-legend__symbol {
+    .shiftcharts-legend__symbol {
       border-color: ButtonText;
       background-color: CanvasText;
     }
 
-    .gx-legend--control .gx-legend__control {
+    .shiftcharts-legend--control .shiftcharts-legend__control {
       background: Canvas;
       color: ButtonText;
     }
 
-    .gx-legend--control .gx-legend__control[aria-pressed='true'] {
+    .shiftcharts-legend--control .shiftcharts-legend__control[aria-pressed='true'] {
       background: Highlight;
       color: HighlightText;
     }
@@ -232,32 +232,32 @@
 
   /* --- Chrome ----------------------------------------------------------------------- */
 
-  .gx-grid__line {
+  .shiftcharts-grid__line {
     fill: none;
-    stroke: var(--gx-grid-color);
-    stroke-width: var(--gx-grid-width);
-    stroke-dasharray: var(--gx-grid-dash);
-    stroke-dashoffset: var(--gx-grid-dash-offset);
-    stroke-linecap: var(--gx-grid-cap);
-    opacity: var(--gx-grid-opacity);
+    stroke: var(--shiftcharts-grid-color);
+    stroke-width: var(--shiftcharts-grid-width);
+    stroke-dasharray: var(--shiftcharts-grid-dash);
+    stroke-dashoffset: var(--shiftcharts-grid-dash-offset);
+    stroke-linecap: var(--shiftcharts-grid-cap);
+    opacity: var(--shiftcharts-grid-opacity);
   }
 
-  .gx-grid__zero {
+  .shiftcharts-grid__zero {
     /* The zero rule reads as chrome, not as a gridline: full strength, axis colour. */
-    fill: var(--gx-axis-color);
+    fill: var(--shiftcharts-axis-color);
     opacity: 1;
   }
 
-  .gx-axis__rule,
-  .gx-axis__tick-mark {
-    fill: var(--gx-axis-color);
+  .shiftcharts-axis__rule,
+  .shiftcharts-axis__tick-mark {
+    fill: var(--shiftcharts-axis-color);
   }
 
-  .gx-axis__tick-label {
+  .shiftcharts-axis__tick-label {
     fill: currentColor;
-    font-size: var(--gx-label-font-size);
-    font-weight: var(--gx-label-font-weight);
-    letter-spacing: var(--gx-label-letter-spacing);
+    font-size: var(--shiftcharts-label-font-size);
+    font-weight: var(--shiftcharts-label-font-weight);
+    letter-spacing: var(--shiftcharts-label-letter-spacing);
   }
 
   /*
@@ -265,20 +265,20 @@
    * right-to-left locale inverts every one of these. The markup emits `data-anchor` as a
    * hint and this is what reads it.
    */
-  .gx-axis--x .gx-axis__tick-label {
+  .shiftcharts-axis--x .shiftcharts-axis__tick-label {
     text-anchor: middle;
     dominant-baseline: hanging;
   }
 
-  .gx-axis--x .gx-axis__tick-label[data-anchor='start'] {
+  .shiftcharts-axis--x .shiftcharts-axis__tick-label[data-anchor='start'] {
     text-anchor: start;
   }
 
-  .gx-axis--x .gx-axis__tick-label[data-anchor='end'] {
+  .shiftcharts-axis--x .shiftcharts-axis__tick-label[data-anchor='end'] {
     text-anchor: end;
   }
 
-  .gx-axis--y .gx-axis__tick-label {
+  .shiftcharts-axis--y .shiftcharts-axis__tick-label {
     text-anchor: end;
     dominant-baseline: middle;
   }
@@ -288,227 +288,227 @@
   /*
    * ⚠ Six bindings and no seventh, because the ladder caps a legible chart at six series
    * and the palette is six named emission lines. A series past the sixth inherits
-   * --gx-series-color's own default rather than wrapping to series-1, which makes the
+   * --shiftcharts-series-color's own default rather than wrapping to series-1, which makes the
    * overflow visible instead of making it look intentional.
    */
-  .gx-series[data-series-index='0'] {
-    --gx-series-color: var(--gx-series-1);
+  .shiftcharts-series[data-series-index='0'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-1);
   }
-  .gx-series[data-series-index='1'] {
-    --gx-series-color: var(--gx-series-2);
+  .shiftcharts-series[data-series-index='1'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-2);
   }
-  .gx-series[data-series-index='2'] {
-    --gx-series-color: var(--gx-series-3);
+  .shiftcharts-series[data-series-index='2'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-3);
   }
-  .gx-series[data-series-index='3'] {
-    --gx-series-color: var(--gx-series-4);
+  .shiftcharts-series[data-series-index='3'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-4);
   }
-  .gx-series[data-series-index='4'] {
-    --gx-series-color: var(--gx-series-5);
+  .shiftcharts-series[data-series-index='4'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-5);
   }
-  .gx-series[data-series-index='5'] {
-    --gx-series-color: var(--gx-series-6);
+  .shiftcharts-series[data-series-index='5'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-6);
   }
 
-  .gx-line {
+  .shiftcharts-line {
     fill: none;
-    stroke: var(--gx-series-color);
-    stroke-width: var(--gx-line-stroke-width);
+    stroke: var(--shiftcharts-series-color);
+    stroke-width: var(--shiftcharts-line-stroke-width);
     /*
      * Round joins and caps, so a one-point series still paints a dot and a steep vertex
      * does not spike. `stroke-linecap: butt` on a single-point path renders nothing at
      * all — a series that exists, has a value, and is invisible.
      */
-    stroke-linejoin: var(--gx-line-join);
-    stroke-linecap: var(--gx-line-cap);
-    stroke-miterlimit: var(--gx-line-miter-limit);
-    stroke-dasharray: var(--gx-line-dash);
-    stroke-dashoffset: var(--gx-line-dash-offset);
+    stroke-linejoin: var(--shiftcharts-line-join);
+    stroke-linecap: var(--shiftcharts-line-cap);
+    stroke-miterlimit: var(--shiftcharts-line-miter-limit);
+    stroke-dasharray: var(--shiftcharts-line-dash);
+    stroke-dashoffset: var(--shiftcharts-line-dash-offset);
   }
 
-  .gx-area {
-    fill: var(--gx-series-color);
-    fill-opacity: var(--gx-area-opacity);
+  .shiftcharts-area {
+    fill: var(--shiftcharts-series-color);
+    fill-opacity: var(--shiftcharts-area-opacity);
     stroke: none;
   }
 
-  .gx-bar {
-    fill: var(--gx-series-color);
-    stroke: var(--gx-series-color);
-    stroke-width: var(--gx-bar-border-width);
+  .shiftcharts-bar {
+    fill: var(--shiftcharts-series-color);
+    stroke: var(--shiftcharts-series-color);
+    stroke-width: var(--shiftcharts-bar-border-width);
   }
 
-  .gx-arc {
-    fill: var(--gx-series-color);
-    stroke: var(--gx-series-color);
-    stroke-width: var(--gx-bar-border-width);
+  .shiftcharts-arc {
+    fill: var(--shiftcharts-series-color);
+    stroke: var(--shiftcharts-series-color);
+    stroke-width: var(--shiftcharts-bar-border-width);
   }
 
   /* Donut slices are categories inside one source series, so their colour identity comes from
    * the slice index rather than the ancestor series index. The seventh slot is a blended token
    * colour, keeping the existing six-series palette useful without introducing a second palette. */
-  .gx-arc[data-slice-index='0'],
-  .gx-legend__item[data-slice-index='0'],
-  .gx-compact-key__entry[data-slice-index='0'],
-  .gx-compact-key__swatch[data-slice-index='0'] {
-    --gx-series-color: var(--gx-series-1);
+  .shiftcharts-arc[data-slice-index='0'],
+  .shiftcharts-legend__item[data-slice-index='0'],
+  .shiftcharts-compact-key__entry[data-slice-index='0'],
+  .shiftcharts-compact-key__swatch[data-slice-index='0'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-1);
   }
-  .gx-arc[data-slice-index='1'],
-  .gx-legend__item[data-slice-index='1'],
-  .gx-compact-key__entry[data-slice-index='1'],
-  .gx-compact-key__swatch[data-slice-index='1'] {
-    --gx-series-color: var(--gx-series-2);
+  .shiftcharts-arc[data-slice-index='1'],
+  .shiftcharts-legend__item[data-slice-index='1'],
+  .shiftcharts-compact-key__entry[data-slice-index='1'],
+  .shiftcharts-compact-key__swatch[data-slice-index='1'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-2);
   }
-  .gx-arc[data-slice-index='2'],
-  .gx-legend__item[data-slice-index='2'],
-  .gx-compact-key__entry[data-slice-index='2'],
-  .gx-compact-key__swatch[data-slice-index='2'] {
-    --gx-series-color: var(--gx-series-3);
+  .shiftcharts-arc[data-slice-index='2'],
+  .shiftcharts-legend__item[data-slice-index='2'],
+  .shiftcharts-compact-key__entry[data-slice-index='2'],
+  .shiftcharts-compact-key__swatch[data-slice-index='2'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-3);
   }
-  .gx-arc[data-slice-index='3'],
-  .gx-legend__item[data-slice-index='3'],
-  .gx-compact-key__entry[data-slice-index='3'],
-  .gx-compact-key__swatch[data-slice-index='3'] {
-    --gx-series-color: var(--gx-series-4);
+  .shiftcharts-arc[data-slice-index='3'],
+  .shiftcharts-legend__item[data-slice-index='3'],
+  .shiftcharts-compact-key__entry[data-slice-index='3'],
+  .shiftcharts-compact-key__swatch[data-slice-index='3'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-4);
   }
-  .gx-arc[data-slice-index='4'],
-  .gx-legend__item[data-slice-index='4'],
-  .gx-compact-key__entry[data-slice-index='4'],
-  .gx-compact-key__swatch[data-slice-index='4'] {
-    --gx-series-color: var(--gx-series-5);
+  .shiftcharts-arc[data-slice-index='4'],
+  .shiftcharts-legend__item[data-slice-index='4'],
+  .shiftcharts-compact-key__entry[data-slice-index='4'],
+  .shiftcharts-compact-key__swatch[data-slice-index='4'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-5);
   }
-  .gx-arc[data-slice-index='5'],
-  .gx-legend__item[data-slice-index='5'],
-  .gx-compact-key__entry[data-slice-index='5'],
-  .gx-compact-key__swatch[data-slice-index='5'] {
-    --gx-series-color: var(--gx-series-6);
+  .shiftcharts-arc[data-slice-index='5'],
+  .shiftcharts-legend__item[data-slice-index='5'],
+  .shiftcharts-compact-key__entry[data-slice-index='5'],
+  .shiftcharts-compact-key__swatch[data-slice-index='5'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-6);
   }
-  .gx-arc[data-slice-index='6'],
-  .gx-legend__item[data-slice-index='6'],
-  .gx-compact-key__entry[data-slice-index='6'],
-  .gx-compact-key__swatch[data-slice-index='6'] {
-    --gx-series-color: color-mix(in srgb, var(--gx-series-1) 35%, var(--gx-series-6));
+  .shiftcharts-arc[data-slice-index='6'],
+  .shiftcharts-legend__item[data-slice-index='6'],
+  .shiftcharts-compact-key__entry[data-slice-index='6'],
+  .shiftcharts-compact-key__swatch[data-slice-index='6'] {
+    --shiftcharts-series-color: color-mix(in srgb, var(--shiftcharts-series-1) 35%, var(--shiftcharts-series-6));
   }
-  .gx-arc[data-slice-index='7'],
-  .gx-legend__item[data-slice-index='7'],
-  .gx-compact-key__entry[data-slice-index='7'],
-  .gx-compact-key__swatch[data-slice-index='7'] {
-    --gx-series-color: color-mix(in srgb, var(--gx-series-2) 35%, var(--gx-series-5));
+  .shiftcharts-arc[data-slice-index='7'],
+  .shiftcharts-legend__item[data-slice-index='7'],
+  .shiftcharts-compact-key__entry[data-slice-index='7'],
+  .shiftcharts-compact-key__swatch[data-slice-index='7'] {
+    --shiftcharts-series-color: color-mix(in srgb, var(--shiftcharts-series-2) 35%, var(--shiftcharts-series-5));
   }
-  .gx-arc[data-slice-index='8'],
-  .gx-legend__item[data-slice-index='8'],
-  .gx-compact-key__entry[data-slice-index='8'],
-  .gx-compact-key__swatch[data-slice-index='8'] {
-    --gx-series-color: color-mix(in srgb, var(--gx-series-3) 35%, var(--gx-series-4));
+  .shiftcharts-arc[data-slice-index='8'],
+  .shiftcharts-legend__item[data-slice-index='8'],
+  .shiftcharts-compact-key__entry[data-slice-index='8'],
+  .shiftcharts-compact-key__swatch[data-slice-index='8'] {
+    --shiftcharts-series-color: color-mix(in srgb, var(--shiftcharts-series-3) 35%, var(--shiftcharts-series-4));
   }
-  .gx-arc[data-slice-index='9'],
-  .gx-legend__item[data-slice-index='9'],
-  .gx-compact-key__entry[data-slice-index='9'],
-  .gx-compact-key__swatch[data-slice-index='9'] {
-    --gx-series-color: color-mix(in srgb, var(--gx-series-1) 65%, var(--gx-series-5));
+  .shiftcharts-arc[data-slice-index='9'],
+  .shiftcharts-legend__item[data-slice-index='9'],
+  .shiftcharts-compact-key__entry[data-slice-index='9'],
+  .shiftcharts-compact-key__swatch[data-slice-index='9'] {
+    --shiftcharts-series-color: color-mix(in srgb, var(--shiftcharts-series-1) 65%, var(--shiftcharts-series-5));
   }
-  .gx-arc[data-slice-kind='other'],
-  .gx-legend__item[data-slice-kind='other'],
-  .gx-compact-key__entry[data-slice-kind='other'],
-  .gx-compact-key__swatch[data-slice-kind='other'] {
-    --gx-series-color: currentColor;
+  .shiftcharts-arc[data-slice-kind='other'],
+  .shiftcharts-legend__item[data-slice-kind='other'],
+  .shiftcharts-compact-key__entry[data-slice-kind='other'],
+  .shiftcharts-compact-key__swatch[data-slice-kind='other'] {
+    --shiftcharts-series-color: currentColor;
   }
 
   /* `Other` remains distinguishable in forced-colors and without relying on hue alone. */
-  .gx-arc--other {
+  .shiftcharts-arc--other {
     fill: currentColor;
-    fill-opacity: var(--gx-area-opacity);
+    fill-opacity: var(--shiftcharts-area-opacity);
   }
 
-  .gx-progress__track {
+  .shiftcharts-progress__track {
     fill: currentColor;
-    fill-opacity: var(--gx-area-opacity);
+    fill-opacity: var(--shiftcharts-area-opacity);
     stroke: none;
   }
 
-  .gx-progress__fill {
-    fill: var(--gx-series-color);
-    stroke: var(--gx-series-color);
-    stroke-width: var(--gx-bar-border-width);
+  .shiftcharts-progress__fill {
+    fill: var(--shiftcharts-series-color);
+    stroke: var(--shiftcharts-series-color);
+    stroke-width: var(--shiftcharts-bar-border-width);
   }
 
-  .gx-heatmap-cell {
+  .shiftcharts-heatmap-cell {
     /* Heatmap colour is one comparable intensity field; row identity comes from the axis. */
     fill: currentColor;
-    stroke: var(--gx-plot-border-color);
-    stroke-width: var(--gx-plot-border-width);
+    stroke: var(--shiftcharts-plot-border-color);
+    stroke-width: var(--shiftcharts-plot-border-width);
   }
 
-  .gx-heatmap-cell[data-heatmap-state='missing'] {
-    fill: var(--gx-plot-color);
-    stroke: var(--gx-plot-border-color);
+  .shiftcharts-heatmap-cell[data-heatmap-state='missing'] {
+    fill: var(--shiftcharts-plot-color);
+    stroke: var(--shiftcharts-plot-border-color);
     fill-opacity: 1;
   }
 
-  .gx-heatmap-cell[data-heatmap-intensity='0'] {
-    fill-opacity: calc(var(--gx-area-opacity) * 0.5);
+  .shiftcharts-heatmap-cell[data-heatmap-intensity='0'] {
+    fill-opacity: calc(var(--shiftcharts-area-opacity) * 0.5);
   }
 
-  .gx-heatmap-cell[data-heatmap-intensity='1'] {
-    fill-opacity: var(--gx-area-opacity);
+  .shiftcharts-heatmap-cell[data-heatmap-intensity='1'] {
+    fill-opacity: var(--shiftcharts-area-opacity);
   }
 
-  .gx-heatmap-cell[data-heatmap-intensity='2'] {
-    fill-opacity: calc(var(--gx-area-opacity) * 1.5);
+  .shiftcharts-heatmap-cell[data-heatmap-intensity='2'] {
+    fill-opacity: calc(var(--shiftcharts-area-opacity) * 1.5);
   }
 
-  .gx-heatmap-cell[data-heatmap-intensity='3'] {
-    fill-opacity: calc(var(--gx-area-opacity) * 2);
+  .shiftcharts-heatmap-cell[data-heatmap-intensity='3'] {
+    fill-opacity: calc(var(--shiftcharts-area-opacity) * 2);
   }
 
-  .gx-heatmap-cell[data-heatmap-intensity='4'] {
+  .shiftcharts-heatmap-cell[data-heatmap-intensity='4'] {
     fill-opacity: 1;
   }
 
-  .gx-legend[data-legend-family='heatmap'] {
+  .shiftcharts-legend[data-legend-family='heatmap'] {
     flex-wrap: wrap;
   }
 
-  .gx-legend[data-legend-family='heatmap'] .gx-legend__symbol {
+  .shiftcharts-legend[data-legend-family='heatmap'] .shiftcharts-legend__symbol {
     border-color: currentColor;
     background-color: currentColor;
   }
 
-  .gx-legend[data-legend-family='heatmap'] .gx-legend__title {
-    font-weight: var(--gx-legend-label-font-weight);
+  .shiftcharts-legend[data-legend-family='heatmap'] .shiftcharts-legend__title {
+    font-weight: var(--shiftcharts-legend-label-font-weight);
   }
 
-  .gx-legend[data-legend-family='heatmap'] .gx-legend__item[data-heatmap-intensity='0'] .gx-legend__symbol {
-    opacity: calc(var(--gx-area-opacity) * 0.5);
+  .shiftcharts-legend[data-legend-family='heatmap'] .shiftcharts-legend__item[data-heatmap-intensity='0'] .shiftcharts-legend__symbol {
+    opacity: calc(var(--shiftcharts-area-opacity) * 0.5);
   }
 
-  .gx-legend[data-legend-family='heatmap'] .gx-legend__item[data-heatmap-intensity='1'] .gx-legend__symbol {
-    opacity: var(--gx-area-opacity);
+  .shiftcharts-legend[data-legend-family='heatmap'] .shiftcharts-legend__item[data-heatmap-intensity='1'] .shiftcharts-legend__symbol {
+    opacity: var(--shiftcharts-area-opacity);
   }
 
-  .gx-legend[data-legend-family='heatmap'] .gx-legend__item[data-heatmap-intensity='2'] .gx-legend__symbol {
-    opacity: calc(var(--gx-area-opacity) * 1.5);
+  .shiftcharts-legend[data-legend-family='heatmap'] .shiftcharts-legend__item[data-heatmap-intensity='2'] .shiftcharts-legend__symbol {
+    opacity: calc(var(--shiftcharts-area-opacity) * 1.5);
   }
 
-  .gx-legend[data-legend-family='heatmap'] .gx-legend__item[data-heatmap-intensity='3'] .gx-legend__symbol {
-    opacity: calc(var(--gx-area-opacity) * 2);
+  .shiftcharts-legend[data-legend-family='heatmap'] .shiftcharts-legend__item[data-heatmap-intensity='3'] .shiftcharts-legend__symbol {
+    opacity: calc(var(--shiftcharts-area-opacity) * 2);
   }
 
-  .gx-legend[data-legend-family='heatmap'] .gx-legend__item[data-heatmap-intensity='4'] .gx-legend__symbol {
+  .shiftcharts-legend[data-legend-family='heatmap'] .shiftcharts-legend__item[data-heatmap-intensity='4'] .shiftcharts-legend__symbol {
     opacity: 1;
   }
 
-  .gx-funnel-stage__mark {
-    fill: var(--gx-series-color);
-    stroke: var(--gx-series-color);
-    stroke-width: var(--gx-bar-border-width);
+  .shiftcharts-funnel-stage__mark {
+    fill: var(--shiftcharts-series-color);
+    stroke: var(--shiftcharts-series-color);
+    stroke-width: var(--shiftcharts-bar-border-width);
   }
 
-  .gx-funnel-stage__text,
-  .gx-funnel__summary {
+  .shiftcharts-funnel-stage__text,
+  .shiftcharts-funnel__summary {
     fill: currentColor;
-    font-size: var(--gx-legend-label-font-size);
-    font-weight: var(--gx-label-font-weight);
+    font-size: var(--shiftcharts-legend-label-font-size);
+    font-weight: var(--shiftcharts-label-font-weight);
     text-anchor: middle;
     dominant-baseline: middle;
   }
@@ -516,22 +516,22 @@
   /* Horizontal funnels start at the plot edge; centering those labels on x=0 hides half
    * of every stage name. Their value is still inside the shared frame, so start anchoring is
    * the faithful text geometry while vertical funnels remain centered inside each bar. */
-  .gx-funnel--horizontal .gx-funnel-stage__text {
+  .shiftcharts-funnel--horizontal .shiftcharts-funnel-stage__text {
     text-anchor: start;
   }
 
-  .gx-progress__state {
+  .shiftcharts-progress__state {
     fill: currentColor;
-    font-weight: var(--gx-label-font-weight);
+    font-weight: var(--shiftcharts-label-font-weight);
     text-anchor: middle;
     dominant-baseline: middle;
   }
 
-  .gx-progress__value {
+  .shiftcharts-progress__value {
     fill: currentColor;
-    font-size: var(--gx-value-label-font-size);
-    font-weight: var(--gx-value-label-font-weight);
-    letter-spacing: var(--gx-value-label-letter-spacing);
+    font-size: var(--shiftcharts-value-label-font-size);
+    font-weight: var(--shiftcharts-value-label-font-weight);
+    letter-spacing: var(--shiftcharts-value-label-letter-spacing);
     text-anchor: middle;
     dominant-baseline: middle;
   }
@@ -542,85 +542,85 @@
    * is expressed as a multiplier on one token so a theme restates the ramp by changing a
    * single number.
    */
-  .gx-band {
-    fill: var(--gx-series-color);
+  .shiftcharts-band {
+    fill: var(--shiftcharts-series-color);
     stroke: none;
-    fill-opacity: var(--gx-horizon-band-opacity);
+    fill-opacity: var(--shiftcharts-horizon-band-opacity);
   }
-  .gx-band[data-band='1'] {
-    fill-opacity: calc(var(--gx-horizon-band-opacity) * 2);
+  .shiftcharts-band[data-band='1'] {
+    fill-opacity: calc(var(--shiftcharts-horizon-band-opacity) * 2);
   }
-  .gx-band[data-band='2'] {
-    fill-opacity: calc(var(--gx-horizon-band-opacity) * 3);
+  .shiftcharts-band[data-band='2'] {
+    fill-opacity: calc(var(--shiftcharts-horizon-band-opacity) * 3);
   }
 
-  .gx-point {
+  .shiftcharts-point {
     /*
      * ⚠ `r` as a CSS property, which is the whole of decision 012's positive half: SVG2
      * promoted cx/cy/r and browsers shipped them, so point radius can be a token. The
      * same line written for a <line> element's y2 would parse, pass this gate, and do
      * nothing.
      */
-    r: var(--gx-point-radius);
-    fill: var(--gx-series-color);
-    stroke: var(--gx-point-stroke-color);
-    stroke-width: var(--gx-point-stroke-width);
+    r: var(--shiftcharts-point-radius);
+    fill: var(--shiftcharts-series-color);
+    stroke: var(--shiftcharts-point-stroke-color);
+    stroke-width: var(--shiftcharts-point-stroke-width);
   }
 
   /* --- Direct labels ---------------------------------------------------------------- */
 
-  .gx-label {
-    fill: var(--gx-series-color);
-    font-size: var(--gx-legend-label-font-size);
-    font-weight: var(--gx-legend-label-font-weight);
-    letter-spacing: var(--gx-legend-label-letter-spacing);
+  .shiftcharts-label {
+    fill: var(--shiftcharts-series-color);
+    font-size: var(--shiftcharts-legend-label-font-size);
+    font-weight: var(--shiftcharts-legend-label-font-weight);
+    letter-spacing: var(--shiftcharts-legend-label-letter-spacing);
     text-anchor: end;
     dominant-baseline: middle;
   }
 
-  .gx-value-label {
+  .shiftcharts-value-label {
     fill: currentColor;
-    font-size: var(--gx-value-label-font-size);
-    font-weight: var(--gx-value-label-font-weight);
-    letter-spacing: var(--gx-value-label-letter-spacing);
+    font-size: var(--shiftcharts-value-label-font-size);
+    font-weight: var(--shiftcharts-value-label-font-weight);
+    letter-spacing: var(--shiftcharts-value-label-letter-spacing);
     text-anchor: middle;
   }
 
-  .gx-label[data-halo='light'],
-  .gx-value-label[data-halo='light'] {
+  .shiftcharts-label[data-halo='light'],
+  .shiftcharts-value-label[data-halo='light'] {
     paint-order: stroke fill;
-    stroke: var(--gx-value-label-halo-color);
-    stroke-width: var(--gx-value-label-halo-width);
-    stroke-opacity: var(--gx-value-label-halo-opacity);
+    stroke: var(--shiftcharts-value-label-halo-color);
+    stroke-width: var(--shiftcharts-value-label-halo-width);
+    stroke-opacity: var(--shiftcharts-value-label-halo-opacity);
     stroke-linejoin: round;
   }
 
-  .gx-label[data-halo='dark'],
-  .gx-value-label[data-halo='dark'] {
+  .shiftcharts-label[data-halo='dark'],
+  .shiftcharts-value-label[data-halo='dark'] {
     paint-order: stroke fill;
-    stroke: var(--gx-surface-text-color);
-    stroke-width: var(--gx-value-label-halo-width);
-    stroke-opacity: var(--gx-value-label-halo-opacity);
+    stroke: var(--shiftcharts-surface-text-color);
+    stroke-width: var(--shiftcharts-value-label-halo-width);
+    stroke-opacity: var(--shiftcharts-value-label-halo-opacity);
     stroke-linejoin: round;
   }
 
   /* --- Data table ------------------------------------------------------------------- */
 
-  .gx-data-table__summary {
+  .shiftcharts-data-table__summary {
     cursor: pointer;
   }
 
-  .gx-data-table__table {
+  .shiftcharts-data-table__table {
     border-collapse: collapse;
-    font-variant-numeric: var(--gx-numeric-variant);
+    font-variant-numeric: var(--shiftcharts-numeric-variant);
   }
 
-  .gx-data-table__table :is(th, td) {
-    padding: var(--gx-size-gap);
+  .shiftcharts-data-table__table :is(th, td) {
+    padding: var(--shiftcharts-size-gap);
     text-align: end;
   }
 
-  .gx-data-table__table :is(th, td):first-child {
+  .shiftcharts-data-table__table :is(th, td):first-child {
     text-align: start;
   }
 
@@ -647,7 +647,7 @@
    *   1. **`d` snaps when the command count changes.** Equal counts interpolate; unequal
    *      counts jump with no intermediate frame. That is precisely the `rescale` /
    *      `recompose` seam `MotionPlan` already drew from Heer & Robertson, which is why
-   *      `.gx-line` and `.gx-area` carry `opacity` alongside `d`: a rescale tweens the
+   *      `.shiftcharts-line` and `.shiftcharts-area` carry `opacity` alongside `d`: a rescale tweens the
    *      path, a recompose crossfades it, and neither needs to know which it is. The
    *      alternative — padding both command lists to a common length — is JS in the render
    *      path, and decision 7 does not have room for it.
@@ -668,25 +668,25 @@
    * ⚠ Outside the media query on purpose. These are variable bindings, not animations —
    * they set no property and start no transition, and keeping them out means the reduced
    * -motion path and the animated path resolve the same custom properties. A theme reading
-   * `--gx-motion-duration` gets an answer either way.
+   * `--shiftcharts-motion-duration` gets an answer either way.
    */
   /*
    * ⚠ **The delay is rebound alongside the duration, and it has to be.** Writing only the
-   * duration here and leaving `--gx-motion-stage-delay: calc(var(--gx-motion-duration) / 2)`
+   * duration here and leaving `--shiftcharts-motion-stage-delay: calc(var(--shiftcharts-motion-duration) / 2)`
    * on `:root` reads as though the delay tracks whatever the duration currently is. It does
    * not: custom properties are substituted where they are declared, so the root delay
    * resolves against the root duration and inherits down already computed. The recompose
    * figure got a 150ms delay against a 1000ms move — staged, but by a sixth of the gesture
-   * rather than half. See the note in `@gx/tokens`' theme.css for the measurement.
+   * rather than half. See the note in `@shiftcharts/tokens`' theme.css for the measurement.
    */
-  .gx-chart[data-motion-duration='rescale'] {
-    --gx-motion-duration: var(--gx-motion-duration-rescale);
-    --gx-motion-stage-delay: var(--gx-motion-stage-delay-rescale);
+  .shiftcharts-chart[data-motion-duration='rescale'] {
+    --shiftcharts-motion-duration: var(--shiftcharts-motion-duration-rescale);
+    --shiftcharts-motion-stage-delay: var(--shiftcharts-motion-stage-delay-rescale);
   }
 
-  .gx-chart[data-motion-duration='recompose'] {
-    --gx-motion-duration: var(--gx-motion-duration-recompose);
-    --gx-motion-stage-delay: var(--gx-motion-stage-delay-recompose);
+  .shiftcharts-chart[data-motion-duration='recompose'] {
+    --shiftcharts-motion-duration: var(--shiftcharts-motion-duration-recompose);
+    --shiftcharts-motion-stage-delay: var(--shiftcharts-motion-stage-delay-recompose);
   }
 
   /*
@@ -696,8 +696,8 @@
    * sparkline that delayed its own line behind an axis it does not draw would just be
    * slow.
    */
-  .gx-chart[data-motion-stages='1'] {
-    --gx-motion-stage-delay: 0ms;
+  .shiftcharts-chart[data-motion-stages='1'] {
+    --shiftcharts-motion-stage-delay: 0ms;
   }
 
   @media (prefers-reduced-motion: no-preference) {
@@ -709,22 +709,22 @@
      * own `transform` is in the list; without it the group jumps to the new origin while
      * its children slide within it, which reads worse than not animating at all.
      */
-    .gx-grid,
-    .gx-axis,
-    .gx-axis__tick {
-      transition: transform var(--gx-motion-duration) var(--gx-motion-easing);
+    .shiftcharts-grid,
+    .shiftcharts-axis,
+    .shiftcharts-axis__tick {
+      transition: transform var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing);
     }
 
-    .gx-grid__line,
-    .gx-grid__zero,
-    .gx-axis__rule,
-    .gx-axis__tick-mark {
+    .shiftcharts-grid__line,
+    .shiftcharts-grid__zero,
+    .shiftcharts-axis__rule,
+    .shiftcharts-axis__tick-mark {
       transition:
-        x var(--gx-motion-duration) var(--gx-motion-easing),
-        y var(--gx-motion-duration) var(--gx-motion-easing),
-        width var(--gx-motion-duration) var(--gx-motion-easing),
-        height var(--gx-motion-duration) var(--gx-motion-easing),
-        opacity var(--gx-motion-duration) var(--gx-motion-easing);
+        x var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing),
+        y var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing),
+        width var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing),
+        height var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing),
+        opacity var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing);
     }
 
     /*
@@ -734,62 +734,62 @@
      * Fading the label while the line slides is what makes the landmark read as the same
      * landmark relabelled, rather than as a new one.
      */
-    .gx-axis__tick-label {
+    .shiftcharts-axis__tick-label {
       transition:
-        x var(--gx-motion-duration) var(--gx-motion-easing),
-        y var(--gx-motion-duration) var(--gx-motion-easing),
-        opacity var(--gx-motion-duration) var(--gx-motion-easing);
+        x var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing),
+        y var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing),
+        opacity var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing);
     }
 
     /*
-     * Stage 2 — the marks, delayed behind the chrome by `--gx-motion-stage-delay`, which
+     * Stage 2 — the marks, delayed behind the chrome by `--shiftcharts-motion-stage-delay`, which
      * `[data-motion-stages='1']` zeroes above.
      *
      * ⚠ `d` first in the list and `opacity` last, and the order is not cosmetic: it is the
      * two halves of finding 1 above, declared together so that a rescale and a recompose
      * are the same rule. The path interpolates when it can and crossfades when it cannot.
      */
-    .gx-line,
-    .gx-area,
-    .gx-band,
-    .gx-progress__fill,
-    .gx-progress__track,
-    .gx-heatmap-cell,
-    .gx-funnel-stage__mark {
+    .shiftcharts-line,
+    .shiftcharts-area,
+    .shiftcharts-band,
+    .shiftcharts-progress__fill,
+    .shiftcharts-progress__track,
+    .shiftcharts-heatmap-cell,
+    .shiftcharts-funnel-stage__mark {
       transition:
-        d var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
-        x var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
-        y var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
-        height var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
-        width var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
-        opacity var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay);
+        d var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing) var(--shiftcharts-motion-stage-delay),
+        x var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing) var(--shiftcharts-motion-stage-delay),
+        y var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing) var(--shiftcharts-motion-stage-delay),
+        height var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing) var(--shiftcharts-motion-stage-delay),
+        width var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing) var(--shiftcharts-motion-stage-delay),
+        opacity var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing) var(--shiftcharts-motion-stage-delay);
     }
 
-    .gx-point {
+    .shiftcharts-point {
       transition:
-        cx var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
-        cy var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
-        r var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
-        opacity var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay);
+        cx var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing) var(--shiftcharts-motion-stage-delay),
+        cy var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing) var(--shiftcharts-motion-stage-delay),
+        r var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing) var(--shiftcharts-motion-stage-delay),
+        opacity var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing) var(--shiftcharts-motion-stage-delay);
     }
 
     /*
      * Direct labels and the value display ride stage 2 with the marks they annotate. A
      * label that arrived with the axis would name a position its line had not reached yet.
      */
-    .gx-label,
-    .gx-value-label,
-    .gx-value,
-    .gx-value__metric,
-    .gx-value__unit,
-    .gx-value__delta,
-    .gx-value__target,
-    .gx-value__status,
-    .gx-value__overflow {
+    .shiftcharts-label,
+    .shiftcharts-value-label,
+    .shiftcharts-value,
+    .shiftcharts-value__metric,
+    .shiftcharts-value__unit,
+    .shiftcharts-value__delta,
+    .shiftcharts-value__target,
+    .shiftcharts-value__status,
+    .shiftcharts-value__overflow {
       transition:
-        x var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
-        y var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay),
-        opacity var(--gx-motion-duration) var(--gx-motion-easing) var(--gx-motion-stage-delay);
+        x var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing) var(--shiftcharts-motion-stage-delay),
+        y var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing) var(--shiftcharts-motion-stage-delay),
+        opacity var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing) var(--shiftcharts-motion-stage-delay);
     }
   }
 
@@ -805,42 +805,42 @@
    *
    * Everything below is theme, and every one of it is a token.
    */
-  .gx-value {
+  .shiftcharts-value {
     /*
      * Series-coloured, like a direct label and for the same reason: with more than one
      * value in the band, colour is the only thing tying a number to the line it summarises.
      * The index comes from the frame's own series index, so a series with no defined value
      * does not shift the colour of the ones after it.
      */
-    fill: var(--gx-series-color);
-    font-weight: var(--gx-value-label-font-weight);
-    letter-spacing: var(--gx-value-label-letter-spacing);
+    fill: var(--shiftcharts-series-color);
+    font-weight: var(--shiftcharts-value-label-font-weight);
+    letter-spacing: var(--shiftcharts-value-label-letter-spacing);
     text-anchor: middle;
     dominant-baseline: middle;
   }
 
   /*
    * The same six bindings the marks use, restated because the value display is not inside a
-   * .gx-series group — <Chart> mounts it once for the whole band, not once per series. A
-   * seventh series falls through to --gx-series-color's own default, exactly as a mark does.
+   * .shiftcharts-series group — <Chart> mounts it once for the whole band, not once per series. A
+   * seventh series falls through to --shiftcharts-series-color's own default, exactly as a mark does.
    */
-  .gx-value[data-series-index='0'] {
-    --gx-series-color: var(--gx-series-1);
+  .shiftcharts-value[data-series-index='0'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-1);
   }
-  .gx-value[data-series-index='1'] {
-    --gx-series-color: var(--gx-series-2);
+  .shiftcharts-value[data-series-index='1'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-2);
   }
-  .gx-value[data-series-index='2'] {
-    --gx-series-color: var(--gx-series-3);
+  .shiftcharts-value[data-series-index='2'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-3);
   }
-  .gx-value[data-series-index='3'] {
-    --gx-series-color: var(--gx-series-4);
+  .shiftcharts-value[data-series-index='3'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-4);
   }
-  .gx-value[data-series-index='4'] {
-    --gx-series-color: var(--gx-series-5);
+  .shiftcharts-value[data-series-index='4'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-5);
   }
-  .gx-value[data-series-index='5'] {
-    --gx-series-color: var(--gx-series-6);
+  .shiftcharts-value[data-series-index='5'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-6);
   }
 
   /*
@@ -856,9 +856,9 @@
    * What it does carry is hierarchy: the value's weight is the display weight, the delta's
    * is the label weight, so the qualifier reads as secondary to the number it qualifies.
    */
-  .gx-value__delta {
+  .shiftcharts-value__delta {
     fill: currentColor;
-    font-weight: var(--gx-label-font-weight);
+    font-weight: var(--shiftcharts-label-font-weight);
   }
 
   /*
@@ -866,31 +866,31 @@
    * separate tspan so the value remains the dominant token while the series context stays
    * visible in a static/RSC render.
    */
-  .gx-value__context,
-  .gx-value__label,
-  .gx-value__separator {
+  .shiftcharts-value__context,
+  .shiftcharts-value__label,
+  .shiftcharts-value__separator {
     fill: currentColor;
-    font-weight: var(--gx-label-font-weight);
+    font-weight: var(--shiftcharts-label-font-weight);
   }
 
-  .gx-value__metric {
-    fill: var(--gx-series-color);
-    font-weight: var(--gx-value-label-font-weight);
+  .shiftcharts-value__metric {
+    fill: var(--shiftcharts-series-color);
+    font-weight: var(--shiftcharts-value-label-font-weight);
   }
 
   /* KPI qualifiers remain visible text; themes may add emphasis without owning the meaning. */
-  .gx-value__unit,
-  .gx-value__target,
-  .gx-value__status,
-  .gx-value__progress {
+  .shiftcharts-value__unit,
+  .shiftcharts-value__target,
+  .shiftcharts-value__status,
+  .shiftcharts-value__progress {
     fill: currentColor;
-    font-weight: var(--gx-label-font-weight);
+    font-weight: var(--shiftcharts-label-font-weight);
   }
 
   /* The "+2 more" marker: not a value, so it takes the text colour rather than a series'. */
-  .gx-value__overflow {
+  .shiftcharts-value__overflow {
     fill: currentColor;
-    font-weight: var(--gx-label-font-weight);
+    font-weight: var(--shiftcharts-label-font-weight);
     text-anchor: middle;
     dominant-baseline: middle;
   }
@@ -903,54 +903,54 @@
    * typography. It is not the HTML legend overlay: the plot layer has already been moved into
    * the remaining coordinates before this group is painted.
    */
-  .gx-compact-key {
+  .shiftcharts-compact-key {
     pointer-events: none;
   }
 
-  .gx-compact-key__entry[data-series-index='0'],
-  .gx-compact-key__swatch[data-series-index='0'] {
-    --gx-series-color: var(--gx-series-1);
+  .shiftcharts-compact-key__entry[data-series-index='0'],
+  .shiftcharts-compact-key__swatch[data-series-index='0'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-1);
   }
-  .gx-compact-key__entry[data-series-index='1'],
-  .gx-compact-key__swatch[data-series-index='1'] {
-    --gx-series-color: var(--gx-series-2);
+  .shiftcharts-compact-key__entry[data-series-index='1'],
+  .shiftcharts-compact-key__swatch[data-series-index='1'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-2);
   }
-  .gx-compact-key__entry[data-series-index='2'],
-  .gx-compact-key__swatch[data-series-index='2'] {
-    --gx-series-color: var(--gx-series-3);
+  .shiftcharts-compact-key__entry[data-series-index='2'],
+  .shiftcharts-compact-key__swatch[data-series-index='2'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-3);
   }
-  .gx-compact-key__entry[data-series-index='3'],
-  .gx-compact-key__swatch[data-series-index='3'] {
-    --gx-series-color: var(--gx-series-4);
+  .shiftcharts-compact-key__entry[data-series-index='3'],
+  .shiftcharts-compact-key__swatch[data-series-index='3'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-4);
   }
-  .gx-compact-key__entry[data-series-index='4'],
-  .gx-compact-key__swatch[data-series-index='4'] {
-    --gx-series-color: var(--gx-series-5);
+  .shiftcharts-compact-key__entry[data-series-index='4'],
+  .shiftcharts-compact-key__swatch[data-series-index='4'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-5);
   }
-  .gx-compact-key__entry[data-series-index='5'],
-  .gx-compact-key__swatch[data-series-index='5'] {
-    --gx-series-color: var(--gx-series-6);
-  }
-
-  .gx-compact-key__swatch {
-    fill: var(--gx-series-color);
-    stroke: var(--gx-series-color);
-    stroke-width: var(--gx-bar-border-width);
+  .shiftcharts-compact-key__entry[data-series-index='5'],
+  .shiftcharts-compact-key__swatch[data-series-index='5'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-6);
   }
 
-  .gx-compact-key__label {
+  .shiftcharts-compact-key__swatch {
+    fill: var(--shiftcharts-series-color);
+    stroke: var(--shiftcharts-series-color);
+    stroke-width: var(--shiftcharts-bar-border-width);
+  }
+
+  .shiftcharts-compact-key__label {
     fill: currentColor;
-    font-size: var(--gx-legend-label-font-size);
-    font-weight: var(--gx-legend-label-font-weight);
-    letter-spacing: var(--gx-legend-label-letter-spacing);
+    font-size: var(--shiftcharts-legend-label-font-size);
+    font-weight: var(--shiftcharts-legend-label-font-weight);
+    letter-spacing: var(--shiftcharts-legend-label-letter-spacing);
     dominant-baseline: middle;
   }
 
-  .gx-compact-key__more {
+  .shiftcharts-compact-key__more {
     fill: currentColor;
-    font-size: var(--gx-legend-label-font-size);
-    font-weight: var(--gx-legend-label-font-weight);
-    letter-spacing: var(--gx-legend-label-letter-spacing);
+    font-size: var(--shiftcharts-legend-label-font-size);
+    font-weight: var(--shiftcharts-legend-label-font-weight);
+    letter-spacing: var(--shiftcharts-legend-label-letter-spacing);
     text-anchor: end;
     dominant-baseline: middle;
   }

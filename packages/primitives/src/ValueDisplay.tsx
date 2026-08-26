@@ -7,10 +7,10 @@
  * plot's `y` origin — so at Micro, whose plan is `marks.primary.kind: 'none'` and
  * `regionOrder: ['value','table']`, the *entire content of the rung* was a value display that
  * did not exist. The rendered output was an empty `<svg>` with three empty
- * `<g class="gx-series">` and a data table below it. Nothing in the geometry suite could see
+ * `<g class="shiftcharts-series">` and a data table below it. Nothing in the geometry suite could see
  * it, because the geometry was right.
  *
- * ⚠ **Every number here was computed in `@gx/core` and none of it is recomputed.** The
+ * ⚠ **Every number here was computed in `@shiftcharts/core` and none of it is recomputed.** The
  * fitted font size, each entry's x, the band's vertical centre, the formatted value, the
  * formatted delta and its direction all arrive on `ChartFrame['value']`. That is not
  * fastidiousness: the size the text is painted at is the exact inverse of the equation that
@@ -29,7 +29,7 @@
  * plot would not move — the same silent-overflow failure the whole file is written against.
  *
  * Everything a theme *does* control — fill, weight, letter-spacing, anchoring, the delta's
- * relative weight — is in `chart.css` under `.gx-value`.
+ * relative weight — is in `chart.css` under `.shiftcharts-value`.
  *
  * ## What is deliberately present
  *
@@ -44,7 +44,7 @@
  * it is not a replacement for the table and does not require client state.
  */
 
-import type { ValueFrame } from '@gx/core'
+import type { ValueFrame } from '@shiftcharts/core'
 
 import { classes, roundCoord } from './svg.ts'
 
@@ -70,16 +70,16 @@ export function ValueDisplay({ value, className }: ValueDisplayProps) {
   const showDelta = value.presentation.context === 'delta'
 
   return (
-    <g className={classes('gx-value-display', className)}>
+    <g className={classes('shiftcharts-value-display', className)}>
       {value.entries.map((entry) => {
         const label = displayLabel(entry.label, entry.seriesId)
         return (
           <text
-            className="gx-value"
+            className="shiftcharts-value"
             key={entry.seriesId}
             data-series-id={entry.seriesId}
             // ⚠ The series' index, straight off the frame — never the map's index. It is what
-            // `chart.css` binds `--gx-series-color` from, and a series with no defined value
+            // `chart.css` binds `--shiftcharts-series-color` from, and a series with no defined value
             // contributes no entry, so the two differ exactly when a chart has a silent series.
             data-series-index={entry.seriesIndex}
             aria-label={accessibleValue(entry, label)}
@@ -87,34 +87,34 @@ export function ValueDisplay({ value, className }: ValueDisplayProps) {
             y={roundCoord(entry.y)}
             fontSize={fontSize}
           >
-            {showLabel ? <tspan className="gx-value__context gx-value__label">{label}</tspan> : null}
-            {showLabel ? <tspan className="gx-value__separator"> · </tspan> : null}
-            <tspan className="gx-value__metric">{entry.text}</tspan>
+            {showLabel ? <tspan className="shiftcharts-value__context shiftcharts-value__label">{label}</tspan> : null}
+            {showLabel ? <tspan className="shiftcharts-value__separator"> · </tspan> : null}
+            <tspan className="shiftcharts-value__metric">{entry.text}</tspan>
           {entry.unit === null || entry.unit.length === 0 ? null : (
-            <tspan className="gx-value__unit">{` ${entry.unit}`}</tspan>
+            <tspan className="shiftcharts-value__unit">{` ${entry.unit}`}</tspan>
           )}
           {entry.delta === null || !showDelta ? null : (
             /*
-             * ⚠ The separating space is inside the string, not a `dx` on the tspan. `@gx/core`
+             * ⚠ The separating space is inside the string, not a `dx` on the tspan. `@shiftcharts/core`
              * fitted the width of `"36 +4"` including that space; a gap introduced here would
              * be a gap the fit never measured, and the text would run wider than the column it
              * was sized for.
             */
-            <tspan className="gx-value__delta" data-direction={entry.delta.direction}>
+            <tspan className="shiftcharts-value__delta" data-direction={entry.delta.direction}>
               {` ${entry.delta.text}${entry.comparison === null ? '' : ` (${entry.comparison})`}`}
             </tspan>
           )}
           {entry.target === null ? null : (
-            <tspan className="gx-value__target">{` target ${entry.target.text}`}</tspan>
+            <tspan className="shiftcharts-value__target">{` target ${entry.target.text}`}</tspan>
           )}
           {entry.status === null ? null : (
-            <tspan className="gx-value__status" data-status={entry.status}>
+            <tspan className="shiftcharts-value__status" data-status={entry.status}>
               {` status ${entry.status}`}
             </tspan>
           )}
           {entry.progress === undefined || entry.progress === null ? null : (
             <tspan
-              className="gx-value__progress"
+              className="shiftcharts-value__progress"
               data-progress-state={entry.progress.indeterminate ? 'indeterminate' : 'determinate'}
             >
               {entry.progress.indeterminate
@@ -138,7 +138,7 @@ export function ValueDisplay({ value, className }: ValueDisplayProps) {
          * rather than overlaps, and the hidden values stay in the data table.
          */
         <text
-          className="gx-value__overflow"
+          className="shiftcharts-value__overflow"
           data-hidden={overflow.hidden}
           aria-label={`${overflow.hidden} additional series`}
           x={roundCoord(overflow.x)}

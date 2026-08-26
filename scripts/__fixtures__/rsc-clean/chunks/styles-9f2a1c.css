@@ -6,16 +6,16 @@
  * the thing it styles. Copied in shape from a real `next build` of `apps/rsc-fixture`, where
  * all four of these appeared in `.next/static/chunks/*.css` and none appeared in any `.js`.
  */
-.gx-chart__svg {
+.shiftcharts-chart__svg {
   display: block;
   overflow: visible;
 }
-.gx-chart__caption {
-  margin-block-start: var(--gx-size-gap);
+.shiftcharts-chart__caption {
+  margin-block-start: var(--shiftcharts-size-gap);
 }
-.gx-axis__tick-mark {
-  fill: var(--gx-axis-color);
+.shiftcharts-axis__tick-mark {
+  fill: var(--shiftcharts-axis-color);
 }
-.gx-grid__line {
-  fill: var(--gx-grid-color);
+.shiftcharts-grid__line {
+  fill: var(--shiftcharts-grid-color);
 }

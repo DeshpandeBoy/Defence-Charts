@@ -3,7 +3,7 @@
  *
  * ⚠ **G7 structurally cannot catch what this catches.** The token gate parses stylesheets and
  * asserts that a `var()` was used; it has no way to know whether the property that `var()`
- * lands on *exists* on the element it targets. `line { y2: var(--gx-tick-length) }` parses,
+ * lands on *exists* on the element it targets. `line { y2: var(--shiftcharts-tick-length) }` parses,
  * passes G7, builds, warns about nothing, and does nothing —
  * `research/decisions/012-no-line-element-for-tokened-geometry.md` has the SVG2 property table
  * and the element census (Vega ships 28 `<line>` elements, Observable Plot ships 0). The only
@@ -29,7 +29,7 @@ import {
   type PlanPolicy,
   type Series,
   sizeContextFromPixels,
-} from '@gx/core'
+} from '@shiftcharts/core'
 import { renderToStaticMarkup } from 'react-dom/server'
 import { describe, expect, it } from 'vitest'
 
@@ -173,7 +173,7 @@ describe('gate G14: no <line> carries tokened geometry', () => {
    */
   it('draws ticks as <rect> with non-zero extent', () => {
     const ticks = parseElements(render(1000, 700)).filter(
-      (el) => el.attrs['class'] === 'gx-axis__tick-mark',
+      (el) => el.attrs['class'] === 'shiftcharts-axis__tick-mark',
     )
     expect(ticks.length).toBeGreaterThan(0)
     for (const t of ticks) {
@@ -190,7 +190,7 @@ describe('gate G14: no <line> carries tokened geometry', () => {
       axisRuleWidth: 3,
     })
     const ticks = parseElements(html).filter(
-      (el) => el.attrs['class'] === 'gx-axis__tick-mark',
+      (el) => el.attrs['class'] === 'shiftcharts-axis__tick-mark',
     )
 
     expect(ticks.some((tick) => tick.attrs.width === '3' && tick.attrs.height === '17')).toBe(true)
@@ -206,7 +206,7 @@ describe('gate G14: no <line> carries tokened geometry', () => {
    */
   it('draws the horizon rung as banded <path>, not as nothing', () => {
     const bands = parseElements(render(240, 44)).filter((el) =>
-      (el.attrs['class'] ?? '').includes('gx-band'),
+      (el.attrs['class'] ?? '').includes('shiftcharts-band'),
     )
     expect(bands.length).toBeGreaterThan(0)
     for (const b of bands) {
@@ -294,10 +294,10 @@ describe('compact information structure', () => {
   it('gives Tile a visible identity key for every plotted series', () => {
     const html = render(240, 80)
     const keyEntries = parseElements(html).filter(
-      (el) => el.attrs['class'] === 'gx-compact-key__entry',
+      (el) => el.attrs['class'] === 'shiftcharts-compact-key__entry',
     )
-    const key = parseElements(html).find((el) => el.attrs['class'] === 'gx-compact-key')
-    const plot = parseElements(html).find((el) => el.attrs['class'] === 'gx-compact-plot')
+    const key = parseElements(html).find((el) => el.attrs['class'] === 'shiftcharts-compact-key')
+    const plot = parseElements(html).find((el) => el.attrs['class'] === 'shiftcharts-compact-plot')
 
     expect(key?.attrs['data-legend-source']).toBe('fallback')
     expect(keyEntries.map((entry) => entry.attrs['data-series-id'])).toEqual([
@@ -308,28 +308,28 @@ describe('compact information structure', () => {
     expect(keyEntries.every((entry) => entry.attrs['role'] === 'listitem')).toBe(true)
     expect(Number(key?.attrs['data-legend-rail-height'])).toBeGreaterThan(0)
     expect(plot?.attrs.transform).toMatch(/translate\(0 [\d.]+\) scale\(1 0\.[\d]+\)/)
-    expect(html.indexOf('class="gx-compact-key"')).toBeGreaterThan(
-      html.indexOf('class="gx-compact-plot"'),
+    expect(html.indexOf('class="shiftcharts-compact-key"')).toBeGreaterThan(
+      html.indexOf('class="shiftcharts-compact-plot"'),
     )
   })
 
   it('moves Strip geometry below its SVG identity rail instead of overlaying HTML labels', () => {
     const html = render(400, 200)
-    const key = parseElements(html).find((el) => el.attrs['class'] === 'gx-compact-key')
-    const plot = parseElements(html).find((el) => el.attrs['class'] === 'gx-compact-plot')
+    const key = parseElements(html).find((el) => el.attrs['class'] === 'shiftcharts-compact-key')
+    const plot = parseElements(html).find((el) => el.attrs['class'] === 'shiftcharts-compact-plot')
 
     expect(key?.attrs['data-legend-placement']).toBe('internal')
     expect(key?.attrs['data-legend-source']).toBe('core')
     expect(Number(key?.attrs['data-legend-rail-height'])).toBeGreaterThan(0)
-    expect(html).not.toContain('gx-legend--internal')
+    expect(html).not.toContain('shiftcharts-legend--internal')
     expect(plot).toBeUndefined()
-    expect(parseElements(html).filter((el) => el.attrs['class'] === 'gx-compact-key__label')).toHaveLength(3)
+    expect(parseElements(html).filter((el) => el.attrs['class'] === 'shiftcharts-compact-key__label')).toHaveLength(3)
   })
 
   it('does not add a plot identity rail to Micro, where the value reading is the chart', () => {
     const html = render(60, 24)
-    expect(html).not.toContain('gx-compact-key')
-    expect(html).toContain('gx-value__metric')
+    expect(html).not.toContain('shiftcharts-compact-key')
+    expect(html).toContain('shiftcharts-value__metric')
   })
 })
 
@@ -387,9 +387,9 @@ describe('determinism', () => {
 })
 
 describe('the plan is obeyed, not approximated', () => {
-  it('draws one <g class="gx-series"> per series, in index order', () => {
+  it('draws one <g class="shiftcharts-series"> per series, in index order', () => {
     const groups = parseElements(render(900, 520)).filter(
-      (el) => el.attrs['class'] === 'gx-series',
+      (el) => el.attrs['class'] === 'shiftcharts-series',
     )
     expect(groups.map((g) => g.attrs['data-series-id'])).toEqual(['alpha', 'beta', 'gamma'])
     expect(groups.map((g) => g.attrs['data-series-index'])).toEqual(['0', '1', '2'])
@@ -421,8 +421,8 @@ describe('the plan is obeyed, not approximated', () => {
     const html = renderToStaticMarkup(
       <Chart plan={hidden} data={THREE} ctx={ctx} title="No x" id="t" />,
     )
-    expect(html).not.toContain('gx-axis--x')
-    expect(html).toContain('gx-axis--y')
+    expect(html).not.toContain('shiftcharts-axis--x')
+    expect(html).toContain('shiftcharts-axis--y')
   })
 
   it('wires B2 axis and guide controls into rendered SVG', () => {
@@ -450,8 +450,8 @@ describe('the plan is obeyed, not approximated', () => {
     expect(html).toContain('clip-path="url(#b2-axis-x-bound)"')
     expect(html).toContain('data-dash-phase="3"')
     expect(html).toContain('data-stroke-cap="round"')
-    expect(html).toContain('--gx-grid-dash-offset:3')
-    expect(html).toContain('--gx-grid-cap:round')
+    expect(html).toContain('--shiftcharts-grid-dash-offset:3')
+    expect(html).toContain('--shiftcharts-grid-cap:round')
     expect(html).toContain('data-halo="dark"')
   })
 })
@@ -466,7 +466,7 @@ describe('degenerate input', () => {
   it('renders a figure for no series at all', () => {
     const html = render(900, 520, [])
     expect(html).toContain('<svg')
-    expect(html).not.toContain('gx-series')
+    expect(html).not.toContain('shiftcharts-series')
   })
 
   it('renders a single flat series without a NaN or an empty path', () => {

@@ -15,12 +15,12 @@ const REPO_ROOT = fileURLToPath(new URL('../', import.meta.url))
 const PACKAGES_ROOT = join(REPO_ROOT, 'packages')
 
 export const PACKAGE_NAMES = Object.freeze([
-  '@gx/core',
-  '@gx/grid',
-  '@gx/primitives',
-  '@gx/react',
-  '@gx/testing',
-  '@gx/tokens',
+  '@shiftcharts/core',
+  '@shiftcharts/grid',
+  '@shiftcharts/primitives',
+  '@shiftcharts/react',
+  '@shiftcharts/testing',
+  '@shiftcharts/tokens',
 ])
 
 const RUNTIME_DEPENDENCIES = Object.freeze([
@@ -140,14 +140,14 @@ export async function assertBuiltArtifacts() {
  * install, registry lookup, or network access is part of this proof.
  */
 export async function assertPackedConsumer() {
-  const temporaryRoot = await mkdtemp(join(tmpdir(), 'gx-packed-consumer-'))
+  const temporaryRoot = await mkdtemp(join(tmpdir(), 'shiftcharts-packed-consumer-'))
   const packRoot = join(temporaryRoot, 'packs')
   const consumerRoot = join(temporaryRoot, 'consumer')
   const consumerModules = join(consumerRoot, 'node_modules')
 
   try {
     await mkdir(packRoot, { recursive: true })
-    await mkdir(join(consumerModules, '@gx'), { recursive: true })
+    await mkdir(join(consumerModules, '@shiftcharts'), { recursive: true })
 
     for (const packageName of PACKAGE_NAMES) {
       await execFileAsync('pnpm', ['pack', '--pack-destination', packRoot], {
@@ -216,7 +216,7 @@ for (const specifier of css) {
   await access(resolved)
 }
 
-for (const specifier of ['@gx/core', '@gx/primitives', '@gx/react', '@gx/grid', '@gx/tokens']) {
+for (const specifier of ['@shiftcharts/core', '@shiftcharts/primitives', '@shiftcharts/react', '@shiftcharts/grid', '@shiftcharts/tokens']) {
   await import(specifier)
 }
 

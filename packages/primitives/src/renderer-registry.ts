@@ -38,7 +38,7 @@ export function renderBuiltInMark(input: MarkRendererInput): ReactNode {
   }
 
   throw new Error(
-    "@gx/primitives: mark kind '" + kind + "' is not implemented. A4 renders 'line', 'horizon', 'none', D1.1 renders 'bar', D3.2 renders 'progress', D4.1 renders 'point', D2.1 renders donut 'arc', D5.1 renders heatmap 'cell', D6.1 renders funnel; future marks remain explicit.",
+    "@shiftcharts/primitives: mark kind '" + kind + "' is not implemented. A4 renders 'line', 'horizon', 'none', D1.1 renders 'bar', D3.2 renders 'progress', D4.1 renders 'point', D2.1 renders donut 'arc', D5.1 renders heatmap 'cell', D6.1 renders funnel; future marks remain explicit.",
   )
 }
 

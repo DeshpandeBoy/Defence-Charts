@@ -1,9 +1,9 @@
 {
-  "name": "@gx/tokens",
+  "name": "@shiftcharts/tokens",
   "version": "0.0.0",
   "type": "module",
   "license": "MIT",
-  "description": "CSS custom properties and their generated TypeScript types. Depends on nothing.",
+  "description": "ShiftCharts CSS custom-property themes and generated TypeScript token types.",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/DeshpandeBoy/Defence-Charts.git",

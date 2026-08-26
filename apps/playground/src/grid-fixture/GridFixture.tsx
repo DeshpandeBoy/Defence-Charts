@@ -1,5 +1,5 @@
-import type { LayoutSnapshot, WidgetLayoutInput } from '@gx/core'
-import { AutoChart } from '@gx/react'
+import type { LayoutSnapshot, WidgetLayoutInput } from '@shiftcharts/core'
+import { AutoChart } from '@shiftcharts/react'
 import { useMemo, useState, type CSSProperties, type ReactElement } from 'react'
 
 import { WidgetGrid, WidgetShell } from '../../../../packages/grid/src/index.ts'
@@ -129,17 +129,17 @@ export function GridFixture(): ReactElement {
     <main
       className={`grid-fixture grid-fixture--${ancestor}`}
       dir={rtl ? 'rtl' : 'ltr'}
-      data-gx-fixture="grid"
-      data-gx-mode={mode}
-      data-gx-ancestor={ancestor}
-      data-gx-hidden={hidden ? 'true' : 'false'}
-      data-gx-zero-size={zeroSize ? 'true' : 'false'}
-      data-gx-overflow={overflow ? 'true' : 'false'}
-      data-gx-transform={transform ? 'true' : 'false'}
-      data-gx-zoom={zoom ? 'true' : 'false'}
-      data-gx-direction={rtl ? 'rtl' : 'ltr'}
-      data-gx-last-event={lastEvent}
-      data-gx-events={events.join(',')}
+      data-shiftcharts-fixture="grid"
+      data-shiftcharts-mode={mode}
+      data-shiftcharts-ancestor={ancestor}
+      data-shiftcharts-hidden={hidden ? 'true' : 'false'}
+      data-shiftcharts-zero-size={zeroSize ? 'true' : 'false'}
+      data-shiftcharts-overflow={overflow ? 'true' : 'false'}
+      data-shiftcharts-transform={transform ? 'true' : 'false'}
+      data-shiftcharts-zoom={zoom ? 'true' : 'false'}
+      data-shiftcharts-direction={rtl ? 'rtl' : 'ltr'}
+      data-shiftcharts-last-event={lastEvent}
+      data-shiftcharts-events={events.join(',')}
     >
       <header className="grid-fixture__header">
         <h1>Grid browser fixture</h1>
@@ -156,7 +156,7 @@ export function GridFixture(): ReactElement {
             <button
               key={option.label}
               type="button"
-              data-gx-footprint={option.label}
+              data-shiftcharts-footprint={option.label}
               aria-pressed={footprint.label === option.label}
               onClick={() => chooseFootprint(option)}
             >
@@ -165,28 +165,28 @@ export function GridFixture(): ReactElement {
           ))}
         </fieldset>
         <div className="grid-fixture__button-row">
-          <button type="button" data-gx-mode-toggle onClick={() => setMode((current) => current === 'edit' ? 'read-only' : 'edit')}>
+          <button type="button" data-shiftcharts-mode-toggle onClick={() => setMode((current) => current === 'edit' ? 'read-only' : 'edit')}>
             mode:{mode}
           </button>
-          <button type="button" data-gx-ancestor-toggle onClick={() => setAncestor((current) => current === 'flex' ? 'grid' : 'flex')}>
+          <button type="button" data-shiftcharts-ancestor-toggle onClick={() => setAncestor((current) => current === 'flex' ? 'grid' : 'flex')}>
             ancestor:{ancestor}
           </button>
-          <button type="button" data-gx-hidden-toggle onClick={() => setHidden((current) => !current)}>
+          <button type="button" data-shiftcharts-hidden-toggle onClick={() => setHidden((current) => !current)}>
             hidden:{hidden ? 'on' : 'off'}
           </button>
-          <button type="button" data-gx-zero-toggle onClick={() => setZeroSize((current) => !current)}>
+          <button type="button" data-shiftcharts-zero-toggle onClick={() => setZeroSize((current) => !current)}>
             zero:{zeroSize ? 'on' : 'off'}
           </button>
-          <button type="button" data-gx-overflow-toggle onClick={() => setOverflow((current) => !current)}>
+          <button type="button" data-shiftcharts-overflow-toggle onClick={() => setOverflow((current) => !current)}>
             overflow:{overflow ? 'on' : 'off'}
           </button>
-          <button type="button" data-gx-transform-toggle onClick={() => setTransform((current) => !current)}>
+          <button type="button" data-shiftcharts-transform-toggle onClick={() => setTransform((current) => !current)}>
             transform:{transform ? 'on' : 'off'}
           </button>
-          <button type="button" data-gx-zoom-toggle onClick={() => setZoom((current) => !current)}>
+          <button type="button" data-shiftcharts-zoom-toggle onClick={() => setZoom((current) => !current)}>
             zoom:{zoom ? 'on' : 'off'}
           </button>
-          <button type="button" data-gx-rtl-toggle onClick={() => setRtl((current) => !current)}>
+          <button type="button" data-shiftcharts-rtl-toggle onClick={() => setRtl((current) => !current)}>
             rtl:{rtl ? 'on' : 'off'}
           </button>
         </div>
@@ -196,12 +196,12 @@ export function GridFixture(): ReactElement {
         className={`grid-fixture__tab ${hidden ? 'grid-fixture__tab--hidden' : ''}`}
         hidden={hidden}
         aria-label="Visible grid tab"
-        data-gx-tab="visible"
+        data-shiftcharts-tab="visible"
       >
         <div
           className={`grid-fixture__ancestor grid-fixture__ancestor--${ancestor}`}
           style={{ ...ancestorStyle, ...(overflow ? { overflow: 'auto' } : {}) }}
-          data-gx-ancestor-box
+          data-shiftcharts-ancestor-box
         >
           <div
             className="grid-fixture__grid-host"
@@ -209,7 +209,7 @@ export function GridFixture(): ReactElement {
               ...(transform ? { transform: 'scale(0.85)', transformOrigin: 'top left' } : {}),
               ...(zoom ? { zoom: 1.25 } : {}),
             }}
-            data-gx-grid-host
+            data-shiftcharts-grid-host
           >
             <WidgetGrid
               layout={layout}
@@ -219,12 +219,12 @@ export function GridFixture(): ReactElement {
               mode={mode}
               style={gridStyle}
               renderItem={(item) => (
-                <div className="grid-fixture__slot" data-gx-slot={item.id} data-gx-footprint={`${item.w}x${item.h}`}>
+                <div className="grid-fixture__slot" data-shiftcharts-slot={item.id} data-shiftcharts-footprint={`${item.w}x${item.h}`}>
                   <WidgetShell
                     widgetId={item.id}
                     title={`${item.id} widget`}
                     context={`${item.w}×${item.h} footprint`}
-                    actions={<span data-gx-grid-cancel="true">fixture</span>}
+                    actions={<span data-shiftcharts-grid-cancel="true">fixture</span>}
                     footer={`stable id: ${item.id}`}
                   >
                     <AutoChart
@@ -239,8 +239,8 @@ export function GridFixture(): ReactElement {
                   {item.id === TARGET_ID ? (
                     <div
                       className="grid-fixture__pointer-handle"
-                      data-gx-drag-handle="fixture"
-                      data-gx-pointer-handle
+                      data-shiftcharts-drag-handle="fixture"
+                      data-shiftcharts-pointer-handle
                       aria-hidden="true"
                     >
                       drag
@@ -260,11 +260,11 @@ export function GridFixture(): ReactElement {
         </div>
       </section>
 
-      <section className="grid-fixture__tab grid-fixture__tab--hidden" hidden={!hidden} aria-label="Hidden grid tab" data-gx-tab="hidden">
+      <section className="grid-fixture__tab grid-fixture__tab--hidden" hidden={!hidden} aria-label="Hidden grid tab" data-shiftcharts-tab="hidden">
         <p>Hidden grid tab. Toggle the hidden control to mount the dashboard again.</p>
       </section>
 
-      <output className="grid-fixture__status" data-gx-status>
+      <output className="grid-fixture__status" data-shiftcharts-status>
         event:{lastEvent} · footprint:{footprint.label} · ids:{IDS.join(',')}
       </output>
     </main>

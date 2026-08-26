@@ -1,5 +1,5 @@
 /**
- * `@gx/primitives` — hook-free SVG. RSC-safe: this package ships **no** `"use client"`
+ * `@shiftcharts/primitives` — hook-free SVG. RSC-safe: this package ships **no** `"use client"`
  * directive, and a CI grep of the build output asserts that.
  *
  * ⚠ Three rules bind here, all from `research/20-architecture.md` §2:
@@ -13,7 +13,7 @@
  *      rather than documenting it, and it is the same discipline that makes per-widget
  *      CSS theming work at all. Decided at A1.
  *   3. **No `<line>` for geometry a token controls.** `x1`/`y1`/`x2`/`y2` are not
- *      CSS-settable in *any* browser and none is planned, so `line { y2: var(--gx-tick-length) }`
+ *      CSS-settable in *any* browser and none is planned, so `line { y2: var(--shiftcharts-tick-length) }`
  *      parses, passes the token gate, builds, warns about nothing, and does nothing.
  *      Use `<rect>` for ticks and gridlines, `<path>` where a path already exists. A
  *      `<line>` stays legal for anything no token controls. Gate **G14**, at A4 —
@@ -38,8 +38,8 @@
  * ## What a consumer needs
  *
  * ```tsx
- * import { Chart } from '@gx/primitives'
- * import '@gx/primitives/src/chart.css'
+ * import { Chart } from '@shiftcharts/primitives'
+ * import '@shiftcharts/primitives/src/chart.css'
  * ```
  *
  * `chart.css` is a side effect (`package.json`'s `sideEffects`), so it survives

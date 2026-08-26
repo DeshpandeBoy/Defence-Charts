@@ -5,7 +5,7 @@
  * Transcribed from `research/40-chart-plan.md` §5.
  *
  * `research/20-architecture.md` §3.2 fixes the precedence chain:
- * library defaults → `<GxConfig>` → per-chart props → `planFn` last.
+ * library defaults → `<ShiftChartsConfig>` → per-chart props → `planFn` last.
  *
  * ⚠ **Policy is applied BEFORE resolution; overrides are forced AFTER.** Conflating them
  * is how the token-split bug gets reintroduced, and `aggregateAfter` is the field that
@@ -22,7 +22,7 @@ import { DEFAULT_TYPOGRAPHY } from './text.ts'
 
 /**
  * **INPUT** to `planChart()`. Plan-input tokens per `research/20-architecture.md` §3.2 —
- * TypeScript objects delivered through `<GxConfig>`, **never CSS custom properties**.
+ * TypeScript objects delivered through `<ShiftChartsConfig>`, **never CSS custom properties**.
  *
  * ⚠ The class boundary is the whole point of decision 10. These values change what the
  * resolver *decides*, so they cannot travel as CSS: the resolver does not read the
