@@ -188,8 +188,8 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 |---|---|---|---|---|
 | P0.1 | Coordinator | **done** | — | Final agent plan and continuity system; committed and verified |
 | P0.2 | Claude research | **handoff** | P0.1 | Decision-conflict register |
-| P0.3 | User/coordinator | blocked on decision | — | Final public name and npm scope; `gx-charts` confirmed available on npm/GitHub 2026-08-26, not yet claimed |
-| P0.5 | User/coordinator | blocked on decision | — | Reconcile `main` (a disconnected single "Initial commit", zero shared history — `git merge-base` confirms) with `Anti-gravity-and-other-Agent-changes`, where all real development lives; blocks any real use of `release.yml`/`E2.1` regardless of P0.3 |
+| P0.3 | User/coordinator | **in progress** | — | User selected **ShiftCharts**, `@shiftcharts/*`, and “Charts that shift with their space.”; integration tracked in `research/handoffs/P0.3.md` |
+| P0.5 | User/coordinator | **in progress** | — | Preserve both disconnected histories through an unrelated-history merge, then fast-forward `main`; tracked in `research/handoffs/P0.5.md` |
 | P0.4 | Codex integration | **done** | P0.2 | Record RGL `./core` + `./react` boundary and widget-shell owner |
 | C0.1 | Codex integration | **done** | P0.1, P0.2, P0.4 | Grid/widget/identity contract |
 | C0.2 | Codex integration | **done** | C0.1 | Pin and prove RGL adapter boundary |
@@ -224,7 +224,7 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | E1.2 | Codex release | done | E1.1 | Package metadata/licence/dependency corrections |
 | E1.3 | Codex release | done | E1.1 | Tarball Next/RSC and Vite consumers |
 | E1.4 | Codex release | done | E1.2, E1.3 | `publint`, `attw`, package-content and no-network gates |
-| E2.1 | Codex release | backlog | P0.3, P0.5, E1.4 | Rename, Changesets and trusted Preview publish; mechanical half prepared, see `E2.1-mechanical` |
+| E2.1 | Codex release | **in progress** | P0.3, P0.5, E1.4 | ShiftCharts rename, Changesets and trusted Preview publish; tracked in `research/handoffs/E2.1.md` |
 | E2.1-mechanical | Coordinator (Claude-prepared) | **handoff** | R4 | Changesets config + `release.yml` (trusted-publish OIDC) wired; `pnpm publish --dry-run` validated against pinned `pnpm@10.34.5` for all 6 packages; dormant pending P0.3 and P0.5 |
 | E3.1 | Coordinator | backlog | D7.1, E2.1 | Free-v1 claim and release audit |
 | R1 | Claude research | **done** | P0.1 | RGL/grid current evidence; findings reflected in shipped C0.2/C1.1/C3.1 |
