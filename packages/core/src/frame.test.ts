@@ -15,6 +15,7 @@ import { describe, expect, it } from 'vitest'
 import { sizeContextFromPixels } from './context.ts'
 import type { Series } from './data.ts'
 import { describeShape } from './data.ts'
+import { DONUT_FAMILY_FIXTURE } from './families/donut/fixture.ts'
 import { chromeFromPlan, resolveFrame } from './frame.ts'
 import { legendBands, resolvePlotBox } from './layout.ts'
 import { applyOverrides } from './overrides.ts'
@@ -50,6 +51,15 @@ const BAR_DATA: Series[] = [
   { id: 'b', points: [{ x: 0, y: 5 }, { x: 1, y: 8 }, { x: 2, y: 12 }] },
   { id: 'c', points: [{ x: 0, y: 3 }, { x: 1, y: 6 }, { x: 2, y: 11 }] },
 ]
+
+/** Same ten-category fixture the family matrix ships, whose values sum to 107. */
+const DONUT_DATA: Series[] = [
+  {
+    id: 'programs',
+    points: DONUT_FAMILY_FIXTURE.values.map((y, i) => ({ x: i, y })),
+  },
+]
+const DONUT_SHAPE = describeShape(DONUT_DATA)
 
 describe('the plot box is the resolver’s, not a second opinion', () => {
   /**
@@ -641,6 +651,44 @@ describe('the value display', () => {
       expect(plan.narrative.valueDisplay).toBe('latest')
       const frame = resolveFrame(plan, THREE, MICRO)
       expect(frame.value?.entries.every((e) => e.delta === null)).toBe(true)
+    })
+  })
+
+  describe('the donut total', () => {
+    /**
+     * ⚠ Micro is the one rung where donut's `mark.kind` is `'none'`, so `SeriesFrame.arcs` is
+     * always empty here — this is the exact condition VT-001 found broken (the total silently
+     * summed that empty array to 0). The total must come from the raw defined points instead.
+     */
+    it('sums the raw series at Micro, where arc geometry is never built', () => {
+      const plan = planChart('donut', MICRO, DONUT_SHAPE)
+      expect(plan.marks.primary.kind).toBe('none')
+
+      const frame = resolveFrame(plan, DONUT_DATA, MICRO)
+      expect(frame.value?.entries).toHaveLength(1)
+      expect(frame.value?.entries[0]?.text).toBe('107')
+      expect(frame.value?.entries[0]?.unit).toBe('total')
+    })
+
+    it('agrees with the arc-built total at Tile, the only larger rung with both arcs and a value band', () => {
+      // Strip/Panel/Canvas/Stage build arcs too, but donut's narrative turns the value band off
+      // there (`valueDisplay: 'none'`) in favour of the compact key/legend, so there is no
+      // `frame.value` to compare — Tile is the one rung where both paths are exercised at once.
+      const plan = planChart('donut', TILE, DONUT_SHAPE)
+      expect(plan.marks.primary.kind).toBe('arc')
+      expect(plan.narrative.valueDisplay).toBe('latest')
+      const frame = resolveFrame(plan, DONUT_DATA, TILE)
+      expect(frame.value?.entries[0]?.text).toBe('107')
+      expect(frame.value?.entries[0]?.unit).toBe('total')
+    })
+
+    it('has no value band at Strip, Panel, Canvas, or Stage, where the key/legend carries the total instead', () => {
+      for (const ctx of [STRIP, PANEL, STAGE]) {
+        const plan = planChart('donut', ctx, DONUT_SHAPE)
+        expect(plan.marks.primary.kind).toBe('arc')
+        expect(plan.narrative.valueDisplay).toBe('none')
+        expect(resolveFrame(plan, DONUT_DATA, ctx).value).toBeNull()
+      }
     })
   })
 

@@ -181,23 +181,27 @@ async function runStaticMatrix(page) {
         throw new Error('scatter geometry missing for ' + card.caseId + ': ' + JSON.stringify(card))
       }
     }
-    if (card.type === 'donut' && card.rung !== 'micro') {
-      if (card.mark !== 'arc' || card.arcs === 0) {
-        throw new Error('donut geometry missing for ' + card.caseId + ': ' + JSON.stringify(card))
-      }
-      if ((card.rung === 'canvas' || card.rung === 'stage') && card.otherArcs === 0) {
-        throw new Error('donut Other bucket missing for ' + card.caseId + ': ' + JSON.stringify(card))
-      }
+    if (card.type === 'donut') {
+      // Checked unconditionally (not only when rung !== 'micro'): Micro is exactly the rung
+      // VT-001 found broken, because it is the one case with no arc geometry to fall back on.
       if ((card.rung === 'micro' || card.rung === 'tile') && !card.valueText?.includes('107 total')) {
         throw new Error('donut aggregate value is not readable for ' + card.caseId + ': ' + JSON.stringify(card))
       }
-      if (card.rung === 'panel' &&
-        (card.compactKeyLabels.length === 0 || card.compactKeyLabels.includes('Program mix'))) {
-        throw new Error('donut panel key lost slice identity for ' + card.caseId + ': ' + JSON.stringify(card))
-      }
-      if ((card.rung === 'canvas' || card.rung === 'stage') &&
-        (card.legendFamily !== 'donut' || card.legendLabels.length === 0 || !card.legendLabels.includes('Other'))) {
-        throw new Error('donut external slice legend missing for ' + card.caseId + ': ' + JSON.stringify(card))
+      if (card.rung !== 'micro') {
+        if (card.mark !== 'arc' || card.arcs === 0) {
+          throw new Error('donut geometry missing for ' + card.caseId + ': ' + JSON.stringify(card))
+        }
+        if ((card.rung === 'canvas' || card.rung === 'stage') && card.otherArcs === 0) {
+          throw new Error('donut Other bucket missing for ' + card.caseId + ': ' + JSON.stringify(card))
+        }
+        if (card.rung === 'panel' &&
+          (card.compactKeyLabels.length === 0 || card.compactKeyLabels.includes('Program mix'))) {
+          throw new Error('donut panel key lost slice identity for ' + card.caseId + ': ' + JSON.stringify(card))
+        }
+        if ((card.rung === 'canvas' || card.rung === 'stage') &&
+          (card.legendFamily !== 'donut' || card.legendLabels.length === 0 || !card.legendLabels.includes('Other'))) {
+          throw new Error('donut external slice legend missing for ' + card.caseId + ': ' + JSON.stringify(card))
+        }
       }
     }
     if (card.type === 'kpi') {

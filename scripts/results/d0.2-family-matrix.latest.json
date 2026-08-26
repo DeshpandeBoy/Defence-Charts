@@ -1,7 +1,7 @@
 {
   "status": "pass",
   "fixture": "apps/playground/src/family-matrix-fixture/",
-  "origin": "http://127.0.0.1:5186/",
+  "origin": "http://127.0.0.1:5201/",
   "browser": "151.0.7922.34",
   "playwrightFrom": "playwright",
   "cards": 60,
@@ -255,7 +255,7 @@
     "border": "rgb(0, 0, 0)",
     "rootBackground": "rgb(255, 255, 255)"
   },
-  "screenshot": "/Users/SameeraD/Defence-Charts/scripts/results/d0.2-family-matrix.latest.png",
+  "screenshot": "/Users/SameeraD/Defence-Charts-Claude-VT001/scripts/results/d0.2-family-matrix.latest.png",
   "runtimeErrors": {
     "console": [],
     "page": [],

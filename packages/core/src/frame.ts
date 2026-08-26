@@ -724,7 +724,12 @@ function fitValueDisplay(
   // reading of the data, and there is no reading to give.
   const drafts = series.flatMap((s) => {
     if (mode === 'donut-total') {
-      const total = s.arcs.reduce((sum, arc) => sum + arc.value, 0)
+      // Sum the raw defined points, not `s.arcs` — arcs are only built when `mark.kind==='arc'`
+      // (Tile and above), so at Micro (`mark.kind==='none'`) `s.arcs` is always empty and this
+      // total must not depend on it. `s.points` holds every defined point regardless of mark
+      // kind, and its sum equals the arc-built total exactly (arcs partition these same values
+      // into visible/Other without loss), so larger-rung totals are unchanged by this.
+      const total = s.points.reduce((sum, p) => sum + p.value, 0)
       return [{
         seriesId: s.id,
         seriesIndex: s.index,
