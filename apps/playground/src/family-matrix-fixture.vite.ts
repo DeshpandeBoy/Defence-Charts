@@ -9,9 +9,12 @@ const repositoryRoot = fileURLToPath(new URL('../../../', import.meta.url))
 export default defineConfig({
   root,
   plugins: [react()],
+  define: {
+    __GX_FAMILY_MATRIX_REPOSITORY_ROOT__: JSON.stringify(repositoryRoot),
+  },
   server: {
     host: '127.0.0.1',
-    port: 5186,
+    port: Number(process.env.GX_FAMILY_MATRIX_PORT ?? '5186'),
     strictPort: true,
     open: false,
   },

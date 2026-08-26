@@ -23,6 +23,8 @@ import {
   type FamilyType,
 } from './matrix.ts'
 
+declare const __GX_FAMILY_MATRIX_REPOSITORY_ROOT__: string
+
 export function FamilyMatrixApp() {
   const [light, setLight] = useState(false)
 
@@ -30,6 +32,7 @@ export function FamilyMatrixApp() {
     <main
       className={light ? 'family-matrix gx-theme-neutral-light' : 'family-matrix gx-theme-neutral'}
       data-family-matrix=""
+      data-family-matrix-source={__GX_FAMILY_MATRIX_REPOSITORY_ROOT__}
       data-gx-theme={light ? 'neutral-light' : 'neutral'}
     >
       <header className="family-matrix__header">

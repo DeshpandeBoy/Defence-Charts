@@ -8,6 +8,7 @@ import { openChromium } from './check-containment.mjs'
 
 const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
 const ORIGIN = process.env.GX_FAMILY_MATRIX_ORIGIN ?? 'http://127.0.0.1:5186/'
+const EXPECTED_SOURCE = REPO_ROOT
 const RESULT_PATH = fileURLToPath(new URL('./results/d0.2-family-matrix.latest.json', import.meta.url))
 const SCREENSHOT_PATH = fileURLToPath(new URL('./results/d0.2-family-matrix.latest.png', import.meta.url))
 const EXPECTED_RUNGS = ['micro', 'tile', 'strip', 'panel', 'canvas', 'stage']
@@ -37,7 +38,15 @@ async function ensureServer() {
       '--config',
       'src/family-matrix-fixture.vite.ts',
     ],
-    { cwd: REPO_ROOT, detached: true, stdio: ['ignore', 'pipe', 'pipe'] },
+    {
+      cwd: REPO_ROOT,
+      detached: true,
+      stdio: ['ignore', 'pipe', 'pipe'],
+      env: {
+        ...process.env,
+        GX_FAMILY_MATRIX_PORT: new URL(ORIGIN).port || '5186',
+      },
+    },
   )
 
   let stopped = false
@@ -87,6 +96,13 @@ function captureErrors(page) {
 async function openFixture(page) {
   await page.goto(ORIGIN, { waitUntil: 'load' })
   await page.waitForSelector('[data-family-matrix]')
+  const source = await page.locator('[data-family-matrix]').getAttribute('data-family-matrix-source')
+  if (source !== EXPECTED_SOURCE) {
+    throw new Error(
+      'family matrix server belongs to a different checkout: expected ' + EXPECTED_SOURCE + ', got ' + (source ?? '<missing marker>') +
+        '. Start the fixture with GX_FAMILY_MATRIX_ORIGIN on an isolated port.',
+    )
+  }
   await page.waitForSelector('[data-family-case="line-stage"] svg[role="graphics-document"]')
   await page.waitForSelector('[data-family-case="bar-stage"] .gx-bar')
   await page.waitForSelector('[data-family-case="scatter-stage"] .gx-scatter-point')
@@ -541,6 +557,7 @@ async function runGate() {
     return {
       status: 'pass',
       fixture: 'apps/playground/src/family-matrix-fixture/',
+      sourceRoot: EXPECTED_SOURCE,
       origin: ORIGIN,
       browser: browser.version(),
       playwrightFrom: from,
