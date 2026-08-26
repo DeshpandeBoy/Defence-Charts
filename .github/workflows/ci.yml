@@ -112,13 +112,17 @@ jobs:
         if: '!cancelled()'
         run: pnpm lint:treeshake
 
-      - name: Test
-        if: '!cancelled()'
-        run: pnpm test
-
+      # ⚠ AFTER the build: the artifact contract tests intentionally resolve the packages'
+      # publish exports from `dist/`, so a clean runner must have compiled output before
+      # Vitest starts. Long-lived local checkouts can hide this ordering bug with ignored,
+      # stale `dist/` directories.
       - name: Build
         if: '!cancelled()'
         run: pnpm build
+
+      - name: Test
+        if: '!cancelled()'
+        run: pnpm test
 
       # ⚠ AFTER the build, and it cannot move earlier: G3 reads `dist/`, not `src/`. The
       # directive survives in source under every configuration and in output under
