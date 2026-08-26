@@ -21,6 +21,7 @@ export type { LayoutSnapshot, WidgetLayout, WidgetLayoutInput } from '@shiftchar
 export {
   normalizeGridLayout,
   normalizeLayoutSnapshot,
+  reconcileGridLayoutSnapshot,
   RGL_VERSION,
 } from './adapter.ts'
 export type { GridLayoutOptions } from './adapter.ts'

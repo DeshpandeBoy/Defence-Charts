@@ -4,6 +4,7 @@ import { createLayoutSnapshot, serializeLayoutSnapshot } from '@shiftcharts/core
 import {
   normalizeGridLayout,
   normalizeLayoutSnapshot,
+  reconcileGridLayoutSnapshot,
   RGL_VERSION,
 } from './adapter.ts'
 
@@ -121,5 +122,31 @@ describe('RGL core adapter', () => {
     expect(result.columns).toBe(12)
     expect(result.items[0]).toMatchObject({ id: 'kpi', x: 2, y: 0 })
     expect(Object.isFrozen(result)).toBe(true)
+  })
+
+  it('reconciles changed constraints and settles the resulting collision', () => {
+    const snapshot = createLayoutSnapshot([
+      { id: 'primary', x: 0, y: 0, w: 2, h: 1 },
+      { id: 'secondary', x: 2, y: 0, w: 2, h: 1 },
+      { id: 'removed', x: 8, y: 0, w: 2, h: 1 },
+    ])
+    const result = reconcileGridLayoutSnapshot(snapshot, [
+      { id: 'primary', minW: 4 },
+      { id: 'secondary' },
+      { id: 'added', defaultPlacement: { x: 0, y: 0, w: 2, h: 1 } },
+    ])
+
+    expect(result.items.map((item) => item.id)).toEqual(['primary', 'secondary', 'added'])
+    expect(result.items.find((item) => item.id === 'primary')).toMatchObject({ w: 4, minW: 4 })
+    for (const item of result.items) {
+      for (const other of result.items) {
+        if (item.id === other.id) continue
+        const overlaps = item.x < other.x + other.w
+          && item.x + item.w > other.x
+          && item.y < other.y + other.h
+          && item.y + item.h > other.y
+        expect(overlaps).toBe(false)
+      }
+    }
   })
 })

@@ -201,7 +201,12 @@ export { resolveFrame } from './frame.ts'
 // serialisable identity/layout boundary consumed by that UI and by host persistence.
 export type {
   LayoutSnapshot,
+  LayoutMigration,
+  LayoutMigrationMap,
+  LayoutReconciliationWidget,
   LayoutValidationCode,
+  ParseLayoutSnapshotOptions,
+  WidgetDefaultPlacement,
   WidgetId,
   WidgetLayout,
   WidgetLayoutConstraints,
@@ -209,12 +214,15 @@ export type {
 } from './widget-layout.ts'
 export {
   GRID_COLUMNS,
+  LAYOUT_MIGRATIONS,
   LAYOUT_SCHEMA_VERSION,
   LayoutValidationError,
+  applyLayoutMigrations,
   createLayoutSnapshot,
   createWidgetId,
   createWidgetLayout,
   parseLayoutSnapshot,
+  reconcileLayoutSnapshot,
   serializeLayoutSnapshot,
   validateWidgetLayouts,
 } from './widget-layout.ts'

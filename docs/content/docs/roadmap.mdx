@@ -41,13 +41,14 @@ granularity manifest has zero entries owed to B1 or B2, and gate G20 is part of 
 chain. Twelve declared token candidates are reserved for later chart-family renderers; their
 presence does not imply that line/area consumes them today.
 
-## Next
+## Free-v1 implementation
 
 | Milestone | Scope |
 | --- | --- |
-| C1-C2 | Twelve-column dashboard grid, resize and compaction, widget chrome |
-| D | Bar, donut, KPI, scatter, heatmap, funnel, progress |
-| E | Finish docs, select project name and npm scope, Changesets, trusted publishing |
+| C1-C4 | Implemented: twelve-column grid, resize/compaction, widget chrome, keyboard controls, versioned layout migration/reconciliation, browser and stress gates |
+| I1 | Implemented: stable datum identity, tooltip/crosshair placement, legends, keyboard and touch equivalents |
+| D | Implemented: bar/timebar, donut, KPI, scatter, heatmap, funnel, and progress |
+| E | Release candidate: ShiftCharts naming, packed consumers, Changesets, and trusted-publish workflow |
 
 Sparkline rendering remains a line-plan composition with axes suppressed; it is not a separate
 chart type or family. Bar/column is the first breadth chart because horizontal transposition makes the responsive thesis
@@ -75,12 +76,12 @@ The planned delivery sequence is a line/area + grid Preview first, followed by t
 catalogue. Advanced shared filters, linked views, brush/zoom, hosted persistence, and Pro packaging
 remain later work unless the master plan explicitly promotes them.
 
-## Publishing blockers
+## Publishing boundary
 
-1. Choose the project name and npm scope. `@shiftcharts/*` is a placeholder.
-2. Freeze the C0 contract and complete the C grid shell before broad parallel chart integration.
-3. Expand chart breadth only after the line/area renderer contract is stable.
-4. Finish release automation and package validation.
+The brand and scope are final: **ShiftCharts**, `@shiftcharts/*`, and **Charts that shift with their
+space.** Repository packaging and release automation are implemented. Live npm publication still
+requires ownership of the `shiftcharts` npm scope and the matching trusted-publisher entries; the
+repository cannot create account-level npm permissions by itself.
 
 ## Docs work still gated
 

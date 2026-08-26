@@ -1,9 +1,15 @@
 import {
   GRID_COLUMNS,
   createLayoutSnapshot,
+  reconcileLayoutSnapshot,
   validateWidgetLayouts,
 } from '@shiftcharts/core'
-import type { LayoutSnapshot, WidgetLayout, WidgetLayoutInput } from '@shiftcharts/core'
+import type {
+  LayoutReconciliationWidget,
+  LayoutSnapshot,
+  WidgetLayout,
+  WidgetLayoutInput,
+} from '@shiftcharts/core'
 import {
   cloneLayout,
   correctBounds,
@@ -93,4 +99,13 @@ export function normalizeLayoutSnapshot(
   options: GridLayoutOptions = {},
 ): LayoutSnapshot {
   return createLayoutSnapshot(normalizeGridLayout(snapshot.items, options))
+}
+
+/** Reconcile host-owned current widgets, then settle resulting collisions through pinned RGL core. */
+export function reconcileGridLayoutSnapshot(
+  snapshot: LayoutSnapshot,
+  currentWidgets: readonly LayoutReconciliationWidget[],
+  options: GridLayoutOptions = {},
+): LayoutSnapshot {
+  return normalizeLayoutSnapshot(reconcileLayoutSnapshot(snapshot, currentWidgets), options)
 }

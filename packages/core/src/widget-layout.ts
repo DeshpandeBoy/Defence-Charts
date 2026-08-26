@@ -55,6 +55,41 @@ export type WidgetLayoutInput = {
   readonly resizable?: boolean
 }
 
+/** One source-version migration step. It must return the next integer version. */
+export type LayoutMigration = (
+  snapshot: Readonly<Record<string, unknown>>,
+) => Readonly<Record<string, unknown>>
+
+/** Migration functions keyed by the version they migrate from. */
+export type LayoutMigrationMap = Readonly<Record<number, LayoutMigration>>
+
+/** No built-in migration exists before the first public release. Future schema bumps add steps here. */
+export const LAYOUT_MIGRATIONS: LayoutMigrationMap = Object.freeze({})
+
+export type ParseLayoutSnapshotOptions = {
+  readonly migrations?: LayoutMigrationMap
+}
+
+/** Placement used only when a current widget does not exist in the saved snapshot. */
+export type WidgetDefaultPlacement = {
+  readonly x: number
+  readonly y: number
+  readonly w: number
+  readonly h: number
+}
+
+/** Host-owned current widget identity, constraints, and optional placement for newly added widgets. */
+export type LayoutReconciliationWidget = {
+  readonly id: string
+  readonly defaultPlacement?: WidgetDefaultPlacement
+  readonly minW?: number
+  readonly minH?: number
+  readonly maxW?: number | null
+  readonly maxH?: number | null
+  readonly draggable?: boolean
+  readonly resizable?: boolean
+}
+
 export type LayoutValidationCode =
   | 'invalid-id'
   | 'invalid-coordinate'
@@ -64,6 +99,8 @@ export type LayoutValidationCode =
   | 'duplicate-id'
   | 'invalid-snapshot'
   | 'unsupported-version'
+  | 'future-version'
+  | 'migration-failed'
 
 /** A deterministic, inspectable validation failure at the serialisation boundary. */
 export class LayoutValidationError extends Error {
@@ -184,8 +221,73 @@ export function serializeLayoutSnapshot(snapshot: LayoutSnapshot): string {
   return JSON.stringify(canonical)
 }
 
+/**
+ * Apply every migration between a stored and target version in order.
+ *
+ * The migration receives a clone, so even a mutating host-supplied function cannot alter the
+ * caller's decoded value. Each step must advance exactly one version; jumps fail loudly.
+ */
+export function applyLayoutMigrations(
+  value: Readonly<Record<string, unknown>>,
+  targetVersion: number,
+  migrations: LayoutMigrationMap,
+): Readonly<Record<string, unknown>> {
+  const storedVersion = readLayoutVersion(value.version)
+  if (!Number.isSafeInteger(targetVersion) || targetVersion < 0) {
+    throw new LayoutValidationError('invalid-snapshot', 'targetVersion', 'must be a non-negative safe integer')
+  }
+  if (storedVersion > targetVersion) {
+    throw new LayoutValidationError(
+      'future-version',
+      'snapshot.version',
+      `received ${storedVersion}, but this build supports ${targetVersion}`,
+    )
+  }
+
+  let current = cloneRecord(value)
+  for (let version = storedVersion; version < targetVersion; version += 1) {
+    const migration = migrations[version]
+    if (migration === undefined) {
+      throw new LayoutValidationError(
+        'unsupported-version',
+        'snapshot.version',
+        `no migration is registered from version ${version}`,
+      )
+    }
+
+    let next: Readonly<Record<string, unknown>>
+    try {
+      const result = migration(cloneRecord(current))
+      if (!isRecord(result)) {
+        throw new Error('migration must return an object')
+      }
+      next = cloneRecord(result)
+    } catch (error) {
+      throw new LayoutValidationError(
+        'migration-failed',
+        `snapshot.version.${version}`,
+        error instanceof Error ? error.message : 'migration threw a non-error value',
+      )
+    }
+
+    if (next.version !== version + 1) {
+      throw new LayoutValidationError(
+        'migration-failed',
+        `snapshot.version.${version}`,
+        `migration must advance exactly to version ${version + 1}`,
+      )
+    }
+    current = next
+  }
+
+  return current
+}
+
 /** Parse either a JSON string or an unknown decoded value at the persistence boundary. */
-export function parseLayoutSnapshot(value: string | unknown): LayoutSnapshot {
+export function parseLayoutSnapshot(
+  value: string | unknown,
+  options: ParseLayoutSnapshotOptions = {},
+): LayoutSnapshot {
   let candidate: unknown = value
   if (typeof value === 'string') {
     try {
@@ -198,25 +300,149 @@ export function parseLayoutSnapshot(value: string | unknown): LayoutSnapshot {
   if (!isRecord(candidate)) {
     throw new LayoutValidationError('invalid-snapshot', 'snapshot', 'must be an object')
   }
-  if (candidate.version !== LAYOUT_SCHEMA_VERSION) {
+
+  const storedVersion = readLayoutVersion(candidate.version)
+  if (storedVersion > LAYOUT_SCHEMA_VERSION) {
     throw new LayoutValidationError(
-      'unsupported-version',
+      'future-version',
       'snapshot.version',
-      `expected ${LAYOUT_SCHEMA_VERSION}`,
+      `received ${storedVersion}, but this build supports ${LAYOUT_SCHEMA_VERSION}`,
     )
   }
-  if (candidate.columns !== GRID_COLUMNS) {
+  const migrated = storedVersion === LAYOUT_SCHEMA_VERSION
+    ? cloneRecord(candidate)
+    : applyLayoutMigrations(candidate, LAYOUT_SCHEMA_VERSION, options.migrations ?? LAYOUT_MIGRATIONS)
+
+  if (migrated.columns !== GRID_COLUMNS) {
     throw new LayoutValidationError(
       'invalid-snapshot',
       'snapshot.columns',
       `expected the locked ${GRID_COLUMNS}-column profile`,
     )
   }
-  if (!Array.isArray(candidate.items)) {
+  if (!Array.isArray(migrated.items)) {
     throw new LayoutValidationError('invalid-snapshot', 'snapshot.items', 'must be an array')
   }
 
-  return createLayoutSnapshot(candidate.items.map((item, index) => toInput(item, `snapshot.items[${index}]`)))
+  return createLayoutSnapshot(migrated.items.map((item, index) => toInput(item, `snapshot.items[${index}]`)))
+}
+
+/**
+ * Reconcile a saved snapshot against the host's current widget set without owning storage.
+ *
+ * Current IDs are authoritative. Missing saved IDs are dropped, new IDs receive their explicit
+ * default placement or append below the retained layout, and changed constraints clamp saved size
+ * and horizontal position. Collision settlement remains the grid adapter's responsibility.
+ */
+export function reconcileLayoutSnapshot(
+  snapshot: LayoutSnapshot,
+  currentWidgets: readonly LayoutReconciliationWidget[],
+): LayoutSnapshot {
+  if (!Array.isArray(currentWidgets)) {
+    throw new LayoutValidationError('invalid-snapshot', 'currentWidgets', 'must be an array')
+  }
+
+  const definitions = new Map<string, LayoutReconciliationWidget>()
+  currentWidgets.forEach((widget, index) => {
+    const candidate: unknown = widget
+    if (!isLayoutReconciliationWidget(candidate)) {
+      throw new LayoutValidationError('invalid-snapshot', `currentWidgets[${index}]`, 'must be an object')
+    }
+    const id = createWidgetId(candidate.id)
+    if (definitions.has(id)) {
+      throw new LayoutValidationError(
+        'duplicate-id',
+        `currentWidgets[${index}].id`,
+        `duplicate widget id ${id}`,
+      )
+    }
+    definitions.set(id, candidate)
+  })
+
+  const savedById = new Map(snapshot.items.map((item) => [item.id, item] as const))
+  const retained = new Map<string, WidgetLayout>()
+  let appendY = 0
+
+  for (const widget of currentWidgets) {
+    const saved = savedById.get(widget.id)
+    if (saved === undefined) continue
+    const next = reconcileWidget(widget, saved)
+    retained.set(widget.id, next)
+    appendY = Math.max(appendY, next.y + next.h)
+  }
+
+  const reconciled = currentWidgets.map((widget) => {
+    const existing = retained.get(widget.id)
+    if (existing !== undefined) return existing
+
+    const placement = widget.defaultPlacement ?? {
+      x: 0,
+      y: appendY,
+      w: widget.minW ?? DEFAULT_MIN,
+      h: widget.minH ?? DEFAULT_MIN,
+    }
+    const next = reconcileWidget(widget, placement)
+    appendY = Math.max(appendY, next.y + next.h)
+    return next
+  })
+
+  return createLayoutSnapshot(reconciled)
+}
+
+function reconcileWidget(
+  widget: LayoutReconciliationWidget,
+  placement: WidgetDefaultPlacement | WidgetLayout,
+): WidgetLayout {
+  const minW = widget.minW ?? ('minW' in placement ? placement.minW : DEFAULT_MIN)
+  const minH = widget.minH ?? ('minH' in placement ? placement.minH : DEFAULT_MIN)
+  const maxW = widget.maxW === undefined
+    ? ('maxW' in placement ? placement.maxW : null)
+    : widget.maxW
+  const maxH = widget.maxH === undefined
+    ? ('maxH' in placement ? placement.maxH : null)
+    : widget.maxH
+  const w = clamp(placement.w, minW, maxW)
+  const h = clamp(placement.h, minH, maxH)
+  const x = Math.max(0, Math.min(placement.x, GRID_COLUMNS - w))
+
+  return createWidgetLayout({
+    id: widget.id,
+    x,
+    y: placement.y,
+    w,
+    h,
+    minW,
+    minH,
+    maxW,
+    maxH,
+    draggable: widget.draggable ?? ('draggable' in placement ? placement.draggable : true),
+    resizable: widget.resizable ?? ('resizable' in placement ? placement.resizable : true),
+  })
+}
+
+function clamp(value: number, minimum: number, maximum: number | null): number {
+  return maximum === null ? Math.max(value, minimum) : Math.min(Math.max(value, minimum), maximum)
+}
+
+function readLayoutVersion(value: unknown): number {
+  if (typeof value !== 'number' || !Number.isSafeInteger(value) || value < 0) {
+    throw new LayoutValidationError(
+      'unsupported-version',
+      'snapshot.version',
+      `expected a non-negative integer no greater than ${LAYOUT_SCHEMA_VERSION}`,
+    )
+  }
+  return value
+}
+
+function cloneRecord(value: Readonly<Record<string, unknown>>): Record<string, unknown> {
+  return cloneUnknown(value) as Record<string, unknown>
+}
+
+function cloneUnknown(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(cloneUnknown)
+  if (!isRecord(value)) return value
+  return Object.fromEntries(Object.entries(value).map(([key, nested]) => [key, cloneUnknown(nested)]))
 }
 
 function toInput(value: unknown, path: string): WidgetLayoutInput {
@@ -271,4 +497,10 @@ function booleanOrDefault(value: unknown, fallback: boolean, field: string): boo
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
+function isLayoutReconciliationWidget(
+  value: unknown,
+): value is LayoutReconciliationWidget {
+  return isRecord(value) && typeof value.id === 'string'
 }
