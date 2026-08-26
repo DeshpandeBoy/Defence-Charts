@@ -2,14 +2,14 @@
 id: FT-V1
 title: ShiftCharts polished demo shell
 type: implementation
-state: in progress
+state: handoff
 owner: Codex
 branch: Fine-Tuning-V1
 worktree: /Users/SameeraD/Defence-Charts
 base_commit: 20709d9af90fbe2e34b24a8eac6df415579f4bac
 depends_on: []
 started_at: 2026-08-26T00:00:00+05:30
-last_checkpoint: 2026-08-26T00:00:00+05:30
+last_checkpoint: 2026-08-26T23:25:50+05:30
 ---
 
 # FT-V1 — ShiftCharts polished demo shell
@@ -50,13 +50,13 @@ the existing engineering fixtures available and unchanged for verification.
 
 ## Acceptance criteria
 
-- [ ] The main playground has a clear ShiftCharts showcase headline, a visible interaction cue, and three realistic dashboard widgets.
-- [ ] The primary demo uses the existing grid/chart primitives and retains stable widget identity through layout changes.
-- [ ] Edit mode, reset, and the optional inspector are understandable without exposing the engineering fixture vocabulary by default.
-- [ ] The main route has no horizontal overflow at the audited 620px viewport and remains coherent at desktop width.
-- [ ] Existing diagnostic fixture routes remain unchanged and the playground typecheck/build pass.
-- [ ] Browser verification covers initial render, responsive layout, and at least one real keyboard layout interaction; `git diff --check` passes.
-- [ ] Documentation describes only shipped behavior.
+- [x] The main playground has a clear ShiftCharts showcase headline, a visible interaction cue, and three realistic dashboard widgets.
+- [x] The primary demo uses the existing grid/chart primitives and retains stable widget identity through layout changes.
+- [x] Edit mode, reset, and the optional inspector are understandable without exposing the engineering fixture vocabulary by default.
+- [x] The main route has no horizontal overflow at the audited 620px viewport and remains coherent at desktop width.
+- [x] Existing diagnostic fixture routes remain unchanged and the playground typecheck/build pass.
+- [x] Browser verification covers initial render, responsive layout, and at least one real keyboard layout interaction; `git diff --check` passes.
+- [x] Documentation describes only shipped behavior.
 
 ## Baseline
 
@@ -79,15 +79,17 @@ the existing engineering fixtures available and unchanged for verification.
 - Inspected the existing `WidgetGrid`, `WidgetShell`, `AutoChart`, and playground entrypoint contracts.
 - Added the first product-facing dashboard shell to the main playground route; `/?lab=1` keeps the resize lab reachable.
 - Updated the playground README so its documented entrypoint matches the shipped local demo and lab toggle.
+- Re-ran the local browser pass after removing decorative text glyphs from the product surface.
+- No implementation work remains for this checkpoint.
 
 ### Remaining
 
-- Commit the implementation and update this handoff with the final commit hash and exact evidence.
+- Coordinator integration/review only. Follow-up visual refinement can build on this committed shell.
 
 ### Exact next action
 
 ```bash
-sed -n '1,280p' packages/grid/src/WidgetGrid.tsx
+pnpm --filter @shiftcharts/playground typecheck
 ```
 
 ## Decisions and assumptions
@@ -114,14 +116,14 @@ sed -n '1,280p' packages/grid/src/WidgetGrid.tsx
 | Commit | Command | Exit | Exact result |
 |---|---|---:|---|
 | `20709d9` | startup checks and baseline inspection | 0 | Branch and worktree were clean before implementation. |
-| pending | `pnpm --filter @shiftcharts/playground typecheck` | 0 | TypeScript check passed; pnpm emitted only the known Node engine warning for v22.12.0 versus >=22.18. |
-| pending | `pnpm --filter @shiftcharts/playground build` | 0 | Vite production build passed; 346 modules transformed. |
-| pending | `pnpm --filter @shiftcharts/grid typecheck` | 0 | Grid package typecheck passed. |
-| pending | `pnpm test -- packages/grid/src/WidgetGrid.test.tsx packages/grid/src/KeyboardGrid.test.tsx` | 0 | Vitest passed 74 files and 973 tests. |
-| pending | `git diff --check` | 0 | No whitespace errors. |
-| pending | Browser at `http://127.0.0.1:5175/` | 0 | 620px viewport: title and headline present, 3 widgets present, `scrollWidth === innerWidth === 620`, no console errors/warnings. |
-| pending | Browser keyboard interaction | 0 | Net revenue moved from column 1 to column 2 and committed; reset restored column 1; read-only removed edit controls. |
-| pending | Browser route preservation | 0 | `/?lab=1` retained Resize lab and widget; grid fixture at `http://127.0.0.1:5184/` retained its root and heading with no console errors/warnings. |
+| `5342e0a` | `pnpm --filter @shiftcharts/playground typecheck` | 0 | TypeScript check passed; pnpm emitted only the known Node engine warning for v22.12.0 versus >=22.18. |
+| `5342e0a` | `pnpm --filter @shiftcharts/playground build` | 0 | Vite production build passed; 346 modules transformed. |
+| `5342e0a` | `pnpm --filter @shiftcharts/grid typecheck` | 0 | Grid package typecheck passed. |
+| `5342e0a` | `pnpm test -- packages/grid/src/WidgetGrid.test.tsx packages/grid/src/KeyboardGrid.test.tsx` | 0 | Vitest passed 74 files and 973 tests. |
+| `5342e0a` | `git diff --check` | 0 | No whitespace errors. |
+| `5342e0a` | Browser at `http://127.0.0.1:5175/` | 0 | 620px viewport: title and headline present, 3 widgets present, `scrollWidth === innerWidth === 620`, no console errors/warnings. |
+| `5342e0a` | Browser keyboard interaction | 0 | Net revenue moved from column 1 to column 2 and committed; reset restored column 1; read-only removed edit controls. |
+| `5342e0a` | Browser route preservation | 0 | `/?lab=1` retained Resize lab and widget; grid fixture at `http://127.0.0.1:5184/` retained its root and heading with no console errors/warnings. |
 
 ## Known failures and blockers
 
@@ -135,8 +137,8 @@ sed -n '1,280p' packages/grid/src/WidgetGrid.tsx
 
 ## Final handoff
 
-- Worker commit: pending
+- Worker commit: `5342e0a feat(FT-V1): add polished ShiftCharts demo`
 - Branch pushed or locally available: local branch `Fine-Tuning-V1`
-- Working tree clean: pending
-- Narrow restart check: pending
-- Remaining risk/limitations: pending
+- Working tree clean: pending final handoff commit
+- Narrow restart check: `pnpm --filter @shiftcharts/playground typecheck`
+- Remaining risk/limitations: Pointer drag on the standalone CSS resize handle is not reproducible in the in-app browser driver; keyboard grid movement is verified. No deployment or push was requested.
