@@ -187,7 +187,7 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | ID | Owner lane | State | Depends on | Deliverable |
 |---|---|---|---|---|
 | P0.1 | Coordinator | **done** | — | Final agent plan and continuity system; committed and verified |
-| P0.2 | Claude research | **handoff** | P0.1 | Decision-conflict register |
+| P0.2 | Claude research | **done** | P0.1 | Decision-conflict register integrated; no unresolved contract conflict redirects shipped work |
 | P0.3 | User/coordinator | **done** | — | **ShiftCharts**, `@shiftcharts/*`, and “Charts that shift with their space.” integrated across packages, CSS, docs, fixtures, scripts, and release config; full verify green |
 | P0.5 | User/coordinator | **in progress** | — | Preserve both disconnected histories through an unrelated-history merge, then fast-forward `main`; tracked in `research/handoffs/P0.5.md` |
 | P0.4 | Codex integration | **done** | P0.2 | Record RGL `./core` + `./react` boundary and widget-shell owner |
@@ -224,9 +224,9 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | E1.2 | Codex release | done | E1.1 | Package metadata/licence/dependency corrections |
 | E1.3 | Codex release | done | E1.1 | Tarball Next/RSC and Vite consumers |
 | E1.4 | Codex release | done | E1.2, E1.3 | `publint`, `attw`, package-content and no-network gates |
-| E2.1 | Codex release | **in progress** | P0.3, P0.5, E1.4 | ShiftCharts rename, Changesets and trusted Preview publish; tracked in `research/handoffs/E2.1.md` |
-| E2.1-mechanical | Coordinator (Claude-prepared) | **handoff** | R4 | Changesets config + `release.yml` (trusted-publish OIDC) wired; `pnpm publish --dry-run` validated against pinned `pnpm@10.34.5` for all 6 packages; dormant pending P0.3 and P0.5 |
-| E3.1 | Coordinator | **in progress** | D7.1, E2.1 | ShiftCharts Free-v1 source, browser, packed-artifact, and claim audit; tracked in `research/handoffs/E3.1.md` |
+| E2.1 | Codex release | **blocked** | P0.3, P0.5, E1.4 | Repository work and six-package 0.1.0 dry-run complete; live npm publish awaits scope ownership and trusted-publisher entries |
+| E2.1-mechanical | Coordinator (Claude-prepared) | **done** | R4 | Changesets/release workflow integrated; six-package 0.1.0 dry-run and clean consumer gates passed |
+| E3.1 | Coordinator | **done** | D7.1, E2.1 | Free-v1 source, browser, clean-versioned-artifact, and claim audit complete; `research/93-free-v1-release-audit.md` |
 | R1 | Claude research | **done** | P0.1 | RGL/grid current evidence; findings reflected in shipped C0.2/C1.1/C3.1 |
 | R2 | Claude research | **done** | P0.1 | Evidence-bounded launch catalogue; sparkline doc correction verified applied in `roadmap.mdx`/`30-implementation-plan.md` |
 | R3 | Claude research | **done** | P0.1 | Interaction and chart-semantics evidence; verified adopted in shipped I1 code (seriesId identity, `aria-pressed`, fixed/fluid tooltip); `CR-X04` remains its own separate, open empirical task for real AT verification |
