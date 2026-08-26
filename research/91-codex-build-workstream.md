@@ -341,7 +341,11 @@ Every family task must produce all of the following:
 - empty, missing, negative, extreme, and dense-data cases;
 - light/dark/forced-color and reduced-motion fixtures;
 - resize boundary and containment tests;
-- docs, examples, G20 disposition, API snapshot, and tree-shaking proof.
+- docs, examples, G20 disposition, API snapshot, and tree-shaking proof;
+- the visual-comprehension checks in `apps/playground/src/family-matrix/README.md` (added after
+  `CR-VT01`/`VT-003` found nine cross-family instances of these defect classes invisible to the
+  structural checks above) — added to `scripts/check-family-matrix.mjs` in the same task that adds
+  the family, not deferred to a later audit.
 
 ### D1.1 — bar and timebar
 
