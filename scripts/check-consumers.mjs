@@ -25,6 +25,13 @@ export const PACKAGE_NAMES = Object.freeze([
   '@shiftcharts/tokens',
 ])
 
+export const JS_SPECIFIERS = Object.freeze([
+  ...PACKAGE_NAMES,
+  '@shiftcharts/primitives/line',
+  '@shiftcharts/primitives/bar',
+  '@shiftcharts/primitives/donut',
+])
+
 export const FIXTURE_NAMES = Object.freeze([
   'react-consumer',
   'next-rsc-consumer',
@@ -122,6 +129,9 @@ export async function assertFixtureSourceContract() {
   for (const packageName of PACKAGE_NAMES) {
     assert(source.includes(packageName), 'fixture source does not cover ' + packageName)
   }
+  for (const specifier of JS_SPECIFIERS) {
+    assert(source.includes(specifier), 'fixture source does not cover ' + specifier)
+  }
   for (const specifier of CSS_SPECIFIERS) {
     assert(source.includes(specifier), 'fixture source does not cover ' + specifier)
   }
@@ -134,6 +144,7 @@ export async function assertFixtureSourceContract() {
   return {
     files: files.map((file) => relative(FIXTURE_SOURCE_ROOT, file)),
     packages: PACKAGE_NAMES.length,
+    javascript: JS_SPECIFIERS.length,
     css: CSS_SPECIFIERS.length,
   }
 }
@@ -293,28 +304,32 @@ async function stageFixture(source, destination, packRoot) {
 
 /**
  * @param {string} fixtureRoot
- * @param {string} packageName
+ * @param {string} packageSpecifier
  * @returns {Promise<{ entry: string, manifest: Record<string, unknown> }>}
  */
-async function assertPackageResolution(fixtureRoot, packageName) {
+async function assertPackageResolution(fixtureRoot, packageSpecifier) {
   const require = createRequire(join(fixtureRoot, 'package.json'))
   const realFixtureRoot = await realpath(fixtureRoot)
-  const entry = await realpath(require.resolve(packageName))
+  const packageName = PACKAGE_NAMES.find(
+    (candidate) => packageSpecifier === candidate || packageSpecifier.startsWith(candidate + '/'),
+  )
+  if (packageName === undefined) throw new Error('unknown package specifier: ' + packageSpecifier)
+  const entry = await realpath(require.resolve(packageSpecifier))
   const manifestPath = await realpath(require.resolve(packageName + '/package.json'))
   const manifest = JSON.parse(await readFile(manifestPath, 'utf8'))
 
-  assert(entry.startsWith(realFixtureRoot), packageName + ' resolved outside the fixture')
+  assert(entry.startsWith(realFixtureRoot), packageSpecifier + ' resolved outside the fixture')
   assert(
     entry.includes(join('node_modules', '@shiftcharts', packageName.slice(packageName.indexOf('/') + 1))),
-    packageName + ' is not an extracted packed install',
+    packageSpecifier + ' is not an extracted packed install',
   )
-  assert(entry.includes('/dist/'), packageName + ' did not resolve to dist')
-  assert(!entry.includes(join('packages', packageName.slice(packageName.indexOf('/') + 1))), packageName + ' resolved to the repository package')
-  assert(!entry.includes(join('src', 'index.ts')), packageName + ' resolved to a source entry')
-  assert(manifest.name === packageName, packageName + ' manifest name mismatch')
-  assert(manifest.license === 'MIT', packageName + ' manifest is missing MIT metadata')
-  assert(manifest.type === 'module', packageName + ' manifest is not ESM')
-  assert(!JSON.stringify(manifest).includes('workspace:'), packageName + ' tarball retained workspace metadata')
+  assert(entry.includes('/dist/'), packageSpecifier + ' did not resolve to dist')
+  assert(!entry.includes(join('packages', packageName.slice(packageName.indexOf('/') + 1))), packageSpecifier + ' resolved to the repository package')
+  assert(!entry.includes(join('src', 'index.ts')), packageSpecifier + ' resolved to a source entry')
+  assert(manifest.name === packageName, packageSpecifier + ' manifest name mismatch')
+  assert(manifest.license === 'MIT', packageSpecifier + ' manifest is missing MIT metadata')
+  assert(manifest.type === 'module', packageSpecifier + ' manifest is not ESM')
+  assert(!JSON.stringify(manifest).includes('workspace:'), packageSpecifier + ' tarball retained workspace metadata')
 
   const declaration = entry.replace(/\.js$/, '.d.ts')
   await access(declaration)
@@ -329,9 +344,9 @@ async function assertInstalledPackageMaps(fixtureRoot) {
   const require = createRequire(join(fixtureRoot, 'package.json'))
   const realFixtureRoot = await realpath(fixtureRoot)
   const resolved = []
-  for (const packageName of PACKAGE_NAMES) {
-    const result = await assertPackageResolution(fixtureRoot, packageName)
-    resolved.push(packageName + ' -> ' + result.entry)
+  for (const packageSpecifier of JS_SPECIFIERS) {
+    const result = await assertPackageResolution(fixtureRoot, packageSpecifier)
+    resolved.push(packageSpecifier + ' -> ' + result.entry)
     await import(pathToFileURL(result.entry).href)
   }
   for (const specifier of CSS_SPECIFIERS) {
@@ -380,6 +395,15 @@ async function installPackedFixture(fixtureRoot, packRoot) {
     await mkdir(dirname(destination), { recursive: true })
     const source = resolveInstalledPackage(packageName)
     if (packageName === 'next') {
+      const fixtureManifest = JSON.parse(await readFile(join(fixtureRoot, 'package.json'), 'utf8'))
+      const declaredVersion = fixtureManifest.dependencies?.next
+      const installedManifest = JSON.parse(await readFile(join(source, 'package.json'), 'utf8'))
+      if (declaredVersion !== undefined) {
+        assert(
+          declaredVersion === installedManifest.version,
+          'next-rsc-consumer declares next ' + String(declaredVersion) + ' but resolved ' + String(installedManifest.version),
+        )
+      }
       await cp(source, destination, { recursive: true })
       await linkPackageDependencies(dirname(source), nodeModules)
     } else {

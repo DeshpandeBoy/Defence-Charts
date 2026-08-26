@@ -23,6 +23,13 @@ export const PACKAGE_NAMES = Object.freeze([
   '@shiftcharts/tokens',
 ])
 
+export const JS_SPECIFIERS = Object.freeze([
+  ...PACKAGE_NAMES,
+  '@shiftcharts/primitives/line',
+  '@shiftcharts/primitives/bar',
+  '@shiftcharts/primitives/donut',
+])
+
 const RUNTIME_DEPENDENCIES = Object.freeze([
   'd3-array',
   'd3-format',
@@ -201,7 +208,7 @@ export async function assertPackedConsumer() {
 import { createRequire } from 'node:module'
 
 const require = createRequire(import.meta.url)
-const js = ${JSON.stringify(PACKAGE_NAMES)}
+const js = ${JSON.stringify(JS_SPECIFIERS)}
 const css = ${JSON.stringify(cssSpecifiers)}
 
 for (const specifier of js) {
@@ -216,7 +223,7 @@ for (const specifier of css) {
   await access(resolved)
 }
 
-for (const specifier of ['@shiftcharts/core', '@shiftcharts/primitives', '@shiftcharts/react', '@shiftcharts/grid', '@shiftcharts/tokens']) {
+for (const specifier of ${JSON.stringify(JS_SPECIFIERS.filter((specifier) => specifier !== '@shiftcharts/testing'))}) {
   await import(specifier)
 }
 

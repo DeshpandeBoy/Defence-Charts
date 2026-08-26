@@ -1,6 +1,9 @@
 import { describeShape, planChart, sizeContextFromPixels } from '@shiftcharts/core'
 import { GRID_COLUMNS } from '@shiftcharts/grid'
 import { Chart } from '@shiftcharts/primitives'
+import { BarChart } from '@shiftcharts/primitives/bar'
+import { DonutChart } from '@shiftcharts/primitives/donut'
+import { LineChart } from '@shiftcharts/primitives/line'
 import { AutoChart } from '@shiftcharts/react'
 import { parseChart } from '@shiftcharts/testing'
 import * as tokens from '@shiftcharts/tokens'
@@ -24,7 +27,16 @@ const shape = describeShape([
   },
 ])
 const plan = planChart(chartType, context, shape)
-const rootExports = [Chart, AutoChart, parseChart, GRID_COLUMNS, Object.keys(tokens).length]
+const rootExports = [
+  Chart,
+  LineChart,
+  BarChart,
+  DonutChart,
+  AutoChart,
+  parseChart,
+  GRID_COLUMNS,
+  Object.keys(tokens).length,
+]
 
 const status = document.querySelector('#status')
 if (status === null) throw new Error('Vite consumer status node is missing')

@@ -13,7 +13,7 @@
     "@shiftcharts/react": "file:__SHIFTCHARTS_TARBALL_ROOT__/shiftcharts-react-0.0.0.tgz",
     "@shiftcharts/testing": "file:__SHIFTCHARTS_TARBALL_ROOT__/shiftcharts-testing-0.0.0.tgz",
     "@shiftcharts/tokens": "file:__SHIFTCHARTS_TARBALL_ROOT__/shiftcharts-tokens-0.0.0.tgz",
-    "next": "16.3.2",
+    "next": "16.3.3",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },
