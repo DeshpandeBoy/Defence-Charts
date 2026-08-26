@@ -2,7 +2,7 @@
 id: CR-TY01
 title: Typography validation — Segoe UI Variable, GRAD at 11px, U+2212, line-height
 type: research
-state: handoff
+state: done
 owner: claude-research
 branch: Anti-gravity-and-other-Agent-changes
 worktree: /Users/SameeraD/Defence-Charts
@@ -95,12 +95,18 @@ guessing at it or silently repeating the existing UNVERIFIED label without new i
 
 ### Remaining
 
-- The actual Segoe UI Variable `safetyFactor` measurement itself remains open. Two concrete unblocks
-  are recorded in the report's Recommendation section (a real Windows machine running the existing
-  generator against `C:\Windows\Fonts\SegUIVar.ttf`, or a separately-scoped, explicitly-labelled
-  Selawik proxy pass) — coordinator to choose.
+- The actual Segoe UI Variable measurement remains a documented post-release evidence opportunity.
+  The coordinator accepted the current conservative bound for Free v1 in decision 019; no proxy
+  number is presented as Segoe evidence.
 - The GRAD:150 screenshot baseline is deferred to whichever task first wires landmark emphasis to a
   real element.
+
+### Coordinator resolution
+
+- Decision 019 accepts `safetyFactor: 1.57` for Free v1 while preserving the explicit Segoe UI
+  Variable limitation in generated source and public docs.
+- Faces without `GRAD` receive no emphasis; ShiftCharts does not substitute a width-changing weight.
+- The missing Windows measurement and future landmark screenshot are not claimed as completed tests.
 
 ### Exact next action
 

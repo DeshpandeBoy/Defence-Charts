@@ -33,6 +33,13 @@
     display: block;
     block-size: 100%;
     min-block-size: 0;
+    /*
+     * The SVG fills this fixed block and the HTML caption is positioned over its lower edge.
+     * `overflow: hidden` still creates a scroll container whose scrollHeight includes SVG visual
+     * overflow; a consumer override to `auto` can then create the ResizeObserver feedback loop.
+     * `clip` contains the visual overflow without creating latent scrollable overflow.
+     */
+    overflow: clip;
     line-height: var(--shiftcharts-label-line-height);
     /* Enable container queries for the chart */
     container-type: inline-size;

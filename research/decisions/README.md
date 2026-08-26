@@ -33,6 +33,8 @@ forced it.
 | 015 | [The token gate parses CSS; it does not grep it](015-token-gate-is-a-parser.md) | this folder | ✅ **applied** |
 | 016 | [What SVG geometry actually transitions, and what has to crossfade instead](016-what-svg-geometry-actually-transitions.md) | this folder | ✅ **measured** |
 | 017 | [The transition is not the hysteresis mechanism, because a rung boundary mounts](017-the-transition-is-not-the-hysteresis-mechanism.md) | this folder | ✅ **measured** |
+| 018 | [React Grid Layout package boundary and widget-shell ownership](018-rgl-shell-boundary.md) | this folder | ✅ **applied** |
+| 019 | [Accept the measured typography bound for Free v1](019-segoe-launch-bound-and-grade-fallback.md) | this folder | ✅ **applied with explicit limitation** |
 
 **012–014 were applied on 2026-08-23**, in a separate, explicit act after they were written — which
 is the point of the two-step. Each record's Status line now names the files it landed in, and each

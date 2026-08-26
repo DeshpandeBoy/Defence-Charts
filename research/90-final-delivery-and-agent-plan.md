@@ -226,13 +226,13 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | E1.4 | Codex release | done | E1.2, E1.3 | `publint`, `attw`, package-content and no-network gates |
 | E2.1 | Codex release | **in progress** | P0.3, P0.5, E1.4 | ShiftCharts rename, Changesets and trusted Preview publish; tracked in `research/handoffs/E2.1.md` |
 | E2.1-mechanical | Coordinator (Claude-prepared) | **handoff** | R4 | Changesets config + `release.yml` (trusted-publish OIDC) wired; `pnpm publish --dry-run` validated against pinned `pnpm@10.34.5` for all 6 packages; dormant pending P0.3 and P0.5 |
-| E3.1 | Coordinator | backlog | D7.1, E2.1 | Free-v1 claim and release audit |
+| E3.1 | Coordinator | **in progress** | D7.1, E2.1 | ShiftCharts Free-v1 source, browser, packed-artifact, and claim audit; tracked in `research/handoffs/E3.1.md` |
 | R1 | Claude research | **done** | P0.1 | RGL/grid current evidence; findings reflected in shipped C0.2/C1.1/C3.1 |
 | R2 | Claude research | **done** | P0.1 | Evidence-bounded launch catalogue; sparkline doc correction verified applied in `roadmap.mdx`/`30-implementation-plan.md` |
 | R3 | Claude research | **done** | P0.1 | Interaction and chart-semantics evidence; verified adopted in shipped I1 code (seriesId identity, `aria-pressed`, fixed/fluid tooltip); `CR-X04` remains its own separate, open empirical task for real AT verification |
-| R4 | Claude research | **done** | P0.1 | Publication and competitor refresh; Next.js critical-RCE pin bumped (16.3.2→16.3.3, commit `0a47155`), pnpm publish mechanics dry-run validated; Fumadocs/tsdown staleness recheck still an open minor follow-up |
+| R4 | Claude research | **done** | P0.1 | Publication refresh adopted; Next.js 16.3.3 retained, Fumadocs core/base UI refreshed to 16.15.2, and current tsdown 0.22.14 verified through the registry |
 | CR-VT01 | Claude research | **done** | D0.2 | Visual family-matrix audit; 9 confirmed issues — 7 fixed in `D0.2-visual-defects`, VT-003 fixed (commit `9443cfb`), VT-009/010/011 remain deferred lower-confidence proposals |
-| CR-TY01 | Claude research | **handoff** | P0.1 | Typography validation; GRAD-axis-absence-on-Windows and Selawik-proxy findings are new and actionable, Segoe UI Variable `safetyFactor` measurement itself remains a genuine evidence gap with two recorded unblock paths |
+| CR-TY01 | Claude research | **done** | P0.1 | Free-v1 accepts the measured 1.57 bound with Segoe explicitly unverified; no-GRAD fallback remains no emphasis; decision 019 |
 | R5 | Claude/user research | optional | Preview | User-validation protocol and findings |
 
 Allowed states: `backlog`, `ready`, `claimed`, `in progress`, `handoff`, `verifying`, `done`,
