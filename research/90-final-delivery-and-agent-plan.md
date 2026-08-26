@@ -217,6 +217,7 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | D5.1 | Codex heatmap | done | D0.2, R2 | Heatmap family |
 | D6.1 | Codex funnel | done | D0.2, R2 | Funnel or evidence-backed deferral |
 | D7.1 | Codex integration | done | D1–D6 | Central registration and complete family matrix |
+| D0.2-visual-defects | Codex verification | ready | CR-VT01 | Fix 7 confirmed CR-VT01 defects (VT-001/002/004–008); branch `codex/D0.2-visual-defects`, worktree `/Users/SameeraD/Defence-Charts-D0.2-visual-defects` |
 | E1.1 | Codex release | done | C2.1 | Built exports and emitted CSS |
 | E1.2 | Codex release | done | E1.1 | Package metadata/licence/dependency corrections |
 | E1.3 | Codex release | done | E1.1 | Tarball Next/RSC and Vite consumers |
@@ -227,6 +228,7 @@ Only the coordinator edits this table. An agent records detailed state in its ha
 | R2 | Claude research | **handoff** | P0.1 | Evidence-bounded launch catalogue; sparkline doc correction applied |
 | R3 | Claude research | **handoff** | P0.1 | Interaction and chart-semantics evidence; CR-X04 remains required for real AT verification |
 | R4 | Claude research | **handoff** | P0.1 | Publication and competitor refresh |
+| CR-VT01 | Claude research | **verifying** | D0.2 | Visual family-matrix audit; 9 confirmed issues, 7 promoted to D0.2-visual-defects, VT-003 needs a coordinator data-model decision |
 | R5 | Claude/user research | optional | Preview | User-validation protocol and findings |
 
 Allowed states: `backlog`, `ready`, `claimed`, `in progress`, `handoff`, `verifying`, `done`,
