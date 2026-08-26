@@ -1,6 +1,6 @@
 {
   "name": "@shiftcharts/react",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "license": "MIT",
   "description": "Adaptive ShiftCharts client boundary with measurement, tooltip, crosshair, and controlled legends.",

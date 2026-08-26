@@ -1,6 +1,6 @@
 {
   "name": "@shiftcharts/grid",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "license": "MIT",
   "description": "ShiftCharts 12-column widget grid, shell, keyboard controls, and stable layout adapters.",

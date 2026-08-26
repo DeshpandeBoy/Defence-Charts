@@ -1,6 +1,6 @@
 {
   "name": "@shiftcharts/primitives",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "license": "MIT",
   "description": "Hook-free, RSC-safe SVG renderers for the ShiftCharts Free-v1 chart catalogue.",

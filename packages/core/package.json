@@ -1,6 +1,6 @@
 {
   "name": "@shiftcharts/core",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "license": "MIT",
   "description": "Pure, serialisable ShiftCharts planning, geometry, interaction, typography, and widget-layout contracts.",
