@@ -21,6 +21,9 @@
   ],
   "exports": {
     ".": "./src/index.ts",
+    "./bar": "./src/bar/index.tsx",
+    "./donut": "./src/donut/index.tsx",
+    "./line": "./src/line/index.tsx",
     "./package.json": "./package.json",
     "./chart.css": "./src/chart.css"
   },
@@ -49,6 +52,9 @@
     "access": "public",
     "exports": {
       ".": "./dist/index.js",
+      "./bar": "./dist/bar/index.js",
+      "./donut": "./dist/donut/index.js",
+      "./line": "./dist/line/index.js",
       "./package.json": "./package.json",
       "./chart.css": "./dist/chart.css"
     }

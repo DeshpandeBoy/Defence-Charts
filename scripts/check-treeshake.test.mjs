@@ -21,6 +21,7 @@ import {
   COMPONENTS,
   EXPECTED,
   checkWorld,
+  checkPrimitiveEntrypoints,
   discoverPackages,
   exportedValues,
   probeSymbol,
@@ -222,6 +223,13 @@ describe('the real tree', () => {
       COMPONENTS,
     )
     expect(components).toEqual(['line-path'])
+  })
+
+  it('keeps family entrypoints isolated from the other family renderers', async () => {
+    const world = await discoverPackages(PACKAGES)
+    const result = await checkPrimitiveEntrypoints({ world })
+    expect(result.failures).toEqual([])
+    expect(result.probes).toBe(3)
   })
 })
 

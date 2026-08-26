@@ -166,7 +166,7 @@ import { fileURLToPath } from 'node:url'
 
 const REPO_ROOT = fileURLToPath(new URL('..', import.meta.url))
 
-export const ORIGIN = process.env.SHIFTCHARTS_PLAYGROUND_ORIGIN ?? 'http://localhost:5173/'
+export const ORIGIN = process.env.SHIFTCHARTS_PLAYGROUND_ORIGIN ?? 'http://localhost:5173/?lab=1'
 
 /**
  * ⚠ Wide and tall on purpose. `.widget` is `max-width: 100%` inside `.lab__stage`, so the

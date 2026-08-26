@@ -79,6 +79,7 @@ describe('donut family planner', () => {
     expect(micro.narrative.valueDisplay).toBe('latest')
     expect(tile.marks.primary).toEqual({ kind: 'arc', donut: true })
     expect(tile.narrative.valueDisplay).toBe('latest')
+    expect(tile.regionOrder).toEqual(['value', 'plot', 'table'])
     expect(tile.legend).toEqual({ placement: 'absent' })
   })
 

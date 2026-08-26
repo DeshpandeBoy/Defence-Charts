@@ -2,8 +2,8 @@
  * Bar/timebar family renderer.
  *
  * The family owns rectangles and stable keys. `SeriesFrame.cells` is the serialisable geometry
- * seam; until the coordinator teaches `resolveFrame()` to populate it for `MarkSpec['bar']`, an
- * empty cell array produces an intentionally empty result rather than silently drawing a line.
+ * seam populated by `resolveFrame()` for `MarkSpec['bar']`; an empty cell array remains an
+ * intentionally empty result rather than silently drawing a line.
  */
 
 import type { MarkRenderer, MarkRendererRegistration } from '../../renderer-seam.ts'

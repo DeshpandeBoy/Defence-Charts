@@ -37,6 +37,17 @@ figure.shiftcharts-chart
 The root SVG never uses `role="img"`; that role would make its descendants presentational. Ticks
 and gridlines use CSS-settable rectangles instead of SVG `<line>` coordinates.
 
+When the chart family is known ahead of time, the package also exposes tree-shakeable entrypoints:
+
+```tsx
+import { LineChart } from '@shiftcharts/primitives/line'
+import { BarChart } from '@shiftcharts/primitives/bar'
+import { DonutChart } from '@shiftcharts/primitives/donut'
+```
+
+These components accept the same props as `Chart` and should receive a plan resolved for the
+corresponding family. The root `Chart` remains the generic runtime-dispatched entrypoint.
+
 ## Current renderer scope
 
 For the implemented line/area, bar/timebar, donut, scatter, KPI, progress, heatmap, and funnel families,

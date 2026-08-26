@@ -17,15 +17,15 @@ function planChart(
 
 1. Resolve policy from defaults plus `policy`.
 2. Choose a size family from cells, pixels, and aspect.
-3. Run the complete rung for `line` or `area`.
+3. Run the complete rung for the requested registered chart family.
 4. Apply label fitting and plot-height consequences.
 5. Apply forced `overrides` last.
 
 ## Supported types
 
-`line` and `area` are implemented. Other members remain in `ChartType` because the public roadmap is
-known, but calling them throws with the milestone that owns the renderer. There is no silent
-fallback.
+All ten `ChartType` members are registered: `line`, `area`, `bar`, `timebar`, `donut`, `scatter`,
+`funnel`, `kpi`, `heatmap`, and `progress`. Unknown types still throw, and there is no silent
+fallback to a line plan.
 
 ## Core invariants
 
@@ -37,10 +37,10 @@ fallback.
 
 Use [`describeShape`](/docs/api/series) to derive the third argument from canonical data.
 
-## Current line/area policy surface
+## Current policy surface
 
-The completed B3 surface gives the line/area resolver typed inputs for the decisions that change
-what the plan contains. The main controls are:
+The completed B3 surface gives the registered family planners typed inputs for the decisions that
+change what the plan contains. The main controls are:
 
 | Concern | `PlanPolicy` fields | Current effect |
 | --- | --- | --- |

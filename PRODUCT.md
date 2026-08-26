@@ -12,16 +12,16 @@ Greenfield monorepo with the A1–A6 walking skeleton implemented. The research 
 the public direction and the remaining B–E work; it is settled by `research/00-decisions.md` and
 `research/20-architecture.md`:
 
-- Open source, npm, scoped packages (`@scope/tokens`, `@scope/core`, `@scope/primitives`, `@scope/react`, `@scope/grid`, `@scope/testing`) — name/scope itself is undecided, see Capabilities and Constraints.
+- Open source, npm, scoped packages (`@shiftcharts/tokens`, `@shiftcharts/core`, `@shiftcharts/primitives`, `@shiftcharts/react`, `@shiftcharts/grid`, `@shiftcharts/testing`).
 - Build: `tsdown` with `unbundle: true`, ESM-only. TypeScript pinned to **6.0.3** (not 7.x).
 - Chart math/drawing: raw `d3-scale@4`, `d3-shape@3`, `d3-array@3`, `d3-format`, `d3-time-format` — no visx, Recharts, or ECharts.
 - Grid engine: adopts `react-grid-layout@2`'s framework-agnostic `./core` subpath (pinned away from `2.2.0`, a known layout bug).
-- Theming: CSS custom properties (`--gx-*` placeholder prefix) + matching TypeScript token types. No runtime style provider, no Tailwind dependency. Two themes ship — "The Emission-Line Rail" as the default and a neutral escape hatch resetting to field-convention defaults — selected by class or stylesheet import, never by a JS prop.
+- Theming: CSS custom properties (`--shiftcharts-*`) + matching TypeScript token types. No runtime style provider, no Tailwind dependency. Two themes ship — "The Emission-Line Rail" as the default and a neutral escape hatch resetting to field-convention defaults — selected by class or stylesheet import, never by a JS prop.
 - Conventions: React 19, TypeScript, CSS Modules with design tokens, Storybook, Playwright, Vitest, Changesets releases.
 - ⚠ **Next.js 16 is a consumer convention and a test fixture, not a dependency.** The library is
   framework-agnostic React. Next appears in exactly three places: the RSC fixture app CI renders at
   A4/A5, the Fumadocs docs site at D, and the environment consumers are assumed to be in. Nothing
-  under `packages/` may import from `next/` — if `@gx/react` ever did, decision 7 (RSC-safe render,
+  under `packages/` may import from `next/` — if `@shiftcharts/react` ever did, decision 7 (RSC-safe render,
   zero JS) would be a Next.js feature rather than a property of the library.
 - Test stack: bare Node for the core "ladder" logic, an injected `FakeResizeObserver` (not jsdom/happy-dom's), Vitest browser mode via `@vitest/browser-playwright` for the tier needing a real browser. **happy-dom is banned**; jsdom is permitted.
 - Token discipline: lint gate rejects raw hex/rgb/hsl colours, raw `px` values, and gradients; requires `var(--...)`. Runs from day one, with a narrow allowlist for the tokens package itself — the one place literal values must live (`research/43-theming.md`).
@@ -64,8 +64,9 @@ A readiness review on 2026-08-23 found Milestone A1 genuinely unblocked but thre
 The walking skeleton is delivered through A6: a line/area chart plans six information rungs,
 renders as hook-free SVG, adapts through `AutoChart`, transitions across rung changes and holds
 rung mounts with a fractional deadband. B1's generated theme surface, B2's renderer control
-surface and G20 granularity audit, and B3's typed threshold policy are delivered for the line/area
-renderer. C grid work, D chart breadth, and E publishing remain sequenced work.
+surface and G20 granularity audit, B3's typed threshold policy, C grid work, and D chart breadth
+are now delivered across the ten registered chart types. E publishing remains the next release
+workstream.
 
 A from-scratch, standalone public open-source npm project, **MIT licensed** — not derived from or dependent on any other codebase. The primary evidence/reference product studied throughout research is Basedash (demo video + frame-by-frame analysis in `research/00-source-analysis.md` and `research/assets/`) — treated as a studied reference and a source of anti-patterns to avoid (e.g. its single 480px breakpoint), not as a product to imitate wholesale, and not a dependency of any kind.
 
@@ -82,7 +83,7 @@ A from-scratch, standalone public open-source npm project, **MIT licensed** — 
 - **No DOM measurement in the planner.** `planChart()` may not call `getComputedTextLength`, `getBBox`, `getTotalLength`, or `getBoundingClientRect`; text width comes from a character-advance table. Non-negotiable because jsdom throws and happy-dom silently returns `0` on all four, which would let broken label-collision layouts pass tests forever.
 - **Two token mechanisms, never mixed:** CSS custom properties drive *presentation* only (server can't read them); anything that changes what `planChart()` decides is a typed value through a `<GxConfig>` component, so server and client always agree. ⚠ The split runs by **consequence, not by token name** — the test is *"does this token's value change the outcome of a fit-or-collide decision?"* Six do, all text-measurement properties (`research/41-text-metrics.md` §2); their custom properties are generated from the typed values rather than authored alongside them.
 - **ESM-only**, `tsdown` with `unbundle: true` (the only tested config where `"use client"` survives the build) — protected by a CI job that builds a real Next.js app and greps the output.
-- **Undecided, not to be invented:** the project name and npm scope (currently `@gx/*` placeholder — blocks publishing, not code); the C grid and D chart-breadth integrations; release automation; and Windows-only fallback-face measurement. The released Roboto Flex digit behavior and available-face `safetyFactor: 1.57` are committed. B1's generated tree is complete for the shipped presentation surface, and B3 keeps research uncertainty explicit through typed provenance tiers rather than silently upgrading it.
+- **Still bounded or release-scoped:** release automation and Windows-only fallback-face measurement. The project identity is `ShiftCharts` with the `@shiftcharts/*` npm scope. The released Roboto Flex digit behavior and available-face `safetyFactor: 1.57` are committed. B1's generated tree is complete for the shipped presentation surface, and B3 keeps research uncertainty explicit through typed provenance tiers rather than silently upgrading it.
 
 ## Brand Commitments
 
@@ -100,7 +101,7 @@ Load-bearing commitments. Full statements and their reasoning live in `DESIGN.md
 
 The Emission-Line Rail ships as the library's **default theme**, alongside a documented **neutral escape-hatch theme** that resets to field-convention defaults for consumers who want the ladder without the visual world.
 
-Still genuinely undecided and not to be invented: **the project name and the npm scope** (`@gx/*` is a placeholder, `DESIGN.md:249`). These block publishing, not code.
+The project identity is settled as **ShiftCharts** with the **`@shiftcharts/*`** npm scope. Publishing still requires the release workflow and external npm trusted-publisher setup to be completed.
 
 ## Evidence on Hand
 

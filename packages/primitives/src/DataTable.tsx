@@ -88,7 +88,7 @@ function DonutTable({ data, caption }: { readonly data: readonly Series[]; reado
           const share = value === null || total === 0 ? null : value / total
           return (
             <tr key={`${key(point.x)}:${index}`}>
-              <th scope="row">{formatXLabel(point.x)}</th>
+              <th scope="row">{point.category ?? formatXLabel(point.x)}</th>
               <td>{value === null ? '—' : formatYLabel(value)}</td>
               <td>{share === null ? '—' : `${Math.round(share * 100)}%`}</td>
             </tr>
@@ -257,7 +257,7 @@ function FunnelTable({ data, caption }: { readonly data: readonly Series[]; read
             : null
           return (
             <tr key={`${key(point.x)}:${index}`}>
-              <th scope="row">{formatXLabel(point.x)}</th>
+              <th scope="row">{point.category ?? formatXLabel(point.x)}</th>
               <td>{point.y === null ? '—' : formatYLabel(point.y)}</td>
               <td>{conversion === null ? '—' : `${formatPercent(conversion)}`}</td>
               <td>{dropoff === null ? '—' : `${formatPercent(dropoff)}`}</td>

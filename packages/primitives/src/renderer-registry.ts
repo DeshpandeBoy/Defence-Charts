@@ -15,7 +15,7 @@ import { PROGRESS_MARK_RENDERERS } from './families/progress/renderer.tsx'
 import { SCATTER_MARK_RENDERERS } from './families/scatter/renderer.tsx'
 import { HEATMAP_MARK_RENDERERS } from './families/heatmap/renderer.tsx'
 import { FUNNEL_MARK_RENDERERS } from './families/funnel/renderer.tsx'
-import type { MarkRendererInput, MarkRendererRegistration } from './renderer-seam.ts'
+import { renderRegisteredMark, type MarkRendererInput, type MarkRendererRegistration } from './renderer-seam.ts'
 
 type BuiltInMarkRenderer = MarkRendererRegistration
 
@@ -30,16 +30,7 @@ const BUILT_IN_MARK_RENDERERS: readonly BuiltInMarkRenderer[] = Object.freeze([
 ])
 
 export function renderBuiltInMark(input: MarkRendererInput): ReactNode {
-  const kind = input.plan.marks.primary.kind
-  for (const registration of BUILT_IN_MARK_RENDERERS) {
-    if (registration.markKinds.some((candidate) => candidate === kind)) {
-      return registration.render(input)
-    }
-  }
-
-  throw new Error(
-    "@shiftcharts/primitives: mark kind '" + kind + "' is not implemented. A4 renders 'line', 'horizon', 'none', D1.1 renders 'bar', D3.2 renders 'progress', D4.1 renders 'point', D2.1 renders donut 'arc', D5.1 renders heatmap 'cell', D6.1 renders funnel; future marks remain explicit.",
-  )
+  return renderRegisteredMark(BUILT_IN_MARK_RENDERERS, input)
 }
 
 export { BUILT_IN_MARK_RENDERERS }

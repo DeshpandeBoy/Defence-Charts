@@ -52,6 +52,7 @@ function corpus(): readonly Case[] {
     for (const type of ['line', 'area'] as const) {
       cases.push([`${type} ${label}`, planChart(type, ctx, shape)])
     }
+    cases.push([`donut ${label}`, planChart('donut', ctx, shape)])
   }
 
   for (const [rung, ctx] of SIX) for (const [name, shape] of SHAPES) push(`${rung} / ${name}`, ctx, shape)
@@ -127,8 +128,8 @@ describe('the corpus reaches every state the gates branch on', () => {
     ])
   })
 
-  it('all three mark states, including the empty one', () => {
-    expect([...reached((p) => p.marks.primary.kind)].sort()).toEqual(['horizon', 'line', 'none'])
+  it('all registered mark states, including the empty one', () => {
+    expect([...reached((p) => p.marks.primary.kind)].sort()).toEqual(['arc', 'horizon', 'line', 'none'])
   })
 
   it('an internal legend and an external one', () => {

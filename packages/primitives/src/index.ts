@@ -39,7 +39,7 @@
  *
  * ```tsx
  * import { Chart } from '@shiftcharts/primitives'
- * import '@shiftcharts/primitives/src/chart.css'
+ * import '@shiftcharts/primitives/chart.css'
  * ```
  *
  * `chart.css` is a side effect (`package.json`'s `sideEffects`), so it survives
@@ -48,10 +48,8 @@
  *
  * ⚠ **Current scope.** Mark kinds `'line'`, `'horizon'`, `'none'`, D1.1's `'bar'`, D3.2's
  * target-aware `'progress'`, D4.1's `'point'`, D5.1's heatmap `'cell'`, D6.1's `'funnel'`, and D2.1's donut `'arc'` render. D3.1's KPI is
- * composed from these existing marks and the value/table primitives. `'cell'` throws, naming the later
- * milestone that adds it — the same
- * contract `planChart()` holds, and for the same reason: a silent fallback to a line would
- * render another family's data as a line chart.
+ * composed from these existing marks and the value/table primitives. Unsupported mark kinds still
+ * throw rather than silently rendering another family's data as a line chart.
  */
 
 export type { AreaPathProps } from './AreaPath.tsx'

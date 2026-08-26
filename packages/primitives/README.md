@@ -13,6 +13,17 @@ import '@shiftcharts/primitives/chart.css'
 Pass a resolved plan to Chart; responsive measurement and client-only behavior belong to
 @shiftcharts/react.
 
+For smaller bundles, import the family-specific entrypoint that matches the plan:
+
+~~~tsx
+import { LineChart } from '@shiftcharts/primitives/line'
+import { BarChart } from '@shiftcharts/primitives/bar'
+import { DonutChart } from '@shiftcharts/primitives/donut'
+~~~
+
+These entrypoints share the same `ChartProps` contract and render only their selected family
+renderer. Use the root `Chart` when the plan may contain any built-in family.
+
 ## License
 
 MIT. See the bundled LICENSE file.

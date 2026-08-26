@@ -24,3 +24,18 @@ export type MarkRendererRegistration<TMarkKind extends MarkKind = MarkKind> = {
   readonly markKinds: readonly TMarkKind[]
   readonly render: MarkRenderer
 }
+
+/** Dispatch a mark through one explicitly selected family registry. */
+export function renderRegisteredMark(
+  registrations: readonly MarkRendererRegistration[],
+  input: MarkRendererInput,
+): ReactNode {
+  const kind = input.plan.marks.primary.kind
+  for (const registration of registrations) {
+    if (registration.markKinds.some((candidate) => candidate === kind)) {
+      return registration.render(input)
+    }
+  }
+
+  throw new Error(`@shiftcharts/primitives: mark kind '${kind}' is not registered for this entrypoint.`)
+}

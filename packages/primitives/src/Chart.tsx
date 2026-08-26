@@ -54,6 +54,7 @@ import { DataTable } from './DataTable.tsx'
 import { Grid } from './Grid.tsx'
 import { Labels, resolveLabelOffsets } from './Labels.tsx'
 import { PointMarks } from './PointMarks.tsx'
+import type { MarkRenderer } from './renderer-seam.ts'
 import { renderBuiltInMark } from './renderer-registry.ts'
 import { classes, roundCoord } from './svg.ts'
 import { ValueDisplay } from './ValueDisplay.tsx'
@@ -104,7 +105,17 @@ export type ChartProps = {
   readonly className?: string | undefined
 }
 
-export function Chart({
+export type ChartViewProps = ChartProps & {
+  /** Internal renderer seam used by the root and family-specific public entrypoints. */
+  readonly renderMark: MarkRenderer
+}
+
+/** The generic root chart, backed by every built-in family renderer. */
+export function Chart(props: ChartProps) {
+  return <ChartView {...props} renderMark={renderBuiltInMark} />
+}
+
+export function ChartView({
   plan,
   data,
   ctx,
@@ -113,7 +124,8 @@ export function Chart({
   policy,
   id,
   className,
-}: ChartProps) {
+  renderMark,
+}: ChartViewProps) {
   const generated = useId()
   const base = id ?? generated
   const resolvedPolicy = useMemo(() => resolvePolicy(policy), [policy])
@@ -192,6 +204,7 @@ export function Chart({
             frame={frame}
             plan={plan}
             policy={resolvedPolicy}
+            renderMark={renderMark}
           />
         ) : (
           <g className="shiftcharts-compact-plot" data-compact-plot="" transform={compactKey.plotTransform}>
@@ -200,6 +213,7 @@ export function Chart({
               frame={frame}
               plan={plan}
               policy={resolvedPolicy}
+              renderMark={renderMark}
             />
           </g>
         )}
@@ -252,18 +266,27 @@ function PlotContent({
   frame,
   plan,
   policy,
+  renderMark,
 }: {
   readonly base: string
   readonly frame: ChartFrame
   readonly plan: ChartPlan
   readonly policy: PlanPolicy
+  readonly renderMark: MarkRenderer
 }) {
   const labelOffsets = resolveLabelOffsets(frame.series, plan.labels, frame.plot, policy)
 
   return (
     <>
       {frame.series.map((s) => (
-        <SeriesMarks key={s.id} frame={s} plan={plan} policy={policy} labelOffsets={labelOffsets} />
+        <SeriesMarks
+          key={s.id}
+          frame={s}
+          plan={plan}
+          policy={policy}
+          labelOffsets={labelOffsets}
+          renderMark={renderMark}
+        />
       ))}
 
       {plan.axes.x.visible ? (
@@ -319,16 +342,18 @@ function SeriesMarks({
   plan,
   policy,
   labelOffsets,
+  renderMark,
 }: {
   readonly frame: ChartFrame['series'][number]
   readonly plan: ChartPlan
   readonly policy: PlanPolicy
   readonly labelOffsets: ReadonlyMap<string, number>
+  readonly renderMark: MarkRenderer
 }) {
   return (
     <g className="shiftcharts-series" data-series-id={frame.id} data-series-index={frame.index}>
       <title>{frame.label}</title>
-      {renderBuiltInMark({ frame, plan, policy })}
+      {renderMark({ frame, plan, policy })}
       <PointMarks
         points={frame.points}
         extrema={frame.extrema}

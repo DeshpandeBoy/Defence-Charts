@@ -114,6 +114,7 @@ function HeatmapLegend({
     .filter(Boolean)
     .join(' ')
   const entries = [0, 1, 2, 3, 4] as const
+  const labels = ['Low', 'Low–medium', 'Medium', 'High–medium', 'High'] as const
 
   return (
     <div
@@ -133,7 +134,7 @@ function HeatmapLegend({
           role="listitem"
         >
           <span className="shiftcharts-legend__symbol" aria-hidden="true" />
-          <span className="shiftcharts-legend__label">{intensity === 0 ? 'Low' : intensity === 4 ? 'High' : ''}</span>
+          <span className="shiftcharts-legend__label">{labels[intensity]}</span>
           {intensity === 0 && minimum !== null ? (
             <span className="shiftcharts-legend__detail">{formatYLabel(minimum)}</span>
           ) : intensity === 4 && maximum !== null ? (

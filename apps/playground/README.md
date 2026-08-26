@@ -68,10 +68,10 @@ uses the same classifier and previous-rung rule as the chart beside it.
 
 ## What is deliberately missing
 
-**The line chart is real now.** The playground exercises the delivered A4–A6 renderer,
-`AutoChart`, B1-B3 control surface, fractional rung deadband and CSS transition path beside the resolver's JSON output. What is still absent
-is breadth: chart types other than line and area are missing for the same reason —
-`planChart()` **throws** for them rather than falling back to a plan it cannot justify.
+**The line chart is the demo's focus.** The playground exercises the delivered A4–A6 renderer,
+`AutoChart`, B1-B3 control surface, fractional rung deadband and CSS transition path beside the
+resolver's JSON output. The core planner and family renderers now cover all ten registered chart
+types; the product-facing demo stays intentionally focused on line and area.
 
 
 ## The remaining open question this page makes visible

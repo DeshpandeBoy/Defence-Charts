@@ -7,9 +7,8 @@
  * multiple series by default, and transpose when the inherited category-label degradation says
  * the x labels no longer fit.
  *
- * The central frame currently does not populate `SeriesFrame.cells` for `MarkSpec['bar']`; the
- * family renderer therefore consumes that explicit frame seam and returns no geometry until the
- * coordinator adds the shared bar geometry integration. It never falls back to a line.
+ * The shared frame populates `SeriesFrame.cells` for `MarkSpec['bar']`; the family renderer
+ * consumes that explicit seam and never falls back to a line.
  */
 
 import type { FamilyPlanner, FamilyPlannerInput } from '../../family-seam.ts'

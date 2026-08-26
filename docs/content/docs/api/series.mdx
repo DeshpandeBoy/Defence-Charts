@@ -7,6 +7,7 @@ description: The canonical, serializable actual-value contract shared by every S
 export type DataPoint = {
   readonly x: number | Date
   readonly y: number | null
+  readonly category?: string
 }
 
 export type Series = {
@@ -50,6 +51,9 @@ an explicit unavailable conversion rather than division by zero.
 
 **`y: null`:** a gap, not zero. The line breaks because no reading exists. Use `0` only when the
 measured value is actually zero.
+
+**Optional `category`:** the human-readable name for a categorical point, such as a donut part or
+funnel stage. Donut and funnel tables and geometry prefer it over the formatted `x` value.
 
 ## describeShape
 

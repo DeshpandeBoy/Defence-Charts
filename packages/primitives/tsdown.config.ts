@@ -5,7 +5,7 @@ import { cssExportsFor } from '../../scripts/emit-package-assets.mjs'
 // Rolldown build on a non-entry file (30-implementation-plan.md A1). It is load-bearing
 // for decision 7, not an optimisation — do not remove it to "simplify the build".
 export default defineConfig({
-  entry: ['src/index.ts'],
+  entry: ['src/index.ts', 'src/line/index.tsx', 'src/bar/index.tsx', 'src/donut/index.tsx'],
   format: ['esm'],
   unbundle: true,
   dts: true,

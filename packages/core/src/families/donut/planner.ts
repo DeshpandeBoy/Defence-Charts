@@ -91,7 +91,9 @@ function planDonut(input: FamilyPlannerInput<DonutChartType>): ChartPlan {
         ? (['value', 'table'] as const)
         : externalLegend
           ? (['plot', 'legend', 'table'] as const)
-          : (['plot', 'table'] as const),
+          : input.ctx.sizeClass === 'tile'
+            ? (['value', 'plot', 'table'] as const)
+            : (['plot', 'table'] as const),
     ),
     marks: Object.freeze({
       ...seed.marks,

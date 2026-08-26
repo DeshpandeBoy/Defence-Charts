@@ -32,8 +32,9 @@
  * A table where twenty-three rows are noise hides the one row that is the actual claim.
  *
  * So `COMPONENTS` is the small set of modules whose presence *is* a product decision — one
- * chart type's ladder, the resolver, the frame solver. Everything else is measured and not
- * asserted. Adding a chart type is one line here and one line in `EXPECTED`.
+ * chart type's ladder, the resolver, the frame solver, and each family renderer. Everything
+ * else is measured and not asserted. Adding a chart type is one line here and one line in
+ * `EXPECTED`.
  *
  * ⚠ Recorded so it is not rediscovered: the metrics table's reach was **measured, not
  * assumed**. `tickCountForWidth` alone carries `policy.ts`, `text.ts` and
@@ -79,6 +80,13 @@ export const COMPONENTS = [
   { component: 'line-path', module: 'LinePath.tsx' },
   { component: 'point-marks', module: 'PointMarks.tsx' },
   { component: 'horizon-bands', module: 'HorizonBands.tsx' },
+  { component: 'line-renderer', module: 'families/line/renderer.tsx' },
+  { component: 'bar-renderer', module: 'families/bar/renderer.tsx' },
+  { component: 'donut-renderer', module: 'families/donut/renderer.tsx' },
+  { component: 'scatter-renderer', module: 'families/scatter/renderer.tsx' },
+  { component: 'progress-renderer', module: 'families/progress/renderer.tsx' },
+  { component: 'heatmap-renderer', module: 'families/heatmap/renderer.tsx' },
+  { component: 'funnel-renderer', module: 'families/funnel/renderer.tsx' },
 ]
 
 /**
@@ -121,16 +129,54 @@ export const EXPECTED = {
     PointMarks: ['point-marks'],
     HorizonBands: ['horizon-bands'],
 
-    // ⚠ `<Chart plan={…}>` carries every mark, and must: it dispatches on a plan resolved
-    // at runtime, so it cannot know which mark it will need. That is the cost of the
-    // plan-driven API and it is exactly what the `/line`, `/bar`, `/donut` subpath exports
-    // in `research/maps/00-system-map.md` exist to let a consumer opt out of. This line
-    // going up when a chart type lands is correct; the four above it going up is not.
-    Chart: ['area-path', 'horizon-bands', 'line-path', 'point-marks'],
+    // ⚠ The root `<Chart plan={…}>` carries every family renderer because it dispatches on a
+    // plan resolved at runtime. The family entrypoints below are the opt-out that keeps a
+    // consumer importing one chart from paying for the other family renderers.
+    Chart: [
+      'area-path',
+      'bar-renderer',
+      'donut-renderer',
+      'funnel-renderer',
+      'heatmap-renderer',
+      'horizon-bands',
+      'line-path',
+      'line-renderer',
+      'point-marks',
+      'progress-renderer',
+      'scatter-renderer',
+    ],
   },
   '@shiftcharts/react': {},
   '@shiftcharts/grid': {},
 }
+
+/**
+ * Public family entrypoints. These are intentionally checked separately from the root barrel:
+ * the root chart is runtime-dispatched and must carry all built-in renderers, while each named
+ * family entrypoint must carry only its own renderer.
+ *
+ * @type {readonly { name: string, module: string, symbol: string, expected: readonly string[] }[]}
+ */
+export const PRIMITIVE_ENTRYPOINTS = Object.freeze([
+  {
+    name: '@shiftcharts/primitives/line',
+    module: 'line/index.tsx',
+    symbol: 'LineChart',
+    expected: ['area-path', 'horizon-bands', 'line-path', 'line-renderer', 'point-marks'],
+  },
+  {
+    name: '@shiftcharts/primitives/bar',
+    module: 'bar/index.tsx',
+    symbol: 'BarChart',
+    expected: ['bar-renderer', 'point-marks'],
+  },
+  {
+    name: '@shiftcharts/primitives/donut',
+    module: 'donut/index.tsx',
+    symbol: 'DonutChart',
+    expected: ['donut-renderer', 'point-marks'],
+  },
+])
 
 const VIRTUAL_ENTRY = '\0gx-treeshake-probe'
 
@@ -342,6 +388,41 @@ export async function checkWorld({ world, expected = EXPECTED, components = COMP
 }
 
 /**
+ * @param {{ world: readonly Pkg[], components?: readonly ComponentRule[] }} input
+ * @returns {Promise<{ failures: Failure[], probes: number }>}
+ */
+export async function checkPrimitiveEntrypoints({ world, components = COMPONENTS }) {
+  const primitives = world.find((pkg) => pkg.name === '@shiftcharts/primitives')
+  if (primitives === undefined) return { failures: [], probes: 0 }
+
+  /** @type {Failure[]} */
+  const failures = []
+  for (const entrypoint of PRIMITIVE_ENTRYPOINTS) {
+    const entry = join(primitives.src, entrypoint.module)
+    const { components: actual, modules } = await probeSymbol(
+      entry,
+      entrypoint.symbol,
+      primitives.src,
+      components,
+    )
+    const expected = [...entrypoint.expected].sort()
+    const diff = symmetricDifference(expected, actual)
+    if (diff.only_in_expected.length > 0 || diff.only_in_actual.length > 0) {
+      failures.push({
+        kind: 'leak',
+        pkg: entrypoint.name,
+        symbol: entrypoint.symbol,
+        expected,
+        actual,
+        diff,
+        modules,
+      })
+    }
+  }
+  return { failures, probes: PRIMITIVE_ENTRYPOINTS.length }
+}
+
+/**
  * ⚠ The two failure kinds print differently on purpose. A leak has a diff, and the diff is
  * the reason to run a bundler in a lint gate. An undeclared package has no diff — nothing
  * was measured — and printing it in the leak's shape emits four lines of empty brackets that
@@ -401,11 +482,17 @@ if (invokedDirectly) {
     process.exit(1)
   }
 
-  const { failures, probes } = await checkWorld({
+  const rootCheck = await checkWorld({
     world,
     expected: table.EXPECTED,
     components: table.COMPONENTS,
   })
+  const entryCheck =
+    tableFlag === undefined
+      ? await checkPrimitiveEntrypoints({ world, components: table.COMPONENTS })
+      : { failures: [], probes: 0 }
+  const failures = [...rootCheck.failures, ...entryCheck.failures]
+  const probes = rootCheck.probes + entryCheck.probes
 
   if (failures.length > 0) {
     // ⚠ Counted by kind. An undeclared package is not a probe, and folding it into the probe

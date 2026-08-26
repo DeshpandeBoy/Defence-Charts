@@ -108,8 +108,9 @@ export {
   yAxisGutter,
 } from './layout.ts'
 
-// The six line/area rungs, exported individually so a consumer can read one rung's
-// semantics without going through the size classifier.
+// The shared six-rung line/area ladder, exported individually so a consumer can read one rung's
+// semantics without going through the size classifier. Other families compose these rungs and
+// replace their family-specific semantics in their planners.
 export type { LineChartType, Rung, RungInput } from './rungs/line.ts'
 export {
   canvasRung,
