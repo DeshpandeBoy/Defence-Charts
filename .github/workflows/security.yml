@@ -1,0 +1,56 @@
+name: Security
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# This workflow does not publish, comment, upload results, or modify repository state.
+permissions:
+  contents: read
+
+env:
+  TZ: UTC
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      # Pin actions to commits so a mutable major tag cannot change the code executed by this
+      # security workflow. The exact tag-to-commit mappings are recorded in the task handoff.
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        # The action reads the repository's packageManager field; pnpm@10.34.5 stays declared in
+        # one place and is therefore the same version used by local verification and CI.
+
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit dependencies (high and critical)
+        run: pnpm audit --audit-level=high
+
+      # Keep the repository's existing dependency-boundary and packed-package gates in the
+      # security path. The explicit status check lets every focused gate report in one run while
+      # preserving failure: no gate is ignored or allowed to pass conditionally.
+      - name: Gate — dependency boundaries
+        if: '!cancelled()'
+        run: pnpm lint:deps
+
+      - name: Gate — packed package integrity and consumer proof
+        if: '!cancelled()'
+        run: pnpm verify:packages
