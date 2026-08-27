@@ -98,6 +98,41 @@ describe('the plot box is the resolver’s, not a second opinion', () => {
       expect(frame.plot.y + frame.plot.height).toBeLessThanOrEqual(frame.box.height)
     }
   })
+
+  it('publishes the exact charged external legend rail for every placement', () => {
+    const ctx = sizeContextFromPixels(1000, 700)
+    const base = planChart('line', ctx, describeShape(SIX_SERIES))
+    for (const position of ['left', 'right', 'top', 'bottom'] as const) {
+      const plan = applyOverrides(base, {
+        legend: { placement: 'external', position, maxEntries: 6, showValues: false, showPercent: false },
+      })
+      const frame = resolveFrame(plan, SIX_SERIES, ctx)
+      const band = legendBands(plan.legend, SIX_SERIES.length, DEFAULT_POLICY)
+      expect(frame.legend).not.toBeNull()
+      expect(frame.legend).toEqual(
+        position === 'left'
+          ? { x: 0, y: 0, width: band.width, height: frame.box.height }
+          : position === 'right'
+            ? { x: frame.box.width - band.width, y: 0, width: band.width, height: frame.box.height }
+            : position === 'top'
+              ? { x: 0, y: 0, width: frame.box.width, height: band.height }
+              : { x: 0, y: frame.box.height - band.height, width: frame.box.width, height: band.height },
+      )
+    }
+  })
+
+  it('publishes the reserved internal rail above the plot without shrinking it twice', () => {
+    const ctx = STRIP
+    const plan = planChart('bar', ctx, describeShape(BAR_DATA))
+    const frame = resolveFrame(plan, BAR_DATA, ctx)
+    expect(plan.legend).toMatchObject({ placement: 'internal', flow: 'reserved' })
+    expect(frame.legend).toEqual({
+      x: frame.plot.x,
+      y: frame.plot.y - (frame.legend?.height ?? 0),
+      width: frame.plot.width,
+      height: frame.legend?.height,
+    })
+  })
 })
 
 describe('path strings', () => {
@@ -974,18 +1009,17 @@ describe('no-plot and reserved-legend geometry', () => {
     expect(legendBands(overlay, SIX_SERIES.length, DEFAULT_POLICY)).toEqual({ width: 0, height: 0 })
   })
 
-  it('gives grouped bars a measured four-sided plot inset and a top identity band', () => {
+  it('gives grouped bars a measured four-sided plot inset and a right identity rail', () => {
     const ctx = sizeContextFromPixels(760, 480)
     const plan = planChart('bar', ctx, describeShape(BAR_DATA))
     const frame = resolveFrame(plan, BAR_DATA, ctx)
     const chrome = chromeFromPlan(plan, DEFAULT_POLICY.plotInset)
     const box = resolvePlotBox(ctx, chrome, BAR_DATA.length, DEFAULT_POLICY)
 
-    expect(plan.legend).toMatchObject({ placement: 'external', position: 'top' })
+    expect(plan.legend).toMatchObject({ placement: 'external', position: 'right' })
     expect(frame.plot.width).toBe(box.width)
     expect(frame.plot.height).toBe(box.height)
     expect(frame.plot.x).toBeGreaterThan(yAxisGutter(plan.axes.y, DEFAULT_POLICY))
-    expect(frame.plot.y).toBeGreaterThan(0)
     expect(frame.plot.x + frame.plot.width).toBeLessThan(frame.box.width)
     expect(frame.plot.y + frame.plot.height).toBeLessThan(frame.box.height)
   })

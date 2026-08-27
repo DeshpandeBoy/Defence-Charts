@@ -3,8 +3,10 @@ import {
   type ArcFrame,
   type CellFrame,
   type ChartPlan,
+  type Rect,
   type Series,
 } from '@shiftcharts/core'
+import type { CSSProperties } from 'react'
 
 export type LegendProps = {
   readonly plan: ChartPlan['legend']
@@ -13,6 +15,8 @@ export type LegendProps = {
   readonly arcs?: readonly ArcFrame[] | undefined
   /** Heatmap cells are one intensity field, not a set of coloured source series. */
   readonly heatmapCells?: readonly CellFrame[] | undefined
+  /** Core-resolved rail geometry for an external legend. */
+  readonly region?: Rect | null | undefined
   readonly className?: string | undefined
 }
 
@@ -38,13 +42,13 @@ export function legendEntries(
 }
 
 /** Hook-free, static legend output; safe to render in an RSC. */
-export function Legend({ plan, series, arcs, heatmapCells, className }: LegendProps) {
+export function Legend({ plan, series, arcs, heatmapCells, region, className }: LegendProps) {
   if (heatmapCells !== undefined && heatmapCells.length > 0) {
-    return <HeatmapLegend plan={plan} cells={heatmapCells} className={className} />
+    return <HeatmapLegend plan={plan} cells={heatmapCells} region={region} className={className} />
   }
 
   if (arcs !== undefined && arcs.length > 0) {
-    return <ArcLegend plan={plan} arcs={arcs} className={className} />
+    return <ArcLegend plan={plan} arcs={arcs} region={region} className={className} />
   }
 
   const entries = legendEntries(plan, series)
@@ -68,6 +72,8 @@ export function Legend({ plan, series, arcs, heatmapCells, className }: LegendPr
       className={rootClass}
       data-legend-placement={placement}
       data-legend-position={position}
+      data-legend-region={region === null || region === undefined ? undefined : 'core'}
+      style={legendRegionStyle(region)}
       role="list"
       aria-label="Chart legend"
     >
@@ -82,6 +88,7 @@ export function Legend({ plan, series, arcs, heatmapCells, className }: LegendPr
             data-series-index={index}
             key={item.id}
             role="listitem"
+            tabIndex={0}
           >
             <span className="shiftcharts-legend__symbol" aria-hidden="true" />
             <span className="shiftcharts-legend__label" title={label}>{label}</span>
@@ -96,10 +103,12 @@ export function Legend({ plan, series, arcs, heatmapCells, className }: LegendPr
 function HeatmapLegend({
   plan,
   cells,
+  region,
   className,
 }: {
   readonly plan: ChartPlan['legend']
   readonly cells: readonly CellFrame[]
+  readonly region?: Rect | null | undefined
   readonly className?: string | undefined
 }) {
   if (plan.placement === 'absent' || plan.placement === 'direct') return null
@@ -122,6 +131,8 @@ function HeatmapLegend({
       data-legend-placement={plan.placement}
       data-legend-position={plan.placement === 'external' ? plan.position : undefined}
       data-legend-family="heatmap"
+      data-legend-region={region === null || region === undefined ? undefined : 'core'}
+      style={legendRegionStyle(region)}
       role="list"
       aria-label="Heatmap intensity"
     >
@@ -132,6 +143,7 @@ function HeatmapLegend({
           data-heatmap-intensity={intensity}
           key={intensity}
           role="listitem"
+          tabIndex={0}
         >
           <span className="shiftcharts-legend__symbol" aria-hidden="true" />
           <span className="shiftcharts-legend__label">{labels[intensity]}</span>
@@ -149,10 +161,12 @@ function HeatmapLegend({
 function ArcLegend({
   plan,
   arcs,
+  region,
   className,
 }: {
   readonly plan: ChartPlan['legend']
   readonly arcs: readonly ArcFrame[]
+  readonly region?: Rect | null | undefined
   readonly className?: string | undefined
 }) {
   if (plan.placement === 'absent' || plan.placement === 'direct') return null
@@ -170,6 +184,8 @@ function ArcLegend({
       data-legend-placement={plan.placement}
       data-legend-position={plan.placement === 'external' ? plan.position : undefined}
       data-legend-family="donut"
+      data-legend-region={region === null || region === undefined ? undefined : 'core'}
+      style={legendRegionStyle(region)}
       role="list"
       aria-label="Donut categories"
     >
@@ -182,6 +198,7 @@ function ArcLegend({
           data-slice-label={arc.label}
           key={arc.id}
           role="listitem"
+          tabIndex={0}
         >
           <span className="shiftcharts-legend__symbol" aria-hidden="true" />
           <span className="shiftcharts-legend__label" title={arc.label}>{arc.label}</span>
@@ -224,4 +241,14 @@ function legendDetail(
   if (showValues) parts.push(value === null ? '—' : formatYLabel(value))
   if (showPercent) parts.push(percent === null ? '—' : `${Math.round(percent)}%`)
   return parts.join(' · ')
+}
+
+function legendRegionStyle(region: Rect | null | undefined): CSSProperties | undefined {
+  if (region === null || region === undefined) return undefined
+  return {
+    '--legend-region-x': `${region.x}px`,
+    '--legend-region-y': `${region.y}px`,
+    '--legend-region-width': `${region.width}px`,
+    '--legend-region-height': `${region.height}px`,
+  } as CSSProperties
 }

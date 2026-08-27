@@ -103,6 +103,15 @@
     line-height: var(--shiftcharts-label-line-height);
   }
 
+  /* The frame resolves this rail; these properties only place its already-charged geometry. */
+  .shiftcharts-legend[data-legend-region='core'] {
+    box-sizing: border-box;
+    inset-inline-start: var(--legend-region-x);
+    inset-block-start: var(--legend-region-y);
+    inline-size: var(--legend-region-width);
+    block-size: var(--legend-region-height);
+  }
+
   .shiftcharts-legend--internal {
     inset-block-start: 0;
     inset-inline: 0;
@@ -224,23 +233,48 @@
   }
 
   /* A legend is an inspection control as well as a key. The chart stays static/RSC-safe;
-     supported browsers use this relationship to make the referenced series read first. */
-  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='0']:hover) .shiftcharts-bar:not([data-series-index='0']),
-  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='1']:hover) .shiftcharts-bar:not([data-series-index='1']),
-  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='2']:hover) .shiftcharts-bar:not([data-series-index='2']),
-  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='3']:hover) .shiftcharts-bar:not([data-series-index='3']),
-  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='4']:hover) .shiftcharts-bar:not([data-series-index='4']),
-  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='5']:hover) .shiftcharts-bar:not([data-series-index='5']) {
+     supported browsers use this relationship to make the referenced data read first. */
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='0']:is(:hover, :focus-visible)) .shiftcharts-series:not([data-series-index='0']),
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='1']:is(:hover, :focus-visible)) .shiftcharts-series:not([data-series-index='1']),
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='2']:is(:hover, :focus-visible)) .shiftcharts-series:not([data-series-index='2']),
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='3']:is(:hover, :focus-visible)) .shiftcharts-series:not([data-series-index='3']),
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='4']:is(:hover, :focus-visible)) .shiftcharts-series:not([data-series-index='4']),
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='5']:is(:hover, :focus-visible)) .shiftcharts-series:not([data-series-index='5']) {
     opacity: var(--shiftcharts-motion-fade-factor);
   }
 
-  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='0']:hover) .shiftcharts-bar[data-series-index='0'],
-  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='1']:hover) .shiftcharts-bar[data-series-index='1'],
-  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='2']:hover) .shiftcharts-bar[data-series-index='2'],
-  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='3']:hover) .shiftcharts-bar[data-series-index='3'],
-  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='4']:hover) .shiftcharts-bar[data-series-index='4'],
-  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='5']:hover) .shiftcharts-bar[data-series-index='5'] {
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='0']:is(:hover, :focus-visible)) .shiftcharts-series[data-series-index='0'],
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='1']:is(:hover, :focus-visible)) .shiftcharts-series[data-series-index='1'],
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='2']:is(:hover, :focus-visible)) .shiftcharts-series[data-series-index='2'],
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='3']:is(:hover, :focus-visible)) .shiftcharts-series[data-series-index='3'],
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='4']:is(:hover, :focus-visible)) .shiftcharts-series[data-series-index='4'],
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='5']:is(:hover, :focus-visible)) .shiftcharts-series[data-series-index='5'] {
     opacity: 1;
+  }
+
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-slice-index='0']:is(:hover, :focus-visible)) .shiftcharts-arc:not([data-slice-index='0']),
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-slice-index='1']:is(:hover, :focus-visible)) .shiftcharts-arc:not([data-slice-index='1']),
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-slice-index='2']:is(:hover, :focus-visible)) .shiftcharts-arc:not([data-slice-index='2']),
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-slice-index='3']:is(:hover, :focus-visible)) .shiftcharts-arc:not([data-slice-index='3']),
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-slice-index='4']:is(:hover, :focus-visible)) .shiftcharts-arc:not([data-slice-index='4']),
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-slice-index='5']:is(:hover, :focus-visible)) .shiftcharts-arc:not([data-slice-index='5']),
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-slice-index='6']:is(:hover, :focus-visible)) .shiftcharts-arc:not([data-slice-index='6']),
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-slice-index='7']:is(:hover, :focus-visible)) .shiftcharts-arc:not([data-slice-index='7']) {
+    opacity: var(--shiftcharts-motion-fade-factor);
+  }
+
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-heatmap-intensity='0']:is(:hover, :focus-visible)) .shiftcharts-heatmap-cell:not([data-heatmap-intensity='0']),
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-heatmap-intensity='1']:is(:hover, :focus-visible)) .shiftcharts-heatmap-cell:not([data-heatmap-intensity='1']),
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-heatmap-intensity='2']:is(:hover, :focus-visible)) .shiftcharts-heatmap-cell:not([data-heatmap-intensity='2']),
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-heatmap-intensity='3']:is(:hover, :focus-visible)) .shiftcharts-heatmap-cell:not([data-heatmap-intensity='3']),
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-heatmap-intensity='4']:is(:hover, :focus-visible)) .shiftcharts-heatmap-cell:not([data-heatmap-intensity='4']) {
+    opacity: var(--shiftcharts-motion-fade-factor);
+  }
+
+  .shiftcharts-legend__item:focus-visible,
+  .shiftcharts-compact-key__entry:focus-visible {
+    outline: var(--shiftcharts-line-stroke-width) solid currentColor;
+    outline-offset: calc(var(--shiftcharts-line-stroke-width) * 2);
   }
 
   .shiftcharts-legend--control .shiftcharts-legend__control:focus-visible {

@@ -261,6 +261,12 @@ export type ChartFrame = {
   readonly box: Rect
   /** Where marks go. Its `width`/`height` are `resolvePlotBox()`'s, exactly. */
   readonly plot: Rect
+  /**
+   * The exact band charged for a reserved or external legend, or `null` when the plan does
+   * not charge legend space. This is geometry rather than presentation: renderers may expose
+   * it as CSS layout properties, but must not invent a competing rail.
+   */
+  readonly legend: Rect | null
   readonly xTicks: readonly ComputedTick[]
   readonly yTicks: readonly ComputedTick[]
   readonly series: readonly SeriesFrame[]
@@ -945,6 +951,30 @@ function fitValueDisplay(
 // --- The resolver ------------------------------------------------------------------------
 
 /**
+ * Materialise the same legend cost that `resolvePlotBox()` already subtracts. Keeping this in
+ * core makes the HTML/SVG rail agree with the serialisable plot geometry at every placement.
+ */
+function resolveLegendRegion(
+  plan: ChartPlan['legend'],
+  band: { readonly width: number; readonly height: number },
+  box: Rect,
+  plot: Rect,
+): Rect | null {
+  if (band.width === 0 && band.height === 0) return null
+
+  if (plan.placement === 'internal') {
+    if (plan.flow !== 'reserved') return null
+    return Object.freeze({ x: plot.x, y: plot.y - band.height, width: plot.width, height: band.height })
+  }
+  if (plan.placement !== 'external') return null
+
+  if (plan.position === 'left') return Object.freeze({ x: 0, y: 0, width: band.width, height: box.height })
+  if (plan.position === 'right') return Object.freeze({ x: box.width - band.width, y: 0, width: band.width, height: box.height })
+  if (plan.position === 'top') return Object.freeze({ x: 0, y: 0, width: box.width, height: band.height })
+  return Object.freeze({ x: 0, y: box.height - band.height, width: box.width, height: band.height })
+}
+
+/**
  * `(plan, data, ctx)` → the coordinates that draw it.
  *
  * Pure: no measurement, no clock, no state, no randomness. Same inputs, same frame, on a
@@ -982,8 +1012,15 @@ export function resolveFrame(
       : plan.legend.placement === 'internal' && plan.legend.flow === 'reserved'
         ? legend.height
         : 0
-
+  const legendRight =
+    plan.legend.placement === 'external' && plan.legend.position === 'right' ? legend.width : 0
   const boxHeight = Number.isFinite(ctx.height) && ctx.height > 0 ? ctx.height : 0
+  const box: Rect = Object.freeze({
+    x: 0,
+    y: 0,
+    width: Number.isFinite(ctx.width) && ctx.width > 0 ? ctx.width : 0,
+    height: boxHeight,
+  })
   // ⚠ Computed once and used twice. The band the plot's origin is pushed down by and the band
   // the value display paints into are the same band by construction here; two calls would be
   // two chances to pass different arguments, and the disagreement would be invisible — the
@@ -996,12 +1033,7 @@ export function resolveFrame(
     height: size.height,
   })
 
-  const box: Rect = Object.freeze({
-    x: 0,
-    y: 0,
-    width: Number.isFinite(ctx.width) && ctx.width > 0 ? ctx.width : 0,
-    height: boxHeight,
-  })
+  const legendRegion = resolveLegendRegion(plan.legend, legend, box, plot)
 
   const temporal = data.length > 0 && data.every((s) => s.points.every((p) => p.x instanceof Date))
 
@@ -1102,7 +1134,7 @@ export function resolveFrame(
           Object.freeze({
             x: legendLeft,
             y: legendTop,
-            width: Math.max(0, box.width - legendLeft),
+            width: Math.max(0, box.width - legendLeft - legendRight),
             height: valueHeight,
           }),
           resolved,
@@ -1116,6 +1148,7 @@ export function resolveFrame(
   return Object.freeze({
     box,
     plot,
+    legend: legendRegion,
     xTicks:
       barValueXScale === null
         ? computeTicks(

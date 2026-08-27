@@ -44,6 +44,7 @@ describe('static legend', () => {
     ])
     expect((html.match(/>Shared</g) ?? []).length).toBe(2)
     expect(html).not.toContain('data-series-id="gamma"')
+    expect((html.match(/tabindex="0"/g) ?? []).length).toBe(2)
   })
 
   it('uses stable IDs for missing or whitespace-only labels', () => {
@@ -160,6 +161,8 @@ describe('static legend', () => {
       <Chart plan={plan} data={many} ctx={ctx} title='Legend chart' id='legend' />,
     )
     expect(html).toContain('data-legend-placement="external"')
+    expect(html).toContain('data-legend-region="core"')
+    expect(html).toContain('--legend-region-width')
     expect(html).toContain('data-series-id="series-4"')
 
     const directPlan = stagePlan()

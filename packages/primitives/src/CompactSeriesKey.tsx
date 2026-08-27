@@ -26,15 +26,6 @@ type RectLike = {
   readonly height: number
 }
 
-type LegendRegionState = {
-  readonly region: RectLike
-}
-
-type FrameWithLegend = ChartFrame & {
-  /** Compatibility shape for a future core frame that charges an internal legend explicitly. */
-  readonly legend?: LegendRegionState | undefined
-}
-
 type CompactSeriesKeyItem = {
   readonly id: string
   readonly index: number
@@ -72,10 +63,8 @@ export type CompactSeriesKeyProps = {
 /**
  * Resolve whether a compact identity rail is needed and where it can safely live.
  *
- * `frame.legend.region` is intentionally read structurally. The current core frame does not yet
- * expose that region, but accepting it here means a later core contract can charge the legend
- * without making this renderer invent a second layout path. The fallback is only used for an
- * internal legend or a multi-series Tile with no explicit legend state.
+ * `frame.legend` is the core-owned charged region. The fallback is only used for a legacy
+ * overlay legend or a multi-series Tile with no explicit legend state.
  */
 export function compactSeriesKeyLayout(
   frame: ChartFrame,
@@ -105,7 +94,7 @@ export function compactSeriesKeyLayout(
         )
       : frame.series.map((item) => ({ id: item.id, index: item.index, label: item.label, kind: 'series' as const }))
 
-  const explicit = (frame as FrameWithLegend).legend?.region
+  const explicit = frame.legend
   if (isRectLike(explicit)) {
     return buildEntries(items, explicit, policy, 'core')
   }
@@ -199,6 +188,7 @@ export function CompactSeriesKey({ layout, className }: CompactSeriesKeyProps) {
           data-slice-kind={entry.kind === 'slice' ? (entry.other ? 'other' : 'value') : undefined}
           key={entry.id}
           role="listitem"
+          tabIndex={0}
           aria-label={entry.label}
         >
           <rect

@@ -241,6 +241,7 @@ export function ChartView({
           series={data}
           arcs={plan.type === 'donut' ? frame.series[0]?.arcs : undefined}
           heatmapCells={plan.type === 'heatmap' ? frame.series.flatMap((item) => item.cells) : undefined}
+          region={frame.legend}
         />
       ) : null}
 
