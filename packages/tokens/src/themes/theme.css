@@ -361,8 +361,8 @@
     --shiftcharts-legend-max-entries: 8;
 
     /* --- Tooltip ----------------------------------------------------------------- */
-    --shiftcharts-tooltip-color: #fff;
-    --shiftcharts-tooltip-radius: 0;
+    --shiftcharts-tooltip-color: var(--shiftcharts-ramp-neutral-2);
+    --shiftcharts-tooltip-radius: 8px;
     --shiftcharts-tooltip-padding: 8px;
     --shiftcharts-tooltip-shadow: none;
     --shiftcharts-tooltip-offset: 16px;
@@ -392,6 +392,7 @@
   @media (prefers-color-scheme: light) {
     :where(:root) {
       --shiftcharts-surface-color: #f4f3ef;
+      --shiftcharts-tooltip-color: var(--shiftcharts-ramp-neutral-8);
       --shiftcharts-surface-text-color: var(--shiftcharts-ramp-neutral-2); /* 21.0:1 on the ground. */
       --shiftcharts-series-1: #084962; /* H-beta   ·  8.84 */
       --shiftcharts-series-2: #784009; /* Na I D₂  ·  7.46 */
@@ -409,6 +410,7 @@
   :where(:root)[data-shiftcharts-theme='rail-light'],
   .shiftcharts-theme-rail-light {
     --shiftcharts-surface-color: #f4f3ef;
+    --shiftcharts-tooltip-color: var(--shiftcharts-ramp-neutral-8);
     --shiftcharts-surface-text-color: var(--shiftcharts-ramp-neutral-2); /* 21.0:1 on the ground. */
     --shiftcharts-series-1: #084962; /* H-beta   ·  8.84 */
     --shiftcharts-series-2: #784009; /* Na I D₂  ·  7.46 */

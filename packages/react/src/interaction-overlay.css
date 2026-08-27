@@ -87,7 +87,7 @@
     padding: var(--shiftcharts-tooltip-padding);
     color: var(--shiftcharts-surface-text-color);
     background: var(--shiftcharts-tooltip-color);
-    border: 0;
+    border: var(--shiftcharts-axis-domain-width) solid var(--shiftcharts-axis-domain-color);
     border-radius: var(--shiftcharts-tooltip-radius);
     box-shadow: var(--shiftcharts-tooltip-shadow);
     pointer-events: none;

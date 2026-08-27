@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { AXIS_OFF } from './plan.ts'
 import { DEFAULT_POLICY } from './policy.ts'
-import { lineHeight, xAxisBand, yAxisGutter } from './layout.ts'
+import { legendBands, lineHeight, xAxisBand, yAxisGutter } from './layout.ts'
 
 const AXIS = {
   ...AXIS_OFF,
@@ -24,5 +24,22 @@ describe('axis extent controls', () => {
     expect(natural).toBeGreaterThan(lineHeight('D', DEFAULT_POLICY))
     expect(yAxisGutter({ ...AXIS, minExtent: natural + 12 }, DEFAULT_POLICY)).toBe(natural + 12)
     expect(yAxisGutter({ ...AXIS, maxExtent: natural - 4 }, DEFAULT_POLICY)).toBe(natural - 4)
+  })
+})
+
+describe('horizontal legend bands', () => {
+  it('charges one row for top and bottom legends because the renderer scrolls horizontally', () => {
+    const expected = { width: 0, height: DEFAULT_POLICY.regionGap + lineHeight('C', DEFAULT_POLICY) }
+    const top = {
+      placement: 'external' as const,
+      position: 'top' as const,
+      maxEntries: DEFAULT_POLICY.legendMaxEntries,
+      showValues: false,
+      showPercent: false,
+    }
+    const bottom = { ...top, position: 'bottom' as const }
+
+    expect(legendBands(top, 6, DEFAULT_POLICY)).toEqual(expected)
+    expect(legendBands(bottom, 6, DEFAULT_POLICY)).toEqual(expected)
   })
 })

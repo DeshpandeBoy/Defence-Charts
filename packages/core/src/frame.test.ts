@@ -17,7 +17,7 @@ import type { Series } from './data.ts'
 import { describeShape } from './data.ts'
 import { DONUT_FAMILY_FIXTURE } from './families/donut/fixture.ts'
 import { chromeFromPlan, resolveFrame } from './frame.ts'
-import { legendBands, resolvePlotBox } from './layout.ts'
+import { legendBands, resolvePlotBox, yAxisGutter } from './layout.ts'
 import { applyOverrides } from './overrides.ts'
 import { planChart } from './plan-chart.ts'
 import { DEFAULT_POLICY } from './policy.ts'
@@ -957,5 +957,21 @@ describe('no-plot and reserved-legend geometry', () => {
 
     const overlay = { placement: 'internal' as const, maxEntries: 8, flow: 'overlay' as const }
     expect(legendBands(overlay, SIX_SERIES.length, DEFAULT_POLICY)).toEqual({ width: 0, height: 0 })
+  })
+
+  it('gives grouped bars a measured four-sided plot inset and a top identity band', () => {
+    const ctx = sizeContextFromPixels(760, 480)
+    const plan = planChart('bar', ctx, describeShape(BAR_DATA))
+    const frame = resolveFrame(plan, BAR_DATA, ctx)
+    const chrome = chromeFromPlan(plan, DEFAULT_POLICY.plotInset)
+    const box = resolvePlotBox(ctx, chrome, BAR_DATA.length, DEFAULT_POLICY)
+
+    expect(plan.legend).toMatchObject({ placement: 'external', position: 'top' })
+    expect(frame.plot.width).toBe(box.width)
+    expect(frame.plot.height).toBe(box.height)
+    expect(frame.plot.x).toBeGreaterThan(yAxisGutter(plan.axes.y, DEFAULT_POLICY))
+    expect(frame.plot.y).toBeGreaterThan(0)
+    expect(frame.plot.x + frame.plot.width).toBeLessThan(frame.box.width)
+    expect(frame.plot.y + frame.plot.height).toBeLessThan(frame.box.height)
   })
 })

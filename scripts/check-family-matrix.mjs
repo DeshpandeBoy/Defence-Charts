@@ -219,8 +219,8 @@ async function runStaticMatrix(page) {
       if (card.rung === 'strip' && card.legendPosition !== null) {
         throw new Error('internal bar legend unexpectedly exposes an external position for ' + card.caseId + ': ' + JSON.stringify(card))
       }
-      if (['panel', 'canvas', 'stage'].includes(card.rung) && card.legendPosition !== 'bottom') {
-        throw new Error('bar legend is not bottom-aligned for ' + card.caseId + ': ' + JSON.stringify(card))
+      if (['panel', 'canvas', 'stage'].includes(card.rung) && card.legendPosition !== 'top') {
+        throw new Error('bar legend is not top-aligned for ' + card.caseId + ': ' + JSON.stringify(card))
       }
       if (card.barRadius === null || card.barRadius.rx === '0px' || card.barRadius.ry === '0px') {
         throw new Error('bar corners are not rounded for ' + card.caseId + ': ' + JSON.stringify(card))

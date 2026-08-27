@@ -55,6 +55,7 @@ import { formatHeatmapXLabel, formatXLabel, formatYLabel } from './format.ts'
 import {
   legendBands,
   resolvePlotBox,
+  resolvePlotInsets,
   resolvedValueBand,
   yAxisGutter,
   type ChromeSpec,
@@ -428,7 +429,7 @@ export type ValueDelta = NonNullable<ValueEntry['delta']>
  * `frame.test.ts` can assert the plot-box equality against the real mapping instead of
  * against a second copy of it, which would test nothing.
  */
-export function chromeFromPlan(plan: ChartPlan): ChromeSpec {
+export function chromeFromPlan(plan: ChartPlan, plotInset = 0): ChromeSpec {
   return {
     x: plan.axes.x,
     y: plan.axes.y,
@@ -439,6 +440,7 @@ export function chromeFromPlan(plan: ChartPlan): ChromeSpec {
     tableDisclosure: plan.dataTable.disclosure,
     tablePresent: plan.dataTable.present,
     plotPresence: plan.marks.primary.kind === 'none' ? 'none' : 'present',
+    plotInset,
   }
 }
 
@@ -962,10 +964,12 @@ export function resolveFrame(
   policy?: Partial<PlanPolicy>,
 ): ChartFrame {
   const resolved = resolvePolicy(policy)
-  const chrome = chromeFromPlan(plan)
+  const isBar = plan.type === 'bar' || plan.type === 'timebar'
+  const chrome = chromeFromPlan(plan, isBar ? resolved.plotInset : 0)
 
   // Invariant 1: the SIZE comes straight from the resolver's own function, never re-derived.
   const size = resolvePlotBox(ctx, chrome, data.length, resolved)
+  const insets = resolvePlotInsets(ctx, chrome, data.length, resolved)
 
   // The ORIGIN is what `resolvePlotBox()` does not return — it subtracts bands without
   // saying which side they came off. Left-hand bands are the ones that displace the plot.
@@ -986,8 +990,8 @@ export function resolveFrame(
   // numbers would both look plausible and the text would sit slightly off its own region.
   const valueHeight = resolvedValueBand(chrome, boxHeight, data.length, resolved)
   const plot: Rect = Object.freeze({
-    x: yAxisGutter(plan.axes.y, resolved) + legendLeft,
-    y: valueHeight + legendTop,
+    x: yAxisGutter(plan.axes.y, resolved) + legendLeft + insets.inline,
+    y: valueHeight + legendTop + insets.block,
     width: size.width,
     height: size.height,
   })

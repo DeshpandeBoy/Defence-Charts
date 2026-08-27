@@ -585,8 +585,8 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
   {
     title: 'Tooltip',
     tokens: [
-      { name: 'tooltip-color', value: '#fff', tier: 'A-impl', source: 'Nivo `tooltip.container.background: \'white\'`' },
-      { name: 'tooltip-radius', value: '0', tier: 'C', source: 'DESIGN.md:196 — Rail Square Corner Rule' },
+      { name: 'tooltip-color', value: 'var(--shiftcharts-ramp-neutral-2)', tier: 'C', source: 'SB-005: dark tooltip surface on the default rail; theme variants may re-point it for contrast' },
+      { name: 'tooltip-radius', value: '8px', tier: 'C', source: 'SB-005: premium tooltip corner radius' },
       { name: 'tooltip-padding', value: '8px', tier: 'A-impl', source: 'Highcharts `tooltip.padding: 8` (Nivo `\'5px 9px\'`)' },
       { name: 'tooltip-shadow', value: 'none', tier: 'C', source: 'DESIGN.md:190 — Rail elevation tokens resolve to nothing' },
       { name: 'tooltip-offset', value: '16px', tier: 'A-impl', source: 'Highcharts `tooltip.distance: 16`' },
@@ -684,6 +684,7 @@ export const THEME_VARIANTS: readonly ThemeVariant[] = [
     note: 'Same six wavelengths, re-solved for a light ground. 43-theming.md §2.',
     overrides: [
       { name: 'surface-color', value: '#f4f3ef', tier: 'C', source: 'DESIGN.md:63' },
+      { name: 'tooltip-color', value: 'var(--shiftcharts-ramp-neutral-8)', tier: 'C', source: 'SB-005: light tooltip surface paired with dark theme text' },
       {
         name: 'surface-text-color',
         value: 'var(--shiftcharts-ramp-neutral-2)',

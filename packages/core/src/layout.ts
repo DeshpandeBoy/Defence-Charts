@@ -68,6 +68,12 @@ export type PlotBox = {
   readonly height: number
 }
 
+/** The symmetric inline/block inset applied inside the resolved plot rectangle. */
+export type PlotInsets = {
+  readonly inline: number
+  readonly block: number
+}
+
 /**
  * The chrome a rung has already committed to, before it chooses its mark.
  *
@@ -87,6 +93,8 @@ export type ChromeSpec = {
   readonly tablePresent: boolean
   /** Final mark presence. `'none'` gives the value region the remaining box. */
   readonly plotPresence: 'present' | 'none'
+  /** px. Inner breathing room for a family that owns a finite plot mark. */
+  readonly plotInset?: number
 }
 
 /**
@@ -232,7 +240,9 @@ export function legendBands(
 
   if (legend.placement !== 'external') return { width: 0, height: 0 }
 
-  const entries = Math.max(1, Math.min(seriesCount, legend.maxEntries))
+  const entries = Math.max(0, Math.min(seriesCount, legend.maxEntries))
+  if (entries === 0) return { width: 0, height: 0 }
+
   if (legend.position === 'left' || legend.position === 'right') {
     // Entries stack vertically in a column of fixed width. The width is a swatch plus a
     // label; the label is measured at the shape's own worst case rather than a sample,
@@ -247,9 +257,12 @@ export function legendBands(
     )
     return { width: policy.regionGap + swatch + policy.tickLabelGap + label, height: 0 }
   }
-  return { 
-    width: 0, 
-    height: policy.regionGap + entries * lineHeight(LEGEND_RANK, policy) + Math.max(0, entries - 1) * policy.legendItemGap 
+  // Top and bottom legends are rendered as one horizontal identity row. Keeping the charged
+  // band to that row is what makes the core geometry agree with the primitive's flex layout;
+  // the renderer scrolls a long row rather than wrapping into uncharged plot space.
+  return {
+    width: 0,
+    height: policy.regionGap + lineHeight(LEGEND_RANK, policy),
   }
 }
 
@@ -348,12 +361,40 @@ export function resolvePlotBox(
   seriesCount: number,
   policy: PlanPolicy,
 ): PlotBox {
+  const raw = rawPlotBox(ctx, spec, seriesCount, policy)
+  const insets = plotInsetsFromRaw(raw, spec.plotInset)
+  return Object.freeze({
+    width: Math.max(0, raw.width - insets.inline * 2),
+    height: Math.max(0, raw.height - insets.block * 2),
+  })
+}
+
+/**
+ * The usable inline/block breathing room for the same measured box as `resolvePlotBox()`.
+ *
+ * The inset is clamped to half of the available dimension. A chart whose chrome consumes the
+ * whole box therefore collapses to zero without moving its origin outside the measured box.
+ */
+export function resolvePlotInsets(
+  ctx: SizeContext,
+  spec: ChromeSpec,
+  seriesCount: number,
+  policy: PlanPolicy,
+): PlotInsets {
+  return plotInsetsFromRaw(rawPlotBox(ctx, spec, seriesCount, policy), spec.plotInset)
+}
+
+function rawPlotBox(
+  ctx: SizeContext,
+  spec: ChromeSpec,
+  seriesCount: number,
+  policy: PlanPolicy,
+): { readonly width: number; readonly height: number } {
   const boxWidth = Number.isFinite(ctx.width) && ctx.width > 0 ? ctx.width : 0
   const boxHeight = Number.isFinite(ctx.height) && ctx.height > 0 ? ctx.height : 0
-
   const legend = legendBands(spec.legend, seriesCount, policy)
 
-  // Horizontal: y gutter → plot width. §1.3, verbatim.
+  // Horizontal: y gutter → plot width. §1.3, verbatim, then a symmetric inner inset.
   const width =
     boxWidth -
     yAxisGutter(spec.y, policy) -
@@ -368,7 +409,21 @@ export function resolvePlotBox(
     legend.height -
     tableBand(spec, policy)
 
-  return Object.freeze({ width: Math.max(0, width), height: Math.max(0, height) })
+  return { width, height }
+}
+
+function plotInsetsFromRaw(
+  raw: { readonly width: number; readonly height: number },
+  desiredInset: number | undefined,
+): PlotInsets {
+  const inset =
+    typeof desiredInset === 'number' && Number.isFinite(desiredInset) && desiredInset > 0
+      ? desiredInset
+      : 0
+  return Object.freeze({
+    inline: Math.min(inset, Math.max(0, raw.width) / 2),
+    block: Math.min(inset, Math.max(0, raw.height) / 2),
+  })
 }
 
 // --- §1.3's fourth link: x label degradation -------------------------------------------

@@ -64,6 +64,8 @@ export type PlanPolicy = {
   readonly axisRuleWidth: number
   /** px. Gap between the legend/table band and the plot. **C**. */
   readonly regionGap: number
+  /** px. Symmetric breathing room inside the resolved plot rectangle. **C**. */
+  readonly plotInset: number
 
   /** px. Optimal plot height for a line; below it, change encoding. **A-lit** — Heer 2009. */
   readonly plotHeightOptimal: number
@@ -274,6 +276,7 @@ export const DEFAULT_POLICY: PlanPolicy = Object.freeze({
   axisTitleGap: 4,
   axisRuleWidth: 1,
   regionGap: 4,
+  plotInset: 8,
   plotHeightOptimal: 24,
   plotHeightMinValues: 40,
   plotHeightSaturation: 80,

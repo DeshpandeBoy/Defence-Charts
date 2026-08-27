@@ -95,13 +95,14 @@ export { tickCountForWidth } from './ticks.ts'
 // The plot box, and the two resolution chains that produce it. **Tier B** — the horizontal
 // chain is `research/40-chart-plan.md` §1.3 verbatim; the vertical one is ours, because the
 // corpus is silent on it and Tile cannot pick its mark without it.
-export type { ChromeSpec, LabelDegrade, PlotBox } from './layout.ts'
+export type { ChromeSpec, LabelDegrade, PlotBox, PlotInsets } from './layout.ts'
 export {
   CHROME_METRICS,
   degradeXLabels,
   legendBands,
   lineHeight,
   resolvePlotBox,
+  resolvePlotInsets,
   tableBand,
   valueBand,
   xAxisBand,

@@ -117,17 +117,23 @@
   .shiftcharts-legend--external[data-legend-position='top'] {
     inset-block-start: 0;
     inset-inline: 0;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
+    overflow-x: auto;
+    overflow-y: hidden;
     background-color: var(--shiftcharts-surface-color);
+    border-block-end: var(--shiftcharts-axis-domain-width) solid var(--shiftcharts-axis-domain-color);
   }
 
   .shiftcharts-legend--external[data-legend-position='bottom'] {
     inset-block-end: 0;
     inset-inline: 0;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     justify-content: center;
+    overflow-x: auto;
+    overflow-y: hidden;
     background-color: var(--shiftcharts-surface-color);
+    border-block-start: var(--shiftcharts-axis-domain-width) solid var(--shiftcharts-axis-domain-color);
   }
 
   .shiftcharts-legend--external[data-legend-position='left'] {
