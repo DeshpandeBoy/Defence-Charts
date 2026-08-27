@@ -16,10 +16,10 @@ last_checkpoint: 2026-08-27T23:48:00+05:30
 
 ## Objective
 
-Make the client tooltip/crosshair hover path measurable and remove its two cheapest unnecessary
-costs: a geometry read for every pointer event and a React update when the resolved datum has not
-changed. Preserve the static/RSC renderer, controlled interaction semantics, touch and keyboard
-behavior, and the DOM-free core boundary.
+Make the client tooltip/crosshair hover path measurable and remove avoidable hot-path work:
+geometry reads for every pointer event, repeated React updates for the same datum, linear data
+lookups, and one React hit-test per pointer event. Preserve the static/RSC renderer, controlled
+interaction semantics, touch and keyboard behavior, and the DOM-free core boundary.
 
 ## Read first
 
@@ -82,9 +82,18 @@ behavior, and the DOM-free core boundary.
 - Implemented SVG client-rect caching with resize/scroll/frame-change/pointer-leave invalidation.
 - Implemented a ref-backed semantic identity guard so repeated same-datum pointer events do not
   enqueue React state or commit a render.
+- Implemented a prepared client interaction index with stable series/data maps, source point-index
+  mapping, normalized domain-X buckets for shared tooltips, and sorted pixel-X arrays. Line-like
+  charts now use binary-search neighbours; scatter retains the exhaustive 2D fallback pending a
+  measured spatial-index workload.
+- Implemented a requestAnimationFrame pointer scheduler that keeps only the latest sample per
+  frame, cancels pending work on leave/unmount, and flushes synchronously in non-rAF test hosts.
 - Post-change browser evidence: 1/24 client-rect reads, 23 distinct resolved datums, 207.6ms total
   / 8.65ms per sample, Chromium 151.0.7922.34, zero runtime errors.
-- Full I1.5 browser matrix passed after the change; focused React test now has 11 passing tests.
+- Current browser evidence after indexing/frame pacing: 1/24 client-rect reads, 23 distinct
+  resolved datums, 205.5ms total / 8.56ms per sample, Chromium 151.0.7922.34, zero runtime errors.
+- Full I1.5 browser matrix passed after indexing/frame pacing; focused interaction tests now have
+  12 passing tests, plus 5 index tests and 5 scheduler tests.
 
 ## Decisions and constraints
 
@@ -94,27 +103,25 @@ behavior, and the DOM-free core boundary.
 | Frame pacing | Do not throttle hover to 33ms | It would cap visual response at ~30fps, conflicting with the interaction objective. |
 | State identity | Preserve `{seriesId, pointIndex}` semantic contract | I1.1 made identity stable through resize/filtering; implementation may use a scalar internal key only. |
 | Architecture | No core or primitive changes | Interaction caches are client-only derived state and must not compromise RSC/static output. |
+| Hit testing | Use sorted pixel-X neighbours for line/area/bar/timebar; retain exhaustive XY for scatter | The common line-like path is O(series × log points); a 2D index should be justified by a real scatter workload before adding its memory/maintenance cost. |
+| Frame pacing | Coalesce pointer moves to one latest sample per animation frame | Keeps visual response at display cadence without reusing the 33ms/30fps motion token; touch/pointerdown remains synchronous. |
 
 ## Verification evidence
 
 | Command | Exit | Exact result |
 |---|---:|---|
-| `/opt/homebrew/bin/pnpm exec vitest run packages/react/src/InteractionOverlay.test.tsx --reporter=dot` | 0 | 1 file, 11 tests passed; existing keyboard test emits a pre-existing act warning. |
+| `/opt/homebrew/bin/pnpm exec vitest run packages/react/src/InteractionOverlay.test.tsx packages/react/src/interaction-index.test.ts packages/react/src/interaction-scheduler.test.ts --reporter=dot` | 0 | 3 files, 22 tests passed; existing keyboard test emits a pre-existing act warning. |
 | `/opt/homebrew/bin/pnpm --filter @shiftcharts/react typecheck` | 0 | TypeScript passed. |
 | `/opt/homebrew/bin/pnpm --filter @shiftcharts/playground typecheck` | 0 | TypeScript passed. |
 | `/opt/homebrew/bin/pnpm exec eslint packages/react/src/InteractionOverlay.tsx packages/react/src/InteractionOverlay.test.tsx apps/playground/src/interaction-fixture/InteractionFixture.tsx scripts/check-interaction-performance.mjs` | 0 | Focused lint passed. |
 | `node scripts/check-interaction-performance.mjs` (pre-change) | 0 | Baseline captured in `scripts/results/ux-perf-01-interaction-baseline.json`. |
-| `node scripts/check-interaction-performance.mjs` (post-change) | 0 | 24 samples, `boundsReads: 1`, 23 distinct datums, zero runtime errors; latest result in `scripts/results/ux-perf-01-interaction.latest.json`. |
+| `node scripts/check-interaction-performance.mjs` (post-change) | 0 | 24 samples, `boundsReads: 1`, 23 distinct datums, 205.5ms total / 8.56ms mean, zero runtime errors; latest result in `scripts/results/ux-perf-01-interaction.latest.json`. |
 | `node scripts/check-interaction-browser.mjs` | 0 | I1.5 touch/keyboard/legend/resize/static/reduced-motion/forced-colors matrix passed with zero runtime errors. |
 | `git diff --check` | 0 | Passed. |
 
 ## Exact next action
 
-```bash
-sed -n '1,320p' scripts/check-interaction-browser.mjs
-sed -n '1,320p' apps/playground/src/interaction-fixture/InteractionFixture.tsx
-```
-
-Then implement the next bounded slice: a prepared client interaction index, starting with sorted
-X lookup for line/timebar and precomputed series/data maps. Do not add a k-d tree until a scatter
-benchmark demonstrates that 1D lookup is insufficient.
+Run the narrow checks from the current checkpoint, then begin the next bounded slice: keep the
+crosshair/tooltip DOM layer stable during pointer movement by updating its geometry imperatively
+where safe, while retaining React state for semantic tooltip content and accessibility. Measure
+DOM mutation/commit counts in the browser fixture before changing the rendering contract.

@@ -14,7 +14,7 @@ import {
 } from '@shiftcharts/core'
 import { act, createElement, Fragment, Profiler, type RefObject } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { InteractionOverlay } from './InteractionOverlay.tsx'
 
@@ -41,6 +41,9 @@ let containerRef: RefObject<HTMLElement | null>
 
 beforeEach(() => {
   globalThis.IS_REACT_ACT_ENVIRONMENT = true
+  // Keep DOM interaction assertions synchronous in jsdom. Real browsers retain rAF pacing;
+  // the overlay's scheduler falls back to an immediate flush when no frame driver exists.
+  vi.stubGlobal('requestAnimationFrame', undefined)
   container = document.createElement('div')
   document.body.append(container)
   root = createRoot(container)
@@ -50,6 +53,7 @@ beforeEach(() => {
 afterEach(() => {
   act(() => root.unmount())
   container.remove()
+  vi.unstubAllGlobals()
 })
 
 function context(width: number, height: number): SizeContext {
@@ -239,6 +243,28 @@ describe('fixed and fluid tooltip interaction', () => {
 
     expect(commitsAfterFirstDatum).toBeGreaterThan(commitsBeforeHover)
     expect(commits).toBe(commitsAfterFirstDatum)
+  })
+
+  it('coalesces a pointer burst to the latest datum on the next animation frame', () => {
+    const callbacks: Array<() => void> = []
+    vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
+      callbacks.push(() => callback(performance.now()))
+      return callbacks.length
+    })
+    vi.stubGlobal('cancelAnimationFrame', () => undefined)
+
+    const { renderedFrame } = renderOverlay(context(420, 320))
+    const first = renderedFrame.series[0]?.points[1]
+    const latest = renderedFrame.series[0]?.points[4]
+    if (first === undefined || latest === undefined) throw new Error('fixture points missing')
+
+    dispatchPointer('pointermove', first)
+    dispatchPointer('pointermove', latest)
+    expect(container.querySelector('[role="tooltip"]')).toBeNull()
+    expect(callbacks).toHaveLength(1)
+
+    act(() => callbacks.shift()?.())
+    expect(container.querySelector('[role="tooltip"]')?.getAttribute('data-point-index')).toBe('4')
   })
 
   it('uses the nearest stable datum for fixed hover, clips the crosshair, and clears on leave', () => {

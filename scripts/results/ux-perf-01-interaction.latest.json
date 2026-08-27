@@ -10,10 +10,10 @@
   "result": {
     "sampleCount": 24,
     "boundsReads": 1,
-    "elapsedMs": 207.60000002384186,
-    "meanEventToNextFrameMs": 8.65000000099341,
+    "elapsedMs": 205.5,
+    "meanEventToNextFrameMs": 8.5625,
     "distinctResolvedDatums": 23,
-    "finalDatum": "999"
+    "finalDatum": "956"
   },
   "runtimeErrors": {
     "console": [],

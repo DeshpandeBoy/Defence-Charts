@@ -24,6 +24,16 @@ import {
   type RefObject,
 } from 'react'
 
+import {
+  nearestIndexedPoint,
+  prepareInteractionIndex,
+  type InteractionIndex,
+} from './interaction-index.ts'
+import {
+  createPointerFrameScheduler,
+  type PointerFrameScheduler,
+} from './interaction-scheduler.ts'
+
 type DatumKey = {
   readonly seriesId: string
   readonly pointIndex: number
@@ -41,6 +51,11 @@ type TooltipRow = {
   readonly label: string
   readonly value: string
   readonly pointIndex: number
+}
+
+type PointerSample = {
+  readonly clientX: number
+  readonly clientY: number
 }
 
 export type InteractionOverlayProps = {
@@ -121,6 +136,9 @@ function InteractionLayer({
   const activeKeyRef = useRef<DatumKey | null>(null)
   const [locked, setLocked] = useState(false)
   const [tooltipBox, setTooltipBox] = useState<TooltipBox>(() => estimateTooltipBox([]))
+  const interactionIndex = useMemo(() => prepareInteractionIndex(frame, data), [data, frame])
+  const hoverSchedulerRef = useRef<PointerFrameScheduler<PointerSample> | null>(null)
+  const pointerSampleConsumerRef = useRef<(sample: PointerSample) => void>(() => undefined)
 
   const readSvgBounds = useCallback(() => {
     const svg = svgRef.current
@@ -139,13 +157,40 @@ function InteractionLayer({
     setActiveKey(next)
   }, [])
 
+  const consumePointerSample = useCallback(
+    (sample: PointerSample) => {
+      const bounds = svgBoundsRef.current ?? readSvgBounds()
+      const point = nearestPoint(
+        sample,
+        interactionIndex,
+        bounds,
+        plan.type === 'scatter' ? 'xy' : 'x',
+      )
+      if (point === null) return
+      if (plan.interaction.trigger === 'hover' && !locked) commitActiveKey(point)
+    },
+    [commitActiveKey, interactionIndex, locked, plan.interaction.trigger, plan.type, readSvgBounds],
+  )
+  pointerSampleConsumerRef.current = consumePointerSample
+
+  useIsomorphicLayoutEffect(() => {
+    const scheduler = createPointerFrameScheduler<PointerSample>(
+      (sample) => pointerSampleConsumerRef.current(sample),
+    )
+    hoverSchedulerRef.current = scheduler
+    return () => {
+      scheduler.cancel()
+      if (hoverSchedulerRef.current === scheduler) hoverSchedulerRef.current = null
+    }
+  }, [])
+
   const active = useMemo(
-    () => (activeKey === null ? null : resolveActivePoint(activeKey, frame, data)),
-    [activeKey, data, frame],
+    () => (activeKey === null ? null : resolveActivePoint(activeKey, interactionIndex)),
+    [activeKey, interactionIndex],
   )
   const rows = useMemo(
-    () => (active === null ? [] : buildTooltipRows(active, frame, data)),
-    [active, data, frame],
+    () => (active === null ? [] : buildTooltipRows(active, interactionIndex)),
+    [active, interactionIndex],
   )
   const tooltipForPlacement = useMemo(() => {
     const estimated = estimateTooltipBox(rows)
@@ -163,13 +208,12 @@ function InteractionLayer({
     return rows.flatMap((row) => {
       const point = resolveActivePoint(
         { seriesId: row.seriesId, pointIndex: row.pointIndex },
-        frame,
-        data,
+        interactionIndex,
       )
-      const seriesIndex = frame.series.findIndex((series) => series.id === row.seriesId)
+      const seriesIndex = interactionIndex.byId.get(row.seriesId)?.index ?? -1
       return point === null ? [] : [{ ...point, seriesIndex }]
     })
-  }, [active, activePointHighlight, data, frame, rows])
+  }, [active, activePointHighlight, interactionIndex, rows])
   const header = active === null ? '' : active.category ?? formatXLabel(active.xValue)
   const placement = useMemo<TooltipPlacement | null>(() => {
     if (active === null || rows.length === 0) return null
@@ -237,18 +281,24 @@ function InteractionLayer({
 
   const moveToPointer = useCallback(
     (event: PointerEvent<SVGRectElement>) => {
-      const bounds = svgBoundsRef.current ?? readSvgBounds()
-      const point = nearestPoint(event, frame, data, bounds)
-      if (point === null) return
-      if (plan.interaction.trigger === 'hover' && !locked) commitActiveKey(point)
+      const sample = { clientX: event.clientX, clientY: event.clientY }
+      const scheduler = hoverSchedulerRef.current
+      if (scheduler === null) {
+        consumePointerSample(sample)
+        return
+      }
+      scheduler.schedule(sample)
+      // jsdom and SSR-like test hosts often expose no rAF. Deliver synchronously there so the
+      // interaction contract remains deterministic; real browsers consume one sample per paint.
+      if (typeof globalThis.requestAnimationFrame !== 'function') scheduler.flush()
     },
-    [commitActiveKey, data, frame, locked, plan.interaction.trigger, readSvgBounds],
+    [consumePointerSample],
   )
 
   const activateAtPointer = useCallback(
     (event: PointerEvent<SVGRectElement>) => {
       const bounds = svgBoundsRef.current ?? readSvgBounds()
-      const point = nearestPoint(event, frame, data, bounds)
+      const point = nearestPoint(event, interactionIndex, bounds, plan.type === 'scatter' ? 'xy' : 'x')
       if (point === null) return
       const same =
         activeKeyRef.current?.seriesId === point.seriesId && activeKeyRef.current?.pointIndex === point.pointIndex
@@ -262,10 +312,11 @@ function InteractionLayer({
         }
       }
     },
-    [commitActiveKey, data, frame, locked, plan.interaction.trigger, readSvgBounds],
+    [commitActiveKey, interactionIndex, locked, plan.interaction.trigger, plan.type, readSvgBounds],
   )
 
   const clearOnLeave = useCallback(() => {
+    hoverSchedulerRef.current?.cancel()
     svgBoundsRef.current = null
     if (!locked) commitActiveKey(null)
   }, [commitActiveKey, locked])
@@ -278,7 +329,7 @@ function InteractionLayer({
         setLocked(false)
         return
       }
-      const points = flattenedPoints(frame, data)
+      const points = flattenedPoints(interactionIndex)
       if (points.length === 0) return
       if (!['ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter', ' '].includes(event.key)) return
       event.preventDefault()
@@ -299,7 +350,7 @@ function InteractionLayer({
             : Math.max(0, Math.min(points.length - 1, index + (event.key === 'ArrowRight' ? 1 : -1)))
       commitActiveKey(points[nextIndex] ?? null)
     },
-    [activeKey, commitActiveKey, data, frame],
+    [activeKey, commitActiveKey, interactionIndex],
   )
 
   const clipId = baseId + '-plot-clip'
@@ -365,7 +416,7 @@ function InteractionLayer({
           onPointerOut={clearOnLeave}
           onPointerCancel={clearOnLeave}
           onFocus={() => {
-            if (activeKey === null) commitActiveKey(flattenedPoints(frame, data)[0] ?? null)
+            if (activeKey === null) commitActiveKey(flattenedPoints(interactionIndex)[0] ?? null)
           }}
           onKeyDown={handleKeyDown}
         />
@@ -421,72 +472,49 @@ function InteractionLayer({
 }
 
 function nearestPoint(
-  event: PointerEvent<SVGRectElement>,
-  frame: ChartFrame,
-  data: readonly Series[],
+  event: PointerSample,
+  index: InteractionIndex,
   bounds: DOMRect | null,
+  mode: 'x' | 'xy',
 ): DatumKey | null {
   if (bounds === null) return null
-  const scaleX = bounds.width > 0 ? frame.box.width / bounds.width : 1
-  const scaleY = bounds.height > 0 ? frame.box.height / bounds.height : 1
+  const scaleX = bounds.width > 0 ? index.frame.box.width / bounds.width : 1
+  const scaleY = bounds.height > 0 ? index.frame.box.height / bounds.height : 1
   const x = (event.clientX - bounds.left) * scaleX
   const y = (event.clientY - bounds.top) * scaleY
-  let bestKey: DatumKey | null = null
-  let bestDistance = Number.POSITIVE_INFINITY
-  for (const seriesFrame of frame.series) {
-    const source = data.find((series) => series.id === seriesFrame.id)
-    if (source === undefined) continue
-    const indices = definedPointIndices(source)
-    seriesFrame.points.forEach((point, ordinal) => {
-      const pointIndex = indices[ordinal]
-      if (pointIndex === undefined) return
-      const distance = (point.x - x) ** 2 + (point.y - y) ** 2
-      const key = { seriesId: seriesFrame.id, pointIndex }
-      if (distance < bestDistance) {
-        bestKey = key
-        bestDistance = distance
-      }
-    })
+  return nearestIndexedPoint(index, x, y, mode)
+}
+
+function resolveActivePoint(key: DatumKey, index: InteractionIndex): ActivePoint | null {
+  const indexedSeries = index.byId.get(key.seriesId)
+  if (indexedSeries === undefined) return null
+  const indexedPoint = indexedSeries.pointByIndex.get(key.pointIndex)
+  const sourcePoint = indexedSeries.source.points[key.pointIndex]
+  if (indexedPoint === undefined || sourcePoint === undefined || sourcePoint.y === null) return null
+  return {
+    ...key,
+    point: indexedPoint,
+    xValue: sourcePoint.x,
+    category: sourcePoint.category ?? null,
   }
-  return bestKey
 }
 
-function resolveActivePoint(
-  key: DatumKey,
-  frame: ChartFrame,
-  data: readonly Series[],
-): ActivePoint | null {
-  const seriesFrame = frame.series.find((series) => series.id === key.seriesId)
-  const source = data.find((series) => series.id === key.seriesId)
-  if (seriesFrame === undefined || source === undefined) return null
-  const ordinal = definedPointIndices(source).indexOf(key.pointIndex)
-  const point = ordinal < 0 ? undefined : seriesFrame.points[ordinal]
-  const sourcePoint = source.points[key.pointIndex]
-  if (point === undefined || sourcePoint === undefined || sourcePoint.y === null) return null
-  return { ...key, point, xValue: sourcePoint.x, category: sourcePoint.category ?? null }
-}
-
-function buildTooltipRows(
-  active: ActivePoint,
-  frame: ChartFrame,
-  data: readonly Series[],
-): readonly TooltipRow[] {
-  const activeSource = data.find((series) => series.id === active.seriesId)
-  const activePoint = activeSource?.points[active.pointIndex]
+function buildTooltipRows(active: ActivePoint, index: InteractionIndex): readonly TooltipRow[] {
+  const activeSeries = index.byId.get(active.seriesId)
+  const activePoint = activeSeries?.source.points[active.pointIndex]
   if (activePoint === undefined) return []
+  const domainX = normalizeX(activePoint.x)
+  if (domainX === null) return []
   const rows: TooltipRow[] = []
-  for (const seriesFrame of frame.series) {
-    const source = data.find((series) => series.id === seriesFrame.id)
-    if (source === undefined) continue
-    const pointIndex = source.points.findIndex(
-      (point) => sameX(point.x, activePoint.x) && point.y !== null,
-    )
-    const point = pointIndex < 0 ? undefined : source.points[pointIndex]
+  for (const indexedSeries of index.series) {
+    const indexedPoint = indexedSeries.pointAtDomainX.get(domainX)
+    const pointIndex = indexedPoint?.pointIndex ?? -1
+    const point = pointIndex < 0 ? undefined : indexedSeries.source.points[pointIndex]
     if (point === undefined || point.y === null) continue
     rows.push({
-      seriesId: seriesFrame.id,
-      seriesIndex: seriesFrame.index,
-      label: seriesFrame.label,
+      seriesId: indexedSeries.id,
+      seriesIndex: indexedSeries.index,
+      label: indexedSeries.label,
       value: formatYLabel(point.y),
       pointIndex,
     })
@@ -494,30 +522,19 @@ function buildTooltipRows(
   return rows
 }
 
-function flattenedPoints(frame: ChartFrame, data: readonly Series[]): readonly DatumKey[] {
+function flattenedPoints(index: InteractionIndex): readonly DatumKey[] {
   const points: DatumKey[] = []
-  for (const seriesFrame of frame.series) {
-    const source = data.find((series) => series.id === seriesFrame.id)
-    if (source === undefined) continue
-    for (const pointIndex of definedPointIndices(source)) {
-      points.push({ seriesId: seriesFrame.id, pointIndex })
+  for (const indexedSeries of index.series) {
+    for (const point of indexedSeries.points) {
+      points.push({ seriesId: indexedSeries.id, pointIndex: point.pointIndex })
     }
   }
   return points
 }
 
-function definedPointIndices(series: Series): readonly number[] {
-  const indices: number[] = []
-  series.points.forEach((point, index) => {
-    if (point.y !== null) indices.push(index)
-  })
-  return indices
-}
-
-function sameX(a: DataPoint['x'], b: DataPoint['x']): boolean {
-  const left = a instanceof Date ? a.getTime() : a
-  const right = b instanceof Date ? b.getTime() : b
-  return left === right
+function normalizeX(value: DataPoint['x']): number | null {
+  const normalized = value instanceof Date ? value.getTime() : value
+  return Number.isFinite(normalized) ? normalized : null
 }
 
 function sameDatum(left: DatumKey, right: DatumKey): boolean {
