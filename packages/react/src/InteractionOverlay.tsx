@@ -36,6 +36,7 @@ type ActivePoint = DatumKey & {
 
 type TooltipRow = {
   readonly seriesId: string
+  readonly seriesIndex: number
   readonly label: string
   readonly value: string
   readonly pointIndex: number
@@ -350,8 +351,12 @@ function InteractionLayer({
                 className="shiftcharts-interaction__tooltip-row"
                 key={row.seriesId}
                 data-series-id={row.seriesId}
+                data-series-index={row.seriesIndex}
               >
-                <span>{row.label}</span>
+                <span className="shiftcharts-interaction__tooltip-label">
+                  <span className="shiftcharts-interaction__tooltip-swatch" aria-hidden="true" />
+                  <span>{row.label}</span>
+                </span>
                 <strong>{row.value}</strong>
               </div>
             ))}
@@ -436,6 +441,7 @@ function buildTooltipRows(
     if (point === undefined || point.y === null) continue
     rows.push({
       seriesId: seriesFrame.id,
+      seriesIndex: seriesFrame.index,
       label: seriesFrame.label,
       value: formatYLabel(point.y),
       pointIndex,

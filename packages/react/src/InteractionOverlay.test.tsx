@@ -227,6 +227,16 @@ describe('fixed and fluid tooltip interaction', () => {
     const tooltip = container.querySelector('[role="tooltip"]')
     expect(tooltip?.getAttribute('data-tooltip-mode')).toBe('fluid')
     expect(tooltip?.querySelectorAll('.shiftcharts-interaction__tooltip-row')).toHaveLength(2)
+    expect(
+      [...(tooltip?.querySelectorAll('.shiftcharts-interaction__tooltip-row') ?? [])].map((row) => ({
+        seriesId: row.getAttribute('data-series-id'),
+        seriesIndex: row.getAttribute('data-series-index'),
+        swatch: row.querySelector('.shiftcharts-interaction__tooltip-swatch') !== null,
+      })),
+    ).toEqual([
+      { seriesId: 'alpha', seriesIndex: '0', swatch: true },
+      { seriesId: 'beta', seriesIndex: '1', swatch: true },
+    ])
     expect(tooltip?.querySelector('.shiftcharts-interaction__tooltip-overflow')).toBeNull()
   })
 

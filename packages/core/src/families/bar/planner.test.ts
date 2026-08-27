@@ -78,6 +78,28 @@ describe('bar/timebar family planner', () => {
     expect(shape.hasNegative).toBe(true)
     expect(plan.marks.primary).toEqual({ kind: 'bar', stacked: false, grouped: true })
     expect(plan.axes.y.visible).toBe(true)
+    expect(plan.legend).toEqual({
+      placement: 'external',
+      position: 'bottom',
+      maxEntries: policy.legendMaxEntries,
+      showValues: false,
+      showPercent: false,
+    })
+    expect(plan.labels.seriesLabels).toBe('none')
+    expect(plan.regionOrder).toEqual(['plot', 'legend', 'table'])
+  })
+
+  it('uses a reserved identity row for compact strips and no legend in Tile', () => {
+    const strip = barFamilyPlanner({ type: 'bar', ctx: context('strip'), shape, policy })
+    expect(strip.legend).toEqual({
+      placement: 'internal',
+      maxEntries: policy.legendMaxEntries,
+      flow: 'reserved',
+    })
+    expect(strip.labels.seriesLabels).toBe('none')
+
+    const tile = barFamilyPlanner({ type: 'bar', ctx: context('tile'), shape, policy })
+    expect(tile.legend).toEqual({ placement: 'absent' })
   })
 
   it('keeps timebar identity and temporal shape metadata separate from the plan type', () => {

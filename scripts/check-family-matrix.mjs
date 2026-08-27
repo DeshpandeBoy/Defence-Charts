@@ -133,6 +133,13 @@ async function runStaticMatrix(page) {
     title: card.querySelector('svg title') !== null,
     interactionMarkup: card.querySelector('.shiftcharts-interaction') !== null,
     bars: card.querySelectorAll('.shiftcharts-bar').length,
+    barRadius: (() => {
+      const bar = card.querySelector('.shiftcharts-bar')
+      if (bar === null) return null
+      const style = getComputedStyle(bar)
+      return { rx: style.rx, ry: style.ry }
+    })(),
+    legendPosition: card.querySelector('.shiftcharts-legend')?.getAttribute('data-legend-position') ?? null,
     scatterPoints: card.querySelectorAll('.shiftcharts-scatter-point').length,
     arcs: card.querySelectorAll('.shiftcharts-arc').length,
     otherArcs: card.querySelectorAll('.shiftcharts-arc--other').length,
@@ -204,6 +211,19 @@ async function runStaticMatrix(page) {
     if ((card.type === 'bar' || card.type === 'timebar') && card.rung !== 'micro') {
       if (card.mark !== 'bar' || card.bars === 0) {
         throw new Error('bar geometry missing for ' + card.caseId + ': ' + JSON.stringify(card))
+      }
+      const expectedLegend = card.rung === 'strip' ? 'internal' : ['panel', 'canvas', 'stage'].includes(card.rung) ? 'external' : 'absent'
+      if (card.legend !== expectedLegend) {
+        throw new Error('bar legend state missing for ' + card.caseId + ': ' + JSON.stringify(card))
+      }
+      if (card.rung === 'strip' && card.legendPosition !== null) {
+        throw new Error('internal bar legend unexpectedly exposes an external position for ' + card.caseId + ': ' + JSON.stringify(card))
+      }
+      if (['panel', 'canvas', 'stage'].includes(card.rung) && card.legendPosition !== 'bottom') {
+        throw new Error('bar legend is not bottom-aligned for ' + card.caseId + ': ' + JSON.stringify(card))
+      }
+      if (card.barRadius === null || card.barRadius.rx === '0px' || card.barRadius.ry === '0px') {
+        throw new Error('bar corners are not rounded for ' + card.caseId + ': ' + JSON.stringify(card))
       }
     }
     if (card.type === 'scatter' && card.rung !== 'micro') {

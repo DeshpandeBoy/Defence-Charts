@@ -12,7 +12,7 @@
  */
 
 import type { FamilyPlanner, FamilyPlannerInput } from '../../family-seam.ts'
-import type { ChartPlan, ChartType, MarkSpec } from '../../plan.ts'
+import type { ChartPlan, ChartType, LegendPlan, MarkSpec, RegionName } from '../../plan.ts'
 import {
   canvasRung,
   microRung,
@@ -48,6 +48,47 @@ function barMark(input: FamilyPlannerInput<BarChartType>, seed: ChartPlan): Mark
   })
 }
 
+/**
+ * Bar identity needs a dedicated home because end-of-line labels are not a stable affordance
+ * for a finite rectangle: on the last category they sit over the mark and make the plot edge
+ * feel clipped. The compact strip gets one reserved identity row; larger bars get a centered
+ * bottom band. Micro has no mark, Tile is still a value/sparkline budget, and one-series bars
+ * retain the seed's direct label because there is no competing series identity to decode.
+ */
+function barLegend(
+  input: FamilyPlannerInput<BarChartType>,
+  seed: ChartPlan,
+  primary: MarkSpec,
+): LegendPlan {
+  if (primary.kind !== 'bar' || input.shape.series <= 1) return seed.legend
+  if (input.ctx.sizeClass === 'strip') {
+    return Object.freeze({
+      placement: 'internal',
+      maxEntries: input.policy.legendMaxEntries,
+      flow: 'reserved',
+    })
+  }
+  if (input.ctx.sizeClass === 'panel' || input.ctx.sizeClass === 'canvas' || input.ctx.sizeClass === 'stage') {
+    return Object.freeze({
+      placement: 'external',
+      position: 'bottom',
+      maxEntries: input.policy.legendMaxEntries,
+      showValues: false,
+      showPercent: false,
+    })
+  }
+  return Object.freeze({ placement: 'absent' })
+}
+
+function barRegionOrder(seed: ChartPlan, legend: LegendPlan): readonly RegionName[] {
+  const regions: RegionName[] = seed.regionOrder.filter((region) => region !== 'legend')
+  if (legend.placement === 'external') {
+    const tableIndex = regions.indexOf('table')
+    regions.splice(tableIndex < 0 ? regions.length : tableIndex, 0, 'legend')
+  }
+  return Object.freeze(regions)
+}
+
 function planBar(input: FamilyPlannerInput<BarChartType>): ChartPlan {
   const rung = BAR_RUNGS[input.ctx.sizeClass]
   const seed = rung({
@@ -57,12 +98,21 @@ function planBar(input: FamilyPlannerInput<BarChartType>): ChartPlan {
     policy: input.policy,
   })
   const primary = barMark(input, seed)
+  const legend = barLegend(input, seed, primary)
 
   return Object.freeze({
     ...seed,
     type: input.type,
     orientation: seed.orientation,
-    regionOrder: Object.freeze(seed.regionOrder),
+    regionOrder: barRegionOrder(seed, legend),
+    labels: Object.freeze({
+      ...seed.labels,
+      seriesLabels:
+        legend.placement === 'direct' || legend.placement === 'absent'
+          ? seed.labels.seriesLabels
+          : 'none',
+    }),
+    legend,
     marks: Object.freeze({
       ...seed.marks,
       primary,

@@ -395,6 +395,19 @@ describe('bar geometry', () => {
       expect(bar.y + bar.height).toBeLessThanOrEqual(frame.plot.y + frame.plot.height)
     }
   })
+
+  it('keeps equal outer breathing room around the first and last bar groups', () => {
+    const ctx = sizeContextFromPixels(500, 300)
+    const plan = planChart('bar', ctx, describeShape(BAR_DATA))
+    const frame = resolveFrame(plan, BAR_DATA, ctx)
+    const bars = frame.series.flatMap((series) => series.cells)
+    const leftGap = Math.min(...bars.map((bar) => bar.x)) - frame.plot.x
+    const rightGap = frame.plot.x + frame.plot.width - Math.max(...bars.map((bar) => bar.x + bar.width))
+
+    expect(leftGap).toBeGreaterThan(0)
+    expect(rightGap).toBeGreaterThan(0)
+    expect(leftGap).toBeCloseTo(rightGap, 8)
+  })
 })
 
 describe('horizon', () => {

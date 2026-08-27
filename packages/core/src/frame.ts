@@ -480,6 +480,53 @@ function xDomain(
 }
 
 /**
+ * Return the distinct category positions used by a mark, in source-independent order.
+ *
+ * Bars need the same category centres as the x axis, but their visual width extends on both
+ * sides of each centre. Keeping the category extraction in one helper makes the endpoint
+ * treatment below explicit instead of letting grouped bars inherit the x scale's edge contact.
+ */
+function categoryValues(
+  data: readonly Series[],
+  temporalBin: ChartPlan['aggregate']['temporalBin'] = 'none',
+): readonly number[] {
+  const values = [
+    ...new Set(
+      data.flatMap((s) =>
+        s.points.map((point) => heatmapXValue(point.x, temporalBin)),
+      ),
+    ),
+  ]
+  return values.filter((value): value is number => Number.isFinite(value)).sort((a, b) => a - b)
+}
+
+/**
+ * Inset the first and last bar categories by half a category gap.
+ *
+ * A point scale maps the first and last categories to the plot edges. That is appropriate for
+ * lines, but a bar is a finite rectangle centred on the category, so the edge categories then
+ * need a clamp and the two outer gaps become visibly unequal. Padding the domain preserves the
+ * resolved plot box while making those outer gaps equal. One-category domains stay on the
+ * existing degenerate-domain contract because there is no measured gap to infer.
+ */
+function paddedBarDomain(
+  domain: readonly [number, number],
+  categories: readonly number[],
+): readonly [number, number] {
+  if (categories.length < 2) return domain
+  let smallestGap = Number.POSITIVE_INFINITY
+  for (let index = 1; index < categories.length; index += 1) {
+    const previous = categories[index - 1]
+    const current = categories[index]
+    if (previous === undefined || current === undefined || current <= previous) continue
+    smallestGap = Math.min(smallestGap, current - previous)
+  }
+  if (!Number.isFinite(smallestGap) || smallestGap <= 0) return domain
+  const padding = smallestGap / 2
+  return [domain[0] - padding, domain[1] + padding]
+}
+
+/**
  * ⚠ **Zero is not forced into the y domain, and that is the right default for a line.**
  * Forcing zero is a *bar* convention — a bar encodes value by length, so a truncated baseline
  * lies about ratios. A line encodes value by position, and forcing zero on a series that
@@ -961,7 +1008,10 @@ export function resolveFrame(
   if (mark.kind === 'funnel' && data.length > 1) {
     throw new Error('@shiftcharts/core: funnel requires exactly one series of ordered stages.')
   }
-  const xd = xDomain(data, mark.kind === 'cell' ? plan.aggregate.temporalBin : 'none')
+  const xBin = mark.kind === 'cell' ? plan.aggregate.temporalBin : 'none'
+  const sortedX = categoryValues(data, xBin)
+  const xd = xDomain(data, xBin)
+  const xScaleDomain = mark.kind === 'bar' ? paddedBarDomain(xd, sortedX) : xd
   const yd = yDomain(data, mark)
 
   /**
@@ -972,8 +1022,8 @@ export function resolveFrame(
    * it. Wrapped, it lives in these four lines and the two branches are visibly parallel.
    */
   const x: AxisScale = temporal
-    ? wrapUtc(scaleUtc().domain([new Date(xd[0]), new Date(xd[1])]).range([plot.x, plot.x + plot.width]))
-    : wrapLinear(scaleLinear().domain([xd[0], xd[1]]).range([plot.x, plot.x + plot.width]))
+    ? wrapUtc(scaleUtc().domain([new Date(xScaleDomain[0]), new Date(xScaleDomain[1])]).range([plot.x, plot.x + plot.width]))
+    : wrapLinear(scaleLinear().domain([xScaleDomain[0], xScaleDomain[1]]).range([plot.x, plot.x + plot.width]))
 
   const yScale = scaleLinear()
     .domain([yd[0], yd[1]])
@@ -987,16 +1037,9 @@ export function resolveFrame(
   const toX = (v: number | Date): number => x.at(v instanceof Date ? v.getTime() : v)
 
   // Category centres are shared across series so grouped bars keep the same slot even when one
-  // series has a missing value. The smallest positive gap is the nominal category width.
-  const sortedX = [
-    ...new Set(
-      data.flatMap((s) =>
-        s.points.map((point) =>
-          mark.kind === 'cell' ? heatmapXValue(point.x, plan.aggregate.temporalBin) : xValue(point),
-        ),
-      ),
-    ),
-  ].sort((a, b) => a - b)
+  // series has a missing value. The smallest positive gap is the nominal category width. The
+  // bar-only domain padding above means the first and last centres are no longer on the plot
+  // edge, while the clamp in `seriesFrame` remains a final finite-box safety net.
   const categoryStep = sortedX.reduce((smallest, value, index) => {
     const previous = sortedX[index - 1]
     if (previous === undefined || value <= previous) return smallest

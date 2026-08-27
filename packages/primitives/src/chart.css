@@ -104,22 +104,30 @@
   }
 
   .shiftcharts-legend--internal {
-    inset-block-start: var(--shiftcharts-size-gap);
-    inset-inline-start: var(--shiftcharts-size-gap);
-    flex-wrap: wrap;
+    inset-block-start: 0;
+    inset-inline: 0;
+    flex-wrap: nowrap;
     pointer-events: none;
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    background-color: var(--shiftcharts-surface-color);
   }
 
   .shiftcharts-legend--external[data-legend-position='top'] {
     inset-block-start: 0;
     inset-inline: 0;
     flex-wrap: wrap;
+    justify-content: center;
+    background-color: var(--shiftcharts-surface-color);
   }
 
   .shiftcharts-legend--external[data-legend-position='bottom'] {
     inset-block-end: 0;
     inset-inline: 0;
     flex-wrap: wrap;
+    justify-content: center;
+    background-color: var(--shiftcharts-surface-color);
   }
 
   .shiftcharts-legend--external[data-legend-position='left'] {
@@ -343,6 +351,8 @@
     fill: var(--shiftcharts-series-color);
     stroke: var(--shiftcharts-series-color);
     stroke-width: var(--shiftcharts-bar-border-width);
+    rx: var(--shiftcharts-bar-radius);
+    ry: var(--shiftcharts-bar-radius);
   }
 
   .shiftcharts-arc {

@@ -112,6 +112,55 @@
     padding-block: var(--shiftcharts-tooltip-row-padding);
   }
 
+  .shiftcharts-interaction__tooltip-row[data-series-index='0'],
+  .shiftcharts-interaction__tooltip-row[data-series-index='1'],
+  .shiftcharts-interaction__tooltip-row[data-series-index='2'],
+  .shiftcharts-interaction__tooltip-row[data-series-index='3'],
+  .shiftcharts-interaction__tooltip-row[data-series-index='4'],
+  .shiftcharts-interaction__tooltip-row[data-series-index='5'] {
+    color: var(--shiftcharts-series-color);
+  }
+
+  .shiftcharts-interaction__tooltip-row[data-series-index='0'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-1);
+  }
+
+  .shiftcharts-interaction__tooltip-row[data-series-index='1'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-2);
+  }
+
+  .shiftcharts-interaction__tooltip-row[data-series-index='2'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-3);
+  }
+
+  .shiftcharts-interaction__tooltip-row[data-series-index='3'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-4);
+  }
+
+  .shiftcharts-interaction__tooltip-row[data-series-index='4'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-5);
+  }
+
+  .shiftcharts-interaction__tooltip-row[data-series-index='5'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-6);
+  }
+
+  .shiftcharts-interaction__tooltip-label {
+    display: inline-flex;
+    min-inline-size: 0;
+    align-items: center;
+    gap: var(--shiftcharts-tooltip-chip-gap);
+  }
+
+  .shiftcharts-interaction__tooltip-swatch {
+    display: inline-block;
+    flex: 0 0 auto;
+    inline-size: var(--shiftcharts-size-gap);
+    block-size: var(--shiftcharts-size-gap);
+    border-radius: 50%;
+    background-color: var(--shiftcharts-series-color);
+  }
+
   .shiftcharts-interaction__tooltip-row strong {
     font-weight: var(--shiftcharts-label-font-weight);
   }
@@ -147,6 +196,10 @@
       background: Canvas;
       border: var(--shiftcharts-crosshair-width) solid CanvasText;
       box-shadow: none;
+    }
+
+    .shiftcharts-interaction__tooltip-swatch {
+      background-color: CanvasText;
     }
   }
 }

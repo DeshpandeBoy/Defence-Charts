@@ -90,7 +90,11 @@ describe('shared line, area, bar, timebar, scatter, donut, KPI, progress, heatma
                     : 'shape-only'
                 : row.expected.valueLegibility,
           regions:
-            type === 'donut'
+            type === 'bar' || type === 'timebar'
+              ? ['panel', 'canvas', 'stage'].includes(row.id)
+                ? ['plot', 'legend', 'table']
+                : row.expected.regions
+              : type === 'donut'
                 ? row.id === 'micro'
                   ? ['value', 'table']
                   : row.id === 'canvas' || row.id === 'stage'
@@ -118,7 +122,13 @@ describe('shared line, area, bar, timebar, scatter, donut, KPI, progress, heatma
                     : ['plot', 'table']
                 : row.expected.regions,
           legend:
-            type === 'donut'
+            type === 'bar' || type === 'timebar'
+              ? ['panel', 'canvas', 'stage'].includes(row.id)
+                ? 'external'
+                : row.id === 'strip'
+                  ? 'internal'
+                  : 'absent'
+              : type === 'donut'
               ? row.id === 'panel'
                 ? 'internal'
                 : row.id === 'canvas' || row.id === 'stage'
@@ -137,7 +147,13 @@ describe('shared line, area, bar, timebar, scatter, donut, KPI, progress, heatma
                 : ['line', 'area'].includes(type) && row.id === 'strip'
                   ? 'internal'
                   : row.expected.legend,
-          legendToggle: type === 'kpi' ? ['canvas', 'stage'].includes(row.id) : type === 'progress' || type === 'heatmap' || type === 'funnel' ? false : row.expected.legendToggle,
+          legendToggle: type === 'kpi'
+            ? ['canvas', 'stage'].includes(row.id)
+            : type === 'progress' || type === 'heatmap' || type === 'funnel'
+              ? false
+              : type === 'bar' || type === 'timebar'
+                ? ['canvas', 'stage'].includes(row.id)
+                : row.expected.legendToggle,
           interaction:
             type === 'kpi'
               ? ['micro', 'tile', 'strip'].includes(row.id)
