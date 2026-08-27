@@ -75,6 +75,16 @@ const NULL_BASE_DEFAULTS: Readonly<Record<string, unknown>> = Object.freeze({
 })
 
 /**
+ * Keys that must never be copied from an untyped override into a normal object.
+ *
+ * `__proto__` is an accessor on `Object.prototype`, so assigning it can change the
+ * prototype of the output instead of creating an own property. `constructor` and
+ * `prototype` are rejected with it because they are the other two keys used to
+ * traverse or replace JavaScript object inheritance during unsafe deep merges.
+ */
+const UNSAFE_KEYS = new Set(['__proto__', 'constructor', 'prototype'])
+
+/**
  * The paths `NULL_BASE_DEFAULTS` covers. Exported for the same reason `ATOMIC_PATHS` is:
  * `invariants.test.ts` proves §1.1 totality by asserting that every structural divergence
  * between two rungs is declared in one of these two sets, so both have to be readable from
@@ -105,11 +115,11 @@ function mergeNode(base: unknown, patch: unknown, path: string): unknown {
   // then fall through — the two absences are different absences.
   if (patch === null) return null
 
-  if (Array.isArray(patch)) return deepFreeze(patch.slice())
+  if (Array.isArray(patch)) return deepFreeze(structuredCopy(patch, path))
   if (!isPlainObject(patch)) return patch
 
   // A whole union member. No merge, at any depth below it.
-  if (ATOMIC_PATHS.has(path)) return deepFreeze(structuredCopy(patch))
+  if (ATOMIC_PATHS.has(path)) return deepFreeze(structuredCopy(patch, path))
 
   // The resolver said `null` and the consumer supplied a partial. Merging onto the declared
   // base keeps the result total; without one there is nothing to complete it from.
@@ -118,10 +128,11 @@ function mergeNode(base: unknown, patch: unknown, path: string): unknown {
     : base === null
       ? NULL_BASE_DEFAULTS[path]
       : undefined
-  if (!isPlainObject(base_)) return deepFreeze(structuredCopy(patch))
+  if (!isPlainObject(base_)) return deepFreeze(structuredCopy(patch, path))
 
   const out: Record<string, unknown> = { ...base_ }
   for (const key of Object.keys(patch)) {
+    assertSafeKey(key, path)
     const child = (patch as Record<string, unknown>)[key]
     if (child === undefined) continue
     out[key] = mergeNode(base_[key], child, path === '' ? key : `${path}.${key}`)
@@ -135,16 +146,25 @@ function mergeNode(base: unknown, patch: unknown, path: string): unknown {
  * — which is the same mutability hazard `Object.freeze` guards elsewhere, arriving through
  * the caller instead of through the library.
  */
-function structuredCopy(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(structuredCopy)
+function structuredCopy(value: unknown, path = ''): unknown {
+  if (Array.isArray(value)) {
+    return value.map((child, index) => structuredCopy(child, `${path}[${index}]`))
+  }
   if (!isPlainObject(value)) return value
   const out: Record<string, unknown> = {}
   for (const key of Object.keys(value)) {
+    assertSafeKey(key, path)
     const child = (value as Record<string, unknown>)[key]
     if (child === undefined) continue
-    out[key] = structuredCopy(child)
+    out[key] = structuredCopy(child, path === '' ? key : `${path}.${key}`)
   }
   return out
+}
+
+function assertSafeKey(key: string, parentPath: string): void {
+  if (!UNSAFE_KEYS.has(key)) return
+  const path = parentPath === '' ? key : `${parentPath}.${key}`
+  throw new TypeError(`applyOverrides: unsafe key ${JSON.stringify(key)} at ${path}`)
 }
 
 function deepFreeze(value: unknown): unknown {

@@ -150,6 +150,38 @@ describe('null is a value; undefined is an absence', () => {
   })
 })
 
+// --- Prototype-chain safety ---------------------------------------------------------------
+
+describe('untyped overrides cannot alter the prototype chain', () => {
+  it.each(['__proto__', 'constructor', 'prototype'])('rejects %s at a nested path', (key) => {
+    const raw = JSON.parse(`{"marks":{"primary":{${JSON.stringify(key)}:{"kind":"horizon"}}}}`) as Record<
+      string,
+      unknown
+    >
+
+    expect(() => applyOverrides(panel(), fromUntypedCaller(raw))).toThrow(
+      `applyOverrides: unsafe key ${JSON.stringify(key)} at marks.primary.${key}`,
+    )
+  })
+
+  it('leaves global prototypes unchanged when hostile JSON is rejected', () => {
+    const before = Object.getOwnPropertyDescriptor(Object.prototype, 'kind')
+    const raw = JSON.parse('{"marks":{"primary":{"__proto__":{"kind":"horizon"}}}}') as Record<string, unknown>
+
+    expect(() => applyOverrides(panel(), fromUntypedCaller(raw))).toThrow()
+    expect(Object.getOwnPropertyDescriptor(Object.prototype, 'kind')).toEqual(before)
+  })
+
+  it('keeps accepted JSON overrides own-keyed and serialisable', () => {
+    const raw = JSON.parse('{"marks":{"primary":{"kind":"line","area":true}}}') as Record<string, unknown>
+    const out = applyOverrides(panel(), fromUntypedCaller(raw))
+
+    expect(Object.hasOwn(out.marks.primary, 'kind')).toBe(true)
+    expect(Object.getPrototypeOf(out.marks.primary)).toBe(Object.prototype)
+    expect(JSON.parse(JSON.stringify(out))).toEqual(out)
+  })
+})
+
 // --- Totality survives an override -------------------------------------------------------
 
 describe('§1.1 — an override cannot produce a partial plan', () => {
