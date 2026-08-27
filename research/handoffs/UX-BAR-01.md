@@ -146,8 +146,8 @@ npx -y node@24 "$(which pnpm)" exec vitest run packages/core/src/families/bar/pl
 
 ## Final handoff
 
-- Worker commit: pending scrollbar/composition correction commit (prior feature checkpoint `cdc0d66`)
+- Worker commit: da636e2 (prior feature checkpoint `cdc0d66`)
 - Branch pushed or locally available: local task branch
-- Working tree clean: no (pending correction commit)
+- Working tree clean: yes after `da636e2`
 - Narrow restart check: `npx -y node@24 "$(which pnpm)" exec vitest run packages/core/src/frame.test.ts packages/primitives/src/families/bar/renderer.test.tsx packages/react/src/InteractionOverlay.test.tsx`
 - Remaining risk/limitations: CSS legend inspection relies on the supported `:has()` selector; the static legend remains RSC-safe and a consumer may use the already-shipped controlled `LegendControl` when visibility state is required.
