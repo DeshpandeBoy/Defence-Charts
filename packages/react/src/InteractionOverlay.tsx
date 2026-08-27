@@ -115,10 +115,29 @@ function InteractionLayer({
   readonly activePointHighlight: boolean
 }) {
   const svgRef = useRef<SVGSVGElement | null>(null)
+  const svgBoundsRef = useRef<DOMRect | null>(null)
   const tooltipRef = useRef<HTMLDivElement | null>(null)
   const [activeKey, setActiveKey] = useState<DatumKey | null>(null)
+  const activeKeyRef = useRef<DatumKey | null>(null)
   const [locked, setLocked] = useState(false)
   const [tooltipBox, setTooltipBox] = useState<TooltipBox>(() => estimateTooltipBox([]))
+
+  const readSvgBounds = useCallback(() => {
+    const svg = svgRef.current
+    if (svg === null) return null
+    const bounds = svg.getBoundingClientRect()
+    svgBoundsRef.current = bounds
+    return bounds
+  }, [])
+
+  const commitActiveKey = useCallback((next: DatumKey | null) => {
+    // Pointer events can arrive much faster than React commits. Keep the last semantic identity
+    // in a ref so the common "still over the same datum" case does not even enqueue a state
+    // update; the state object remains the source used to derive the rendered tooltip.
+    if (sameNullableDatum(activeKeyRef.current, next)) return
+    activeKeyRef.current = next
+    setActiveKey(next)
+  }, [])
 
   const active = useMemo(
     () => (activeKey === null ? null : resolveActivePoint(activeKey, frame, data)),
@@ -180,6 +199,26 @@ function InteractionLayer({
   }, [active, rows])
 
   useIsomorphicLayoutEffect(() => {
+    // A frame change is the chart's resize signal. The next pointer re-entry reads the new
+    // viewport rect instead of using coordinates from the previous SVG box.
+    svgBoundsRef.current = null
+  }, [frame.box.height, frame.box.width])
+
+  useEffect(() => {
+    // Scrolling changes client coordinates without changing the SVG viewBox. Invalidate rather
+    // than measuring eagerly; the next pointer event or pointer re-entry pays for one read.
+    const invalidate = () => {
+      svgBoundsRef.current = null
+    }
+    window.addEventListener('resize', invalidate)
+    window.addEventListener('scroll', invalidate, true)
+    return () => {
+      window.removeEventListener('resize', invalidate)
+      window.removeEventListener('scroll', invalidate, true)
+    }
+  }, [])
+
+  useIsomorphicLayoutEffect(() => {
     if (active === null) return
     const onResize = () => {
       const element = tooltipRef.current
@@ -198,41 +237,44 @@ function InteractionLayer({
 
   const moveToPointer = useCallback(
     (event: PointerEvent<SVGRectElement>) => {
-      const point = nearestPoint(event, svgRef.current, frame, data)
+      const bounds = svgBoundsRef.current ?? readSvgBounds()
+      const point = nearestPoint(event, frame, data, bounds)
       if (point === null) return
-      if (plan.interaction.trigger === 'hover' && !locked) setActiveKey(point)
+      if (plan.interaction.trigger === 'hover' && !locked) commitActiveKey(point)
     },
-    [data, frame, locked, plan.interaction.trigger],
+    [commitActiveKey, data, frame, locked, plan.interaction.trigger, readSvgBounds],
   )
 
   const activateAtPointer = useCallback(
     (event: PointerEvent<SVGRectElement>) => {
-      const point = nearestPoint(event, svgRef.current, frame, data)
+      const bounds = svgBoundsRef.current ?? readSvgBounds()
+      const point = nearestPoint(event, frame, data, bounds)
       if (point === null) return
       const same =
-        activeKey?.seriesId === point.seriesId && activeKey?.pointIndex === point.pointIndex
+        activeKeyRef.current?.seriesId === point.seriesId && activeKeyRef.current?.pointIndex === point.pointIndex
       if (plan.interaction.trigger === 'tap' || event.pointerType === 'touch') {
         if (same && locked) {
-          setActiveKey(null)
+          commitActiveKey(null)
           setLocked(false)
         } else {
-          setActiveKey(point)
+          commitActiveKey(point)
           setLocked(true)
         }
       }
     },
-    [activeKey, data, frame, locked, plan.interaction.trigger],
+    [commitActiveKey, data, frame, locked, plan.interaction.trigger, readSvgBounds],
   )
 
   const clearOnLeave = useCallback(() => {
-    if (!locked) setActiveKey(null)
-  }, [locked])
+    svgBoundsRef.current = null
+    if (!locked) commitActiveKey(null)
+  }, [commitActiveKey, locked])
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<SVGRectElement>) => {
       if (event.key === 'Escape') {
         event.preventDefault()
-        setActiveKey(null)
+        commitActiveKey(null)
         setLocked(false)
         return
       }
@@ -242,7 +284,7 @@ function InteractionLayer({
       event.preventDefault()
       if (event.key === 'Enter' || event.key === ' ') {
         const next = activeKey === null ? (points[0] ?? null) : activeKey
-        setActiveKey(next)
+        commitActiveKey(next)
         setLocked(true)
         return
       }
@@ -255,9 +297,9 @@ function InteractionLayer({
           : event.key === 'End'
             ? points.length - 1
             : Math.max(0, Math.min(points.length - 1, index + (event.key === 'ArrowRight' ? 1 : -1)))
-      setActiveKey(points[nextIndex] ?? null)
+      commitActiveKey(points[nextIndex] ?? null)
     },
-    [activeKey, data, frame],
+    [activeKey, commitActiveKey, data, frame],
   )
 
   const clipId = baseId + '-plot-clip'
@@ -318,11 +360,12 @@ function InteractionLayer({
           aria-describedby={placement === null ? undefined : tooltipId}
           onPointerMove={moveToPointer}
           onPointerDown={activateAtPointer}
+          onPointerEnter={readSvgBounds}
           onPointerLeave={clearOnLeave}
           onPointerOut={clearOnLeave}
           onPointerCancel={clearOnLeave}
           onFocus={() => {
-            if (activeKey === null) setActiveKey(flattenedPoints(frame, data)[0] ?? null)
+            if (activeKey === null) commitActiveKey(flattenedPoints(frame, data)[0] ?? null)
           }}
           onKeyDown={handleKeyDown}
         />
@@ -379,12 +422,11 @@ function InteractionLayer({
 
 function nearestPoint(
   event: PointerEvent<SVGRectElement>,
-  svg: SVGSVGElement | null,
   frame: ChartFrame,
   data: readonly Series[],
+  bounds: DOMRect | null,
 ): DatumKey | null {
-  if (svg === null) return null
-  const bounds = svg.getBoundingClientRect()
+  if (bounds === null) return null
   const scaleX = bounds.width > 0 ? frame.box.width / bounds.width : 1
   const scaleY = bounds.height > 0 ? frame.box.height / bounds.height : 1
   const x = (event.clientX - bounds.left) * scaleX
@@ -480,6 +522,11 @@ function sameX(a: DataPoint['x'], b: DataPoint['x']): boolean {
 
 function sameDatum(left: DatumKey, right: DatumKey): boolean {
   return left.seriesId === right.seriesId && left.pointIndex === right.pointIndex
+}
+
+function sameNullableDatum(left: DatumKey | null, right: DatumKey | null): boolean {
+  if (left === null || right === null) return left === right
+  return sameDatum(left, right)
 }
 
 function estimateTooltipBox(rows: readonly TooltipRow[]): TooltipBox {

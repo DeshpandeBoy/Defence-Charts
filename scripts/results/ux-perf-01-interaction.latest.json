@@ -1,0 +1,26 @@
+{
+  "status": "pass",
+  "fixture": "apps/playground/src/interaction-fixture/",
+  "browser": "151.0.7922.34",
+  "playwrightFrom": "playwright",
+  "viewport": {
+    "width": 1500,
+    "height": 1400
+  },
+  "result": {
+    "sampleCount": 24,
+    "boundsReads": 1,
+    "elapsedMs": 207.60000002384186,
+    "meanEventToNextFrameMs": 8.65000000099341,
+    "distinctResolvedDatums": 23,
+    "finalDatum": "999"
+  },
+  "runtimeErrors": {
+    "console": [],
+    "page": []
+  },
+  "notes": [
+    "Timing includes one requestAnimationFrame per synthetic pointer sample and is evidence from this machine, not a universal FPS claim.",
+    "boundsReads is the portable structural metric: before caching it should equal sampleCount; after caching it should be one for an unchanged frame."
+  ]
+}

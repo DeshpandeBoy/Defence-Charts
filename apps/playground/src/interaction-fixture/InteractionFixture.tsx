@@ -39,6 +39,21 @@ const DATA: readonly Series[] = [
   },
 ]
 
+/**
+ * Dense enough to exercise the hover loop without crossing the current 2,000-point SVG budget.
+ * One series keeps this fixture focused on point lookup rather than shared-tooltip row count.
+ */
+const PERFORMANCE_DATA: readonly Series[] = [
+  {
+    id: 'performance',
+    label: 'Performance',
+    points: Array.from({ length: 1_000 }, (_, index) => ({
+      x: index,
+      y: 50 + Math.sin(index / 31) * 24 + Math.cos(index / 17) * 8,
+    })),
+  },
+]
+
 const PANEL_GRID = { cols: 3, rows: 3 } as const
 const CANVAS_GRID = { cols: 6, rows: 5 } as const
 const STRIP_GRID = { cols: 3, rows: 1 } as const
@@ -46,6 +61,7 @@ const STRIP_GRID = { cols: 3, rows: 1 } as const
 const PANEL_STYLE: CSSProperties = { inlineSize: 520, blockSize: 320 }
 const CANVAS_STYLE: CSSProperties = { inlineSize: 760, blockSize: 520 }
 const STRIP_STYLE: CSSProperties = { inlineSize: 520, blockSize: 150 }
+const PERFORMANCE_STYLE: CSSProperties = { inlineSize: 760, blockSize: 360 }
 
 const CANVAS_CONTEXT = sizeContextFromPixels(CANVAS_STYLE.inlineSize as number, CANVAS_STYLE.blockSize as number)
 const STATIC_PLAN = planChart('line', CANVAS_CONTEXT, describeShape(DATA))
@@ -153,6 +169,24 @@ export function InteractionFixture(): ReactElement {
             series={DATA}
             hiddenSeriesIds={hiddenSeriesIds}
             onVisibilityChange={setVisibility}
+          />
+        </div>
+      </section>
+
+      <section className="interaction-fixture__section" aria-labelledby="performance-title">
+        <h2 id="performance-title">Hover performance evidence</h2>
+        <div
+          className="interaction-fixture__chart-frame"
+          style={PERFORMANCE_STYLE}
+          data-shiftcharts-performance-chart
+        >
+          <AutoChart
+            type="line"
+            data={PERFORMANCE_DATA}
+            title="Hover performance chart"
+            description="One thousand points for client hover-path evidence."
+            gridSize={CANVAS_GRID}
+            id="performance-chart"
           />
         </div>
       </section>

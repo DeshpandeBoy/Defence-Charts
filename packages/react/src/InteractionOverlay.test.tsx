@@ -12,7 +12,7 @@ import {
   type Series,
   type SizeContext,
 } from '@shiftcharts/core'
-import { act, createElement, Fragment, type RefObject } from 'react'
+import { act, createElement, Fragment, Profiler, type RefObject } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
@@ -163,6 +163,84 @@ describe('interaction availability and the portal boundary', () => {
 })
 
 describe('fixed and fluid tooltip interaction', () => {
+  it('caches the SVG client rect until resize, scroll, or pointer leave invalidates it', () => {
+    const { renderedFrame } = renderOverlay(context(420, 320))
+    const svg = container.querySelector('.shiftcharts-interaction__svg')
+    if (!(svg instanceof SVGSVGElement)) throw new Error('interaction SVG missing')
+    const point = renderedFrame.series[0]?.points[2]
+    if (point === undefined) throw new Error('fixture point missing')
+
+    let reads = 0
+    const bounds = {
+      left: 0,
+      top: 0,
+      width: renderedFrame.box.width,
+      height: renderedFrame.box.height,
+      right: renderedFrame.box.width,
+      bottom: renderedFrame.box.height,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    }
+    Object.defineProperty(svg, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => {
+        reads += 1
+        return bounds
+      },
+    })
+
+    dispatchPointer('pointermove', point)
+    dispatchPointer('pointermove', point)
+    expect(reads).toBe(1)
+
+    window.dispatchEvent(new Event('scroll'))
+    dispatchPointer('pointermove', point)
+    expect(reads).toBe(2)
+
+    dispatchPointer('pointerout', point)
+    dispatchPointer('pointermove', point)
+    expect(reads).toBe(3)
+  })
+
+  it('does not commit a React update when pointer movement resolves the same datum', () => {
+    const resolved = planChart('line', context(420, 320), describeShape(DATA))
+    const renderedFrame = frame(context(420, 320), resolved)
+    let commits = 0
+    act(() => {
+      root.render(
+        createElement(
+          Profiler,
+          { id: 'interaction', onRender: () => { commits += 1 } },
+          createElement(
+            Fragment,
+            null,
+            createElement('figure', { className: 'shiftcharts-chart' }),
+            createElement(InteractionOverlay, {
+              containerRef,
+              plan: resolved,
+              data: DATA,
+              ctx: context(420, 320),
+              title: 'Revenue',
+              id: 'interaction-profiler-test',
+            }),
+          ),
+        ),
+      )
+    })
+    act(() => {})
+    const point = renderedFrame.series[0]?.points[2]
+    if (point === undefined) throw new Error('fixture point missing')
+    const commitsBeforeHover = commits
+
+    dispatchPointer('pointermove', point)
+    const commitsAfterFirstDatum = commits
+    dispatchPointer('pointermove', point)
+
+    expect(commitsAfterFirstDatum).toBeGreaterThan(commitsBeforeHover)
+    expect(commits).toBe(commitsAfterFirstDatum)
+  })
+
   it('uses the nearest stable datum for fixed hover, clips the crosshair, and clears on leave', () => {
     const { renderedFrame } = renderOverlay(context(420, 320))
     const point = renderedFrame.series[0]?.points[2]
