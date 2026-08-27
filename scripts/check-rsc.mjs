@@ -128,8 +128,8 @@
  * both gates run in the same CI job; 3000 is the port a developer most likely already has
  * something on, and attaching to a stranger's server is a failure mode with no error
  * message. The dev-server lifecycle here is deliberately the same shape as that file's —
- * `detached: true` and `process.kill(-pid)` — for the same reason: `npx` spawns `pnpm`
- * spawns `next`, and killing the pid we hold leaves the grandchild holding the port.
+ * `detached: true` and `process.kill(-pid)` — for the same reason: the provisioned `pnpm`
+ * spawns `next`, and killing the pid we hold leaves the child holding the port.
  *
  * ⚠ Playwright resolution is **imported** from `check-containment.mjs` rather than repeated.
  * Two browser gates with two independently-drifting opinions about where Playwright lives is
@@ -200,7 +200,7 @@ const MIN_CLIENT_BYTES = 50_000
  */
 function run(label, args) {
   return new Promise((resolve) => {
-    const child = spawn('npx', ['--yes', 'pnpm@10.34.5', ...args], {
+    const child = spawn('pnpm', args, {
       cwd: REPO_ROOT,
       stdio: ['ignore', 'pipe', 'pipe'],
     })
@@ -249,8 +249,8 @@ async function startServer() {
   }
 
   const child = spawn(
-    'npx',
-    ['--yes', 'pnpm@10.34.5', '--filter', '@shiftcharts/rsc-fixture', 'start'],
+    'pnpm',
+    ['--filter', '@shiftcharts/rsc-fixture', 'start'],
     { cwd: REPO_ROOT, detached: true, stdio: ['ignore', 'pipe', 'pipe'] },
   )
 

@@ -437,7 +437,7 @@ async function answers(origin, timeoutMs = 2000) {
 /**
  * Start the playground, or report that one is already listening.
  *
- * ⚠ `detached: true` and `process.kill(-pid)`. `npx` spawns `pnpm` spawns `vite`; killing
+ * ⚠ `detached: true` and `process.kill(-pid)`. The provisioned `pnpm` spawns `vite`; killing
  * the pid we hold leaves vite holding port 5173, and the *next* run attaches to an orphan
  * whose source tree is whatever it was when it started. Killing the process **group** is
  * the difference between a gate you can run twice and one you can run once.
@@ -452,8 +452,8 @@ export async function ensureDevServer() {
   if (await answers(ORIGIN)) return { stop: () => {}, spawned: false }
 
   const child = spawn(
-    'npx',
-    ['--yes', 'pnpm@10.34.5', '--filter', '@shiftcharts/playground', 'dev'],
+    'pnpm',
+    ['--filter', '@shiftcharts/playground', 'dev'],
     { cwd: REPO_ROOT, detached: true, stdio: ['ignore', 'pipe', 'pipe'] },
   )
 

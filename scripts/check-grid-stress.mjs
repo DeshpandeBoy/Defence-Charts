@@ -37,10 +37,8 @@ async function ensureStressServer() {
   if (await answers(ORIGIN)) return { stop: () => {}, spawned: false }
 
   const child = spawn(
-    'npx',
+    'pnpm',
     [
-      '--yes',
-      'pnpm@10.34.5',
       '--filter',
       '@shiftcharts/playground',
       'exec',
