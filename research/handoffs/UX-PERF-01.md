@@ -9,7 +9,7 @@ worktree: /Users/dhanyarao/Documents/Defence
 base_commit: 26c9cc9a41be5af0c732e6e29aa2098ddaee1fae
 depends_on: [I1.1, I1.2, I1.3, I1.5, UX-LEGEND-01]
 started_at: 2026-08-27T23:55:00+05:30
-last_checkpoint: 2026-08-28T00:07:00+05:30
+last_checkpoint: 2026-08-28T00:16:00+05:30
 ---
 
 # UX-PERF-01 — Interaction rendering performance
@@ -105,6 +105,9 @@ interaction semantics, touch and keyboard behavior, and the DOM-free core bounda
   12 passing tests, plus 5 index tests and 5 scheduler tests.
 - The over-budget boundary is covered with a 2,001-point line fixture; the focused suite now has
   13 overlay tests, 5 index tests, 5 scheduler tests, and 4 policy tests (27 total).
+- Added a 1,900-point under-budget scatter fixture and real-browser baseline for the exhaustive
+  XY fallback: 24 samples, 1 client-rect read, 23 distinct datums, 207.3ms total / 8.64ms mean,
+  `interactionMode: rich`, Chromium 151.0.7922.34, zero runtime errors.
 
 ## Decisions and constraints
 
@@ -118,6 +121,7 @@ interaction semantics, touch and keyboard behavior, and the DOM-free core bounda
 | Frame pacing | Coalesce pointer moves to one latest sample per animation frame | Keeps visual response at display cadence without reusing the 33ms/30fps motion token; touch/pointerdown remains synchronous. |
 | Retained transient layer | Keep one crosshair line mounted and mutate only its x attributes | Crosshair geometry is frame-local and non-semantic; tooltip text/ARIA remain React-owned, so the optimization does not create a second accessibility state machine. |
 | Large-data interaction | Resolve `rich` vs `reduced` from `ChartPlan.marks.renderer` and its point budget; keep tooltip/crosshair semantics in both | The plan already exposes the renderer boundary; reducing optional adornments avoids a second hidden threshold and never silently samples data. |
+| Scatter lookup | Keep exhaustive XY lookup at the supported 1,900-point baseline until measured evidence shows a bottleneck | A 2D spatial index adds memory and update complexity; the checked-in browser baseline makes the decision reversible and evidence-led. |
 
 ## Verification evidence
 
@@ -130,11 +134,13 @@ interaction semantics, touch and keyboard behavior, and the DOM-free core bounda
 | `node scripts/check-interaction-performance.mjs` (pre-change) | 0 | Baseline captured in `scripts/results/ux-perf-01-interaction-baseline.json`. |
 | `node scripts/check-interaction-performance.mjs` (post-change) | 0 | 24 samples, `boundsReads: 1`, 23 distinct datums, 206.6ms total / 8.61ms mean, zero runtime errors; latest result in `scripts/results/ux-perf-01-interaction.latest.json`. |
 | `node scripts/check-interaction-browser.mjs` | 0 | I1.5 touch/keyboard/legend/resize/static/reduced-motion/forced-colors matrix passed with zero runtime errors. |
+| `node scripts/check-scatter-interaction-performance.mjs` | 0 | 1,900-point scatter baseline: 24 samples, `boundsReads: 1`, 23 distinct datums, 207.3ms total / 8.64ms mean, `interactionMode: rich`, zero runtime errors; result in `scripts/results/ux-perf-01-scatter-interaction.latest.json`. |
 | `git diff --check` | 0 | Passed. |
 
 ## Exact next action
 
-Run the narrow checks from the current checkpoint, then begin a measured scatter workload before
-adding any 2D spatial index. The current `interaction-index` deliberately keeps scatter on the
-exhaustive XY path; use a real browser fixture to establish whether that path is a bottleneck at
-the supported data budget. Do not change the core point budget or renderer seam in this task.
+Run the narrow checks from the current checkpoint, then compare the checked-in scatter baseline
+against any future spatial-index prototype. The current 1,900-point workload does not justify a
+2D index from one machine's timing alone, so leave scatter on exhaustive XY and do not change the
+core point budget or renderer seam in this task. The next broader gate is the repository's normal
+package/browser verification before coordinator integration.

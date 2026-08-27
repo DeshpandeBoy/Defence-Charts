@@ -54,6 +54,22 @@ const PERFORMANCE_DATA: readonly Series[] = [
   },
 ]
 
+/**
+ * Near the default 2,000-point SVG budget so the scatter benchmark exercises the current
+ * exhaustive 2D fallback at a realistic supported density. Keep this separate from the line
+ * fixture: the line path uses sorted-X lookup while scatter is intentionally still exhaustive.
+ */
+const SCATTER_PERFORMANCE_DATA: readonly Series[] = [
+  {
+    id: 'scatter-performance',
+    label: 'Scatter performance',
+    points: Array.from({ length: 1_900 }, (_, index) => ({
+      x: index,
+      y: 50 + Math.sin(index / 19) * 28 + Math.cos(index / 43) * 12,
+    })),
+  },
+]
+
 const PANEL_GRID = { cols: 3, rows: 3 } as const
 const CANVAS_GRID = { cols: 6, rows: 5 } as const
 const STRIP_GRID = { cols: 3, rows: 1 } as const
@@ -187,6 +203,24 @@ export function InteractionFixture(): ReactElement {
             description="One thousand points for client hover-path evidence."
             gridSize={CANVAS_GRID}
             id="performance-chart"
+          />
+        </div>
+      </section>
+
+      <section className="interaction-fixture__section" aria-labelledby="scatter-performance-title">
+        <h2 id="scatter-performance-title">Scatter hover performance evidence</h2>
+        <div
+          className="interaction-fixture__chart-frame"
+          style={PERFORMANCE_STYLE}
+          data-shiftcharts-scatter-performance-chart
+        >
+          <AutoChart
+            type="scatter"
+            data={SCATTER_PERFORMANCE_DATA}
+            title="Scatter hover performance chart"
+            description="One thousand nine hundred points for the exhaustive scatter hover-path evidence."
+            gridSize={CANVAS_GRID}
+            id="scatter-performance-chart"
           />
         </div>
       </section>
