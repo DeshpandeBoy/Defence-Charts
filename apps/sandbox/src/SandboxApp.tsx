@@ -133,7 +133,6 @@ type NumericPolicyKey =
   | 'yTickCount'
   | 'directLabelMaxSeries'
   | 'secondaryAxisMinSeries'
-  | 'legendItemGap'
   | 'tickLength'
   | 'tickLabelGap'
   | 'axisTitleGap'
@@ -167,7 +166,6 @@ const POLICY_NUMBER_FIELDS: readonly PolicyNumberField[] = [
   { key: 'yTickCount', label: 'Y tick count', min: 2, max: 8, step: 1 },
   { key: 'directLabelMaxSeries', label: 'Direct-label series limit', min: 1, max: 8, step: 1 },
   { key: 'secondaryAxisMinSeries', label: 'Secondary-axis series minimum', min: 1, max: 6, step: 1 },
-  { key: 'legendItemGap', label: 'Legend item gap', min: 0, max: 32, step: 1, unit: 'px' },
   { key: 'tickLength', label: 'Tick length', min: 0, max: 16, step: 1, unit: 'px' },
   { key: 'tickLabelGap', label: 'Tick / label gap', min: 0, max: 16, step: 1, unit: 'px' },
   { key: 'axisTitleGap', label: 'Axis title gap', min: 0, max: 16, step: 1, unit: 'px' },

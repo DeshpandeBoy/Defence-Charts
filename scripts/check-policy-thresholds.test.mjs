@@ -74,7 +74,7 @@ describe('B3 policy schema extraction', () => {
 })
 
 describe('B3 policy audit', () => {
-  it('passes a total, serialisable, tiered policy consumed by planner source', () => {
+  it('passes a total, serialisable, tiered policy consumed by core resolver source', () => {
     const report = audit()
     expect(report.issues).toEqual([])
     expect(formatPolicyThresholdReport(report)).toMatch(/^B3 policy threshold gate: PASS/)
@@ -115,14 +115,14 @@ describe('B3 policy audit', () => {
     })
   })
 
-  it('fails when a threshold is absent from planner reads', () => {
+  it('fails when a threshold is absent from core resolver reads', () => {
     const report = audit({
       plannerSources: [{ path: 'fixture/planner.ts', source: 'export function plan(policy) { return policy.tickTargetSpacingX }' }],
     })
     expect(report.issues).toContainEqual({
       code: 'unconsumed',
       subject: 'pointBudget',
-      detail: 'no non-test planner source reads policy.pointBudget',
+      detail: 'no non-test core resolver source reads policy.pointBudget',
     })
   })
 
@@ -137,7 +137,7 @@ describe('B3 policy audit', () => {
     expect(report.issues).toEqual([])
   })
 
-  it('does not count comments as planner consumption', () => {
+  it('does not count comments as core resolver consumption', () => {
     const uses = collectPlannerUses(
       '// policy.pointBudget\nexport function plan(policy) { return policy.tickTargetSpacingX }',
       'fixture/planner.ts',
@@ -145,6 +145,15 @@ describe('B3 policy audit', () => {
     )
     expect(uses.has('tickTargetSpacingX')).toBe(true)
     expect(uses.has('pointBudget')).toBe(false)
+  })
+
+  it('counts a local alias only when it is explicitly resolved from policy', () => {
+    const uses = collectPlannerUses(
+      `const resolved = resolvePolicy(policy)\nconst unrelated = { pointBudget: 999 }\nexport const budget = resolved.pointBudget + unrelated.pointBudget`,
+      'fixture/resolver.ts',
+      new Set(['pointBudget']),
+    )
+    expect(uses.get('pointBudget')).toEqual([3])
   })
 
   it('reports issues in stable order', () => {

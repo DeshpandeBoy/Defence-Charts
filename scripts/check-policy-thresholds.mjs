@@ -8,12 +8,13 @@
  *   2. every member has a value in `DEFAULT_POLICY`;
  *   3. the complete default object round-trips through JSON without loss;
  *   4. every threshold has an explicit B3 tier marker in its JSDoc; and
- *   5. every live threshold is read by non-test planner source through `policy.<name>` (or
- *      the equivalent string-literal access). A field marked `@future` may be unconsumed until
+ *   5. every live threshold is read by non-test core resolver source through `policy.<name>`, the
+ *      equivalent string-literal access, or a local `resolvePolicy(policy)` alias. A field marked
+ *      `@future` may be unconsumed until
  *      its future resolver lands, but it must still carry the same provenance tier.
  *
  * The source walk is deliberately AST-based. A comment saying `policy.pointBudget`, a test
- * fixture, or a dead string must not count as planner consumption. The repository runner is
+ * fixture, or a dead string must not count as core resolver consumption. The repository runner is
  * deterministic and sorted, so adding a field produces a stable, reviewable failure.
  */
 
@@ -89,7 +90,7 @@ function leadingDocumentation(source, node) {
 
 /**
  * A future reservation is a source-level contract, not a script allowlist. Only an explicit
- * `@future` tag opts a threshold out of the live planner-consumption requirement.
+ * `@future` tag opts a threshold out of the live core-resolver-consumption requirement.
  *
  * @param {string} documentation
  * @returns {boolean}
@@ -175,6 +176,7 @@ export function collectPlannerUses(source, fileName, thresholdNames) {
   const file = ts.createSourceFile(fileName, source, ts.ScriptTarget.Latest, true, ts.ScriptKind.TS)
   /** @type {Map<string, number[]>} */
   const uses = new Map()
+  const resolvedPolicyAliases = new Set(['policy'])
 
   const record = (name, node) => {
     if (!thresholdNames.has(name)) return
@@ -185,11 +187,22 @@ export function collectPlannerUses(source, fileName, thresholdNames) {
   }
 
   const visit = (node) => {
-    if (ts.isPropertyAccessExpression(node) && node.expression.getText(file) === 'policy') {
+    if (
+      ts.isVariableDeclaration(node) &&
+      ts.isIdentifier(node.name) &&
+      node.initializer !== undefined &&
+      ts.isCallExpression(node.initializer) &&
+      node.initializer.expression.getText(file) === 'resolvePolicy' &&
+      node.initializer.arguments.length === 1 &&
+      node.initializer.arguments[0]?.getText(file) === 'policy'
+    ) {
+      resolvedPolicyAliases.add(node.name.text)
+    }
+    if (ts.isPropertyAccessExpression(node) && resolvedPolicyAliases.has(node.expression.getText(file))) {
       record(node.name.text, node)
     } else if (
       ts.isElementAccessExpression(node) &&
-      node.expression.getText(file) === 'policy' &&
+      resolvedPolicyAliases.has(node.expression.getText(file)) &&
       node.argumentExpression !== undefined &&
       ts.isStringLiteralLike(node.argumentExpression)
     ) {
@@ -411,7 +424,7 @@ export function auditPolicyThresholds({ schema, defaults, plannerSources }) {
       issues.push({
         code: 'unconsumed',
         subject: field.name,
-        detail: 'no non-test planner source reads policy.' + field.name,
+        detail: 'no non-test core resolver source reads policy.' + field.name,
       })
     }
   }
@@ -432,7 +445,7 @@ export function auditPolicyThresholds({ schema, defaults, plannerSources }) {
  */
 export function formatPolicyThresholdReport(report) {
   if (report.issues.length === 0) {
-    return `B3 policy threshold gate: PASS (${report.thresholds.length} thresholds; defaults are serialisable, tiered, and planner-consumed)`
+    return `B3 policy threshold gate: PASS (${report.thresholds.length} thresholds; defaults are serialisable, tiered, and core-resolver-consumed)`
   }
   const lines = [
     `B3 policy threshold gate: FAIL (${report.issues.length} issue${report.issues.length === 1 ? '' : 's'})`,

@@ -52,8 +52,6 @@ export type PlanPolicy = {
    * keeps the current aspect-derived fallback typed until measured cell sizing lands.
    */
   readonly facetColumnsByAspect: Readonly<Record<SizeContext['aspect'], number>>
-  /** px. Legend item gap. **C**. */
-  readonly legendItemGap: number
   /** px. Tick mark length. **C**. */
   readonly tickLength: number
   /** px. Gap between tick and label. **C**. */
@@ -270,7 +268,6 @@ export const DEFAULT_POLICY: PlanPolicy = Object.freeze({
     landscape: 3,
     ultrawide: 4,
   }),
-  legendItemGap: 16,
   tickLength: 4,
   tickLabelGap: 3,
   axisTitleGap: 4,
