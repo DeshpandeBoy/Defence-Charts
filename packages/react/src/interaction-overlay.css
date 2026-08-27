@@ -80,7 +80,9 @@
     position: absolute;
     display: grid;
     gap: var(--shiftcharts-tooltip-header-gap);
-    overflow: auto;
+    /* A tooltip is a transient reading, never a second scroll container. Rows that cannot
+       fit are represented by the explicit “+N more” disclosure from the placement plan. */
+    overflow: clip;
     box-sizing: border-box;
     max-inline-size: calc(100% - var(--shiftcharts-tooltip-padding) * 2);
     max-block-size: calc(100% - var(--shiftcharts-tooltip-padding) * 2);
@@ -97,24 +99,10 @@
   }
 
   .shiftcharts-interaction__tooltip-header {
-    display: grid;
-    gap: var(--shiftcharts-tooltip-row-padding);
+    font-weight: var(--shiftcharts-axis-title-font-weight);
     padding-block-end: var(--shiftcharts-tooltip-row-padding);
     border-block-end: var(--shiftcharts-axis-domain-width) solid var(--shiftcharts-axis-domain-color);
     color: var(--shiftcharts-surface-text-color);
-  }
-
-  .shiftcharts-interaction__tooltip-kicker {
-    color: currentColor;
-    font-size: var(--shiftcharts-legend-label-font-size);
-    font-weight: var(--shiftcharts-legend-label-font-weight);
-    letter-spacing: var(--shiftcharts-legend-label-letter-spacing);
-    opacity: var(--shiftcharts-motion-hover-neutral);
-    text-transform: uppercase;
-  }
-
-  .shiftcharts-interaction__tooltip-header strong {
-    font-weight: var(--shiftcharts-axis-title-font-weight);
   }
 
   .shiftcharts-interaction__tooltip-rows {

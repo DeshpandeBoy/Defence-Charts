@@ -32,6 +32,7 @@ type DatumKey = {
 type ActivePoint = DatumKey & {
   readonly point: PointPos
   readonly xValue: DataPoint['x']
+  readonly category: string | null
 }
 
 type TooltipRow = {
@@ -55,8 +56,8 @@ export type InteractionOverlayProps = {
 
 const DEFAULT_SAFE_PADDING = 8
 const DEFAULT_TOOLTIP_OFFSET = 16
-const ESTIMATED_HEADER_HEIGHT = 24
-const ESTIMATED_ROW_HEIGHT = 24
+const ESTIMATED_HEADER_HEIGHT = 32
+const ESTIMATED_ROW_HEIGHT = 28
 const ESTIMATED_CHARACTER_WIDTH = 8
 
 const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect
@@ -150,7 +151,7 @@ function InteractionLayer({
       return point === null ? [] : [{ ...point, seriesIndex }]
     })
   }, [active, activePointHighlight, data, frame, rows])
-  const header = active === null ? '' : formatXLabel(active.xValue)
+  const header = active === null ? '' : active.category ?? formatXLabel(active.xValue)
   const placement = useMemo<TooltipPlacement | null>(() => {
     if (active === null || rows.length === 0) return null
     return placeTooltip({
@@ -345,10 +346,7 @@ function InteractionLayer({
             blockSize: placement.height,
           }}
         >
-          <div className="shiftcharts-interaction__tooltip-header">
-            <span className="shiftcharts-interaction__tooltip-kicker">Selected reading</span>
-            <strong>{header}</strong>
-          </div>
+          <div className="shiftcharts-interaction__tooltip-header">{header}</div>
           <div className="shiftcharts-interaction__tooltip-rows">
             {visibleRows.map((row) => (
               <div
@@ -423,7 +421,7 @@ function resolveActivePoint(
   const point = ordinal < 0 ? undefined : seriesFrame.points[ordinal]
   const sourcePoint = source.points[key.pointIndex]
   if (point === undefined || sourcePoint === undefined || sourcePoint.y === null) return null
-  return { ...key, point, xValue: sourcePoint.x }
+  return { ...key, point, xValue: sourcePoint.x, category: sourcePoint.category ?? null }
 }
 
 function buildTooltipRows(

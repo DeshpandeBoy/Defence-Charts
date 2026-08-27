@@ -719,6 +719,26 @@ export function SandboxApp() {
             <span className="sandbox__fingerprint">{fingerprint(planJson)}</span>
           </div>
 
+          {(chartType === 'bar' || chartType === 'timebar') ? (
+            <div className="sandbox__bar-toolbar" role="group" aria-label="Bar orientation">
+              <span>Bar orientation</span>
+              {(['vertical', 'horizontal'] as const).map((orientation) => (
+                <button
+                  type="button"
+                  key={orientation}
+                  aria-pressed={displayPlan?.orientation === orientation}
+                  onClick={() => updateOverride({
+                    ...overrideObject,
+                    orientation,
+                    legend: { placement: 'external', position: 'right', maxEntries: 8, showValues: false, showPercent: false },
+                  })}
+                >
+                  {orientation}
+                </button>
+              ))}
+            </div>
+          ) : null}
+
           <div className="sandbox__preview-wrap">
             <div
               className="sandbox__chart-frame"
@@ -805,25 +825,6 @@ export function SandboxApp() {
                 {CHART_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
               </select>
             </label>
-            {(chartType === 'bar' || chartType === 'timebar') ? (
-              <OverrideSelect
-                label="Bar orientation"
-                value={displayValue(overrideObject.orientation)}
-                options={['resolver default', 'vertical', 'horizontal']}
-                onChange={(value) => {
-                  const next = { ...overrideObject }
-                  if (value === 'resolver default') {
-                    delete next.orientation
-                  } else {
-                    next.orientation = value
-                    // Bar identity belongs above the plot in either reading direction; a side
-                    // legend competes with the category labels when the bars are horizontal.
-                    next.legend = { placement: 'external', position: 'top', maxEntries: 8, showValues: false, showPercent: false }
-                  }
-                  updateOverride(next)
-                }}
-              />
-            ) : null}
             <label className="sandbox__field">
               <span>Chart title</span>
               <input aria-label="Chart title" value={title} onChange={(event) => setTitle(event.target.value)} />

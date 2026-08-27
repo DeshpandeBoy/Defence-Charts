@@ -72,7 +72,7 @@ function barLegend(
   if (input.ctx.sizeClass === 'panel' || input.ctx.sizeClass === 'canvas' || input.ctx.sizeClass === 'stage') {
     return Object.freeze({
       placement: 'external',
-      position: 'top',
+      position: 'right',
       maxEntries: input.policy.legendMaxEntries,
       showValues: false,
       showPercent: false,

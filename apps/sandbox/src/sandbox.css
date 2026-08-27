@@ -243,6 +243,29 @@
     font-size: var(--shiftcharts-label-font-size);
   }
 
+  .sandbox__bar-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: calc(var(--shiftcharts-size-gap) * 2);
+    margin-block-end: calc(var(--shiftcharts-size-gap) * 3);
+    color: var(--sandbox-muted);
+    font-size: var(--shiftcharts-label-font-size);
+  }
+
+  .sandbox__bar-toolbar button {
+    border: 1px solid var(--sandbox-rule);
+    border-radius: var(--shiftcharts-widget-radius-inner);
+    background: transparent;
+    color: inherit;
+    padding: calc(var(--shiftcharts-size-gap) * 1) calc(var(--shiftcharts-size-gap) * 2);
+  }
+
+  .sandbox__bar-toolbar button[aria-pressed='true'] {
+    border-color: var(--shiftcharts-series-1);
+    color: var(--shiftcharts-series-1);
+  }
+
   .sandbox__preview-wrap {
     display: grid;
     place-items: center;
