@@ -53,7 +53,7 @@
  * than nothing.
  */
 
-import type { ChartType, PlanOverrides, PlanPolicy, Series, SizeClass, SizeContext } from '@shiftcharts/core'
+import type { ChartPlan, ChartType, PlanOverrides, PlanPolicy, Series, SizeClass, SizeContext } from '@shiftcharts/core'
 import {
   describeShape,
   planChart,
@@ -94,6 +94,14 @@ export type AutoChartProps = {
   readonly className?: string | undefined
   /** Forwarded to `<Chart>` to stabilise generated ids. Snapshot tests should pass it. */
   readonly id?: string | undefined
+  /**
+   * Optional client-only diagnostics for consumers that need to inspect the plan after the
+   * wrapper has measured its real content box. The resolver remains pure; this callback only
+   * reports its result and never changes planning.
+   */
+  readonly onResolvedPlan?: ((plan: ChartPlan, size: Size) => void) | undefined
+  /** Whether an active interaction should paint a token-controlled point highlight. */
+  readonly activePointHighlight?: boolean | undefined
 }
 
 /** The serialisable grid footprint needed to resolve a dashboard chart's size family. */
@@ -114,6 +122,8 @@ export function AutoChart({
   initialSize,
   className,
   id,
+  onResolvedPlan,
+  activePointHighlight = true,
 }: AutoChartProps) {
   const [ref, size] = useElementSize<HTMLDivElement>({ initialSize })
 
@@ -177,6 +187,10 @@ export function AutoChart({
     [type, ctx, shape, policy, overrides],
   )
 
+  useEffect(() => {
+    if (measured) onResolvedPlan?.(plan, size)
+  }, [measured, onResolvedPlan, plan, size])
+
   // ⚠ **The plan is resolved even when the box is `0 × 0`, and that is not an oversight.**
   // The Rules of Hooks put `useMemo` in the unconditional body, so the only way to skip
   // planning while unmeasured is to return `null` from the memo — and that trade is worse
@@ -225,6 +239,7 @@ export function AutoChart({
             title={title}
             policy={policy}
             id={id}
+            activePointHighlight={activePointHighlight}
           />
         </>
       ) : null}

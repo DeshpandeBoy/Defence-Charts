@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 
 import { SandboxApp } from './SandboxApp.tsx'
 import '@shiftcharts/primitives/chart.css'
+import '@shiftcharts/react/auto-chart.css'
+import '@shiftcharts/react/interaction-overlay.css'
 import './sandbox.css'
 
 const root = document.querySelector('#root')

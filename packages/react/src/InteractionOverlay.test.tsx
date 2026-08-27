@@ -64,8 +64,22 @@ function frame(ctx: SizeContext, resolved: ChartPlan): ChartFrame {
   return resolveFrame(resolved, DATA, ctx)
 }
 
-function renderOverlay(ctx: SizeContext): { resolved: ChartPlan; renderedFrame: ChartFrame } {
-  const resolved = plan(ctx)
+function renderOverlay(
+  ctx: SizeContext,
+  options: {
+    readonly activePointHighlight?: boolean
+    readonly tooltipPlacement?: 'fix' | 'fluid'
+  } = {},
+): { resolved: ChartPlan; renderedFrame: ChartFrame } {
+  const resolved = planChart(
+    'line',
+    ctx,
+    describeShape(DATA),
+    undefined,
+    options.tooltipPlacement === undefined
+      ? undefined
+      : { interaction: { tooltip: { placement: options.tooltipPlacement } } },
+  )
   const renderedFrame = frame(ctx, resolved)
   act(() => {
     root.render(
@@ -80,6 +94,7 @@ function renderOverlay(ctx: SizeContext): { resolved: ChartPlan; renderedFrame: 
           ctx,
           title: 'Revenue',
           id: 'interaction-test',
+          activePointHighlight: options.activePointHighlight,
         }),
       ),
     )
@@ -185,6 +200,34 @@ describe('fixed and fluid tooltip interaction', () => {
 
     dispatchPointer('pointerdown', point)
     expect(container.querySelector('[role="tooltip"]')).toBeNull()
+  })
+
+  it('renders shared active points and allows the client highlight to be disabled', () => {
+    const { renderedFrame } = renderOverlay(context(420, 320))
+    const point = renderedFrame.series[0]?.points[2]
+    if (point === undefined) throw new Error('fixture point missing')
+
+    dispatchPointer('pointermove', point)
+
+    expect(container.querySelectorAll('.shiftcharts-interaction__active-point')).toHaveLength(2)
+    expect(container.querySelector('.shiftcharts-interaction__active-point[data-series-id="alpha"]')).not.toBeNull()
+    expect(container.querySelector('.shiftcharts-interaction__active-point[data-series-id="beta"]')).not.toBeNull()
+
+    renderOverlay(context(420, 320), { activePointHighlight: false })
+    expect(container.querySelector('.shiftcharts-interaction__active-point')).toBeNull()
+  })
+
+  it('keeps every shared row visible when fluid placement has room', () => {
+    const { renderedFrame } = renderOverlay(context(420, 320), { tooltipPlacement: 'fluid' })
+    const point = renderedFrame.series[0]?.points[2]
+    if (point === undefined) throw new Error('fixture point missing')
+
+    dispatchPointer('pointermove', point)
+
+    const tooltip = container.querySelector('[role="tooltip"]')
+    expect(tooltip?.getAttribute('data-tooltip-mode')).toBe('fluid')
+    expect(tooltip?.querySelectorAll('.shiftcharts-interaction__tooltip-row')).toHaveLength(2)
+    expect(tooltip?.querySelector('.shiftcharts-interaction__tooltip-overflow')).toBeNull()
   })
 
   it('uses fluid placement at Canvas and preserves the explicit datum identity through resize', () => {

@@ -138,6 +138,9 @@ importers:
       '@shiftcharts/primitives':
         specifier: workspace:*
         version: link:../../packages/primitives
+      '@shiftcharts/react':
+        specifier: workspace:*
+        version: link:../../packages/react
       '@shiftcharts/tokens':
         specifier: workspace:*
         version: link:../../packages/tokens

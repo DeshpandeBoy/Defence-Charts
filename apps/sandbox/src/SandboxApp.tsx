@@ -1,5 +1,5 @@
 import type { CSSProperties, ChangeEvent } from 'react'
-import { useMemo, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 
 import type {
   ChartPlan,
@@ -15,7 +15,7 @@ import {
   planChart,
   sizeContextFromPixels,
 } from '@shiftcharts/core'
-import { Chart } from '@shiftcharts/primitives'
+import { AutoChart, LegendControl } from '@shiftcharts/react'
 import {
   SHIFTCHARTS_THEMES,
   SHIFTCHARTS_TOKENS,
@@ -157,6 +157,40 @@ const DATA_BY_TYPE: Readonly<Record<ChartType, readonly Series[]>> = {
   ],
 }
 
+const LEGEND_STUDY_DATA: readonly Series[] = [
+  { id: 'alpha', label: 'Alpha', points: points([28, 34, 31, 42, 48, 54, 61, 66]) },
+  { id: 'bravo', label: 'Bravo', points: points([46, 51, 49, 56, 61, 60, 68, 72]) },
+  { id: 'charlie', label: 'Charlie', points: points([64, 61, 58, 55, 51, 47, 44, 41]) },
+  { id: 'delta', label: 'Delta', points: points([18, 22, 29, 27, 35, 38, 45, 49]) },
+  { id: 'echo', label: 'Echo', points: points([38, 42, 40, null, 46, 52, 50, 57]) },
+]
+
+const LEGEND_STUDY_PLAN = planChart(
+  'line',
+  sizeContextFromPixels(760, 480),
+  describeShape(LEGEND_STUDY_DATA),
+  DEFAULT_POLICY,
+  {
+    legend: { placement: 'external', position: 'bottom', maxEntries: 5, showValues: false, showPercent: false },
+    interaction: { legendToggle: true },
+  },
+)
+
+const SANDBOX_DEFAULT_OVERRIDES: PlanOverrides = {
+  interaction: {
+    trigger: 'hover',
+    tooltip: { enabled: true, placement: 'fluid' },
+    crosshair: true,
+  },
+}
+
+type MeasuredSnapshot = {
+  readonly signature: string
+  readonly plan: ChartPlan
+  readonly width: number
+  readonly height: number
+}
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
@@ -280,16 +314,27 @@ export function SandboxApp() {
   const [policy, setPolicy] = useState<PlanPolicy>(DEFAULT_POLICY)
   const [policyText, setPolicyText] = useState(() => json(DEFAULT_POLICY))
   const [policyError, setPolicyError] = useState<string | null>(null)
-  const [overrideText, setOverrideText] = useState('{}')
+  const [overrideText, setOverrideText] = useState(() => json(SANDBOX_DEFAULT_OVERRIDES))
   const [overrideError, setOverrideError] = useState<string | null>(null)
   const [tokenOverrides, setTokenOverrides] = useState<Readonly<Record<string, string>>>({})
   const [tokenSearch, setTokenSearch] = useState('')
   const [copied, setCopied] = useState<string | null>(null)
+  const [activePointHighlight, setActivePointHighlight] = useState(true)
+  const [legendHiddenSeriesIds, setLegendHiddenSeriesIds] = useState<readonly string[]>([])
+  const [measuredSnapshot, setMeasuredSnapshot] = useState<MeasuredSnapshot | null>(null)
 
   const parsedData = useMemo(() => parseData(dataText), [dataText])
   const data = parsedData.data ?? DATA_BY_TYPE[chartType]
   const context = useMemo(() => sizeContextFromPixels(width, height), [height, width])
   const parsedOverrides = useMemo(() => parseObject(overrideText), [overrideText])
+  const requestSignature = useMemo(
+    () => fingerprint(json({ chartType, width, height, title, data, policy, overrides: parsedOverrides.value ?? {} })),
+    [chartType, data, height, parsedOverrides.value, policy, title, width],
+  )
+
+  const handleResolvedPlan = useCallback((plan: ChartPlan, size: { readonly width: number; readonly height: number }) => {
+    setMeasuredSnapshot({ signature: requestSignature, plan, width: size.width, height: size.height })
+  }, [requestSignature])
 
   const resolved = useMemo((): { readonly plan: ChartPlan | null; readonly error: string | null } => {
     if (parsedData.error !== null) return { plan: null, error: parsedData.error }
@@ -310,7 +355,9 @@ export function SandboxApp() {
     }
   }, [chartType, context, data, parsedData.error, parsedOverrides, policy])
 
-  const planJson = resolved.plan === null ? '{}' : json(resolved.plan)
+  const currentSnapshot = measuredSnapshot?.signature === requestSignature ? measuredSnapshot : null
+  const displayPlan = currentSnapshot?.plan ?? resolved.plan
+  const planJson = displayPlan === null ? '{}' : json(displayPlan)
   const configJson = json({
     chartType,
     size: { width, height },
@@ -319,6 +366,7 @@ export function SandboxApp() {
     policy,
     overrides: parsedOverrides.value ?? {},
     tokenOverrides,
+    activePointHighlight,
   })
   const cssOutput = Object.entries(tokenOverrides)
     .map(([name, value]) => `  --shiftcharts-${name}: ${value};`)
@@ -382,6 +430,29 @@ export function SandboxApp() {
     updateOverride(next)
   }
 
+  const updateTooltipOverride = (key: string, value: unknown) => {
+    const base = parsedOverrides.value ?? {}
+    const interaction = isRecord(base.interaction) ? base.interaction : {}
+    const tooltip = isRecord(interaction.tooltip) ? interaction.tooltip : {}
+    updateOverride({
+      ...base,
+      interaction: { ...interaction, tooltip: { ...tooltip, [key]: value } },
+    })
+  }
+
+  const removeTooltipOverride = (key: string) => {
+    const base = parsedOverrides.value ?? {}
+    const interaction = isRecord(base.interaction) ? { ...base.interaction } : {}
+    const tooltip = isRecord(interaction.tooltip) ? { ...interaction.tooltip } : {}
+    delete tooltip[key]
+    if (Object.keys(tooltip).length === 0) delete interaction.tooltip
+    else interaction.tooltip = tooltip
+    const next = { ...base }
+    if (Object.keys(interaction).length === 0) delete next.interaction
+    else next.interaction = interaction
+    updateOverride(next)
+  }
+
   const updateOverrideText = (event: ChangeEvent<HTMLTextAreaElement>) => {
     const nextText = event.target.value
     setOverrideText(nextText)
@@ -416,16 +487,31 @@ export function SandboxApp() {
     setTitle('ShiftCharts design study')
     setDataText(json(DATA_BY_TYPE.line))
     updatePolicy(DEFAULT_POLICY)
-    setOverrideText('{}')
+    setOverrideText(json(SANDBOX_DEFAULT_OVERRIDES))
     setOverrideError(null)
     setTokenOverrides({})
+    setTokenSearch('')
+    setActivePointHighlight(true)
+    setLegendHiddenSeriesIds([])
+    setMeasuredSnapshot(null)
   }
+
+  const setLegendVisibility = useCallback((seriesId: string, visible: boolean) => {
+    setLegendHiddenSeriesIds((current) => {
+      const next = new Set(current)
+      if (visible) next.delete(seriesId)
+      else next.add(seriesId)
+      return [...next]
+    })
+  }, [])
 
   const selectedSize = SIZE_PRESETS.find((preset) => preset.width === width && preset.height === height)?.id
   const overrideObject = parsedOverrides.value ?? {}
   const narrativeOverride = isRecord(overrideObject.narrative) ? overrideObject.narrative : {}
   const labelsOverride = isRecord(overrideObject.labels) ? overrideObject.labels : {}
   const legendOverride = isRecord(overrideObject.legend) ? overrideObject.legend : {}
+  const interactionOverride = isRecord(overrideObject.interaction) ? overrideObject.interaction : {}
+  const tooltipOverride = isRecord(interactionOverride.tooltip) ? interactionOverride.tooltip : {}
   const axesOverride = isRecord(overrideObject.axes) ? overrideObject.axes : {}
   const xAxisOverride = isRecord(axesOverride.x) ? axesOverride.x : {}
   const yAxisOverride = isRecord(axesOverride.y) ? axesOverride.y : {}
@@ -451,7 +537,7 @@ export function SandboxApp() {
         <div className="sandbox__header-actions">
           <span className="sandbox__status" role="status" aria-live="polite">
             <span className="sandbox__status-dot" aria-hidden="true" />
-            {resolved.plan === null ? 'Plan needs attention' : 'Core plan live'}
+            {resolved.plan === null ? 'Plan needs attention' : currentSnapshot === null ? 'Core plan live · measuring' : 'Core plan live'}
           </span>
           <button type="button" className="sandbox__button sandbox__button--quiet" onClick={reset}>Reset sandbox</button>
         </div>
@@ -475,13 +561,15 @@ export function SandboxApp() {
               {resolved.plan === null ? (
                 <div className="sandbox__preview-error" role="alert">{resolved.error}</div>
               ) : (
-                <Chart
-                  plan={resolved.plan}
+                <AutoChart
+                  type={chartType}
                   data={data}
-                  ctx={context}
                   title={title}
-                  description="A ShiftCharts sandbox preview generated from the current design controls."
+                  description="A measured ShiftCharts sandbox preview generated from the current design controls."
                   policy={policy}
+                  overrides={parsedOverrides.value as PlanOverrides | undefined}
+                  onResolvedPlan={handleResolvedPlan}
+                  activePointHighlight={activePointHighlight}
                   id="sandbox-chart"
                 />
               )}
@@ -490,11 +578,29 @@ export function SandboxApp() {
 
           <div className="sandbox__preview-meta" aria-label="Resolved chart summary">
             <span><small>Chart</small><strong>{chartType}</strong></span>
-            <span><small>Size class</small><strong>{resolved.plan?.sizeClass ?? '—'}</strong></span>
-            <span><small>Mark</small><strong>{resolved.plan?.marks.primary.kind ?? '—'}</strong></span>
-            <span><small>Value</small><strong>{resolved.plan?.narrative.valueDisplay ?? '—'}</strong></span>
-            <span><small>Legend</small><strong>{resolved.plan?.legend.placement ?? '—'}</strong></span>
+            <span><small>Size class</small><strong>{displayPlan?.sizeClass ?? '—'}</strong></span>
+            <span><small>Mark</small><strong>{displayPlan?.marks.primary.kind ?? '—'}</strong></span>
+            <span><small>Value</small><strong>{displayPlan?.narrative.valueDisplay ?? '—'}</strong></span>
+            <span><small>Legend</small><strong>{displayPlan?.legend.placement ?? '—'}</strong></span>
+            <span><small>Measured box</small><strong>{currentSnapshot === null ? 'waiting' : `${Math.round(currentSnapshot.width)} × ${Math.round(currentSnapshot.height)}`}</strong></span>
           </div>
+
+          <section className="sandbox__legend-study" aria-labelledby="sandbox-legend-study-title">
+            <div>
+              <p className="sandbox__section-label">Controlled legend study</p>
+              <h3 id="sandbox-legend-study-title">Visibility state stays with the consumer</h3>
+              <p className="sandbox__help">Toggle a series to exercise the shipped `LegendControl` contract. The parent owns the state so it can later connect to filtering without changing the chart renderer.</p>
+            </div>
+            <LegendControl
+              plan={LEGEND_STUDY_PLAN}
+              series={LEGEND_STUDY_DATA}
+              hiddenSeriesIds={legendHiddenSeriesIds}
+              onVisibilityChange={setLegendVisibility}
+            />
+            <output className="sandbox__legend-state" aria-live="polite">
+              hidden: {legendHiddenSeriesIds.length === 0 ? 'none' : legendHiddenSeriesIds.join(', ')}
+            </output>
+          </section>
 
           <div className="sandbox__output-bar">
             <span>Copy a working snapshot when a direction feels right.</span>
@@ -601,7 +707,32 @@ export function SandboxApp() {
           </section>
 
           <section className="sandbox__control-section">
-            <SectionTitle eyebrow="03 / resolver" title="Every policy input" />
+            <SectionTitle eyebrow="03 / interaction" title="Tooltip and focus" />
+            <div className="sandbox__quick-grid">
+              <OverrideSelect
+                label="Interaction trigger"
+                value={displayValue(interactionOverride.trigger)}
+                options={['resolver default', 'none', 'hover', 'tap']}
+                onChange={(value) => value === 'resolver default' ? removeNestedOverride('interaction', 'trigger') : updateNestedOverride('interaction', 'trigger', value)}
+              />
+              <OverrideSelect
+                label="Tooltip placement"
+                value={displayValue(tooltipOverride.placement)}
+                options={['resolver default', 'fix', 'fluid']}
+                onChange={(value) => value === 'resolver default' ? removeTooltipOverride('placement') : updateTooltipOverride('placement', value)}
+              />
+            </div>
+            <div className="sandbox__toggle-row">
+              <ToggleOverride label="Tooltip" value={tooltipOverride.enabled} onChange={(value) => value === null ? removeTooltipOverride('enabled') : updateTooltipOverride('enabled', value)} />
+              <ToggleOverride label="Crosshair" value={interactionOverride.crosshair} onChange={(value) => value === null ? removeNestedOverride('interaction', 'crosshair') : updateNestedOverride('interaction', 'crosshair', value)} />
+              <ToggleOverride label="Legend controls" value={interactionOverride.legendToggle} onChange={(value) => value === null ? removeNestedOverride('interaction', 'legendToggle') : updateNestedOverride('interaction', 'legendToggle', value)} />
+              <ToggleOverride label="Active points" value={activePointHighlight} onChange={(value) => { if (value !== null) setActivePointHighlight(value) }} />
+            </div>
+            <p className="sandbox__help">Hover, tap, and keyboard focus share one tooltip surface. Use Tab, Enter, Arrow keys, Home, End, and Escape to inspect the accessible interaction path.</p>
+          </section>
+
+          <section className="sandbox__control-section">
+            <SectionTitle eyebrow="04 / resolver" title="Every policy input" />
             <p className="sandbox__help">Policy changes what the resolver decides. The ranges are editing aids; the full JSON remains the authority for typography, facet maps, and future fields.</p>
             <div className="sandbox__policy-fields">
               {POLICY_NUMBER_FIELDS.map((field) => (
@@ -623,7 +754,7 @@ export function SandboxApp() {
           </section>
 
           <section className="sandbox__control-section">
-            <SectionTitle eyebrow="04 / visual system" title="CSS token overrides" />
+            <SectionTitle eyebrow="05 / visual system" title="CSS token overrides" />
             <p className="sandbox__help">Overrides are scoped to this sandbox root, so you can change every exposed `--shiftcharts-*` value without changing the package theme or the existing app.</p>
             <label className="sandbox__field"><span>Find a token</span><input aria-label="Find a token" value={tokenSearch} onChange={(event) => setTokenSearch(event.target.value)} placeholder="series, grid, radius…" /></label>
             <div className="sandbox__token-groups">
@@ -655,7 +786,7 @@ export function SandboxApp() {
           </section>
 
           <section className="sandbox__control-section">
-            <SectionTitle eyebrow="05 / source data" title="Data and raw overrides" />
+            <SectionTitle eyebrow="06 / source data" title="Data and raw overrides" />
             <div className="sandbox__data-toolbar">
               <button type="button" className="sandbox__button" onClick={() => setDataText(json(DATA_BY_TYPE[chartType]))}>Use {chartType} sample</button>
               <span>{parsedData.error === null ? `${data.length} series · ${describeShape(data).points} points` : 'Using the last valid sample while editing'}</span>

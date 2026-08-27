@@ -213,7 +213,7 @@
     background: var(--shiftcharts-plot-color);
   }
 
-  .sandbox__chart-frame .shiftcharts-chart {
+  .sandbox__chart-frame .shiftcharts-auto-chart {
     inline-size: 100%;
     block-size: 100%;
     margin: 0;
@@ -229,7 +229,7 @@
 
   .sandbox__preview-meta {
     display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: calc(var(--shiftcharts-size-gap) * 3);
     padding-block: calc(var(--shiftcharts-size-gap) * 4);
     border-block-end: 1px solid var(--sandbox-rule);
@@ -269,6 +269,47 @@
     padding-block-start: calc(var(--shiftcharts-size-gap) * 4);
     color: var(--sandbox-muted);
     font-size: var(--shiftcharts-label-font-size);
+  }
+
+  .sandbox__legend-study {
+    display: grid;
+    gap: calc(var(--shiftcharts-size-gap) * 3);
+    margin-block-start: calc(var(--shiftcharts-size-gap) * 5);
+    padding: calc(var(--shiftcharts-size-gap) * 4);
+    border: 1px solid var(--sandbox-rule);
+    border-radius: var(--shiftcharts-widget-radius-inner);
+    background: var(--sandbox-panel);
+  }
+
+  .sandbox__legend-study h3 {
+    margin: calc(var(--shiftcharts-size-gap) * 2) 0 0;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .sandbox__legend-study .sandbox__help {
+    margin-block-end: 0;
+  }
+
+  .sandbox__legend-study .shiftcharts-legend {
+    position: relative;
+    inset: auto;
+    max-block-size: none;
+    overflow: visible;
+    pointer-events: auto;
+  }
+
+  .sandbox__legend-study .shiftcharts-legend--external[data-legend-position='right'] {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .sandbox__legend-state {
+    color: var(--sandbox-muted);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 0.72rem;
   }
 
   .sandbox__output-actions {

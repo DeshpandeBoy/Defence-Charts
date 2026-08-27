@@ -49,6 +49,7 @@ export type InteractionOverlayProps = {
   readonly policy?: Partial<PlanPolicy> | undefined
   readonly id?: string | undefined
   readonly title: string
+  readonly activePointHighlight?: boolean | undefined
 }
 
 const DEFAULT_SAFE_PADDING = 8
@@ -67,6 +68,7 @@ export function InteractionOverlay({
   policy,
   id,
   title,
+  activePointHighlight = true,
 }: InteractionOverlayProps) {
   const [portalHost, setPortalHost] = useState<HTMLElement | null>(null)
   const generatedId = useId()
@@ -83,7 +85,14 @@ export function InteractionOverlay({
   if (!enabled || portalHost === null || !containerRef.current?.contains(portalHost)) return null
 
   return createPortal(
-    <InteractionLayer baseId={baseId} frame={frame} plan={plan} data={data} title={title} />,
+    <InteractionLayer
+      baseId={baseId}
+      frame={frame}
+      plan={plan}
+      data={data}
+      title={title}
+      activePointHighlight={activePointHighlight}
+    />,
     portalHost,
   )
 }
@@ -94,12 +103,14 @@ function InteractionLayer({
   plan,
   data,
   title,
+  activePointHighlight,
 }: {
   readonly baseId: string
   readonly frame: ChartFrame
   readonly plan: ChartPlan
   readonly data: readonly Series[]
   readonly title: string
+  readonly activePointHighlight: boolean
 }) {
   const svgRef = useRef<SVGSVGElement | null>(null)
   const tooltipRef = useRef<HTMLDivElement | null>(null)
@@ -115,13 +126,36 @@ function InteractionLayer({
     () => (active === null ? [] : buildTooltipRows(active, frame, data)),
     [active, data, frame],
   )
+  const tooltipForPlacement = useMemo(() => {
+    const estimated = estimateTooltipBox(rows)
+    return {
+      ...tooltipBox,
+      width: Math.max(tooltipBox.width, estimated.width),
+      height: Math.max(tooltipBox.height, estimated.height),
+      headerHeight: estimated.headerHeight,
+      rowCount: rows.length,
+      rowHeight: estimated.rowHeight,
+    }
+  }, [rows, tooltipBox])
+  const activePoints = useMemo(() => {
+    if (!activePointHighlight || active === null) return []
+    return rows.flatMap((row) => {
+      const point = resolveActivePoint(
+        { seriesId: row.seriesId, pointIndex: row.pointIndex },
+        frame,
+        data,
+      )
+      const seriesIndex = frame.series.findIndex((series) => series.id === row.seriesId)
+      return point === null ? [] : [{ ...point, seriesIndex }]
+    })
+  }, [active, activePointHighlight, data, frame, rows])
   const header = active === null ? '' : formatXLabel(active.xValue)
   const placement = useMemo<TooltipPlacement | null>(() => {
     if (active === null || rows.length === 0) return null
     return placeTooltip({
       mode: plan.interaction.tooltip.placement === 'fluid' ? 'fluid' : 'fixed',
       anchor: { x: active.point.x, y: active.point.y, width: 0, height: 0 },
-      tooltip: { ...tooltipBox, rowCount: rows.length },
+      tooltip: tooltipForPlacement,
       widget: frame.box,
       plot: frame.plot,
       safePadding: DEFAULT_SAFE_PADDING,
@@ -129,7 +163,7 @@ function InteractionLayer({
       preferredFixedRail: 'top',
       preferredFluidSide: 'above-right',
     })
-  }, [active, frame.box, frame.plot, plan.interaction.tooltip.placement, rows.length, tooltipBox])
+  }, [active, frame.box, frame.plot, plan.interaction.tooltip.placement, tooltipForPlacement])
 
   useIsomorphicLayoutEffect(() => {
     const element = tooltipRef.current
@@ -251,6 +285,22 @@ function InteractionLayer({
               y1={frame.plot.y}
               y2={frame.plot.y + frame.plot.height}
             />
+          </g>
+        ) : null}
+        {activePoints.length > 0 ? (
+          <g className="shiftcharts-interaction__active-points" aria-hidden="true">
+            {activePoints.map((point) => (
+              <circle
+                className="shiftcharts-interaction__active-point"
+                cx={point.point.x}
+                cy={point.point.y}
+                data-point-index={point.pointIndex}
+                data-series-id={point.seriesId}
+                data-series-index={point.seriesIndex}
+                key={point.seriesId + ':' + point.pointIndex}
+                r="0"
+              />
+            ))}
           </g>
         ) : null}
         <rect

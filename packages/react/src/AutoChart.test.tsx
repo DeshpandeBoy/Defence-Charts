@@ -252,6 +252,17 @@ describe('a measurement produces a chart at that measurement’s rung', () => {
     expect(wrapper().querySelector('figure')?.getAttribute('data-size-class')).toBe(plan.sizeClass)
     expect(wrapper().querySelector('figure')?.getAttribute('data-chart-type')).toBe(plan.type)
   })
+
+  it('reports the measured plan and content box without changing the render contract', () => {
+    const onResolvedPlan = vi.fn()
+    mount(chart({ onResolvedPlan }))
+    resize(560, 320)
+
+    expect(onResolvedPlan).toHaveBeenCalled()
+    const [resolvedPlan, measuredSize] = onResolvedPlan.mock.calls.at(-1) ?? []
+    expect(resolvedPlan?.sizeClass).toBe('panel')
+    expect(measuredSize).toEqual({ width: 560, height: 320 })
+  })
 })
 
 // --- Gate G11, the content half ---------------------------------------------------------------

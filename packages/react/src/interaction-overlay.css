@@ -40,6 +40,42 @@
     vector-effect: non-scaling-stroke;
   }
 
+  .shiftcharts-interaction__active-points {
+    pointer-events: none;
+  }
+
+  .shiftcharts-interaction__active-point {
+    r: var(--shiftcharts-point-radius-hover);
+    fill: var(--shiftcharts-plot-color);
+    stroke: var(--shiftcharts-series-color, var(--shiftcharts-series-1));
+    stroke-width: var(--shiftcharts-point-stroke-width);
+    vector-effect: non-scaling-stroke;
+  }
+
+  .shiftcharts-interaction__active-point[data-series-index='0'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-1);
+  }
+
+  .shiftcharts-interaction__active-point[data-series-index='1'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-2);
+  }
+
+  .shiftcharts-interaction__active-point[data-series-index='2'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-3);
+  }
+
+  .shiftcharts-interaction__active-point[data-series-index='3'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-4);
+  }
+
+  .shiftcharts-interaction__active-point[data-series-index='4'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-5);
+  }
+
+  .shiftcharts-interaction__active-point[data-series-index='5'] {
+    --shiftcharts-series-color: var(--shiftcharts-series-6);
+  }
+
   .shiftcharts-interaction__tooltip {
     position: absolute;
     display: grid;
