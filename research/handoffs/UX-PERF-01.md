@@ -2,14 +2,15 @@
 id: UX-PERF-01
 title: Interaction rendering performance — measurement and hot-path foundation
 type: implementation
-state: in progress
+state: handoff
 owner: Codex
 branch: codex/ux-perf-01-hover-rendering
 worktree: /Users/dhanyarao/Documents/Defence
 base_commit: 26c9cc9a41be5af0c732e6e29aa2098ddaee1fae
 depends_on: [I1.1, I1.2, I1.3, I1.5, UX-LEGEND-01]
 started_at: 2026-08-27T23:55:00+05:30
-last_checkpoint: 2026-08-28T00:28:00+05:30
+last_checkpoint: 2026-08-28T00:34:00+05:30
+last_checkpoint_commit: 7dd6db2
 ---
 
 # UX-PERF-01 — Interaction rendering performance
@@ -108,6 +109,9 @@ interaction semantics, touch and keyboard behavior, and the DOM-free core bounda
 - Added a 1,900-point under-budget scatter fixture and real-browser baseline for the exhaustive
   XY fallback: 24 samples, 1 client-rect read, 23 distinct datums, 207.3ms total / 8.64ms mean,
   `interactionMode: rich`, Chromium 151.0.7922.34, zero runtime errors.
+- Corrected the prepared-index ordinal seam so finite-y points with invalid x values remain paired
+  with their original source indexes; non-finite pixel coordinates are excluded only from nearest
+  lookup, not from identity tables.
 
 ## Decisions and constraints
 
