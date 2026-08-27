@@ -9,7 +9,7 @@ worktree: /Users/dhanyarao/Documents/Defence
 base_commit: 26c9cc9a41be5af0c732e6e29aa2098ddaee1fae
 depends_on: [I1.1, I1.2, I1.3, I1.5, UX-LEGEND-01]
 started_at: 2026-08-27T23:55:00+05:30
-last_checkpoint: 2026-08-28T00:16:00+05:30
+last_checkpoint: 2026-08-28T00:28:00+05:30
 ---
 
 # UX-PERF-01 — Interaction rendering performance
@@ -130,9 +130,12 @@ interaction semantics, touch and keyboard behavior, and the DOM-free core bounda
 | `/opt/homebrew/bin/pnpm exec vitest run packages/react/src/InteractionOverlay.test.tsx packages/react/src/interaction-index.test.ts packages/react/src/interaction-scheduler.test.ts packages/react/src/interaction-policy.test.ts --reporter=dot` | 0 | 4 files, 27 tests passed; existing keyboard test emits a pre-existing act warning. |
 | `/opt/homebrew/bin/pnpm --filter @shiftcharts/react typecheck` | 0 | TypeScript passed. |
 | `/opt/homebrew/bin/pnpm --filter @shiftcharts/playground typecheck` | 0 | TypeScript passed. |
+| `/opt/homebrew/bin/pnpm typecheck` | 0 | Repository-wide Turbo typecheck passed: 15 tasks successful across core, primitives, React, grid, docs, playground, sandbox, fixtures, testing, and tokens. |
+| `/opt/homebrew/bin/pnpm test -- --reporter=dot` | 1 | 77 test files / 1,012 passed; 2 unrelated existing failures: `scripts/check-api.test.mjs` reports `Tier` missing from the tokens barrel, and `packages/core/src/families/bar/planner.test.ts` expects legend position `top` while current output is `right`. No files from either failure were changed. |
 | `/opt/homebrew/bin/pnpm exec eslint packages/react/src/InteractionOverlay.tsx packages/react/src/InteractionOverlay.test.tsx apps/playground/src/interaction-fixture/InteractionFixture.tsx scripts/check-interaction-performance.mjs` | 0 | Focused lint passed. |
 | `node scripts/check-interaction-performance.mjs` (pre-change) | 0 | Baseline captured in `scripts/results/ux-perf-01-interaction-baseline.json`. |
 | `node scripts/check-interaction-performance.mjs` (post-change) | 0 | 24 samples, `boundsReads: 1`, 23 distinct datums, 206.6ms total / 8.61ms mean, zero runtime errors; latest result in `scripts/results/ux-perf-01-interaction.latest.json`. |
+| `node scripts/check-scatter-interaction-performance.mjs` | 0 | 1,900-point exhaustive-XY baseline: 24 samples, `boundsReads: 1`, 23 distinct datums, 207.3ms total / 8.64ms mean, `interactionMode: rich`, zero runtime errors; result in `scripts/results/ux-perf-01-scatter-interaction.latest.json`. |
 | `node scripts/check-interaction-browser.mjs` | 0 | I1.5 touch/keyboard/legend/resize/static/reduced-motion/forced-colors matrix passed with zero runtime errors. |
 | `node scripts/check-scatter-interaction-performance.mjs` | 0 | 1,900-point scatter baseline: 24 samples, `boundsReads: 1`, 23 distinct datums, 207.3ms total / 8.64ms mean, `interactionMode: rich`, zero runtime errors; result in `scripts/results/ux-perf-01-scatter-interaction.latest.json`. |
 | `git diff --check` | 0 | Passed. |
