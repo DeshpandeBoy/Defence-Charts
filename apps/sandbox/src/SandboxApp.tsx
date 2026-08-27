@@ -1,5 +1,5 @@
 import type { CSSProperties, ChangeEvent } from 'react'
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type {
   ChartPlan,
@@ -20,9 +20,11 @@ import { AutoChart, LegendControl } from '@shiftcharts/react'
 import {
   SHIFTCHARTS_THEMES,
   SHIFTCHARTS_TOKENS,
+  TOKEN_GROUPS,
   toCustomProperty,
   type ShiftChartsTheme,
   type ShiftChartsTokenName,
+  type Token,
 } from '@shiftcharts/tokens'
 
 const CHART_TYPES: readonly ChartType[] = [
@@ -115,6 +117,10 @@ function chartPagePath(type: ChartType): string {
 function chartTypeFromPath(pathname: string): ChartType {
   const candidate = pathname.match(/^\/charts\/([^/]+)\/?$/)?.[1]
   return CHART_TYPES.find((type) => type === candidate) ?? 'line'
+}
+
+function isTokenExplorerPath(pathname: string): boolean {
+  return pathname === '/tokens' || pathname === '/tokens/'
 }
 
 const SIZE_PRESETS = [
@@ -385,6 +391,9 @@ function displayValue(value: unknown): string {
 export function SandboxApp() {
   const initialChartType = chartTypeFromPath(typeof window === 'undefined' ? '/' : window.location.pathname)
   const [chartType, setChartType] = useState<ChartType>(initialChartType)
+  const [isTokenExplorer, setIsTokenExplorer] = useState(() =>
+    typeof window !== 'undefined' && isTokenExplorerPath(window.location.pathname),
+  )
   const [theme, setTheme] = useState<ShiftChartsTheme>('rail-dark')
   const [width, setWidth] = useState(760)
   const [height, setHeight] = useState(480)
@@ -407,6 +416,7 @@ export function SandboxApp() {
       if (replace) window.history.replaceState({}, '', chartPagePath(nextType))
       else window.history.pushState({}, '', chartPagePath(nextType))
     }
+    setIsTokenExplorer(false)
     setChartType(nextType)
     setTitle(CHART_PAGE_DETAILS[nextType].defaultTitle)
     setDataText(json(DATA_BY_TYPE[nextType]))
@@ -417,8 +427,17 @@ export function SandboxApp() {
     setMeasuredSnapshot(null)
   }, [])
 
+  const loadTokenExplorer = useCallback(() => {
+    if (typeof window !== 'undefined') window.history.pushState({}, '', '/tokens')
+    setIsTokenExplorer(true)
+  }, [])
+
   useEffect(() => {
     const handlePopState = () => {
+      if (isTokenExplorerPath(window.location.pathname)) {
+        setIsTokenExplorer(true)
+        return
+      }
       loadChartPage(chartTypeFromPath(window.location.pathname), true)
     }
     window.addEventListener('popstate', handlePopState)
@@ -638,6 +657,10 @@ export function SandboxApp() {
     legend: displayPlan?.legend ?? null,
   })
 
+  if (isTokenExplorer) {
+    return <TokenExplorer theme={theme} onThemeChange={setTheme} onOpenChart={() => loadChartPage('line')} />
+  }
+
   return (
     <main
       className={`sandbox shiftcharts-theme-${theme}`}
@@ -652,6 +675,7 @@ export function SandboxApp() {
           <strong>Geometry first · grid later</strong>
         </div>
         <div className="sandbox__family-links">
+          <a href="/tokens" onClick={(event) => { event.preventDefault(); loadTokenExplorer() }}>Tokens</a>
           {CHART_TYPES.map((type) => (
             <a
               key={type}
@@ -959,6 +983,122 @@ export function SandboxApp() {
           </section>
         </aside>
       </div>
+    </main>
+  )
+}
+
+function tokenPurpose(token: Token, group: string): string {
+  const label = token.name.replaceAll('-', ' ')
+  if (token.name.startsWith('series-')) return 'Assigns one stable data-series identity colour.'
+  if (token.name.startsWith('ramp-')) return 'Defines one step in the shared neutral or sequential colour ramp.'
+  if (token.name.endsWith('-color')) return `Sets the colour used for ${label.replace(/ color$/, '')}.`
+  if (token.name.includes('font-') || token.name.includes('letter-spacing')) return `Controls the typography used for ${label.replace(/ font /, ' ')}.`
+  if (token.name.includes('radius')) return `Sets the corner treatment for ${label.replace(/ radius$/, '')}.`
+  if (token.name.includes('shadow')) return `Sets the elevation treatment for ${label.replace(/ shadow$/, '')}.`
+  if (token.name.startsWith('motion-')) return `Controls the timing or movement behaviour for ${label.replace(/^motion /, '')}.`
+  if (token.name.startsWith('legend-')) return `Controls the legend's ${label.replace(/^legend /, '')}.`
+  if (token.name.startsWith('tooltip-') || token.name.startsWith('crosshair-')) return `Controls the interaction-layer ${label.replace(/^(tooltip|crosshair) /, '')}.`
+  if (token.name.startsWith('axis-') || token.name.startsWith('grid-') || token.name.startsWith('tick-')) return `Controls axis or guide ${label.replace(/^(axis|grid|tick) /, '')}.`
+  return `Controls ${label} in the ${group.toLowerCase()} system.`
+}
+
+function TokenExplorer({
+  theme,
+  onThemeChange,
+  onOpenChart,
+}: {
+  readonly theme: ShiftChartsTheme
+  readonly onThemeChange: (theme: ShiftChartsTheme) => void
+  readonly onOpenChart: () => void
+}) {
+  const rootRef = useRef<HTMLElement>(null)
+  const [query, setQuery] = useState('')
+  const [activeGroup, setActiveGroup] = useState('All groups')
+  const [copied, setCopied] = useState<string | null>(null)
+  const [computedValues, setComputedValues] = useState<Readonly<Record<string, string>>>({})
+  const tokenCount = TOKEN_GROUPS.reduce((total, group) => total + group.tokens.length, 0)
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      const root = rootRef.current
+      if (root === null) return
+      const styles = window.getComputedStyle(root)
+      setComputedValues(Object.fromEntries(
+        TOKEN_GROUPS.flatMap((group) => group.tokens.map((token) => [token.name, styles.getPropertyValue(`--shiftcharts-${token.name}`).trim()])),
+      ))
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [theme])
+
+  const visibleGroups = useMemo(() => {
+    const needle = query.trim().toLowerCase()
+    return TOKEN_GROUPS.flatMap((group) => {
+      if (activeGroup !== 'All groups' && activeGroup !== group.title) return []
+      const tokens = group.tokens.filter((token) => {
+        const searchable = [token.name, token.value, token.source, token.note, token.aside, tokenPurpose(token, group.title)]
+          .filter((value): value is string => value !== undefined)
+          .join(' ')
+          .toLowerCase()
+        return needle === '' || searchable.includes(needle)
+      })
+      return tokens.length === 0 ? [] : [{ ...group, tokens }]
+    })
+  }, [activeGroup, query])
+
+  const copy = async (name: string) => {
+    try {
+      await navigator.clipboard.writeText(`var(--shiftcharts-${name})`)
+      setCopied(name)
+      window.setTimeout(() => setCopied(null), 1400)
+    } catch {
+      setCopied(null)
+    }
+  }
+
+  const visibleTokenCount = visibleGroups.reduce((total, group) => total + group.tokens.length, 0)
+
+  return (
+    <main ref={rootRef} className={`sandbox sandbox--tokens shiftcharts-theme-${theme}`} data-shiftcharts-theme={theme}>
+      <nav className="sandbox__family-nav" aria-label="Sandbox pages">
+        <div className="sandbox__family-nav-intro"><strong>ShiftCharts sandbox</strong></div>
+        <div className="sandbox__family-links"><a href="/charts/line" onClick={(event) => { event.preventDefault(); onOpenChart() }}>Chart studio</a><a href="/tokens" aria-current="page">Tokens</a></div>
+      </nav>
+
+      <header className="sandbox__token-header">
+        <div>
+          <h1>Every visual control.<br /><em>Named before you need it.</em></h1>
+          <p>Browse the complete shipped CSS token system. Each entry shows the custom property, the live theme value, its purpose, and the evidence behind it.</p>
+        </div>
+        <dl className="sandbox__token-summary" aria-label="Token explorer summary"><div><dt>Shipped tokens</dt><dd>{tokenCount}</dd></div><div><dt>Visible now</dt><dd>{visibleTokenCount}</dd></div><div><dt>Theme</dt><dd>{theme}</dd></div></dl>
+      </header>
+
+      <section className="sandbox__token-toolbar" aria-label="Token filters">
+        <label className="sandbox__token-search"><span>Search tokens</span><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="colour, tooltip, spacing, source…" /></label>
+        <label className="sandbox__token-filter"><span>Group</span><select value={activeGroup} onChange={(event) => setActiveGroup(event.target.value)}><option>All groups</option>{TOKEN_GROUPS.map((group) => <option key={group.title}>{group.title}</option>)}</select></label>
+        <label className="sandbox__token-filter"><span>Theme preview</span><select value={theme} onChange={(event) => onThemeChange(event.target.value as ShiftChartsTheme)}>{SHIFTCHARTS_THEMES.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
+      </section>
+
+      <section className="sandbox__token-catalogue" aria-live="polite">
+        {visibleGroups.length === 0 ? <p className="sandbox__token-empty">No token matches “{query}”. Try a token name, a group, or a source term.</p> : visibleGroups.map((group) => (
+          <section className="sandbox__token-group" key={group.title} aria-labelledby={`token-group-${group.title}`}>
+            <header><div><h2 id={`token-group-${group.title}`}>{group.title}</h2>{group.note === undefined ? null : <p>{group.note}</p>}</div><span>{group.tokens.length} tokens</span></header>
+            <div className="sandbox__token-cards">
+              {group.tokens.map((token) => {
+                const property = `--shiftcharts-${token.name}`
+                const currentValue = computedValues[token.name] || token.value
+                const swatch = token.name.includes('color') || token.name.startsWith('series-') || token.name.startsWith('ramp-')
+                return <article className="sandbox__token-card" key={token.name}>
+                  <div className="sandbox__token-card-head">{swatch ? <span className="sandbox__token-card-swatch" style={{ background: `var(${property})` }} aria-hidden="true" /> : null}<code>{property}</code><span className={`sandbox__token-tier sandbox__token-tier--${token.tier}`}>{token.tier}</span></div>
+                  <p className="sandbox__token-purpose">{tokenPurpose(token, group.title)}</p>
+                  <dl><div><dt>Live value</dt><dd><code>{currentValue}</code></dd></div><div><dt>Source value</dt><dd><code>{token.value}</code></dd></div><div><dt>Evidence</dt><dd>{token.source}</dd></div>{token.aside === undefined ? null : <div><dt>Detail</dt><dd>{token.aside}</dd></div>}</dl>
+                  {token.note === undefined ? null : <details className="sandbox__token-note"><summary>Why this exists</summary><p>{token.note}</p></details>}
+                  <button type="button" className="sandbox__button sandbox__button--quiet" onClick={() => copy(token.name)}>{copied === token.name ? 'Copied CSS reference' : 'Copy var() reference'}</button>
+                </article>
+              })}
+            </div>
+          </section>
+        ))}
+      </section>
     </main>
   )
 }

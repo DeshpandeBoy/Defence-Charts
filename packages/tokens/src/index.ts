@@ -23,6 +23,7 @@
  * `pnpm lint:tokens:drift` rejects a list that has fallen behind the stylesheet.
  */
 export { SHIFTCHARTS_TOKENS } from './tokens.generated.ts'
+export { TOKEN_GROUPS, type Token, type TokenGroup } from './tokens.ts'
 
 // ⚠ `import type` even though `SHIFTCHARTS_TOKENS` is a value: it is used here only inside a
 // `typeof` query, so the binding is erased. A plain import would be a second runtime
