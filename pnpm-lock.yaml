@@ -130,6 +130,37 @@ importers:
         specifier: ^19.2.0
         version: 19.2.4(@types/react@19.2.18)
 
+  apps/sandbox:
+    dependencies:
+      '@shiftcharts/core':
+        specifier: workspace:*
+        version: link:../../packages/core
+      '@shiftcharts/primitives':
+        specifier: workspace:*
+        version: link:../../packages/primitives
+      '@shiftcharts/tokens':
+        specifier: workspace:*
+        version: link:../../packages/tokens
+      react:
+        specifier: ^19.2.0
+        version: 19.2.8
+      react-dom:
+        specifier: ^19.2.0
+        version: 19.2.8(react@19.2.8)
+    devDependencies:
+      '@types/react':
+        specifier: ^19.2.0
+        version: 19.2.18
+      '@types/react-dom':
+        specifier: ^19.2.0
+        version: 19.2.4(@types/react@19.2.18)
+      '@vitejs/plugin-react':
+        specifier: ^5.1.0
+        version: 5.2.0(vite@7.3.6(@types/node@26.2.0)(jiti@2.7.0)(lightningcss@1.33.0)(yaml@2.9.0))
+      vite:
+        specifier: ^7.2.0
+        version: 7.3.6(@types/node@26.2.0)(jiti@2.7.0)(lightningcss@1.33.0)(yaml@2.9.0)
+
   docs:
     dependencies:
       '@fontsource-variable/roboto-flex':
