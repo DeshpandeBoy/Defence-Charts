@@ -3,6 +3,16 @@
 This note records the implementation analysis behind the sandbox workbench. It is intentionally
 specific to the shipped ShiftCharts source and does not treat the sandbox as a second chart engine.
 
+## 0. Chart-family page model
+
+The sandbox exposes one geometry-first page per registered family under `/charts/<type>`:
+`line`, `area`, `bar`, `timebar`, `scatter`, `donut`, `kpi`, `progress`, `heatmap`, and `funnel`.
+Each page starts with that family's valid sample and keeps the existing style, policy, override,
+token, and interaction controls available. The geometry inspector is intentionally read-only: it
+reports the measured content box, matching SVG viewBox, resolved plot box, and legend mode so the
+next pass can fix one family at a time with concrete numbers. React-grid placement, cell
+constraints, collision, and compaction remain outside this page task.
+
 ## 1. Styling provenance
 
 The chart is not rendered by a third-party chart component with a hidden default skin. ShiftCharts

@@ -1,5 +1,5 @@
 import type { CSSProperties, ChangeEvent } from 'react'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 import type {
   ChartPlan,
@@ -13,6 +13,7 @@ import {
   DEFAULT_POLICY,
   describeShape,
   planChart,
+  resolveFrame,
   sizeContextFromPixels,
 } from '@shiftcharts/core'
 import { AutoChart, LegendControl } from '@shiftcharts/react'
@@ -36,6 +37,85 @@ const CHART_TYPES: readonly ChartType[] = [
   'heatmap',
   'funnel',
 ]
+
+type ChartPageDetails = {
+  readonly label: string
+  readonly defaultTitle: string
+  readonly description: string
+  readonly geometryFocus: string
+}
+
+const CHART_PAGE_DETAILS: Readonly<Record<ChartType, ChartPageDetails>> = {
+  line: {
+    label: 'Line',
+    defaultTitle: 'ShiftCharts line geometry study',
+    description: 'Inspect direct end labels, shared x positions, and the plot-to-axis relationship.',
+    geometryFocus: 'Direct labels and time-series plot bounds',
+  },
+  area: {
+    label: 'Area',
+    defaultTitle: 'ShiftCharts area geometry study',
+    description: 'Inspect stacked ink, baseline treatment, and label clearance around filled marks.',
+    geometryFocus: 'Filled mark envelope and baseline clearance',
+  },
+  bar: {
+    label: 'Bar',
+    defaultTitle: 'ShiftCharts bar geometry study',
+    description: 'Inspect category slots, bar widths, gaps, and value-label placement.',
+    geometryFocus: 'Category slots, gaps, and bar envelopes',
+  },
+  timebar: {
+    label: 'Timebar',
+    defaultTitle: 'ShiftCharts timebar geometry study',
+    description: 'Inspect temporal bins, interval widths, and axis density across a measured box.',
+    geometryFocus: 'Temporal bins and interval geometry',
+  },
+  scatter: {
+    label: 'Scatter',
+    defaultTitle: 'ShiftCharts scatter geometry study',
+    description: 'Inspect point density, plot bounds, and series separation without grid placement.',
+    geometryFocus: 'Point bounds, density, and plot gutters',
+  },
+  donut: {
+    label: 'Donut',
+    defaultTitle: 'ShiftCharts donut geometry study',
+    description: 'Inspect radial bounds, slice spacing, center value treatment, and legend demand.',
+    geometryFocus: 'Radial bounds and slice/value clearance',
+  },
+  kpi: {
+    label: 'KPI',
+    defaultTitle: 'ShiftCharts KPI geometry study',
+    description: 'Inspect the value region, supporting context, and status treatment inside a tile.',
+    geometryFocus: 'Value region and supporting context',
+  },
+  progress: {
+    label: 'Progress',
+    defaultTitle: 'ShiftCharts progress geometry study',
+    description: 'Inspect target-aware fill, track bounds, and the value-to-label relationship.',
+    geometryFocus: 'Track, fill, target, and value geometry',
+  },
+  heatmap: {
+    label: 'Heatmap',
+    defaultTitle: 'ShiftCharts heatmap geometry study',
+    description: 'Inspect temporal cell sizing, missing values, and the intensity legend seam.',
+    geometryFocus: 'Temporal cell matrix and intensity scale',
+  },
+  funnel: {
+    label: 'Funnel',
+    defaultTitle: 'ShiftCharts funnel geometry study',
+    description: 'Inspect ordered stage bands, conversion context, and label/value clearance.',
+    geometryFocus: 'Ordered stage bands and conversion geometry',
+  },
+}
+
+function chartPagePath(type: ChartType): string {
+  return `/charts/${type}`
+}
+
+function chartTypeFromPath(pathname: string): ChartType {
+  const candidate = pathname.match(/^\/charts\/([^/]+)\/?$/)?.[1]
+  return CHART_TYPES.find((type) => type === candidate) ?? 'line'
+}
 
 const SIZE_PRESETS = [
   { id: 'micro', label: 'Micro', width: 150, height: 110 },
@@ -305,12 +385,13 @@ function displayValue(value: unknown): string {
 }
 
 export function SandboxApp() {
-  const [chartType, setChartType] = useState<ChartType>('line')
+  const initialChartType = chartTypeFromPath(typeof window === 'undefined' ? '/' : window.location.pathname)
+  const [chartType, setChartType] = useState<ChartType>(initialChartType)
   const [theme, setTheme] = useState<ShiftChartsTheme>('rail-dark')
   const [width, setWidth] = useState(760)
   const [height, setHeight] = useState(480)
-  const [title, setTitle] = useState('ShiftCharts design study')
-  const [dataText, setDataText] = useState(() => json(DATA_BY_TYPE.line))
+  const [title, setTitle] = useState(() => CHART_PAGE_DETAILS[initialChartType].defaultTitle)
+  const [dataText, setDataText] = useState(() => json(DATA_BY_TYPE[initialChartType]))
   const [policy, setPolicy] = useState<PlanPolicy>(DEFAULT_POLICY)
   const [policyText, setPolicyText] = useState(() => json(DEFAULT_POLICY))
   const [policyError, setPolicyError] = useState<string | null>(null)
@@ -322,6 +403,29 @@ export function SandboxApp() {
   const [activePointHighlight, setActivePointHighlight] = useState(true)
   const [legendHiddenSeriesIds, setLegendHiddenSeriesIds] = useState<readonly string[]>([])
   const [measuredSnapshot, setMeasuredSnapshot] = useState<MeasuredSnapshot | null>(null)
+
+  const loadChartPage = useCallback((nextType: ChartType, replace = false) => {
+    if (typeof window !== 'undefined') {
+      if (replace) window.history.replaceState({}, '', chartPagePath(nextType))
+      else window.history.pushState({}, '', chartPagePath(nextType))
+    }
+    setChartType(nextType)
+    setTitle(CHART_PAGE_DETAILS[nextType].defaultTitle)
+    setDataText(json(DATA_BY_TYPE[nextType]))
+    setOverrideText(json(SANDBOX_DEFAULT_OVERRIDES))
+    setOverrideError(null)
+    setActivePointHighlight(true)
+    setLegendHiddenSeriesIds([])
+    setMeasuredSnapshot(null)
+  }, [])
+
+  useEffect(() => {
+    const handlePopState = () => {
+      loadChartPage(chartTypeFromPath(window.location.pathname), true)
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [loadChartPage])
 
   const parsedData = useMemo(() => parseData(dataText), [dataText])
   const data = parsedData.data ?? DATA_BY_TYPE[chartType]
@@ -480,21 +584,16 @@ export function SandboxApp() {
   }
 
   const reset = () => {
-    setChartType('line')
+    loadChartPage('line', true)
     setTheme('rail-dark')
     setWidth(760)
     setHeight(480)
-    setTitle('ShiftCharts design study')
-    setDataText(json(DATA_BY_TYPE.line))
     updatePolicy(DEFAULT_POLICY)
-    setOverrideText(json(SANDBOX_DEFAULT_OVERRIDES))
-    setOverrideError(null)
     setTokenOverrides({})
     setTokenSearch('')
-    setActivePointHighlight(true)
-    setLegendHiddenSeriesIds([])
-    setMeasuredSnapshot(null)
   }
+
+  const pageDetails = CHART_PAGE_DETAILS[chartType]
 
   const setLegendVisibility = useCallback((seriesId: string, visible: boolean) => {
     setLegendHiddenSeriesIds((current) => {
@@ -516,6 +615,30 @@ export function SandboxApp() {
   const xAxisOverride = isRecord(axesOverride.x) ? axesOverride.x : {}
   const yAxisOverride = isRecord(axesOverride.y) ? axesOverride.y : {}
   const tableOverride = isRecord(overrideObject.dataTable) ? overrideObject.dataTable : {}
+  const geometryFrame = useMemo(() => {
+    if (currentSnapshot === null || displayPlan === null || parsedData.error !== null) return null
+    try {
+      return resolveFrame(
+        displayPlan,
+        data,
+        sizeContextFromPixels(currentSnapshot.width, currentSnapshot.height),
+        policy,
+      )
+    } catch {
+      return null
+    }
+  }, [currentSnapshot, data, displayPlan, parsedData.error, policy])
+  const geometryJson = json({
+    page: chartPagePath(chartType),
+    scope: 'standalone measured pixels; React-grid placement deferred',
+    measuredContentBox: currentSnapshot === null
+      ? null
+      : { width: currentSnapshot.width, height: currentSnapshot.height },
+    svgViewBox: currentSnapshot === null ? null : `0 0 ${currentSnapshot.width} ${currentSnapshot.height}`,
+    frameBox: geometryFrame === null ? null : geometryFrame.box,
+    plotBox: geometryFrame === null ? null : geometryFrame.plot,
+    legend: displayPlan?.legend ?? null,
+  })
 
   return (
     <main
@@ -525,13 +648,34 @@ export function SandboxApp() {
         Object.entries(tokenOverrides).map(([name, value]) => [toCustomProperty(name as ShiftChartsTokenName), value]),
       ) as CSSProperties}
     >
+      <nav className="sandbox__family-nav" aria-label="Chart family pages">
+        <div className="sandbox__family-nav-intro">
+          <p className="sandbox__section-label">Chart family pages</p>
+          <strong>Geometry first · grid later</strong>
+        </div>
+        <div className="sandbox__family-links">
+          {CHART_TYPES.map((type) => (
+            <a
+              key={type}
+              href={chartPagePath(type)}
+              aria-current={type === chartType ? 'page' : undefined}
+              onClick={(event) => {
+                event.preventDefault()
+                loadChartPage(type)
+              }}
+            >
+              {CHART_PAGE_DETAILS[type].label}
+            </a>
+          ))}
+        </div>
+      </nav>
       <header className="sandbox__header">
         <div>
-          <p className="sandbox__eyebrow">ShiftCharts / design sandbox</p>
-          <h1>Shape the system.<br /><em>See the chart follow.</em></h1>
+          <p className="sandbox__eyebrow">ShiftCharts / {pageDetails.label} page</p>
+          <h1>{pageDetails.label} geometry.<br /><em>Measure it before we place it.</em></h1>
           <p className="sandbox__lede">
-            Tune the chart’s information, geometry, ink, labels, and motion from one isolated
-            surface. Every plan below is resolved by <code>@shiftcharts/core</code>.
+            {pageDetails.description} Every plan below is resolved by <code>@shiftcharts/core</code>;
+            React-grid placement follows in a later pass.
           </p>
         </div>
         <div className="sandbox__header-actions">
@@ -548,7 +692,7 @@ export function SandboxApp() {
           <div className="sandbox__section-heading">
             <div>
               <p className="sandbox__section-label">Live preview</p>
-              <h2 id="sandbox-preview-title">The chart is the source of truth</h2>
+              <h2 id="sandbox-preview-title">The {pageDetails.label} is the source of truth</h2>
             </div>
             <span className="sandbox__fingerprint">{fingerprint(planJson)}</span>
           </div>
@@ -585,6 +729,24 @@ export function SandboxApp() {
             <span><small>Measured box</small><strong>{currentSnapshot === null ? 'waiting' : `${Math.round(currentSnapshot.width)} × ${Math.round(currentSnapshot.height)}`}</strong></span>
           </div>
 
+          <section className="sandbox__geometry-study" aria-labelledby="sandbox-geometry-study-title">
+            <div className="sandbox__geometry-heading">
+              <div>
+                <p className="sandbox__section-label">Geometry inspector</p>
+                <h3 id="sandbox-geometry-study-title">{pageDetails.geometryFocus}</h3>
+              </div>
+              <span className="sandbox__geometry-route">{chartPagePath(chartType)}</span>
+            </div>
+            <div className="sandbox__geometry-grid">
+              <GeometryMetric label="Measured content" value={currentSnapshot === null ? 'waiting' : `${Math.round(currentSnapshot.width)} × ${Math.round(currentSnapshot.height)} px`} />
+              <GeometryMetric label="SVG viewBox" value={currentSnapshot === null ? 'waiting' : `0 0 ${Math.round(currentSnapshot.width)} ${Math.round(currentSnapshot.height)}`} />
+              <GeometryMetric label="Plot box" value={geometryFrame === null ? 'waiting' : `${Math.round(geometryFrame.plot.width)} × ${Math.round(geometryFrame.plot.height)} px`} />
+              <GeometryMetric label="Legend mode" value={displayPlan?.legend.placement ?? 'waiting'} />
+            </div>
+            <pre className="sandbox__geometry-output" aria-label="Measured chart geometry JSON">{geometryJson}</pre>
+            <p className="sandbox__help">This page records standalone pixel geometry only. The later grid pass will supply widget placement and cell constraints without changing this chart geometry contract.</p>
+          </section>
+
           <section className="sandbox__legend-study" aria-labelledby="sandbox-legend-study-title">
             <div>
               <p className="sandbox__section-label">Controlled legend study</p>
@@ -617,7 +779,7 @@ export function SandboxApp() {
             <SectionTitle eyebrow="01 / composition" title="Chart and canvas" />
             <label className="sandbox__field">
               <span>Chart type</span>
-              <select aria-label="Chart type" value={chartType} onChange={(event) => setChartType(event.target.value as ChartType)}>
+              <select aria-label="Chart type" value={chartType} onChange={(event) => loadChartPage(event.target.value as ChartType)}>
                 {CHART_TYPES.map((type) => <option key={type} value={type}>{type}</option>)}
               </select>
             </label>
@@ -809,6 +971,10 @@ function SectionTitle({ eyebrow, title }: { readonly eyebrow: string; readonly t
 
 function OverrideSelect({ label, value, options, onChange }: { readonly label: string; readonly value: string; readonly options: readonly string[]; readonly onChange: (value: string) => void }) {
   return <label className="sandbox__field"><span>{label}</span><select aria-label={label} value={value} onChange={(event) => onChange(event.target.value)}>{options.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
+}
+
+function GeometryMetric({ label, value }: { readonly label: string; readonly value: string }) {
+  return <span className="sandbox__geometry-metric"><small>{label}</small><strong>{value}</strong></span>
 }
 
 function ToggleOverride({ label, value, onChange }: { readonly label: string; readonly value: unknown; readonly onChange: (value: boolean | null) => void }) {

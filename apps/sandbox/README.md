@@ -10,6 +10,24 @@ pnpm --filter @shiftcharts/sandbox dev
 
 Open <http://localhost:5176>.
 
+Each registered family has a geometry-first page:
+
+- `/charts/line`
+- `/charts/area`
+- `/charts/bar`
+- `/charts/timebar`
+- `/charts/scatter`
+- `/charts/donut`
+- `/charts/kpi`
+- `/charts/progress`
+- `/charts/heatmap`
+- `/charts/funnel`
+
+The family navigation and chart-type selector load the matching valid sample. The geometry
+inspector reports the measured content box, SVG viewBox, resolved plot box, and legend mode for
+the current page. This pass intentionally studies standalone pixel geometry; React-grid widget
+placement and cell constraints are deferred to a later integration pass.
+
 ## What it controls
 
 - all ten registered chart types and sample data;
