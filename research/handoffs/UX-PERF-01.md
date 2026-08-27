@@ -9,7 +9,7 @@ worktree: /Users/dhanyarao/Documents/Defence
 base_commit: 26c9cc9a41be5af0c732e6e29aa2098ddaee1fae
 depends_on: [I1.1, I1.2, I1.3, I1.5, UX-LEGEND-01]
 started_at: 2026-08-27T23:55:00+05:30
-last_checkpoint: 2026-08-28T00:34:00+05:30
+last_checkpoint: 2026-08-28T01:05:00+05:30
 last_checkpoint_commit: 75dad81
 ---
 
@@ -112,6 +112,9 @@ interaction semantics, touch and keyboard behavior, and the DOM-free core bounda
 - Corrected the prepared-index ordinal seam so finite-y points with invalid x values remain paired
   with their original source indexes; non-finite pixel coordinates are excluded only from nearest
   lookup, not from identity tables.
+- Added `scripts/compare-interaction-performance.mjs` and a root README comparison table. The
+  merge gate is structural: the latest run must reduce client-rect reads to one or fewer and
+  report zero runtime errors; single-run timing remains informational.
 
 ## Decisions and constraints
 
@@ -142,12 +145,15 @@ interaction semantics, touch and keyboard behavior, and the DOM-free core bounda
 | `node scripts/check-scatter-interaction-performance.mjs` | 0 | 1,900-point exhaustive-XY baseline: 24 samples, `boundsReads: 1`, 23 distinct datums, 207.3ms total / 8.64ms mean, `interactionMode: rich`, zero runtime errors; result in `scripts/results/ux-perf-01-scatter-interaction.latest.json`. |
 | `node scripts/check-interaction-browser.mjs` | 0 | I1.5 touch/keyboard/legend/resize/static/reduced-motion/forced-colors matrix passed with zero runtime errors. |
 | `node scripts/check-scatter-interaction-performance.mjs` | 0 | 1,900-point scatter baseline: 24 samples, `boundsReads: 1`, 23 distinct datums, 207.3ms total / 8.64ms mean, `interactionMode: rich`, zero runtime errors; result in `scripts/results/ux-perf-01-scatter-interaction.latest.json`. |
+| `node scripts/compare-interaction-performance.mjs` | 0 | Baseline/current comparison passed: client-rect reads 24→1 (95.8% reduction), elapsed time 207.3→206.6ms (-0.34%, informational), 23 distinct datums preserved, zero runtime errors. |
+| `/opt/homebrew/bin/pnpm exec eslint scripts/compare-interaction-performance.mjs` | 0 | Comparator lint passed. |
 | `git diff --check` | 0 | Passed. |
 
 ## Exact next action
 
-Run the narrow checks from the current checkpoint, then compare the checked-in scatter baseline
-against any future spatial-index prototype. The current 1,900-point workload does not justify a
-2D index from one machine's timing alone, so leave scatter on exhaustive XY and do not change the
-core point budget or renderer seam in this task. The next broader gate is the repository's normal
-package/browser verification before coordinator integration.
+The source branch is ready for coordinator integration. Compare the captured evidence, fast-forward
+`Fine-Tuning-V1`, rerun the focused/browser/typecheck gates there, then fast-forward `main` only if
+those gates pass. Do not push either branch. Leave the working tree on `Fine-Tuning-V1` for the next
+workstream. The current 1,900-point scatter workload does not justify a 2D index from one machine's
+timing alone, so leave scatter on exhaustive XY and do not change the core point budget or renderer
+seam in this task.
