@@ -2,7 +2,17 @@ version: 2
 
 updates:
   - package-ecosystem: npm
-    directory: /
+    directories:
+      - /
+      - /apps/playground
+      - /apps/rsc-fixture
+      - /docs
+      - /packages/core
+      - /packages/grid
+      - /packages/primitives
+      - /packages/react
+      - /packages/testing
+      - /packages/tokens
     schedule:
       interval: weekly
     open-pull-requests-limit: 5

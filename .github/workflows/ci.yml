@@ -29,15 +29,15 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           persist-credentials: false
 
       - name: Install pnpm
-        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
         # Version comes from `packageManager` in package.json — declared in one place.
 
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           # ⚠ 24, not 22 or latest. `dependency-cruiser@18` declares `^22||^24||>=26`, so
           # Node 20 (EOL April 2026) and Node 25 (odd-numbered, skipped) both fail gate
@@ -179,14 +179,14 @@ jobs:
       # ⚠ Byte-identical to `verify`'s setup block, deliberately. Two browser gates failing
       # on a runner configured differently from the one every other gate runs on would be a
       # day spent on the difference before anyone looked at the chart.
-      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
         with:
           persist-credentials: false
 
       - name: Install pnpm
-        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
 
-      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444
+      - uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: 24
           cache: pnpm
@@ -220,7 +220,7 @@ jobs:
       # the resolver: a near-miss restore would hand the job a browser from a different
       # version, and a browser gate is only evidence if you know which browser it drove.
       - name: Cache the Chromium download
-        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: ~/.cache/ms-playwright
           key: ms-playwright-${{ runner.os }}-${{ runner.arch }}-${{ steps.playwright.outputs.version }}
