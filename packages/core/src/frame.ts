@@ -1038,6 +1038,21 @@ export function resolveFrame(
     // own ragged extent — the property `'endpoints'` deliberately does not have.
     .nice(plan.axes.y.ticks.mode === 'count' ? plan.axes.y.ticks.count : 5)
 
+  // A horizontal bar chart keeps the same zero-baseline value semantics, but values travel
+  // along x and categories occupy evenly spaced y bands. This is intentionally resolved in
+  // the frame (where values exist), not the planner (which only sees data shape).
+  const barValueXScale =
+    mark.kind === 'bar' && plan.orientation === 'horizontal'
+      ? scaleLinear()
+          .domain([yd[0], yd[1]])
+          .range([plot.x, plot.x + plot.width])
+          .nice(plan.axes.y.ticks.mode === 'count' ? plan.axes.y.ticks.count : 5)
+      : null
+  const barCategoryY =
+    barValueXScale === null
+      ? null
+      : new Map(sortedX.map((value, index) => [value, plot.y + ((index + 0.5) * plot.height) / Math.max(1, sortedX.length)]))
+
   const toX = (v: number | Date): number => x.at(v instanceof Date ? v.getTime() : v)
 
   // Category centres are shared across series so grouped bars keep the same slot even when one
@@ -1065,6 +1080,9 @@ export function resolveFrame(
       sortedX,
       heatmapExtent(data),
       plan.type === 'funnel',
+      plan.orientation,
+      barValueXScale,
+      barCategoryY,
     ),
   )
 
@@ -1098,19 +1116,32 @@ export function resolveFrame(
   return Object.freeze({
     box,
     plot,
-    xTicks: computeTicks(
-      plan.axes.x.ticks,
-      x,
-      sortedX,
-      (v) => mark.kind === 'cell' && temporal
-        ? formatHeatmapXLabel(new Date(v))
-        : formatXLabel(temporal ? new Date(v) : v),
-      temporal,
-      plot.x,
-      plan.axes.x.tickExtra,
-    ),
+    xTicks:
+      barValueXScale === null
+        ? computeTicks(
+            plan.axes.x.ticks,
+            x,
+            sortedX,
+            (v) => mark.kind === 'cell' && temporal
+              ? formatHeatmapXLabel(new Date(v))
+              : formatXLabel(temporal ? new Date(v) : v),
+            temporal,
+            plot.x,
+            plan.axes.x.tickExtra,
+          )
+        : computeTicks(
+            plan.axes.y.ticks,
+            wrapLinear(barValueXScale),
+            [yd[0], yd[1]],
+            formatYLabel,
+            false,
+            plot.x,
+            plan.axes.y.tickExtra,
+          ),
     yTicks:
-      mark.kind === 'cell'
+      barCategoryY !== null
+        ? barCategoryTicks(data, sortedX, barCategoryY, plot)
+        : mark.kind === 'cell'
         ? heatmapRowTicks(series, plot)
         : computeTicks(
             plan.axes.y.ticks,
@@ -1122,9 +1153,30 @@ export function resolveFrame(
             plan.axes.y.tickExtra,
           ),
     series: Object.freeze(series),
-    zeroLine: (ylo ?? 0) <= 0 && (yhi ?? 0) >= 0 ? yScale(0) : null,
+    zeroLine: barValueXScale === null && (ylo ?? 0) <= 0 && (yhi ?? 0) >= 0 ? yScale(0) : null,
     value,
   })
+}
+
+/** Horizontal bars make categories the y-axis. Preserve an explicit category where supplied. */
+function barCategoryTicks(
+  data: readonly Series[],
+  categories: readonly number[],
+  positions: ReadonlyMap<number, number>,
+  plot: Rect,
+): readonly ComputedTick[] {
+  return Object.freeze(
+    categories.flatMap((value) => {
+      const source = data.flatMap((series) => series.points).find((point) => xValue(point) === value)
+      const y = positions.get(value)
+      if (source === undefined || y === undefined) return []
+      return [Object.freeze({
+        value,
+        offset: y - plot.y,
+        label: source.category ?? formatXLabel(source.x),
+      })]
+    }),
+  )
 }
 
 function wrapLinear(s: LinearScale): AxisScale {
@@ -1211,6 +1263,9 @@ function seriesFrame(
   heatmapColumns: readonly number[],
   heatmapValueExtent: readonly [number, number],
   funnelSummary: boolean,
+  orientation: ChartPlan['orientation'],
+  barValueXScale: LinearScale | null,
+  barCategoryY: ReadonlyMap<number, number> | null,
 ): SeriesFrame {
   const defined = (p: DataPoint): boolean => p.y !== null && Number.isFinite(p.y)
 
@@ -1262,6 +1317,36 @@ function seriesFrame(
       aggregate.temporalBin,
     )
   } else if (mark.kind === 'bar') {
+    if (orientation === 'horizontal' && barValueXScale !== null && barCategoryY !== null) {
+      const categoryHeight = Math.max(1, plot.height / Math.max(1, barCategoryY.size) * 0.8)
+      const slotHeight = mark.grouped ? categoryHeight / Math.max(1, seriesCount) : categoryHeight
+      const barHeight = Math.max(1, slotHeight * 0.9)
+      const baseline = barValueXScale(0)
+      const cellsArr: CellFrame[] = []
+      const barPoints: PointPos[] = []
+
+      for (const source of s.points) {
+        if (!defined(source)) continue
+        const categoryY = barCategoryY.get(xValue(source))
+        if (categoryY === undefined) continue
+        const slotOffset = mark.grouped ? (index - (seriesCount - 1) / 2) * slotHeight : 0
+        const rawY = categoryY + slotOffset - barHeight / 2
+        const maxY = Math.max(plot.y, plot.y + plot.height - barHeight)
+        const y = Math.min(maxY, Math.max(plot.y, rawY))
+        const valueX = barValueXScale(source.y as number)
+        cellsArr.push(
+          Object.freeze({
+            x: Math.min(baseline, valueX),
+            y,
+            width: Math.max(0.5, Math.abs(baseline - valueX)),
+            height: barHeight,
+          }),
+        )
+        barPoints.push(Object.freeze({ x: valueX, y: categoryY + slotOffset, value: source.y as number }))
+      }
+      cells = Object.freeze(cellsArr)
+      points.splice(0, points.length, ...barPoints)
+    } else {
     const categoryWidth = Math.max(1, categoryStep * 0.8)
     const slotWidth = mark.grouped ? categoryWidth / Math.max(1, seriesCount) : categoryWidth
     const barWidth = Math.max(1, slotWidth * 0.9)
@@ -1286,6 +1371,7 @@ function seriesFrame(
       )
     }
     cells = Object.freeze(cellsArr)
+    }
   } else if (mark.kind === 'arc') {
     arcs = donutArcs(s, aggregate, plot)
   } else if (mark.kind === 'progress') {

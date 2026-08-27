@@ -380,6 +380,21 @@ describe('the y axis', () => {
 })
 
 describe('bar geometry', () => {
+  it('uses the serialisable orientation override to transpose grouped bar geometry', () => {
+    const ctx = sizeContextFromPixels(760, 480)
+    const plan = planChart('bar', ctx, describeShape(BAR_DATA), undefined, { orientation: 'horizontal' })
+    const frame = resolveFrame(plan, BAR_DATA, ctx)
+    const bars = frame.series.flatMap((series) => series.cells)
+
+    expect(plan.orientation).toBe('horizontal')
+    expect(bars).toHaveLength(BAR_DATA.length * 3)
+    expect(bars.every((bar) => bar.width >= 0.5 && bar.height > 0)).toBe(true)
+    expect(new Set(bars.map((bar) => bar.y)).size).toBeGreaterThan(3)
+    expect(Math.max(...bars.map((bar) => bar.x + bar.width))).toBeLessThanOrEqual(frame.plot.x + frame.plot.width)
+    expect(frame.xTicks.every((tick) => Number.isFinite(Number(tick.value)))).toBe(true)
+    expect(frame.yTicks.map((tick) => tick.label)).toEqual(['0', '1', '2'])
+  })
+
   it('keeps grouped endpoint bars inside the finite plot box', () => {
     const ctx = sizeContextFromPixels(500, 300)
     const plan = planChart('bar', ctx, describeShape(BAR_DATA))

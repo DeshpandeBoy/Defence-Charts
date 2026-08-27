@@ -335,6 +335,7 @@ function InteractionLayer({
           data-tooltip-mode={placement.mode}
           data-tooltip-side={placement.side}
           data-status={placement.status}
+          data-chart-type={plan.type}
           data-series-id={active.seriesId}
           data-point-index={active.pointIndex}
           style={{
@@ -344,7 +345,10 @@ function InteractionLayer({
             blockSize: placement.height,
           }}
         >
-          <div className="shiftcharts-interaction__tooltip-header">{header}</div>
+          <div className="shiftcharts-interaction__tooltip-header">
+            <span className="shiftcharts-interaction__tooltip-kicker">Selected reading</span>
+            <strong>{header}</strong>
+          </div>
           <div className="shiftcharts-interaction__tooltip-rows">
             {visibleRows.map((row) => (
               <div

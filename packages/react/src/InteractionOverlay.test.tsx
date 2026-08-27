@@ -174,6 +174,7 @@ describe('fixed and fluid tooltip interaction', () => {
     expect(tooltip?.getAttribute('data-tooltip-mode')).toBe('fixed')
     expect(tooltip?.getAttribute('data-series-id')).toBe('alpha')
     expect(tooltip?.getAttribute('data-point-index')).toBe('2')
+    expect(tooltip?.querySelector('.shiftcharts-interaction__tooltip-kicker')?.textContent).toBe('Selected reading')
     expect(container.querySelector('[role="status"]')?.textContent).toContain('ALPHA')
 
     const crosshair = container.querySelector('.shiftcharts-interaction__crosshair')

@@ -17,6 +17,8 @@ const renderBar: MarkRenderer = ({ frame }) => (
       <rect
         className={classes('shiftcharts-bar')}
         data-bar-index={index}
+        data-series-id={frame.id}
+        data-series-index={frame.index}
         key={`${frame.id}:${index}`}
         x={roundCoord(cell.x)}
         y={roundCoord(cell.y)}

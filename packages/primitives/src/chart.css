@@ -223,6 +223,26 @@
     opacity: var(--shiftcharts-motion-fade-factor);
   }
 
+  /* A legend is an inspection control as well as a key. The chart stays static/RSC-safe;
+     supported browsers use this relationship to make the referenced series read first. */
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='0']:hover) .shiftcharts-bar:not([data-series-index='0']),
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='1']:hover) .shiftcharts-bar:not([data-series-index='1']),
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='2']:hover) .shiftcharts-bar:not([data-series-index='2']),
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='3']:hover) .shiftcharts-bar:not([data-series-index='3']),
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='4']:hover) .shiftcharts-bar:not([data-series-index='4']),
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='5']:hover) .shiftcharts-bar:not([data-series-index='5']) {
+    opacity: var(--shiftcharts-motion-fade-factor);
+  }
+
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='0']:hover) .shiftcharts-bar[data-series-index='0'],
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='1']:hover) .shiftcharts-bar[data-series-index='1'],
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='2']:hover) .shiftcharts-bar[data-series-index='2'],
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='3']:hover) .shiftcharts-bar[data-series-index='3'],
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='4']:hover) .shiftcharts-bar[data-series-index='4'],
+  .shiftcharts-chart:has(.shiftcharts-legend__item[data-series-index='5']:hover) .shiftcharts-bar[data-series-index='5'] {
+    opacity: 1;
+  }
+
   .shiftcharts-legend--control .shiftcharts-legend__control:focus-visible {
     outline: var(--shiftcharts-line-stroke-width) solid currentColor;
     outline-offset: calc(var(--shiftcharts-line-stroke-width) * 2);
