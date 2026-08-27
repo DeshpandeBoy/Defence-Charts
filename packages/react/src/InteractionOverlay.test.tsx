@@ -287,9 +287,18 @@ describe('fixed and fluid tooltip interaction', () => {
     expect(crosshair?.querySelector('line')?.getAttribute('y2')).toBe(
       String(renderedFrame.plot.y + renderedFrame.plot.height),
     )
+    const crosshairLine = crosshair?.querySelector('line')
+    const nextPoint = renderedFrame.series[0]?.points[4]
+    if (crosshairLine === null || crosshairLine === undefined || nextPoint === undefined) {
+      throw new Error('crosshair fixture missing')
+    }
+    dispatchPointer('pointermove', nextPoint)
+    expect(crosshair?.querySelector('line')).toBe(crosshairLine)
+    expect(crosshairLine.getAttribute('x1')).toBe(String(nextPoint.x))
 
     dispatchPointer('pointerout', point)
     expect(container.querySelector('[role="tooltip"]')).toBeNull()
+    expect(crosshair?.getAttribute('data-active')).toBe('false')
   })
 
   it('opens and closes a fixed tap tooltip without treating leave as dismissal', () => {

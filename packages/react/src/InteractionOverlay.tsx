@@ -131,6 +131,7 @@ function InteractionLayer({
 }) {
   const svgRef = useRef<SVGSVGElement | null>(null)
   const svgBoundsRef = useRef<DOMRect | null>(null)
+  const crosshairLineRef = useRef<SVGLineElement | null>(null)
   const tooltipRef = useRef<HTMLDivElement | null>(null)
   const [activeKey, setActiveKey] = useState<DatumKey | null>(null)
   const activeKeyRef = useRef<DatumKey | null>(null)
@@ -157,6 +158,19 @@ function InteractionLayer({
     setActiveKey(next)
   }, [])
 
+  const updateCrosshair = useCallback(
+    (key: DatumKey) => {
+      const line = crosshairLineRef.current
+      const indexed = interactionIndex.byId.get(key.seriesId)?.pointByIndex.get(key.pointIndex)
+      if (line === null || indexed === undefined) return
+      const x = String(indexed.point.x)
+      line.setAttribute('x1', x)
+      line.setAttribute('x2', x)
+      line.parentElement?.setAttribute('data-active', 'true')
+    },
+    [interactionIndex],
+  )
+
   const consumePointerSample = useCallback(
     (sample: PointerSample) => {
       const bounds = svgBoundsRef.current ?? readSvgBounds()
@@ -167,9 +181,10 @@ function InteractionLayer({
         plan.type === 'scatter' ? 'xy' : 'x',
       )
       if (point === null) return
+      if (plan.interaction.crosshair) updateCrosshair(point)
       if (plan.interaction.trigger === 'hover' && !locked) commitActiveKey(point)
     },
-    [commitActiveKey, interactionIndex, locked, plan.interaction.trigger, plan.type, readSvgBounds],
+    [commitActiveKey, interactionIndex, locked, plan.interaction.crosshair, plan.interaction.trigger, plan.type, readSvgBounds, updateCrosshair],
   )
   pointerSampleConsumerRef.current = consumePointerSample
 
@@ -302,6 +317,7 @@ function InteractionLayer({
       if (point === null) return
       const same =
         activeKeyRef.current?.seriesId === point.seriesId && activeKeyRef.current?.pointIndex === point.pointIndex
+      if (plan.interaction.crosshair) updateCrosshair(point)
       if (plan.interaction.trigger === 'tap' || event.pointerType === 'touch') {
         if (same && locked) {
           commitActiveKey(null)
@@ -312,13 +328,16 @@ function InteractionLayer({
         }
       }
     },
-    [commitActiveKey, interactionIndex, locked, plan.interaction.trigger, plan.type, readSvgBounds],
+    [commitActiveKey, interactionIndex, locked, plan.interaction.crosshair, plan.interaction.trigger, plan.type, readSvgBounds, updateCrosshair],
   )
 
   const clearOnLeave = useCallback(() => {
     hoverSchedulerRef.current?.cancel()
     svgBoundsRef.current = null
-    if (!locked) commitActiveKey(null)
+    if (!locked) {
+      hideCrosshair(crosshairLineRef)
+      commitActiveKey(null)
+    }
   }, [commitActiveKey, locked])
 
   const handleKeyDown = useCallback(
@@ -327,6 +346,7 @@ function InteractionLayer({
         event.preventDefault()
         commitActiveKey(null)
         setLocked(false)
+        hideCrosshair(crosshairLineRef)
         return
       }
       const points = flattenedPoints(interactionIndex)
@@ -372,11 +392,17 @@ function InteractionLayer({
             <rect x={frame.plot.x} y={frame.plot.y} width={frame.plot.width} height={frame.plot.height} />
           </clipPath>
         </defs>
-        {plan.interaction.crosshair && active !== null ? (
-          <g className="shiftcharts-interaction__crosshair" clipPath={'url(#' + clipId + ')'} aria-hidden="true">
+        {plan.interaction.crosshair ? (
+          <g
+            className="shiftcharts-interaction__crosshair"
+            data-active={active === null ? 'false' : 'true'}
+            clipPath={'url(#' + clipId + ')'}
+            aria-hidden="true"
+          >
             <line
-              x1={active.point.x}
-              x2={active.point.x}
+              ref={crosshairLineRef}
+              x1={active?.point.x ?? frame.plot.x}
+              x2={active?.point.x ?? frame.plot.x}
               y1={frame.plot.y}
               y2={frame.plot.y + frame.plot.height}
             />
@@ -535,6 +561,10 @@ function flattenedPoints(index: InteractionIndex): readonly DatumKey[] {
 function normalizeX(value: DataPoint['x']): number | null {
   const normalized = value instanceof Date ? value.getTime() : value
   return Number.isFinite(normalized) ? normalized : null
+}
+
+function hideCrosshair(ref: RefObject<SVGLineElement | null>): void {
+  ref.current?.parentElement?.setAttribute('data-active', 'false')
 }
 
 function sameDatum(left: DatumKey, right: DatumKey): boolean {

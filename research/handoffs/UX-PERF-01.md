@@ -9,7 +9,7 @@ worktree: /Users/dhanyarao/Documents/Defence
 base_commit: 26c9cc9a41be5af0c732e6e29aa2098ddaee1fae
 depends_on: [I1.1, I1.2, I1.3, I1.5, UX-LEGEND-01]
 started_at: 2026-08-27T23:55:00+05:30
-last_checkpoint: 2026-08-27T23:48:00+05:30
+last_checkpoint: 2026-08-28T00:03:00+05:30
 ---
 
 # UX-PERF-01 — Interaction rendering performance
@@ -88,11 +88,16 @@ interaction semantics, touch and keyboard behavior, and the DOM-free core bounda
   measured spatial-index workload.
 - Implemented a requestAnimationFrame pointer scheduler that keeps only the latest sample per
   frame, cancels pending work on leave/unmount, and flushes synchronously in non-rAF test hosts.
+- Retained the crosshair `<line>` node and update its x-coordinates imperatively for sampled
+  pointer moves; React still owns tooltip content, active datum identity, focus, and status text.
+- The retained crosshair is hidden with a data-state attribute when hover is cleared, preserving
+  leave/escape semantics without mounting/unmounting the SVG layer on every datum.
 - Post-change browser evidence: 1/24 client-rect reads, 23 distinct resolved datums, 207.6ms total
   / 8.65ms per sample, Chromium 151.0.7922.34, zero runtime errors.
-- Current browser evidence after indexing/frame pacing: 1/24 client-rect reads, 23 distinct
-  resolved datums, 205.5ms total / 8.56ms per sample, Chromium 151.0.7922.34, zero runtime errors.
-- Full I1.5 browser matrix passed after indexing/frame pacing; focused interaction tests now have
+- Current browser evidence after indexing/frame pacing/retained crosshair: 1/24 client-rect reads,
+  23 distinct resolved datums, 206.6ms total / 8.61ms per sample, Chromium 151.0.7922.34, zero
+  runtime errors.
+- Full I1.5 browser matrix passed after indexing/frame pacing/retained crosshair; focused interaction tests now have
   12 passing tests, plus 5 index tests and 5 scheduler tests.
 
 ## Decisions and constraints
@@ -105,6 +110,7 @@ interaction semantics, touch and keyboard behavior, and the DOM-free core bounda
 | Architecture | No core or primitive changes | Interaction caches are client-only derived state and must not compromise RSC/static output. |
 | Hit testing | Use sorted pixel-X neighbours for line/area/bar/timebar; retain exhaustive XY for scatter | The common line-like path is O(series × log points); a 2D index should be justified by a real scatter workload before adding its memory/maintenance cost. |
 | Frame pacing | Coalesce pointer moves to one latest sample per animation frame | Keeps visual response at display cadence without reusing the 33ms/30fps motion token; touch/pointerdown remains synchronous. |
+| Retained transient layer | Keep one crosshair line mounted and mutate only its x attributes | Crosshair geometry is frame-local and non-semantic; tooltip text/ARIA remain React-owned, so the optimization does not create a second accessibility state machine. |
 
 ## Verification evidence
 
@@ -115,13 +121,13 @@ interaction semantics, touch and keyboard behavior, and the DOM-free core bounda
 | `/opt/homebrew/bin/pnpm --filter @shiftcharts/playground typecheck` | 0 | TypeScript passed. |
 | `/opt/homebrew/bin/pnpm exec eslint packages/react/src/InteractionOverlay.tsx packages/react/src/InteractionOverlay.test.tsx apps/playground/src/interaction-fixture/InteractionFixture.tsx scripts/check-interaction-performance.mjs` | 0 | Focused lint passed. |
 | `node scripts/check-interaction-performance.mjs` (pre-change) | 0 | Baseline captured in `scripts/results/ux-perf-01-interaction-baseline.json`. |
-| `node scripts/check-interaction-performance.mjs` (post-change) | 0 | 24 samples, `boundsReads: 1`, 23 distinct datums, 205.5ms total / 8.56ms mean, zero runtime errors; latest result in `scripts/results/ux-perf-01-interaction.latest.json`. |
+| `node scripts/check-interaction-performance.mjs` (post-change) | 0 | 24 samples, `boundsReads: 1`, 23 distinct datums, 206.6ms total / 8.61ms mean, zero runtime errors; latest result in `scripts/results/ux-perf-01-interaction.latest.json`. |
 | `node scripts/check-interaction-browser.mjs` | 0 | I1.5 touch/keyboard/legend/resize/static/reduced-motion/forced-colors matrix passed with zero runtime errors. |
 | `git diff --check` | 0 | Passed. |
 
 ## Exact next action
 
-Run the narrow checks from the current checkpoint, then begin the next bounded slice: keep the
-crosshair/tooltip DOM layer stable during pointer movement by updating its geometry imperatively
-where safe, while retaining React state for semantic tooltip content and accessibility. Measure
-DOM mutation/commit counts in the browser fixture before changing the rendering contract.
+Run the narrow checks from the current checkpoint, then begin the next bounded slice: add an
+explicit large-data interaction policy and a scatter benchmark. Keep the default SVG point budget
+at 2,000, make the policy observable in the plan/fixture rather than silently dropping points, and
+only introduce a 2D spatial index if measured scatter workloads justify it.

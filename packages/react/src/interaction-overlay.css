@@ -33,6 +33,10 @@
     opacity: var(--shiftcharts-crosshair-opacity);
   }
 
+  .shiftcharts-interaction__crosshair[data-active='false'] {
+    visibility: hidden;
+  }
+
   .shiftcharts-interaction__crosshair line {
     stroke: var(--shiftcharts-crosshair-color);
     stroke-width: var(--shiftcharts-crosshair-width);

@@ -10,8 +10,8 @@
   "result": {
     "sampleCount": 24,
     "boundsReads": 1,
-    "elapsedMs": 205.5,
-    "meanEventToNextFrameMs": 8.5625,
+    "elapsedMs": 206.59999990463257,
+    "meanEventToNextFrameMs": 8.60833332935969,
     "distinctResolvedDatums": 23,
     "finalDatum": "956"
   },
