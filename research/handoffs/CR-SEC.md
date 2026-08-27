@@ -102,11 +102,11 @@ PATH=/Users/SameeraD/.nvm/versions/node/v22.22.0/bin:$PATH pnpm vitest run packa
 |---|---|---:|---|
 | `014b581` | `pnpm audit --prod --audit-level low` | 0 | No known vulnerabilities found; prior security audit baseline. |
 | `014b581` | `pnpm test` | 0 | 75 test files, 978 tests passed; prior security audit baseline. |
-| `d4782b3` | `PATH=/Users/SameeraD/.nvm/versions/node/v22.22.0/bin:$PATH pnpm vitest run packages/core/src/overrides.test.ts` | 0 | 1 file, 28 tests passed. |
-| `d4782b3` | `PATH=/Users/SameeraD/.nvm/versions/node/v22.22.0/bin:$PATH pnpm --filter @shiftcharts/core typecheck` | 0 | Core typecheck passed. |
-| `d4782b3` | `PATH=/Users/SameeraD/.nvm/versions/node/v22.22.0/bin:$PATH pnpm verify` | 0 | 75 test files, 983 tests; all typecheck, lint, build, package, boundary, typography, and token-drift gates passed. |
-| `d4782b3` | built-distribution hostile JSON probe | 0 | Payload rejected at `marks.primary.__proto__`; global prototype descriptor unchanged. |
-| `d4782b3` | `git diff --check` | 0 | No whitespace errors. |
+| `412bc56` | `PATH=/Users/SameeraD/.nvm/versions/node/v22.22.0/bin:$PATH pnpm vitest run packages/core/src/overrides.test.ts` | 0 | 1 file, 28 tests passed. |
+| `412bc56` | `PATH=/Users/SameeraD/.nvm/versions/node/v22.22.0/bin:$PATH pnpm --filter @shiftcharts/core typecheck` | 0 | Core typecheck passed. |
+| `412bc56` | `PATH=/Users/SameeraD/.nvm/versions/node/v22.22.0/bin:$PATH pnpm verify` | 0 | 75 test files, 983 tests; all typecheck, lint, build, package, boundary, typography, and token-drift gates passed. |
+| `412bc56` | built-distribution hostile JSON probe | 0 | Payload rejected at `marks.primary.__proto__`; global prototype descriptor unchanged. |
+| `412bc56` | `git diff --check` | 0 | No whitespace errors. |
 
 ## Known failures and blockers
 
@@ -120,7 +120,7 @@ PATH=/Users/SameeraD/.nvm/versions/node/v22.22.0/bin:$PATH pnpm vitest run packa
 
 ## Final handoff
 
-- Worker commit: `d4782b3` (`fix(core): reject prototype-sensitive plan overrides`)
+- Worker commit: `412bc56` (`fix(core): reject prototype-sensitive plan overrides`)
 - Branch pushed or locally available: local `Fine-Tuning-V1`
 - Working tree clean: no; only the concurrent `research/handoffs/SECURITY-FIX.md` handoff is untracked and was not touched or included.
 - Narrow restart check: `PATH=/Users/SameeraD/.nvm/versions/node/v22.22.0/bin:$PATH pnpm vitest run packages/core/src/overrides.test.ts`
