@@ -157,6 +157,39 @@ describe('interaction availability and the portal boundary', () => {
     expect(chartHost.children).toHaveLength(0)
   })
 
+  it('marks over-budget canvas plans as reduced interaction without dropping tooltip semantics', () => {
+    const denseData: readonly Series[] = [
+      {
+        id: 'dense',
+        points: Array.from({ length: 2_001 }, (_, index) => ({ x: index, y: index % 17 })),
+      },
+    ]
+    const ctx = context(420, 320)
+    const densePlan = planChart('line', ctx, describeShape(denseData))
+    expect(densePlan.marks.renderer).toBe('canvas')
+
+    act(() => {
+      root.render(
+        createElement(
+          Fragment,
+          null,
+          createElement('figure', { className: 'shiftcharts-chart' }),
+          createElement(InteractionOverlay, {
+            containerRef,
+            plan: densePlan,
+            data: denseData,
+            ctx,
+            title: 'Dense',
+            id: 'interaction-dense-test',
+          }),
+        ),
+      )
+    })
+    act(() => {})
+
+    expect(container.querySelector('.shiftcharts-interaction')?.getAttribute('data-interaction-mode')).toBe('reduced')
+  })
+
   it('keeps the interaction layer inside the chart figure and exposes a status equivalent', () => {
     renderOverlay(context(420, 320))
 

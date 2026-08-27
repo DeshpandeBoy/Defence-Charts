@@ -9,7 +9,7 @@ worktree: /Users/dhanyarao/Documents/Defence
 base_commit: 26c9cc9a41be5af0c732e6e29aa2098ddaee1fae
 depends_on: [I1.1, I1.2, I1.3, I1.5, UX-LEGEND-01]
 started_at: 2026-08-27T23:55:00+05:30
-last_checkpoint: 2026-08-28T00:03:00+05:30
+last_checkpoint: 2026-08-28T00:07:00+05:30
 ---
 
 # UX-PERF-01 — Interaction rendering performance
@@ -92,6 +92,10 @@ interaction semantics, touch and keyboard behavior, and the DOM-free core bounda
   pointer moves; React still owns tooltip content, active datum identity, focus, and status text.
 - The retained crosshair is hidden with a data-state attribute when hover is cleared, preserving
   leave/escape semantics without mounting/unmounting the SVG layer on every datum.
+- Added an explicit client interaction policy: below the resolved SVG point budget the mode is
+  `rich`; canvas/over-budget plans expose `data-interaction-mode="reduced"` and omit optional
+  active-point circles while retaining semantic tooltip/crosshair behavior. No observations are
+  sampled or dropped.
 - Post-change browser evidence: 1/24 client-rect reads, 23 distinct resolved datums, 207.6ms total
   / 8.65ms per sample, Chromium 151.0.7922.34, zero runtime errors.
 - Current browser evidence after indexing/frame pacing/retained crosshair: 1/24 client-rect reads,
@@ -99,6 +103,8 @@ interaction semantics, touch and keyboard behavior, and the DOM-free core bounda
   runtime errors.
 - Full I1.5 browser matrix passed after indexing/frame pacing/retained crosshair; focused interaction tests now have
   12 passing tests, plus 5 index tests and 5 scheduler tests.
+- The over-budget boundary is covered with a 2,001-point line fixture; the focused suite now has
+  13 overlay tests, 5 index tests, 5 scheduler tests, and 4 policy tests (27 total).
 
 ## Decisions and constraints
 
@@ -111,12 +117,13 @@ interaction semantics, touch and keyboard behavior, and the DOM-free core bounda
 | Hit testing | Use sorted pixel-X neighbours for line/area/bar/timebar; retain exhaustive XY for scatter | The common line-like path is O(series × log points); a 2D index should be justified by a real scatter workload before adding its memory/maintenance cost. |
 | Frame pacing | Coalesce pointer moves to one latest sample per animation frame | Keeps visual response at display cadence without reusing the 33ms/30fps motion token; touch/pointerdown remains synchronous. |
 | Retained transient layer | Keep one crosshair line mounted and mutate only its x attributes | Crosshair geometry is frame-local and non-semantic; tooltip text/ARIA remain React-owned, so the optimization does not create a second accessibility state machine. |
+| Large-data interaction | Resolve `rich` vs `reduced` from `ChartPlan.marks.renderer` and its point budget; keep tooltip/crosshair semantics in both | The plan already exposes the renderer boundary; reducing optional adornments avoids a second hidden threshold and never silently samples data. |
 
 ## Verification evidence
 
 | Command | Exit | Exact result |
 |---|---:|---|
-| `/opt/homebrew/bin/pnpm exec vitest run packages/react/src/InteractionOverlay.test.tsx packages/react/src/interaction-index.test.ts packages/react/src/interaction-scheduler.test.ts --reporter=dot` | 0 | 3 files, 22 tests passed; existing keyboard test emits a pre-existing act warning. |
+| `/opt/homebrew/bin/pnpm exec vitest run packages/react/src/InteractionOverlay.test.tsx packages/react/src/interaction-index.test.ts packages/react/src/interaction-scheduler.test.ts packages/react/src/interaction-policy.test.ts --reporter=dot` | 0 | 4 files, 27 tests passed; existing keyboard test emits a pre-existing act warning. |
 | `/opt/homebrew/bin/pnpm --filter @shiftcharts/react typecheck` | 0 | TypeScript passed. |
 | `/opt/homebrew/bin/pnpm --filter @shiftcharts/playground typecheck` | 0 | TypeScript passed. |
 | `/opt/homebrew/bin/pnpm exec eslint packages/react/src/InteractionOverlay.tsx packages/react/src/InteractionOverlay.test.tsx apps/playground/src/interaction-fixture/InteractionFixture.tsx scripts/check-interaction-performance.mjs` | 0 | Focused lint passed. |
@@ -127,7 +134,7 @@ interaction semantics, touch and keyboard behavior, and the DOM-free core bounda
 
 ## Exact next action
 
-Run the narrow checks from the current checkpoint, then begin the next bounded slice: add an
-explicit large-data interaction policy and a scatter benchmark. Keep the default SVG point budget
-at 2,000, make the policy observable in the plan/fixture rather than silently dropping points, and
-only introduce a 2D spatial index if measured scatter workloads justify it.
+Run the narrow checks from the current checkpoint, then begin a measured scatter workload before
+adding any 2D spatial index. The current `interaction-index` deliberately keeps scatter on the
+exhaustive XY path; use a real browser fixture to establish whether that path is a bottleneck at
+the supported data budget. Do not change the core point budget or renderer seam in this task.

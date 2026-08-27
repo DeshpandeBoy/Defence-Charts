@@ -33,6 +33,7 @@ import {
   createPointerFrameScheduler,
   type PointerFrameScheduler,
 } from './interaction-scheduler.ts'
+import { resolveInteractionMode, type InteractionMode } from './interaction-policy.ts'
 
 type DatumKey = {
   readonly seriesId: string
@@ -138,6 +139,10 @@ function InteractionLayer({
   const [locked, setLocked] = useState(false)
   const [tooltipBox, setTooltipBox] = useState<TooltipBox>(() => estimateTooltipBox([]))
   const interactionIndex = useMemo(() => prepareInteractionIndex(frame, data), [data, frame])
+  const interactionMode: InteractionMode = useMemo(
+    () => resolveInteractionMode(plan, interactionIndex.points.length),
+    [interactionIndex.points.length, plan],
+  )
   const hoverSchedulerRef = useRef<PointerFrameScheduler<PointerSample> | null>(null)
   const pointerSampleConsumerRef = useRef<(sample: PointerSample) => void>(() => undefined)
 
@@ -219,7 +224,7 @@ function InteractionLayer({
     }
   }, [rows, tooltipBox])
   const activePoints = useMemo(() => {
-    if (!activePointHighlight || active === null) return []
+    if (interactionMode !== 'rich' || !activePointHighlight || active === null) return []
     return rows.flatMap((row) => {
       const point = resolveActivePoint(
         { seriesId: row.seriesId, pointIndex: row.pointIndex },
@@ -228,7 +233,7 @@ function InteractionLayer({
       const seriesIndex = interactionIndex.byId.get(row.seriesId)?.index ?? -1
       return point === null ? [] : [{ ...point, seriesIndex }]
     })
-  }, [active, activePointHighlight, interactionIndex, rows])
+  }, [active, activePointHighlight, interactionIndex, interactionMode, rows])
   const header = active === null ? '' : active.category ?? formatXLabel(active.xValue)
   const placement = useMemo<TooltipPlacement | null>(() => {
     if (active === null || rows.length === 0) return null
@@ -380,7 +385,11 @@ function InteractionLayer({
   const status = active === null ? '' : buildStatus(header, rows, placement)
 
   return (
-    <div className="shiftcharts-interaction" data-trigger={plan.interaction.trigger}>
+    <div
+      className="shiftcharts-interaction"
+      data-trigger={plan.interaction.trigger}
+      data-interaction-mode={interactionMode}
+    >
       <svg
         ref={svgRef}
         className="shiftcharts-interaction__svg"
