@@ -205,8 +205,10 @@ export function nearestIndexedPoint(
 function definedPointIndexes(series: Series): readonly number[] {
   const indexes: number[] = []
   series.points.forEach((point, index) => {
-    const domainX = normalizeDomainX(point.x)
-    if (point.y !== null && Number.isFinite(point.y) && Number.isFinite(domainX)) indexes.push(index)
+    // Keep the same ordinal contract as `resolveFrame()`: it filters undefined/non-finite y
+    // values, while x is carried through to the frame as geometry (and may become NaN). Sorting
+    // and nearest lookup filter non-finite pixel x later without shifting source identities.
+    if (point.y !== null && Number.isFinite(point.y)) indexes.push(index)
   })
   return indexes
 }
