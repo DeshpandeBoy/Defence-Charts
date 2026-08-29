@@ -548,6 +548,12 @@ function yDomain(
   data: readonly Series[],
   mark: ChartPlan['marks']['primary'],
 ): readonly [number, number] {
+  // A stacked bar's length is the sum of its segments, so the axis must bound the tallest
+  // STACK per category, not the tallest individual point — the per-point extent below is
+  // correct for every other bar (grouped or single-series) but would truncate a stack and
+  // let it run off the plot.
+  if (mark.kind === 'bar' && mark.stacked) return stackedBarDomain(data)
+
   const values: number[] = []
   for (const s of data) {
     for (const p of s.points) {
@@ -562,6 +568,59 @@ function yDomain(
   return mark.kind === 'bar' || mark.kind === 'cell' || mark.kind === 'funnel'
     ? [Math.min(0, lo), Math.max(0, hi)]
     : padDegenerate(lo, hi)
+}
+
+/**
+ * A stacked category's positive segments accumulate above zero and its negative segments
+ * accumulate below it — mirroring the running totals `barStackOffsets()` builds for the
+ * actual geometry — so a category mixing signs bounds both directions correctly.
+ */
+function stackedBarDomain(data: readonly Series[]): readonly [number, number] {
+  const positiveTotals = new Map<number, number>()
+  const negativeTotals = new Map<number, number>()
+  for (const s of data) {
+    for (const p of s.points) {
+      if (p.y === null || !Number.isFinite(p.y)) continue
+      const key = xValue(p)
+      if (p.y >= 0) positiveTotals.set(key, (positiveTotals.get(key) ?? 0) + p.y)
+      else negativeTotals.set(key, (negativeTotals.get(key) ?? 0) + p.y)
+    }
+  }
+  let maxPositive = 0
+  for (const total of positiveTotals.values()) maxPositive = Math.max(maxPositive, total)
+  let minNegative = 0
+  for (const total of negativeTotals.values()) minNegative = Math.min(minNegative, total)
+  return [minNegative, maxPositive]
+}
+
+/**
+ * Per-category cumulative stack offsets, computed once across every series in plan order
+ * before per-series geometry runs. `seriesFrame()` sees one series at a time and cannot
+ * recover the running total the series before it left behind — the same "cross-series,
+ * computed once" problem `barCategoryY` already solves for grouped bars, below.
+ *
+ * Positive and negative values stack on their own side of zero, matching `stackedBarDomain()`.
+ */
+function barStackOffsets(
+  data: readonly Series[],
+): ReadonlyMap<number, ReadonlyMap<number, { readonly base: number; readonly top: number }>> {
+  const positiveRunning = new Map<number, number>()
+  const negativeRunning = new Map<number, number>()
+  const bySeries = new Map<number, Map<number, { readonly base: number; readonly top: number }>>()
+  data.forEach((s, seriesIndex) => {
+    const perCategory = new Map<number, { readonly base: number; readonly top: number }>()
+    for (const p of s.points) {
+      if (p.y === null || !Number.isFinite(p.y)) continue
+      const key = xValue(p)
+      const running = p.y >= 0 ? positiveRunning : negativeRunning
+      const base = running.get(key) ?? 0
+      const top = base + p.y
+      running.set(key, top)
+      perCategory.set(key, Object.freeze({ base, top }))
+    }
+    bySeries.set(seriesIndex, perCategory)
+  })
+  return bySeries
 }
 
 // --- Ticks -------------------------------------------------------------------------------
@@ -1098,6 +1157,8 @@ export function resolveFrame(
   }, Number.POSITIVE_INFINITY)
   const nominalCategoryStep = Number.isFinite(categoryStep) && categoryStep > 0 ? categoryStep : plot.width
 
+  const stackOffsets = mark.kind === 'bar' && mark.stacked ? barStackOffsets(data) : null
+
   const series = data.map((s, index) =>
     seriesFrame(
       s,
@@ -1115,6 +1176,8 @@ export function resolveFrame(
       plan.orientation,
       barValueXScale,
       barCategoryY,
+      resolved,
+      stackOffsets,
     ),
   )
 
@@ -1299,6 +1362,8 @@ function seriesFrame(
   orientation: ChartPlan['orientation'],
   barValueXScale: LinearScale | null,
   barCategoryY: ReadonlyMap<number, number> | null,
+  policy: PlanPolicy,
+  stackOffsets: ReadonlyMap<number, ReadonlyMap<number, { readonly base: number; readonly top: number }>> | null,
 ): SeriesFrame {
   const defined = (p: DataPoint): boolean => p.y !== null && Number.isFinite(p.y)
 
@@ -1350,11 +1415,16 @@ function seriesFrame(
       aggregate.temporalBin,
     )
   } else if (mark.kind === 'bar') {
+    // Stacked and grouped are independent booleans on `MarkSpec`'s bar variant (an override
+    // can express both), but stacking a slot that is also divided into per-series columns is
+    // not a state any layout can honour. Stacked wins — see the ⚠ on `MarkSpec` in `./plan.ts`.
+    const grouped = mark.grouped && !mark.stacked
+
     if (orientation === 'horizontal' && barValueXScale !== null && barCategoryY !== null) {
-      const categoryHeight = Math.max(1, plot.height / Math.max(1, barCategoryY.size) * 0.8)
-      const slotHeight = mark.grouped ? categoryHeight / Math.max(1, seriesCount) : categoryHeight
-      const barHeight = Math.max(1, slotHeight * 0.9)
-      const baseline = barValueXScale(0)
+      const categoryHeight = Math.max(1, (plot.height / Math.max(1, barCategoryY.size)) * policy.barCategoryShare)
+      const slotHeight = grouped ? categoryHeight / Math.max(1, seriesCount) : categoryHeight
+      const barHeight = Math.max(1, slotHeight * policy.barFillShare)
+      const zeroX = barValueXScale(0)
       const cellsArr: CellFrame[] = []
       const barPoints: PointPos[] = []
 
@@ -1362,48 +1432,69 @@ function seriesFrame(
         if (!defined(source)) continue
         const categoryY = barCategoryY.get(xValue(source))
         if (categoryY === undefined) continue
-        const slotOffset = mark.grouped ? (index - (seriesCount - 1) / 2) * slotHeight : 0
+        const slotOffset = grouped ? (index - (seriesCount - 1) / 2) * slotHeight : 0
         const rawY = categoryY + slotOffset - barHeight / 2
         const maxY = Math.max(plot.y, plot.y + plot.height - barHeight)
         const y = Math.min(maxY, Math.max(plot.y, rawY))
-        const valueX = barValueXScale(source.y as number)
+
+        // Unstacked: base is always zero, top is the point's own value — identical to the
+        // pre-stacking geometry. Stacked: base/top come from the running total this series'
+        // category left behind for the series before it.
+        const stackEntry = mark.stacked ? stackOffsets?.get(index)?.get(xValue(source)) : undefined
+        const top = stackEntry?.top ?? (source.y as number)
+        const xBase = mark.stacked ? barValueXScale(stackEntry?.base ?? 0) : zeroX
+        const xTop = barValueXScale(top)
+
         cellsArr.push(
           Object.freeze({
-            x: Math.min(baseline, valueX),
+            x: Math.min(xBase, xTop),
             y,
-            width: Math.max(0.5, Math.abs(baseline - valueX)),
+            width: Math.max(0.5, Math.abs(xBase - xTop)),
             height: barHeight,
           }),
         )
-        barPoints.push(Object.freeze({ x: valueX, y: categoryY + slotOffset, value: source.y as number }))
+        barPoints.push(Object.freeze({ x: xTop, y: categoryY + slotOffset, value: source.y as number }))
       }
       cells = Object.freeze(cellsArr)
       points.splice(0, points.length, ...barPoints)
     } else {
-    const categoryWidth = Math.max(1, categoryStep * 0.8)
-    const slotWidth = mark.grouped ? categoryWidth / Math.max(1, seriesCount) : categoryWidth
-    const barWidth = Math.max(1, slotWidth * 0.9)
-    const baseline = yScale(0)
-    const cellsArr: CellFrame[] = []
+      const categoryWidth = Math.max(1, categoryStep * policy.barCategoryShare)
+      const slotWidth = grouped ? categoryWidth / Math.max(1, seriesCount) : categoryWidth
+      const barWidth = Math.max(1, slotWidth * policy.barFillShare)
+      const zeroY = yScale(0)
+      const cellsArr: CellFrame[] = []
+      const barPoints: PointPos[] = []
 
-    for (const p of points) {
-      const slotOffset = mark.grouped ? (index - (seriesCount - 1) / 2) * slotWidth : 0
-      // A category scale maps the first/last datum to the plot edges. Keep grouped bars inside
-      // that finite plot rather than letting the half-slot overhang the SVG at either endpoint.
-      const rawX = p.x + slotOffset - barWidth / 2
-      const maxX = Math.max(plot.x, plot.x + plot.width - barWidth)
-      const x = Math.min(maxX, Math.max(plot.x, rawX))
-      const y = Math.min(baseline, p.y)
-      cellsArr.push(
-        Object.freeze({
-          x,
-          y,
-          width: barWidth,
-          height: Math.max(0.5, Math.abs(baseline - p.y)),
-        }),
-      )
-    }
-    cells = Object.freeze(cellsArr)
+      // Reads `s.points` directly rather than the pre-built pixel `points` array above: the
+      // stack lookup is keyed by the domain-space category value (`xValue(source)`), and
+      // `PointPos.x` is already pixel-mapped by `toX()`, so it cannot serve as that key.
+      for (const source of s.points) {
+        if (!defined(source)) continue
+        const px = toX(source.x)
+        const slotOffset = grouped ? (index - (seriesCount - 1) / 2) * slotWidth : 0
+        // A category scale maps the first/last datum to the plot edges. Keep grouped bars inside
+        // that finite plot rather than letting the half-slot overhang the SVG at either endpoint.
+        const rawX = px + slotOffset - barWidth / 2
+        const maxX = Math.max(plot.x, plot.x + plot.width - barWidth)
+        const x = Math.min(maxX, Math.max(plot.x, rawX))
+
+        const stackEntry = mark.stacked ? stackOffsets?.get(index)?.get(xValue(source)) : undefined
+        const top = stackEntry?.top ?? (source.y as number)
+        const yBase = mark.stacked ? yScale(stackEntry?.base ?? 0) : zeroY
+        const yTop = yScale(top)
+
+        cellsArr.push(
+          Object.freeze({
+            x,
+            y: Math.min(yBase, yTop),
+            width: barWidth,
+            height: Math.max(0.5, Math.abs(yBase - yTop)),
+          }),
+        )
+        barPoints.push(Object.freeze({ x: px, y: yTop, value: source.y as number }))
+      }
+      cells = Object.freeze(cellsArr)
+      points.splice(0, points.length, ...barPoints)
     }
   } else if (mark.kind === 'arc') {
     arcs = donutArcs(s, aggregate, plot)

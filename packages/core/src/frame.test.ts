@@ -460,6 +460,81 @@ describe('bar geometry', () => {
   })
 })
 
+describe('stacked bar geometry', () => {
+  it('stacks segments touching, in series order, with no overlap', () => {
+    const ctx = sizeContextFromPixels(500, 300)
+    const plan = planChart('bar', ctx, describeShape(BAR_DATA), undefined, {
+      marks: { primary: { kind: 'bar', stacked: true, grouped: false } },
+    })
+    const frame = resolveFrame(plan, BAR_DATA, ctx)
+    expect(plan.marks.primary).toMatchObject({ kind: 'bar', stacked: true })
+
+    for (let category = 0; category < 3; category += 1) {
+      const cells = frame.series.map((series) => series.cells[category]!)
+      for (let i = 1; i < cells.length; i += 1) {
+        const below = cells[i - 1]!
+        const above = cells[i]!
+        // Earlier series sit closer to the zero baseline; SVG y grows downward, so the
+        // segment above has a smaller y and its bottom edge (y+height) must land exactly on
+        // the lower segment's top edge (y) — touching, not gapped, not overlapping.
+        expect(above.y + above.height).toBeCloseTo(below.y, 6)
+      }
+    }
+  })
+
+  it('scales the domain by the stack TOTAL, not by any individual point', () => {
+    // BAR_DATA's per-category totals are 18/28/32. A single-series chart of exactly those
+    // totals should produce identical pixel geometry to the three-series stacked chart's
+    // topmost segment — direct proof `yDomain` bounds the stack, not the tallest point (14).
+    const ctx = sizeContextFromPixels(500, 300)
+    const stackedPlan = planChart('bar', ctx, describeShape(BAR_DATA), undefined, {
+      marks: { primary: { kind: 'bar', stacked: true, grouped: false } },
+    })
+    const stackedFrame = resolveFrame(stackedPlan, BAR_DATA, ctx)
+    const totals: Series[] = [{ id: 'totals', points: [{ x: 0, y: 18 }, { x: 1, y: 28 }, { x: 2, y: 32 }] }]
+    const totalsPlan = planChart('bar', ctx, describeShape(totals))
+    const totalsFrame = resolveFrame(totalsPlan, totals, ctx)
+
+    const topSeries = stackedFrame.series[stackedFrame.series.length - 1]!
+    for (let category = 0; category < 3; category += 1) {
+      expect(topSeries.cells[category]!.y).toBeCloseTo(totalsFrame.series[0]!.cells[category]!.y, 1)
+    }
+  })
+
+  it('keeps mixed-sign categories on their own side of a correct zero line', () => {
+    const ctx = sizeContextFromPixels(500, 300)
+    const mixed: Series[] = [
+      { id: 'a', points: [{ x: 0, y: 10 }, { x: 1, y: -4 }] },
+      { id: 'b', points: [{ x: 0, y: -6 }, { x: 1, y: 8 }] },
+    ]
+    const plan = planChart('bar', ctx, describeShape(mixed), undefined, {
+      marks: { primary: { kind: 'bar', stacked: true, grouped: false } },
+    })
+    const frame = resolveFrame(plan, mixed, ctx)
+    expect(frame.zeroLine).not.toBeNull()
+    const zeroY = frame.zeroLine!
+
+    // Category 0: series 'a' is +10 (stacks above zero), series 'b' is -6 (stacks below it).
+    const positive = frame.series[0]!.cells[0]!
+    const negative = frame.series[1]!.cells[0]!
+    expect(positive.y).toBeLessThan(zeroY)
+    expect(positive.y + positive.height).toBeCloseTo(zeroY, 6)
+    expect(negative.y + negative.height).toBeGreaterThan(zeroY)
+    expect(negative.y).toBeCloseTo(zeroY, 6)
+  })
+
+  it('resolves {stacked:true, grouped:true} to one column per category — stacked wins', () => {
+    const ctx = sizeContextFromPixels(500, 300)
+    const plan = planChart('bar', ctx, describeShape(BAR_DATA), undefined, {
+      marks: { primary: { kind: 'bar', stacked: true, grouped: true } },
+    })
+    const frame = resolveFrame(plan, BAR_DATA, ctx)
+    const xPositions = new Set(frame.series.flatMap((series) => series.cells.map((cell) => cell.x)))
+    // One column per category (3), not one per series×category (9) — grouping did not split it.
+    expect(xPositions.size).toBe(3)
+  })
+})
+
 describe('horizon', () => {
   /**
    * ⚠ Tile drops to a horizon below 24 px of plot because Heer 2009 measured that a line

@@ -460,6 +460,51 @@
     font-size: 0.72rem;
   }
 
+  .sandbox__bar-ladder {
+    display: grid;
+    gap: calc(var(--shiftcharts-size-gap) * 3);
+    margin-block-start: calc(var(--shiftcharts-size-gap) * 5);
+    padding: calc(var(--shiftcharts-size-gap) * 4);
+    border: 1px solid var(--sandbox-rule);
+    border-radius: var(--shiftcharts-widget-radius-inner);
+    background: var(--sandbox-panel);
+  }
+
+  .sandbox__bar-ladder h3 {
+    margin: calc(var(--shiftcharts-size-gap) * 2) 0 0;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .sandbox__bar-ladder .sandbox__help {
+    margin-block-end: 0;
+  }
+
+  .sandbox__bar-ladder-grid {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: calc(var(--shiftcharts-size-gap) * 4);
+  }
+
+  .sandbox__bar-ladder-item {
+    display: grid;
+    gap: calc(var(--shiftcharts-size-gap) * 1.5);
+  }
+
+  .sandbox__bar-ladder-label {
+    margin: 0;
+    color: var(--sandbox-faint);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .sandbox__chart-frame--ladder {
+    max-inline-size: 100%;
+  }
+
   .sandbox__output-actions {
     flex-wrap: wrap;
     justify-content: end;

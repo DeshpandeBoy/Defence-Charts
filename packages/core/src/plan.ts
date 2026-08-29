@@ -174,6 +174,11 @@ export type AxesPlan = {
  * ⚠ The 24 px switch to `'horizon'` is a `replace`, not a `rescale` — the mark kind
  * changes. Below ~24 px plot height a line degrades measurably and the published fix is
  * to change encoding, not to shrink (Heer 2009).
+ *
+ * ⚠ Bar's `stacked` and `grouped` are independent booleans, so `{ stacked: true, grouped:
+ * true }` is representable but not a state any resolver produces. `./frame.ts` resolves it
+ * at read time — stacked wins, unconditionally — because it is the only place holding the
+ * fully merged plan; policy/override precedence (§5, `./policy.ts`) settles everywhere else.
  */
 export type MarkSpec =
   | { readonly kind: 'none' }

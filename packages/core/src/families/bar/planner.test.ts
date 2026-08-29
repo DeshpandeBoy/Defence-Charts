@@ -117,4 +117,15 @@ describe('bar/timebar family planner', () => {
     expect(plan.marks.primary).toEqual({ kind: 'none' })
     expect(plan.valueLegibility).toBe('single-value')
   })
+
+  it('never auto-decides to stack, at any size rung — stacking stays override-only', () => {
+    // `frame.ts` now honours `stacked: true` correctly, which makes it worth guarding that
+    // the resolver itself never starts producing it on its own: no cited research
+    // distinguishes when stacking vs. grouping is the right default, and `DataShape` has no
+    // signal for "these series sum to something meaningful" to decide it from.
+    for (const sizeClass of ['micro', 'tile', 'strip', 'panel', 'canvas', 'stage'] as const) {
+      const plan = barFamilyPlanner({ type: 'bar', ctx: context(sizeClass), shape, policy })
+      if (plan.marks.primary.kind === 'bar') expect(plan.marks.primary.stacked).toBe(false)
+    }
+  })
 })

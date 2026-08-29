@@ -132,6 +132,21 @@ const SIZE_PRESETS = [
   { id: 'stage', label: 'Stage', width: 960, height: 620 },
 ] as const
 
+/**
+ * Pairs each rung's preview pixel box with the `FAMILY_MINIMA` cols/rows
+ * (`packages/core/src/context.ts`) that actually determine its size class, so `AutoChart`'s
+ * `gridSize` can force the intended rung regardless of how the preview box happens to measure
+ * — `SIZE_PRESETS` above is a pixel guess and isn't guaranteed to land on a boundary. Micro is
+ * excluded: bar's inherited Micro rung always resolves to `marks.primary.kind: 'none'`.
+ */
+const BAR_SIZE_LADDER = [
+  { sizeClass: 'tile', label: 'Tile', width: 260, height: 180, cols: 2, rows: 1 },
+  { sizeClass: 'strip', label: 'Strip', width: 420, height: 190, cols: 3, rows: 1 },
+  { sizeClass: 'panel', label: 'Panel', width: 560, height: 320, cols: 3, rows: 3 },
+  { sizeClass: 'canvas', label: 'Canvas', width: 760, height: 480, cols: 6, rows: 5 },
+  { sizeClass: 'stage', label: 'Stage', width: 960, height: 620, cols: 9, rows: 6 },
+] as const
+
 type NumericPolicyKey =
   | 'tickTargetSpacingX'
   | 'ticksMin'
@@ -155,6 +170,8 @@ type NumericPolicyKey =
   | 'pointAutoHideDensityThreshold'
   | 'minCellSize'
   | 'valueRegionMaxShare'
+  | 'barCategoryShare'
+  | 'barFillShare'
 
 type PolicyNumberField = {
   readonly key: NumericPolicyKey
@@ -188,6 +205,8 @@ const POLICY_NUMBER_FIELDS: readonly PolicyNumberField[] = [
   { key: 'pointAutoHideDensityThreshold', label: 'Point hide density', min: 0, max: 16, step: 0.5, unit: 'px' },
   { key: 'minCellSize', label: 'Heatmap cell floor', min: 2, max: 32, step: 1, unit: 'px' },
   { key: 'valueRegionMaxShare', label: 'Value region max share', min: 0.1, max: 0.8, step: 0.05 },
+  { key: 'barCategoryShare', label: 'Bar category share', min: 0.1, max: 1, step: 0.05 },
+  { key: 'barFillShare', label: 'Bar fill share', min: 0.1, max: 1, step: 0.05 },
 ]
 
 const ASPECTS = ['portrait', 'square', 'landscape', 'ultrawide'] as const
@@ -632,6 +651,18 @@ export function SandboxApp() {
   const xAxisOverride = isRecord(axesOverride.x) ? axesOverride.x : {}
   const yAxisOverride = isRecord(axesOverride.y) ? axesOverride.y : {}
   const tableOverride = isRecord(overrideObject.dataTable) ? overrideObject.dataTable : {}
+  const marksOverride = isRecord(overrideObject.marks) ? overrideObject.marks : {}
+  const barPrimaryOverride = isRecord(marksOverride.primary) ? marksOverride.primary : {}
+  const barComposition =
+    barPrimaryOverride.kind !== 'bar'
+      ? 'resolver default'
+      : barPrimaryOverride.stacked === true
+        ? 'stacked'
+        : barPrimaryOverride.grouped === true
+          ? 'grouped'
+          : barPrimaryOverride.grouped === false
+            ? 'simple'
+            : 'resolver default'
   const geometryFrame = useMemo(() => {
     if (currentSnapshot === null || displayPlan === null || parsedData.error !== null) return null
     try {
@@ -739,6 +770,36 @@ export function SandboxApp() {
             </div>
           ) : null}
 
+          {(chartType === 'bar' || chartType === 'timebar') ? (
+            <div className="sandbox__bar-toolbar" role="group" aria-label="Bar composition">
+              <span>Bar composition</span>
+              {(['resolver default', 'simple', 'grouped', 'stacked'] as const).map((mode) => (
+                <button
+                  type="button"
+                  key={mode}
+                  aria-pressed={barComposition === mode}
+                  onClick={() => {
+                    if (mode === 'resolver default') {
+                      const next = { ...overrideObject }
+                      delete next.marks
+                      updateOverride(next)
+                      return
+                    }
+                    const primary =
+                      mode === 'stacked'
+                        ? { kind: 'bar', stacked: true, grouped: false }
+                        : mode === 'grouped'
+                          ? { kind: 'bar', stacked: false, grouped: true }
+                          : { kind: 'bar', stacked: false, grouped: false }
+                    updateOverride({ ...overrideObject, marks: { ...marksOverride, primary } })
+                  }}
+                >
+                  {mode}
+                </button>
+              ))}
+            </div>
+          ) : null}
+
           <div className="sandbox__preview-wrap">
             <div
               className="sandbox__chart-frame"
@@ -805,6 +866,44 @@ export function SandboxApp() {
               hidden: {legendHiddenSeriesIds.length === 0 ? 'none' : legendHiddenSeriesIds.join(', ')}
             </output>
           </section>
+
+          {(chartType === 'bar' || chartType === 'timebar') ? (
+            <section className="sandbox__bar-ladder" aria-labelledby="sandbox-bar-ladder-title">
+              <div>
+                <p className="sandbox__section-label">Size-class ladder</p>
+                <h3 id="sandbox-bar-ladder-title">The same series, every rung, tile through stage</h3>
+                <p className="sandbox__help">
+                  Each card forces its size class with <code>gridSize</code> rather than guessing pixels, and
+                  shares this page's live policy, overrides, and token state — every control above updates all
+                  six cards at once.
+                </p>
+              </div>
+              <div className="sandbox__bar-ladder-grid">
+                {BAR_SIZE_LADDER.map((rung) => (
+                  <div className="sandbox__bar-ladder-item" key={rung.sizeClass}>
+                    <p className="sandbox__bar-ladder-label">{rung.label}</p>
+                    <div
+                      className="sandbox__chart-frame sandbox__chart-frame--ladder"
+                      style={{ inlineSize: rung.width, blockSize: rung.height }}
+                    >
+                      {resolved.plan === null ? null : (
+                        <AutoChart
+                          type={chartType}
+                          data={data}
+                          title={`${title} — ${rung.label}`}
+                          description={`Size-class ladder preview forced to the ${rung.label} rung.`}
+                          policy={policy}
+                          overrides={parsedOverrides.value as PlanOverrides | undefined}
+                          gridSize={{ cols: rung.cols, rows: rung.rows }}
+                          id={`sandbox-bar-ladder-${rung.sizeClass}`}
+                        />
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          ) : null}
 
           <div className="sandbox__output-bar">
             <span>Copy a working snapshot when a direction feels right.</span>

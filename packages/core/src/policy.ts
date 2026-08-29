@@ -165,6 +165,26 @@ export type PlanPolicy = {
   readonly valueRegionMaxShare: number
 
   /**
+   * Fraction (0..1) of a bar category's nominal step the category's full box occupies,
+   * before any per-series division. **A-impl** — derived as `1 - bar-gap-outer` from
+   * `@shiftcharts/tokens`' `bar-gap-outer: 0.2`, itself cited to Highcharts'
+   * `groupPadding: 0.2` and cross-checked against Nivo/Recharts.
+   *
+   * ⚠ Stored as the CONTENT side of the ratio, not the gap side the token name uses, so the
+   * geometry that reads it (`./frame.ts`) multiplies directly with no subtraction. Move this
+   * and `bar-gap-outer` together, or the CSS token and the geometry it was meant to describe
+   * drift apart the way they already had before this field existed.
+   */
+  readonly barCategoryShare: number
+  /**
+   * Fraction (0..1) of a bar's slot — the category box, divided by series count when
+   * grouped — the drawn bar occupies. **A-impl** — derived as `1 - bar-gap-inner` from
+   * `@shiftcharts/tokens`' `bar-gap-inner: 0.1`, itself cited to Highcharts'
+   * `pointPadding: 0.1`. Same content-side storage as `barCategoryShare`, same reason.
+   */
+  readonly barFillShare: number
+
+  /**
    * All six fit-sensitive typography values plus the character-advance table measured
    * under them (`research/41-text-metrics.md`). Replaced whole so a caller cannot move the
    * rendered font while leaving the planner's table behind.
@@ -287,6 +307,8 @@ export const DEFAULT_POLICY: PlanPolicy = Object.freeze({
   substitute: true,
   minCellSize: 8,
   valueRegionMaxShare: 0.5,
+  barCategoryShare: 0.8,
+  barFillShare: 0.9,
   typography: DEFAULT_TYPOGRAPHY,
 }) satisfies PlanPolicy
 

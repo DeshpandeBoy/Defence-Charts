@@ -83,6 +83,14 @@ describe('DEFAULT_POLICY', () => {
       expect(DEFAULT_POLICY.pointAutoHideDensityThreshold).toBe(2)
     })
 
+    it('barCategoryShare is 0.8 — Highcharts groupPadding: 0.2, stored as the content side', () => {
+      expect(DEFAULT_POLICY.barCategoryShare).toBe(0.8)
+    })
+
+    it('barFillShare is 0.9 — Highcharts pointPadding: 0.1, stored as the content side', () => {
+      expect(DEFAULT_POLICY.barFillShare).toBe(0.9)
+    })
+
     it('minCellSize is 8 — tier C, and the citation stays absent on purpose', () => {
       // ⚠ `research/10-responsive-ladder.md` §4 is explicit that the 8 px *"coincides
       // numerically with Heer & Bostock's gridline result, but that finding is about
