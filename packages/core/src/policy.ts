@@ -46,10 +46,9 @@ export type PlanPolicy = {
   /** Series count after which direct labels externalise into a legend. **B** — §4.4/§6. */
   readonly directLabelMaxSeries: number
   /**
-   * Assumed character budget for a direct-end series label. **C** — ours. Sizes the plot's
-   * right-side gutter via an `'M'`-repeat over-estimate (`./layout.ts`'s `directLabelGutter()`,
-   * same technique `yAxisGutter()` uses) and caps the same label's rendered length, so a name
-   * can never render wider than the space reserved for it.
+   * Character budget for a direct-end series label. **C** — ours. The renderer caps the
+   * inward-anchored label at this length so identity remains compact without consuming a
+   * separate legend rail.
    */
   readonly directLabelMaxChars: number
   /** Minimum series count for the optional secondary axis. **C** — §4.1 leaves it open. */

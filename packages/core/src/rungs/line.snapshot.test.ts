@@ -192,23 +192,18 @@ const PANEL_PLAN: ChartPlan = {
   sizeClass: 'panel',
   valueLegibility: 'values',
   axes: {
-    // §6's comment derives this from width: `max(2, round(420 / 100))` — before
-    // `directLabelGutter()` existed, which is why the count here has since moved off it.
-    // The fixture is 500 px wide; this rung's y axis carries no title, so the y gutter is
-    // 87.96 px. `seriesLabels: 'direct-end'` (below) now also charges a right-side gutter
-    // sized for an 8-char label at rank C — 128.33 px — so the plot is 500 − 87.96 − 128.33
-    // = 283.71 px, and `round(2.84)` = 3.
-    x: { visible: true, domainLine: true, ticks: { mode: 'count', count: 3 }, title: false, gridlines: false, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
+    // 500 px box − 53.27 px value-aware y gutter − 16 px symmetric plot inset =
+    // 430.73 px plot, so `round(4.31)` = 4. Direct labels anchor inward and do not
+    // consume a second rail.
+    x: { visible: true, domainLine: true, ticks: { mode: 'count', count: 4 }, title: false, gridlines: false, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
     // ⚠ `domainLine: false` with `gridlines: true`. Gridlines are the landmarks a reader
     // traces to a label; a rule beside them is ink that adds nothing.
     y: { visible: true, domainLine: false, ticks: { mode: 'count', count: 4 }, title: false, gridlines: true, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
     y2: null,
   },
-  // `seriesLabelMaxChars: 8` is `policy.directLabelMaxChars` — the budget
-  // `directLabelGutter()` reserved space for, so a name can never render wider than its own
-  // gutter (see that function's docblock in `../layout.ts`). `maxChars` (the *x-axis*
-  // tick-label budget, a different field — see `LabelsPlan`) stays `null`, inherited from
-  // `STRIP_PLAN`: 283.71 px across 3 tick slots doesn't need abbreviation.
+  // `seriesLabelMaxChars: 8` is the direct identity label's own compactness budget.
+  // `maxChars` (the x-axis tick-label budget) stays `null`: 396.04 px across 4 tick slots
+  // leaves enough room for the fixture's five-character labels.
   labels: { ...STRIP_PLAN.labels, seriesLabels: 'direct-end', seriesLabelMaxChars: 8 },
   // At this rung the legend IS the end-of-line labels. One fact, stated from two sides.
   legend: { placement: 'direct' },
@@ -236,31 +231,18 @@ const CANVAS_PLAN: ChartPlan = {
   // The legend becomes a region of the box, so it joins the order.
   regionOrder: ['plot', 'legend', 'table'],
   axes: {
-    // 700 px box − 106.03 px y gutter (title now present) − 142.33 px legend − 128.33 px
-    // direct-label gutter (`directLabelGutter()`, ../layout.ts — new; see PANEL_PLAN's own
-    // axes comment) = 323.31 px plot, so `round(3.23)` = 3. §6 elides `axes.x` here, which
-    // means "same as Panel" — and "same as Panel" means the same FORMULA, not the same
-    // number at a different width; that was already true before the gutter existed and
-    // stays true now that a third term feeds it.
-    x: { visible: true, domainLine: true, ticks: { mode: 'count', count: 3 }, title: false, gridlines: false, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
+    // The data-shape y-label budget tightens the titled y gutter to the actual formatted
+    // scale class. After that gutter, the right legend, and 16 px symmetric inset, the plot
+    // resolves to five target tick slots. Direct labels remain an in-plot identity channel
+    // and therefore do not charge a second right-side band.
+    x: { visible: true, domainLine: true, ticks: { mode: 'count', count: 5 }, title: false, gridlines: false, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
     y: { visible: true, domainLine: false, ticks: { mode: 'count', count: 4 }, title: true, gridlines: true, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
     y2: null,
   },
   /**
-   * ⚠ **No longer the departure from §6 this table used to record.** §6:640 gives Canvas no
-   * label degradation, and now the resolver agrees again: 3 tick slots across 323.31 px is
-   * a 107.77 px slot, less 1.5 em (16.5 px) of mandated spacing leaves a **91.27 px**
-   * budget, and the worst-case 5-character label `MMMMM` measures **77.12 px** at rank D —
-   * comfortably inside it. `labels` is `PANEL_PLAN.labels` unchanged, `seriesLabelMaxChars: 8`
-   * included, because a direct-end label's own budget (`directLabelGutter()`) is a
-   * per-rung constant, not a per-tick-count one.
-   *
-   * The abbreviation this comment used to describe was real at the time — 5 tick slots
-   * across a plot with no right-side reservation left only a 73.83 px budget, 3.29 px short
-   * of the 77.12 px worst case — but it was a symptom of the gutter gap `directLabelGutter()`
-   * now closes, not an independent fact about Canvas. Fewer, wider tick slots was the
-   * consequence of reserving real space for the direct-end labels honestly; not needing to
-   * abbreviate the x-axis anymore is a side effect of that, not a second change.
+   * The measured five-slot composition retains enough room for the fixture's worst-case
+   * five-character label after mandatory spacing. Canvas therefore keeps §6's `none`
+   * degradation while using the shared plot inset.
    */
   labels: PANEL_PLAN.labels,
   marks: { ...PANEL_PLAN.marks, points: { mode: 'all', autoHideDensityThreshold: 2 } },
@@ -289,9 +271,9 @@ const STAGE_PLAN: ChartPlan = {
   ...CANVAS_PLAN,
   sizeClass: 'stage',
   axes: {
-    // 1000 − 106.03 − 106.03 (y2) − 142.33 − 128.33 (direct-label gutter) = 517.28 px plot
-    // → `round(5.17)` = 5.
-    x: { visible: true, domainLine: true, ticks: { mode: 'count', count: 5 }, title: false, gridlines: false, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
+    // The same formatted-y-label metadata tightens both y-axis rails; after the external
+    // legend and symmetric inset the Stage plot resolves to seven target tick slots.
+    x: { visible: true, domainLine: true, ticks: { mode: 'count', count: 7 }, title: false, gridlines: false, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
     y: { visible: true, domainLine: false, ticks: { mode: 'count', count: 4 }, title: true, gridlines: true, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
     y2: { visible: true, domainLine: false, ticks: { mode: 'count', count: 4 }, title: true, gridlines: false, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
   },
@@ -301,12 +283,8 @@ const STAGE_PLAN: ChartPlan = {
     // if series > 4" is not a mark, axis or legend change.
     facet: { mode: 'series', columns: 3 },
   },
-  // `labels` inherits `CANVAS_PLAN.labels` unchanged bar `valueLabels`: `axisLabelDegrade`
-  // and `maxChars` land on `'none'`/`null` by coincidence of measurement, not because Stage
-  // overrules Canvas, and `seriesLabelMaxChars: 8` is `policy.directLabelMaxChars`, a
-  // per-rung constant (`directLabelGutter()`, ../layout.ts) that does not vary with tick
-  // count the way x-axis degradation does — unlike the old `axisLabelDegrade` story this
-  // comment used to tell, there's no independent Stage-width measurement to restate here.
+  // `labels` inherits `CANVAS_PLAN.labels` unchanged bar `valueLabels`; the direct series
+  // label keeps its independent eight-character compactness budget.
   labels: { ...CANVAS_PLAN.labels, valueLabels: 'extrema' },
   interaction: { ...CANVAS_PLAN.interaction, brush: true, zoom: true },
   narrative: {

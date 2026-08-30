@@ -298,10 +298,8 @@ function valueIndices(
 /**
  * ⚠ **`…` (U+2026), and it counts as one of the cap.** Whichever budget the caller passes
  * (`LabelsPlan.maxChars` for x-axis ticks, `LabelsPlan.seriesLabelMaxChars` for direct-end
- * series labels) is what `measureText()`/`directLabelGutter()` sized the space against, so a
- * truncation that appends an ellipsis *past* the cap produces a label wider than the one the
- * resolver approved — the overflow the cap exists to prevent, introduced by the code
- * enforcing it.
+ * series labels) must include the ellipsis itself. Appending it *past* the cap would make the
+ * supposedly bounded label wider than the policy allows.
  */
 function truncate(text: string, maxChars: number | null): string {
   if (maxChars === null || maxChars <= 0 || text.length <= maxChars) return text

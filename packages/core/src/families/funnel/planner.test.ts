@@ -72,6 +72,7 @@ describe('funnel family planner', () => {
       points: 5,
       hasNegative: false,
       labelMaxChars: 1,
+      yLabelMaxChars: 4,
       temporal: false,
     })
     expect(FUNNEL_CHART_TYPES).toEqual(['funnel'])

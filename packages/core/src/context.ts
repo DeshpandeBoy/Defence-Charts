@@ -45,6 +45,8 @@ export type DataShape = {
   readonly points: number
   readonly hasNegative: boolean
   readonly labelMaxChars: number
+  /** Conservative character budget for formatted y-axis ticks, including one nice-tick guard. */
+  readonly yLabelMaxChars?: number
   readonly temporal: boolean
 }
 

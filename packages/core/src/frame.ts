@@ -29,28 +29,17 @@
  * A consumer that needs to invert a pixel back to a datum searches `points` — the positions
  * are all here — rather than being handed a scale.
  *
- * ## The gutter this module deliberately does not improve
+ * ## Value-aware y-axis gutter without value-coupled plans
  *
- * ⚠ `./layout.ts` computes the y-axis gutter from a constant sample string, `'-1,234.5M'`,
- * and its docblock invites this milestone to do better: *"A4 can do better — the renderer
- * knows the formatted domain and can measure it."* **That invitation cannot be taken, and it
- * is worth saying why rather than leaving a reader to wonder if it was forgotten.**
- *
- * Measuring the real y labels here would make this module's gutter differ from the one the
- * resolver used, which breaks invariant 1 above — the more important of the two. Measuring
- * them in `./layout.ts` instead would require the resolver to see values, which is the wall
- * the whole plan-as-data split stands on. The only construction that satisfies both is a new
- * `yLabelMaxChars` count on `DataShape`, derived by `describeShape()` the same way
- * `labelMaxChars` already is — and that changes a public type and moves every one of the six
- * hand-authored rung snapshots gate **G9** compares against `research/40-chart-plan.md` §6.
- * That is a B-milestone change with a research-corpus edit attached, not an A4 refinement.
- *
- * Until then the sample over-estimates, which is the recoverable direction (`./text.ts`
- * §6.1), and both sides over-estimate identically, which is what keeps them in agreement.
+ * `describeShape()` carries only a conservative `yLabelMaxChars` count, not values or strings.
+ * The line resolver expands that count into worst-case `M` glyphs and the frame reconstructs
+ * the same metadata from the same data. This keeps invariant 1 intact while avoiding the old
+ * fixed `'-1,234.5M'` charge on every ordinary scale. The count includes a one-character guard
+ * for a nice tick extending beyond the formatted data extrema.
  */
 
 import type { SizeContext } from './context.ts'
-import type { DataPoint, MetricStatus, Series } from './data.ts'
+import { describeShape, type DataPoint, type MetricStatus, type Series } from './data.ts'
 import { formatHeatmapXLabel, formatXLabel, formatYLabel } from './format.ts'
 import {
   legendBands,
@@ -435,13 +424,17 @@ export type ValueDelta = NonNullable<ValueEntry['delta']>
  * `frame.test.ts` can assert the plot-box equality against the real mapping instead of
  * against a second copy of it, which would test nothing.
  */
-export function chromeFromPlan(plan: ChartPlan, plotInset = 0): ChromeSpec {
+export function chromeFromPlan(
+  plan: ChartPlan,
+  plotInset = 0,
+  yLabelMaxChars?: number,
+): ChromeSpec {
   return {
     x: plan.axes.x,
     y: plan.axes.y,
     y2: plan.axes.y2,
     legend: plan.legend,
-    seriesLabels: plan.labels.seriesLabels,
+    ...(yLabelMaxChars === undefined ? {} : { yLabelMaxChars }),
     valueDisplay: plan.narrative.valueDisplay,
     valueTypeScale: plan.narrative.valueTypeScale,
     tableDisclosure: plan.dataTable.disclosure,
@@ -1055,7 +1048,14 @@ export function resolveFrame(
 ): ChartFrame {
   const resolved = resolvePolicy(policy)
   const isBar = plan.type === 'bar' || plan.type === 'timebar'
-  const chrome = chromeFromPlan(plan, isBar ? resolved.plotInset : 0)
+  const isValueLegibleLine =
+    (plan.type === 'line' || plan.type === 'area') && plan.valueLegibility === 'values'
+  const yLabelMaxChars = isValueLegibleLine ? describeShape(data).yLabelMaxChars : undefined
+  const chrome = chromeFromPlan(
+    plan,
+    isBar || isValueLegibleLine ? resolved.plotInset : 0,
+    yLabelMaxChars,
+  )
 
   // Invariant 1: the SIZE comes straight from the resolver's own function, never re-derived.
   const size = resolvePlotBox(ctx, chrome, data.length, resolved)
@@ -1087,7 +1087,7 @@ export function resolveFrame(
   // numbers would both look plausible and the text would sit slightly off its own region.
   const valueHeight = resolvedValueBand(chrome, boxHeight, data.length, resolved)
   const plot: Rect = Object.freeze({
-    x: yAxisGutter(plan.axes.y, resolved) + legendLeft + insets.inline,
+    x: yAxisGutter(plan.axes.y, resolved, chrome.yLabelMaxChars) + legendLeft + insets.inline,
     y: valueHeight + legendTop + insets.block,
     width: size.width,
     height: size.height,

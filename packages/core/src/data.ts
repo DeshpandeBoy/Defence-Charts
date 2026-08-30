@@ -29,7 +29,7 @@
  */
 
 import type { DataShape } from './context.ts'
-import { formatXLabel } from './format.ts'
+import { formatXLabel, formatYLabel } from './format.ts'
 
 /**
  * One observation.
@@ -119,6 +119,7 @@ export function describeShape(data: readonly Series[]): DataShape {
   let points = 0
   let hasNegative = false
   let labelMaxChars = 0
+  let yLabelMaxChars = 1
   let temporal = data.length > 0
   const xs = new Set<number>()
 
@@ -135,6 +136,13 @@ export function describeShape(data: readonly Series[]): DataShape {
 
       if (point.y !== null && point.y < 0) hasNegative = true
 
+      if (point.y !== null && Number.isFinite(point.y)) {
+        // `.nice()` may extend a two-digit domain such as 20…82 to the three-character
+        // tick `100`. One extra character keeps that predictable boundary conservative
+        // without charging every chart for the old nine-character worst-case sample.
+        yLabelMaxChars = Math.max(yLabelMaxChars, formatYLabel(point.y).length + 1)
+      }
+
       const chars = Math.max(formatXLabel(point.x).length, point.category?.length ?? 0)
       if (chars > labelMaxChars) labelMaxChars = chars
     }
@@ -148,6 +156,7 @@ export function describeShape(data: readonly Series[]): DataShape {
     points,
     hasNegative,
     labelMaxChars,
+    yLabelMaxChars,
     temporal,
   })
 }

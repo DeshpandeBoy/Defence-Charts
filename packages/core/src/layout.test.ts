@@ -25,6 +25,14 @@ describe('axis extent controls', () => {
     expect(yAxisGutter({ ...AXIS, minExtent: natural + 12 }, DEFAULT_POLICY)).toBe(natural + 12)
     expect(yAxisGutter({ ...AXIS, maxExtent: natural - 4 }, DEFAULT_POLICY)).toBe(natural - 4)
   })
+
+  it('uses conservative formatted-label metadata instead of the global worst-case sample', () => {
+    const legacy = yAxisGutter(AXIS, DEFAULT_POLICY)
+    const ordinaryScale = yAxisGutter(AXIS, DEFAULT_POLICY, 3)
+
+    expect(ordinaryScale).toBeGreaterThan(lineHeight('D', DEFAULT_POLICY))
+    expect(ordinaryScale).toBeLessThan(legacy)
+  })
 })
 
 describe('horizontal legend bands', () => {

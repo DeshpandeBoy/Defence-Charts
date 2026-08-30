@@ -102,6 +102,13 @@ describe('describeShape', () => {
     expect(describeShape(data).labelMaxChars).toBe('Intelligence'.length)
   })
 
+  it('budgets formatted y labels with one character of nice-domain safety', () => {
+    const data: Series[] = [
+      { id: 'a', points: [{ x: 0, y: 20 }, { x: 1, y: 82 }] },
+    ]
+    expect(describeShape(data).yLabelMaxChars).toBe(3)
+  })
+
   it('is empty and well-formed for no series', () => {
     expect(describeShape([])).toEqual({
       series: 0,
@@ -109,6 +116,7 @@ describe('describeShape', () => {
       points: 0,
       hasNegative: false,
       labelMaxChars: 0,
+      yLabelMaxChars: 1,
       temporal: false,
     })
   })

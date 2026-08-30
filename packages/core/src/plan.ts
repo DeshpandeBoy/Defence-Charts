@@ -255,9 +255,9 @@ export type LabelsPlan = {
   readonly maxChars: number | null
   /**
    * Character budget for a `seriesLabels: 'direct-end'` label — `policy.directLabelMaxChars`,
-   * the same figure `directLabelGutter()` (`./layout.ts`) reserved plot space against, so a
-   * name can never render wider than its own gutter. `null` when `seriesLabels !== 'direct-end'`
-   * (§1.4). **Not `maxChars`**: that field is coupled to `axisLabelDegrade` by an invariant
+   * used to keep the inward-anchored identity label compact. `null` when
+   * `seriesLabels !== 'direct-end'` (§1.4). **Not `maxChars`**: that field is coupled to
+   * `axisLabelDegrade` by an invariant
    * (`invariants.test.ts` §3 — non-`null` only when `axisLabelDegrade === 'abbreviate'`) and
    * means the *x-axis* tick-label budget specifically. A series name and an x-axis tick label
    * are different strings with different width constraints; giving them one field was the

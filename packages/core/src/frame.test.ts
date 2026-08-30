@@ -76,7 +76,13 @@ describe('the plot box is the resolver’s, not a second opinion', () => {
         const ctx = sizeContextFromPixels(w, height)
         const plan = planChart('line', ctx, MANY_SERIES)
         const frame = resolveFrame(plan, THREE, ctx)
-        const box = resolvePlotBox(ctx, chromeFromPlan(plan), THREE.length, DEFAULT_POLICY)
+        const inset = plan.valueLegibility === 'values' ? DEFAULT_POLICY.plotInset : 0
+        const box = resolvePlotBox(
+          ctx,
+          chromeFromPlan(plan, inset, MANY_SERIES.yLabelMaxChars),
+          THREE.length,
+          DEFAULT_POLICY,
+        )
         if (frame.plot.width !== box.width || frame.plot.height !== box.height) {
           mismatches.push(
             `${String(w)}×${String(height)}: frame ${String(frame.plot.width)}×${String(
@@ -97,6 +103,22 @@ describe('the plot box is the resolver’s, not a second opinion', () => {
       expect(frame.plot.x + frame.plot.width).toBeLessThanOrEqual(frame.box.width)
       expect(frame.plot.y + frame.plot.height).toBeLessThanOrEqual(frame.box.height)
     }
+  })
+
+  it('fits value-legible line geometry without a duplicate direct-label rail', () => {
+    const ctx = sizeContextFromPixels(638, 478)
+    const plan = planChart('line', ctx, describeShape(THREE))
+    const frame = resolveFrame(plan, THREE, ctx)
+
+    expect(plan.labels.seriesLabels).toBe('direct-end')
+    expect(frame.plot.width / frame.box.width).toBeGreaterThan(0.8)
+    const yLabelMaxChars = describeShape(THREE).yLabelMaxChars
+    expect(frame.plot.x).toBeCloseTo(
+      yAxisGutter(plan.axes.y, DEFAULT_POLICY, yLabelMaxChars) + DEFAULT_POLICY.plotInset,
+    )
+    expect(frame.box.width - frame.plot.x - frame.plot.width).toBeCloseTo(DEFAULT_POLICY.plotInset)
+    expect(frame.plot.y).toBe(DEFAULT_POLICY.plotInset)
+    expect(frame.plot.y + frame.plot.height).toBeLessThan(frame.box.height)
   })
 
   it('publishes the exact charged external legend rail for every placement', () => {

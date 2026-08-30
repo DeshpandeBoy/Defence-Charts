@@ -34,6 +34,7 @@ export const SHAPE: DataShape = Object.freeze({
   points: 120,
   hasNegative: false,
   labelMaxChars: 5,
+  yLabelMaxChars: 3,
   temporal: true,
 })
 
