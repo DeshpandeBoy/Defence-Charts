@@ -48,11 +48,22 @@
     pointer-events: none;
   }
 
+  /* The resting mark (chart.css `.shiftcharts-point`) is already filled and visible; this is
+     the *active* one under the pointer, and it earns its own, bolder treatment — a solid dot
+     in the series colour, a background-coloured knockout ring so it reads as a distinct object
+     over the line, and a soft colour-matched glow. `clip-path` defaults to `none` (a plain
+     circle); a consumer can set `--shiftcharts-point-clip-path-hover` to any polygon — a
+     rotated square reads as a diamond — to shape-code a specific series beyond colour alone. */
   .shiftcharts-interaction__active-point {
     r: var(--shiftcharts-point-radius-hover);
-    fill: var(--shiftcharts-plot-color);
-    stroke: var(--shiftcharts-series-color, var(--shiftcharts-series-1));
-    stroke-width: var(--shiftcharts-point-stroke-width);
+    fill: var(--shiftcharts-series-color, var(--shiftcharts-series-1));
+    stroke: var(--shiftcharts-point-stroke-color);
+    stroke-width: var(--shiftcharts-point-stroke-width-hover);
+    clip-path: var(--shiftcharts-point-clip-path-hover);
+    filter: drop-shadow(
+      0 0 var(--shiftcharts-point-halo-blur)
+      color-mix(in oklab, var(--shiftcharts-series-color, var(--shiftcharts-series-1)) var(--shiftcharts-point-halo-strength), transparent)
+    );
     vector-effect: non-scaling-stroke;
   }
 
@@ -84,34 +95,91 @@
     position: absolute;
     display: grid;
     gap: var(--shiftcharts-tooltip-header-gap);
-    /* A tooltip is a transient reading, never a second scroll container. Rows that cannot
-       fit are represented by the explicit “+N more” disclosure from the placement plan. */
-    overflow: clip;
     box-sizing: border-box;
-    max-inline-size: calc(100% - var(--shiftcharts-tooltip-padding) * 2);
-    max-block-size: calc(100% - var(--shiftcharts-tooltip-padding) * 2);
-    padding: var(--shiftcharts-tooltip-padding);
+    max-inline-size: calc(100% - var(--shiftcharts-tooltip-padding-inline) * 2);
+    max-block-size: calc(100% - var(--shiftcharts-tooltip-padding-block) * 2);
+    padding-inline: var(--shiftcharts-tooltip-padding-inline);
+    padding-block: var(--shiftcharts-tooltip-padding-block);
     color: var(--shiftcharts-surface-text-color);
     background: var(--shiftcharts-tooltip-color);
-    border: var(--shiftcharts-axis-domain-width) solid var(--shiftcharts-axis-domain-color);
+    backdrop-filter: var(--shiftcharts-tooltip-backdrop);
+    -webkit-backdrop-filter: var(--shiftcharts-tooltip-backdrop);
+    border: var(--shiftcharts-tooltip-border-width) solid var(--shiftcharts-tooltip-border-color);
     border-radius: var(--shiftcharts-tooltip-radius);
     box-shadow: var(--shiftcharts-tooltip-shadow);
     pointer-events: none;
-    font-size: var(--shiftcharts-crosshair-label-font-size);
-    font-weight: var(--shiftcharts-crosshair-label-font-weight, var(--shiftcharts-label-font-weight));
-    letter-spacing: var(--shiftcharts-crosshair-label-letter-spacing, var(--shiftcharts-label-letter-spacing));
+    font-size: var(--shiftcharts-tooltip-font-size);
+    font-weight: var(--shiftcharts-tooltip-font-weight);
+    letter-spacing: var(--shiftcharts-tooltip-letter-spacing);
+    transition: opacity var(--shiftcharts-motion-duration-hover) ease-out;
+  }
+
+  /* Rows are the only part sized from an estimate rather than measured — clip here, not on
+     the whole box, so a header this axis never drifts stays visible even if row measurement
+     is ever off by a pixel. A tooltip is a transient reading, never a second scroll container:
+     rows that cannot fit are represented by the explicit “+N more” disclosure from the
+     placement plan, not a scrollbar. */
+  .shiftcharts-interaction__tooltip-rows {
+    display: grid;
+    gap: var(--shiftcharts-tooltip-row-padding);
+    overflow: clip;
   }
 
   .shiftcharts-interaction__tooltip-header {
     font-weight: var(--shiftcharts-axis-title-font-weight);
     padding-block-end: var(--shiftcharts-tooltip-row-padding);
-    border-block-end: var(--shiftcharts-axis-domain-width) solid var(--shiftcharts-axis-domain-color);
+    border-block-end: var(--shiftcharts-tooltip-border-width) solid var(--shiftcharts-tooltip-border-color);
     color: var(--shiftcharts-surface-text-color);
   }
 
-  .shiftcharts-interaction__tooltip-rows {
-    display: grid;
-    gap: var(--shiftcharts-tooltip-row-padding);
+  /* A small diamond, half-hidden behind the tooltip's own background so only the outward-
+     facing point shows — the standard border-free caret trick. Must come before the header/
+     rows in source order so the (opaque) content paints over its inward half. Positioned per
+     `data-tooltip-side`, the same attribute already used for placement. */
+  .shiftcharts-interaction__tooltip-arrow {
+    position: absolute;
+    inline-size: calc(var(--shiftcharts-tooltip-arrow-size) * 2);
+    block-size: calc(var(--shiftcharts-tooltip-arrow-size) * 2);
+    background: var(--shiftcharts-tooltip-color);
+    border: var(--shiftcharts-tooltip-border-width) solid var(--shiftcharts-tooltip-border-color);
+    transform: rotate(45deg);
+    pointer-events: none;
+  }
+
+  .shiftcharts-interaction__tooltip[data-tooltip-side='top'] .shiftcharts-interaction__tooltip-arrow {
+    inset-inline-start: 50%;
+    inset-block-end: 0;
+    transform: translate(-50%, 50%) rotate(45deg);
+  }
+
+  .shiftcharts-interaction__tooltip[data-tooltip-side='bottom'] .shiftcharts-interaction__tooltip-arrow {
+    inset-inline-start: 50%;
+    inset-block-start: 0;
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+
+  .shiftcharts-interaction__tooltip[data-tooltip-side='above-right'] .shiftcharts-interaction__tooltip-arrow {
+    inset-inline-start: calc(var(--shiftcharts-tooltip-arrow-size) * 3);
+    inset-block-end: 0;
+    transform: translate(-50%, 50%) rotate(45deg);
+  }
+
+  .shiftcharts-interaction__tooltip[data-tooltip-side='above-left'] .shiftcharts-interaction__tooltip-arrow {
+    inset-inline-end: calc(var(--shiftcharts-tooltip-arrow-size) * 3);
+    inset-block-end: 0;
+    transform: translate(50%, 50%) rotate(45deg);
+  }
+
+  .shiftcharts-interaction__tooltip[data-tooltip-side='below-right'] .shiftcharts-interaction__tooltip-arrow {
+    inset-inline-start: calc(var(--shiftcharts-tooltip-arrow-size) * 3);
+    inset-block-start: 0;
+    transform: translate(-50%, -50%) rotate(45deg);
+  }
+
+  .shiftcharts-interaction__tooltip[data-tooltip-side='below-left'] .shiftcharts-interaction__tooltip-arrow {
+    inset-inline-end: calc(var(--shiftcharts-tooltip-arrow-size) * 3);
+    inset-block-start: 0;
+    transform: translate(50%, -50%) rotate(45deg);
   }
 
   .shiftcharts-interaction__tooltip-row {
@@ -123,26 +191,32 @@
 
   .shiftcharts-interaction__tooltip-row[data-series-index='0'] {
     --shiftcharts-series-color: var(--shiftcharts-series-1);
+    --shiftcharts-series-dash: var(--shiftcharts-series-1-dash);
   }
 
   .shiftcharts-interaction__tooltip-row[data-series-index='1'] {
     --shiftcharts-series-color: var(--shiftcharts-series-2);
+    --shiftcharts-series-dash: var(--shiftcharts-series-2-dash);
   }
 
   .shiftcharts-interaction__tooltip-row[data-series-index='2'] {
     --shiftcharts-series-color: var(--shiftcharts-series-3);
+    --shiftcharts-series-dash: var(--shiftcharts-series-3-dash);
   }
 
   .shiftcharts-interaction__tooltip-row[data-series-index='3'] {
     --shiftcharts-series-color: var(--shiftcharts-series-4);
+    --shiftcharts-series-dash: var(--shiftcharts-series-4-dash);
   }
 
   .shiftcharts-interaction__tooltip-row[data-series-index='4'] {
     --shiftcharts-series-color: var(--shiftcharts-series-5);
+    --shiftcharts-series-dash: var(--shiftcharts-series-5-dash);
   }
 
   .shiftcharts-interaction__tooltip-row[data-series-index='5'] {
     --shiftcharts-series-color: var(--shiftcharts-series-6);
+    --shiftcharts-series-dash: var(--shiftcharts-series-6-dash);
   }
 
   .shiftcharts-interaction__tooltip-label {
@@ -165,9 +239,27 @@
     background-color: var(--shiftcharts-series-color);
   }
 
+  /* Line charts only: the swatch is the series' own stroke in miniature, dash pattern and
+     all, instead of a generic dot — so "which line is this" reads the same way in the tooltip
+     as it does on the chart. Rendered as a tiny inline `<svg><line>` so `stroke-dasharray` can
+     read the exact same `--shiftcharts-series-dash` value the real line uses; a CSS background
+     gradient can't take an arbitrary dasharray. */
+  .shiftcharts-interaction__tooltip-swatch-line {
+    flex: 0 0 auto;
+    overflow: visible;
+  }
+
+  .shiftcharts-interaction__tooltip-swatch-line line {
+    stroke: var(--shiftcharts-series-color);
+    stroke-width: 2;
+    stroke-dasharray: var(--shiftcharts-series-dash, var(--shiftcharts-line-dash));
+    stroke-linecap: round;
+    vector-effect: non-scaling-stroke;
+  }
+
   .shiftcharts-interaction__tooltip-row strong {
     color: var(--shiftcharts-surface-text-color);
-    font-weight: var(--shiftcharts-label-font-weight);
+    font-weight: var(--shiftcharts-tooltip-value-font-weight);
     font-variant-numeric: var(--shiftcharts-numeric-variant);
   }
 
@@ -200,12 +292,29 @@
     .shiftcharts-interaction__tooltip {
       color: CanvasText;
       background: Canvas;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
       border: var(--shiftcharts-crosshair-width) solid CanvasText;
       box-shadow: none;
     }
 
+    .shiftcharts-interaction__tooltip-arrow {
+      background: Canvas;
+      border-color: CanvasText;
+    }
+
     .shiftcharts-interaction__tooltip-swatch {
       background-color: CanvasText;
+    }
+
+    .shiftcharts-interaction__tooltip-swatch-line line {
+      stroke: CanvasText;
+    }
+
+    .shiftcharts-interaction__active-point {
+      fill: CanvasText;
+      stroke: Canvas;
+      filter: none;
     }
   }
 }

@@ -909,6 +909,23 @@
     line-height: 1.6;
   }
 
+  .sandbox__link-button {
+    display: inline;
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--shiftcharts-series-1);
+    font: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+    cursor: pointer;
+  }
+
+  .sandbox__link-button:hover,
+  .sandbox__link-button:focus-visible {
+    color: var(--sandbox-fg);
+  }
+
   .sandbox__token-summary {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));

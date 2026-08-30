@@ -123,6 +123,10 @@ function isTokenExplorerPath(pathname: string): boolean {
   return pathname === '/tokens' || pathname === '/tokens/'
 }
 
+function isInteractionPagePath(pathname: string): boolean {
+  return pathname === '/interaction' || pathname === '/interaction/'
+}
+
 const SIZE_PRESETS = [
   { id: 'micro', label: 'Micro', width: 150, height: 110 },
   { id: 'tile', label: 'Tile', width: 260, height: 180 },
@@ -225,6 +229,28 @@ const lineData: readonly Series[] = [
   { id: 'readiness', label: 'Readiness', points: points([42, 46, 44, 52, 57, 55, 61, 68, 66, 74, 78, 82]) },
   { id: 'training', label: 'Training', points: points([28, 34, 32, 37, 41, 46, 44, 51, 55, 58, 63, 69]) },
   { id: 'maintenance', label: 'Maintenance', points: points([61, 58, 60, 57, null, 53, 50, 49, 45, 43, 46, 41]) },
+]
+
+const hourlyPoints = (values: readonly (number | null)[], startHour: number): readonly DataPoint[] =>
+  values.map((y, index) => ({ x: new Date(Date.UTC(2026, 0, 1, startHour + index)), y }))
+
+/** Primary metric (solid) vs. a reference line (dashed) — the shape the interaction page's
+ * dash-distance demo and hover halo both exercise. Hourly so the tooltip header also shows a
+ * real bucket range instead of a single instant. */
+const THROUGHPUT: readonly Series[] = [
+  { id: 'users', label: 'Users', points: hourlyPoints([1180, 1240, 1310, 1290, 1830, 2640, 3995, 3820], 5) },
+  { id: 'average', label: 'Average', points: hourlyPoints([980, 1010, 1040, 1060, 1075, 1085, 1095, 1100], 5) },
+]
+
+const DASH_DISTANCE_EXAMPLES: readonly {
+  readonly sizeClass: string
+  readonly label: string
+  readonly dash: string
+  readonly help: string
+}[] = [
+  { sizeClass: 'long', label: 'Long dash — "12 4"', dash: '12 4', help: 'Reads as a bold reference line at a glance.' },
+  { sizeClass: 'fine', label: 'Fine dash — "4 2"', dash: '4 2', help: 'A quieter reference line for a busier chart.' },
+  { sizeClass: 'dotted', label: 'Dotted — "1 3"', dash: '1 3', help: 'Barely-there — good for a target band, not a metric.' },
 ]
 
 const DATA_BY_TYPE: Readonly<Record<ChartType, readonly Series[]>> = {
@@ -413,6 +439,9 @@ export function SandboxApp() {
   const [isTokenExplorer, setIsTokenExplorer] = useState(() =>
     typeof window !== 'undefined' && isTokenExplorerPath(window.location.pathname),
   )
+  const [isInteractionPage, setIsInteractionPage] = useState(() =>
+    typeof window !== 'undefined' && isInteractionPagePath(window.location.pathname),
+  )
   const [theme, setTheme] = useState<ShiftChartsTheme>('rail-dark')
   const [width, setWidth] = useState(760)
   const [height, setHeight] = useState(480)
@@ -436,6 +465,7 @@ export function SandboxApp() {
       else window.history.pushState({}, '', chartPagePath(nextType))
     }
     setIsTokenExplorer(false)
+    setIsInteractionPage(false)
     setChartType(nextType)
     setTitle(CHART_PAGE_DETAILS[nextType].defaultTitle)
     setDataText(json(DATA_BY_TYPE[nextType]))
@@ -449,12 +479,25 @@ export function SandboxApp() {
   const loadTokenExplorer = useCallback(() => {
     if (typeof window !== 'undefined') window.history.pushState({}, '', '/tokens')
     setIsTokenExplorer(true)
+    setIsInteractionPage(false)
+  }, [])
+
+  const loadInteractionPage = useCallback(() => {
+    if (typeof window !== 'undefined') window.history.pushState({}, '', '/interaction')
+    setIsInteractionPage(true)
+    setIsTokenExplorer(false)
   }, [])
 
   useEffect(() => {
     const handlePopState = () => {
       if (isTokenExplorerPath(window.location.pathname)) {
         setIsTokenExplorer(true)
+        setIsInteractionPage(false)
+        return
+      }
+      if (isInteractionPagePath(window.location.pathname)) {
+        setIsInteractionPage(true)
+        setIsTokenExplorer(false)
         return
       }
       loadChartPage(chartTypeFromPath(window.location.pathname), true)
@@ -689,7 +732,11 @@ export function SandboxApp() {
   })
 
   if (isTokenExplorer) {
-    return <TokenExplorer theme={theme} onThemeChange={setTheme} onOpenChart={() => loadChartPage('line')} />
+    return <TokenExplorer theme={theme} onThemeChange={setTheme} onOpenChart={() => loadChartPage('line')} onOpenInteraction={loadInteractionPage} />
+  }
+
+  if (isInteractionPage) {
+    return <InteractionPage theme={theme} onOpenChart={() => loadChartPage('line')} onOpenTokens={loadTokenExplorer} />
   }
 
   return (
@@ -707,6 +754,7 @@ export function SandboxApp() {
         </div>
         <div className="sandbox__family-links">
           <a href="/tokens" onClick={(event) => { event.preventDefault(); loadTokenExplorer() }}>Tokens</a>
+          <a href="/interaction" onClick={(event) => { event.preventDefault(); loadInteractionPage() }}>Interaction</a>
           {CHART_TYPES.map((type) => (
             <a
               key={type}
@@ -1125,10 +1173,12 @@ function TokenExplorer({
   theme,
   onThemeChange,
   onOpenChart,
+  onOpenInteraction,
 }: {
   readonly theme: ShiftChartsTheme
   readonly onThemeChange: (theme: ShiftChartsTheme) => void
   readonly onOpenChart: () => void
+  readonly onOpenInteraction: () => void
 }) {
   const rootRef = useRef<HTMLElement>(null)
   const [query, setQuery] = useState('')
@@ -1180,7 +1230,7 @@ function TokenExplorer({
     <main ref={rootRef} className={`sandbox sandbox--tokens shiftcharts-theme-${theme}`} data-shiftcharts-theme={theme}>
       <nav className="sandbox__family-nav" aria-label="Sandbox pages">
         <div className="sandbox__family-nav-intro"><strong>ShiftCharts sandbox</strong></div>
-        <div className="sandbox__family-links"><a href="/charts/line" onClick={(event) => { event.preventDefault(); onOpenChart() }}>Chart studio</a><a href="/tokens" aria-current="page">Tokens</a></div>
+        <div className="sandbox__family-links"><a href="/charts/line" onClick={(event) => { event.preventDefault(); onOpenChart() }}>Chart studio</a><a href="/interaction" onClick={(event) => { event.preventDefault(); onOpenInteraction() }}>Interaction</a><a href="/tokens" aria-current="page">Tokens</a></div>
       </nav>
 
       <header className="sandbox__token-header">
@@ -1217,6 +1267,105 @@ function TokenExplorer({
             </div>
           </section>
         ))}
+      </section>
+    </main>
+  )
+}
+
+function InteractionPage({
+  theme,
+  onOpenChart,
+  onOpenTokens,
+}: {
+  readonly theme: ShiftChartsTheme
+  readonly onOpenChart: () => void
+  readonly onOpenTokens: () => void
+}) {
+  return (
+    <main className={`sandbox sandbox--tokens shiftcharts-theme-${theme}`} data-shiftcharts-theme={theme}>
+      <nav className="sandbox__family-nav" aria-label="Sandbox pages">
+        <div className="sandbox__family-nav-intro"><strong>ShiftCharts sandbox</strong></div>
+        <div className="sandbox__family-links">
+          <a href="/charts/line" onClick={(event) => { event.preventDefault(); onOpenChart() }}>Chart studio</a>
+          <a href="/interaction" aria-current="page">Interaction</a>
+          <a href="/tokens" onClick={(event) => { event.preventDefault(); onOpenTokens() }}>Tokens</a>
+        </div>
+      </nav>
+
+      <header className="sandbox__token-header">
+        <div>
+          <h1>Point at the data.<br /><em>Not just a value — the reading.</em></h1>
+          <p>
+            The tooltip, the crosshair, and the active-point halo are one system, driven by the same
+            <code>--shiftcharts-*</code> tokens as everything else. This page is worked examples, not a
+            reference list — for the full token catalogue (including every one used below), search{' '}
+            <button type="button" className="sandbox__link-button" onClick={onOpenTokens}>tooltip, series, or crosshair on the Tokens page</button>.
+          </p>
+        </div>
+      </header>
+
+      <section className="sandbox__bar-ladder" aria-labelledby="interaction-dash-title">
+        <div>
+          <p className="sandbox__section-label">Per-series dash, with distance control</p>
+          <h3 id="interaction-dash-title">Same two series — only the reference line's dash distance changes</h3>
+          <p className="sandbox__help">
+            Each card sets one CSS custom property, <code>--shiftcharts-series-2-dash</code>, on its own
+            wrapper — nothing else differs. Hover any of them: the active point gets a soft halo, and the
+            tooltip's swatch mirrors the exact dash of the line it's naming (a tiny inline{' '}
+            <code>&lt;svg&gt;&lt;line&gt;</code> reading the same token, not an approximation). Because the
+            data is hourly, the header also shows the full hour the reading covers, not a single instant.
+          </p>
+        </div>
+        <div className="sandbox__bar-ladder-grid">
+          {DASH_DISTANCE_EXAMPLES.map((example) => (
+            <div className="sandbox__bar-ladder-item" key={example.sizeClass}>
+              <p className="sandbox__bar-ladder-label">{example.label}</p>
+              <div
+                className="sandbox__chart-frame sandbox__chart-frame--ladder"
+                style={{
+                  inlineSize: 320,
+                  blockSize: 220,
+                  ['--shiftcharts-series-2-dash' as string]: example.dash,
+                }}
+              >
+                <AutoChart type="line" data={THROUGHPUT} title={example.label} />
+              </div>
+              <p className="sandbox__help">{example.help}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="sandbox__bar-ladder" aria-labelledby="interaction-glass-title">
+        <div>
+          <p className="sandbox__section-label">Same mechanism, a different material</p>
+          <h3 id="interaction-glass-title">A translucent tooltip, from tokens alone</h3>
+          <p className="sandbox__help">
+            No new markup — <code>--shiftcharts-tooltip-backdrop</code> plus a translucent{' '}
+            <code>--shiftcharts-tooltip-color</code> and a larger <code>--shiftcharts-tooltip-radius</code>{' '}
+            are the entire difference from the default cards above. Hover to see the chart's own lines blur
+            through the card behind it.
+          </p>
+        </div>
+        <div className="sandbox__bar-ladder-grid">
+          <div className="sandbox__bar-ladder-item">
+            <p className="sandbox__bar-ladder-label">Glass</p>
+            <div
+              className="sandbox__chart-frame sandbox__chart-frame--ladder"
+              style={{
+                inlineSize: 320,
+                blockSize: 220,
+                ['--shiftcharts-tooltip-color' as string]: 'rgb(255 255 255 / 0.14)',
+                ['--shiftcharts-tooltip-backdrop' as string]: 'blur(16px) saturate(180%)',
+                ['--shiftcharts-tooltip-border-color' as string]: 'rgb(255 255 255 / 0.4)',
+                ['--shiftcharts-tooltip-radius' as string]: '20px',
+              }}
+            >
+              <AutoChart type="line" data={THROUGHPUT} title="Glass tooltip material" />
+            </div>
+            <p className="sandbox__help">Four token overrides, zero code.</p>
+          </div>
+        </div>
       </section>
     </main>
   )

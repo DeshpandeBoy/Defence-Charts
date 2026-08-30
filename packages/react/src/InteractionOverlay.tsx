@@ -234,20 +234,44 @@ function InteractionLayer({
       return point === null ? [] : [{ ...point, seriesIndex }]
     })
   }, [active, activePointHighlight, interactionIndex, interactionMode, rows])
-  const header = active === null ? '' : active.category ?? formatXLabel(active.xValue)
+  // For a temporal x-axis, show the reading as the bucket it covers — [this point's x, the
+  // next point's x) — rather than a single instant, when the two format to visibly different
+  // labels. Falls back to the single instant for the series' last point (no next boundary to
+  // show) and for any x that isn't a Date at all (categorical/numeric axes keep their existing
+  // single-value header — a bucket range only means something on a temporal axis).
+  const header = useMemo(() => {
+    if (active === null) return ''
+    if (active.category !== null) return active.category
+    const start = formatXLabel(active.xValue)
+    const bucketEnd = nextPointX(active, interactionIndex)
+    if (bucketEnd === null) return start
+    const end = formatXLabel(bucketEnd)
+    return end === start ? start : start + ' → ' + end
+  }, [active, interactionIndex])
   const placement = useMemo<TooltipPlacement | null>(() => {
     if (active === null || rows.length === 0) return null
-    return placeTooltip({
-      mode: plan.interaction.tooltip.placement === 'fluid' ? 'fluid' : 'fixed',
-      anchor: { x: active.point.x, y: active.point.y, width: 0, height: 0 },
-      tooltip: tooltipForPlacement,
-      widget: frame.box,
-      plot: frame.plot,
-      safePadding: DEFAULT_SAFE_PADDING,
-      offset: DEFAULT_TOOLTIP_OFFSET,
-      preferredFixedRail: 'top',
-      preferredFluidSide: 'above-right',
-    })
+    const place = (mode: 'fixed' | 'fluid'): TooltipPlacement =>
+      placeTooltip({
+        mode,
+        anchor: { x: active.point.x, y: active.point.y, width: 0, height: 0 },
+        tooltip: tooltipForPlacement,
+        widget: frame.box,
+        plot: frame.plot,
+        safePadding: DEFAULT_SAFE_PADDING,
+        offset: DEFAULT_TOOLTIP_OFFSET,
+        preferredFixedRail: 'top',
+        preferredFluidSide: 'above-right',
+      })
+    if (plan.interaction.tooltip.placement === 'fluid') return place('fluid')
+
+    // "Fixed" docks the tooltip in whatever chrome the layout left outside the plot — often
+    // just the axis-label band, a handful of pixels tall. `status === 'fit'` means the real
+    // content (header + every row) fits there without clamping. Anything less and a docked
+    // box would ship wedged against the widget edge with rows silently hidden — worse than
+    // just floating it next to the point, which is the same mechanism Canvas/Stage already
+    // use and always has room to show the full reading.
+    const fixed = place('fixed')
+    return fixed.status === 'fit' ? fixed : place('fluid')
   }, [active, frame.box, frame.plot, plan.interaction.tooltip.placement, tooltipForPlacement])
 
   useIsomorphicLayoutEffect(() => {
@@ -475,6 +499,7 @@ function InteractionLayer({
             blockSize: placement.height,
           }}
         >
+          <span className="shiftcharts-interaction__tooltip-arrow" aria-hidden="true" />
           <div className="shiftcharts-interaction__tooltip-header">{header}</div>
           <div className="shiftcharts-interaction__tooltip-rows">
             {visibleRows.map((row) => (
@@ -485,7 +510,19 @@ function InteractionLayer({
                 data-series-index={row.seriesIndex}
               >
                 <span className="shiftcharts-interaction__tooltip-label">
-                  <span className="shiftcharts-interaction__tooltip-swatch" aria-hidden="true" />
+                  {plan.type === 'line' ? (
+                    <svg
+                      className="shiftcharts-interaction__tooltip-swatch-line"
+                      width="14"
+                      height="8"
+                      viewBox="0 0 14 8"
+                      aria-hidden="true"
+                    >
+                      <line x1="0" y1="4" x2="14" y2="4" />
+                    </svg>
+                  ) : (
+                    <span className="shiftcharts-interaction__tooltip-swatch" aria-hidden="true" />
+                  )}
                   <span>{row.label}</span>
                 </span>
                 <strong>{row.value}</strong>
@@ -570,6 +607,15 @@ function flattenedPoints(index: InteractionIndex): readonly DatumKey[] {
 function normalizeX(value: DataPoint['x']): number | null {
   const normalized = value instanceof Date ? value.getTime() : value
   return Number.isFinite(normalized) ? normalized : null
+}
+
+/** The next point's x in the same series, only when both it and the active point's x are
+ * Dates — the boundary a temporal-bucket header needs. `null` for the series' last point, a
+ * non-Date x, or a next point whose x isn't a Date either. */
+function nextPointX(active: ActivePoint, index: InteractionIndex): Date | null {
+  if (!(active.xValue instanceof Date)) return null
+  const next = index.byId.get(active.seriesId)?.source.points[active.pointIndex + 1]
+  return next !== undefined && next.x instanceof Date ? next.x : null
 }
 
 function hideCrosshair(ref: RefObject<SVGLineElement | null>): void {

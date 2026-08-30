@@ -300,7 +300,7 @@ describe('fixed and fluid tooltip interaction', () => {
     expect(container.querySelector('[role="tooltip"]')?.getAttribute('data-point-index')).toBe('4')
   })
 
-  it('uses the nearest stable datum for fixed hover, clips the crosshair, and clears on leave', () => {
+  it('falls back to fluid hover when the docked rail cannot fit the tooltip, clips the crosshair, and clears on leave', () => {
     const { renderedFrame } = renderOverlay(context(420, 320))
     const point = renderedFrame.series[0]?.points[2]
     if (point === undefined) throw new Error('fixture point missing')
@@ -308,10 +308,17 @@ describe('fixed and fluid tooltip interaction', () => {
     dispatchPointer('pointermove', point)
 
     const tooltip = container.querySelector('[role="tooltip"]')
-    expect(tooltip?.getAttribute('data-tooltip-mode')).toBe('fixed')
+    // At 420x320 the docked rail below the plot is only a few px tall — too thin to fit a
+    // header plus a row for every series without clamping — so the overlay floats the tooltip
+    // next to the point instead of shipping a box with rows silently hidden (see
+    // InteractionOverlay's fixed -> fluid escalation, keyed on `TooltipPlacement.status`).
+    expect(tooltip?.getAttribute('data-tooltip-mode')).toBe('fluid')
     expect(tooltip?.getAttribute('data-series-id')).toBe('alpha')
     expect(tooltip?.getAttribute('data-point-index')).toBe('2')
-    expect(tooltip?.querySelector('.shiftcharts-interaction__tooltip-header')?.textContent).toContain('Jan')
+    // Point index 2 isn't the series' last point, so the header shows the bucket it covers —
+    // [this point's x, the next point's x) — rather than a single instant.
+    expect(tooltip?.querySelector('.shiftcharts-interaction__tooltip-header')?.textContent).toBe('Jan 03 → Jan 04')
+    expect(tooltip?.querySelector('.shiftcharts-interaction__tooltip-overflow')).toBeNull()
     expect(container.querySelector('[role="status"]')?.textContent).toContain('ALPHA')
 
     const crosshair = container.querySelector('.shiftcharts-interaction__crosshair')
@@ -334,13 +341,15 @@ describe('fixed and fluid tooltip interaction', () => {
     expect(crosshair?.getAttribute('data-active')).toBe('false')
   })
 
-  it('opens and closes a fixed tap tooltip without treating leave as dismissal', () => {
+  it('opens and closes a tap tooltip without treating leave as dismissal', () => {
     const { renderedFrame } = renderOverlay(context(320, 120))
     const point = renderedFrame.series[0]?.points[1]
     if (point === undefined) throw new Error('fixture point missing')
 
     dispatchPointer('pointerdown', point)
-    expect(container.querySelector('[role="tooltip"]')?.getAttribute('data-tooltip-mode')).toBe('fixed')
+    // The docked rail at this size cannot fit the tooltip either, so this floats too — see the
+    // fixed -> fluid escalation this describe block exercises above.
+    expect(container.querySelector('[role="tooltip"]')?.getAttribute('data-tooltip-mode')).toBe('fluid')
 
     dispatchPointer('pointerout', point)
     expect(container.querySelector('[role="tooltip"]')).not.toBeNull()
@@ -374,17 +383,75 @@ describe('fixed and fluid tooltip interaction', () => {
     const tooltip = container.querySelector('[role="tooltip"]')
     expect(tooltip?.getAttribute('data-tooltip-mode')).toBe('fluid')
     expect(tooltip?.querySelectorAll('.shiftcharts-interaction__tooltip-row')).toHaveLength(2)
+    // The fixture is a 'line' chart, so each row's swatch is the dash-matching line variant
+    // (a tiny inline <svg><line>), not the generic dot — see the swatch-shape test below for
+    // the dot fallback on a non-line chart type.
     expect(
       [...(tooltip?.querySelectorAll('.shiftcharts-interaction__tooltip-row') ?? [])].map((row) => ({
         seriesId: row.getAttribute('data-series-id'),
         seriesIndex: row.getAttribute('data-series-index'),
-        swatch: row.querySelector('.shiftcharts-interaction__tooltip-swatch') !== null,
+        lineSwatch: row.querySelector('.shiftcharts-interaction__tooltip-swatch-line') !== null,
       })),
     ).toEqual([
-      { seriesId: 'alpha', seriesIndex: '0', swatch: true },
-      { seriesId: 'beta', seriesIndex: '1', swatch: true },
+      { seriesId: 'alpha', seriesIndex: '0', lineSwatch: true },
+      { seriesId: 'beta', seriesIndex: '1', lineSwatch: true },
     ])
     expect(tooltip?.querySelector('.shiftcharts-interaction__tooltip-overflow')).toBeNull()
+  })
+
+  it('shows a single instant, not a range, for the last point in a series', () => {
+    const { renderedFrame } = renderOverlay(context(420, 320))
+    const lastIndex = renderedFrame.series[0]!.points.length - 1
+    const point = renderedFrame.series[0]?.points[lastIndex]
+    if (point === undefined) throw new Error('fixture point missing')
+
+    dispatchPointer('pointermove', point)
+
+    const tooltip = container.querySelector('[role="tooltip"]')
+    expect(tooltip?.querySelector('.shiftcharts-interaction__tooltip-header')?.textContent).toBe('Jan 07')
+  })
+
+  it('falls back to the plain dot swatch on a non-line chart type', () => {
+    const ctx = context(420, 320)
+    const resolved = planChart('scatter', ctx, describeShape(DATA))
+    const renderedFrame = frame(ctx, resolved)
+    act(() => {
+      root.render(
+        createElement(
+          Fragment,
+          null,
+          createElement('figure', { className: 'shiftcharts-chart' }),
+          createElement(InteractionOverlay, {
+            containerRef,
+            plan: resolved,
+            data: DATA,
+            ctx,
+            title: 'Revenue',
+            id: 'interaction-scatter-test',
+          }),
+        ),
+      )
+    })
+    act(() => {})
+    const point = renderedFrame.series[0]?.points[2]
+    if (point === undefined) throw new Error('fixture point missing')
+
+    Object.defineProperty(container.querySelector('.shiftcharts-interaction__svg')!, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({
+        left: 0, top: 0, width: renderedFrame.box.width, height: renderedFrame.box.height,
+        right: renderedFrame.box.width, bottom: renderedFrame.box.height, x: 0, y: 0, toJSON: () => ({}),
+      }),
+    })
+    act(() => {
+      container
+        .querySelector('.shiftcharts-interaction__target')!
+        .dispatchEvent(new MouseEvent('pointermove', { bubbles: true, clientX: point.x, clientY: point.y }))
+    })
+
+    const row = container.querySelector('.shiftcharts-interaction__tooltip-row')
+    expect(row?.querySelector('.shiftcharts-interaction__tooltip-swatch')).not.toBeNull()
+    expect(row?.querySelector('.shiftcharts-interaction__tooltip-swatch-line')).toBeNull()
   })
 
   it('uses fluid placement at Canvas and preserves the explicit datum identity through resize', () => {
@@ -420,7 +487,9 @@ describe('fixed and fluid tooltip interaction', () => {
     })
     act(() => {})
 
-    expect(container.querySelector('[role="tooltip"]')?.getAttribute('data-tooltip-mode')).toBe('fixed')
+    // Panel's docked rail can't fit this tooltip either, so it stays fluid after the resize —
+    // what this asserts is that the datum identity survives, not a mode switch.
+    expect(container.querySelector('[role="tooltip"]')?.getAttribute('data-tooltip-mode')).toBe('fluid')
     expect(container.querySelector('[role="tooltip"]')?.getAttribute('data-point-index')).toBe('1')
     expect(container.querySelector('[role="tooltip"]')?.getAttribute('data-series-id')).toBe('alpha')
   })

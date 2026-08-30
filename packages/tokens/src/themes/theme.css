@@ -59,6 +59,12 @@
     --shiftcharts-series-4: #bda4fb; /* H-delta  410.2nm · 296.3° ·  8.52 */
     --shiftcharts-series-5: #1c9d96; /* He I     492.2nm · 188.9° ·  5.45 */
     --shiftcharts-series-6: #fa2017; /* Fe I     615.0nm ·  29.2° ·  4.56 */
+    --shiftcharts-series-1-dash: var(--shiftcharts-line-dash);
+    --shiftcharts-series-2-dash: var(--shiftcharts-line-dash);
+    --shiftcharts-series-3-dash: var(--shiftcharts-line-dash);
+    --shiftcharts-series-4-dash: var(--shiftcharts-line-dash);
+    --shiftcharts-series-5-dash: var(--shiftcharts-line-dash);
+    --shiftcharts-series-6-dash: var(--shiftcharts-line-dash);
 
     /* --- Neutral ramp ------------------------------------------------------------ */
     /*
@@ -201,6 +207,10 @@
     --shiftcharts-point-stroke-width: 0;
     --shiftcharts-point-stroke-color: var(--shiftcharts-surface-color);
     --shiftcharts-point-shape: circle;
+    --shiftcharts-point-stroke-width-hover: 2px;
+    --shiftcharts-point-halo-blur: 4px;
+    --shiftcharts-point-halo-strength: 45%;
+    --shiftcharts-point-clip-path-hover: none;
     --shiftcharts-point-auto-hide-threshold: 2;
     --shiftcharts-arc-inner-radius: 0;
     --shiftcharts-arc-pad-angle: 0;
@@ -229,6 +239,13 @@
      * setting one property on the figure rather than by reaching into a data attribute.
      */
     --shiftcharts-series-color: var(--shiftcharts-series-1);
+    /*
+     * The stroke-dasharray a line paints with. Re-bound per series by chart.css from the
+     * --shiftcharts-series-N-dash tokens, which each default to the shared --shiftcharts-line-dash — so
+     * nothing changes until a consumer sets one series apart, typically to mark it as a
+     * reference/average line rather than the primary metric.
+     */
+    --shiftcharts-series-dash: var(--shiftcharts-series-1-dash);
 
     /* --- Typography -------------------------------------------------------------- */
     /*
@@ -362,13 +379,23 @@
 
     /* --- Tooltip ----------------------------------------------------------------- */
     --shiftcharts-tooltip-color: var(--shiftcharts-ramp-neutral-2);
-    --shiftcharts-tooltip-radius: 8px;
-    --shiftcharts-tooltip-padding: 8px;
-    --shiftcharts-tooltip-shadow: none;
+    --shiftcharts-tooltip-radius: 12px;
+    --shiftcharts-tooltip-padding: 10px;
+    --shiftcharts-tooltip-padding-inline: var(--shiftcharts-tooltip-padding);
+    --shiftcharts-tooltip-padding-block: var(--shiftcharts-tooltip-padding);
+    --shiftcharts-tooltip-shadow: 0 4px 16px rgb(0 0 0 / 0.28);
+    --shiftcharts-tooltip-backdrop: none;
+    --shiftcharts-tooltip-border-color: var(--shiftcharts-axis-domain-color);
+    --shiftcharts-tooltip-border-width: var(--shiftcharts-axis-domain-width);
     --shiftcharts-tooltip-offset: 16px;
-    --shiftcharts-tooltip-header-gap: 5px;
-    --shiftcharts-tooltip-row-padding: 3px 5px;
-    --shiftcharts-tooltip-chip-gap: 7px;
+    --shiftcharts-tooltip-header-gap: 8px;
+    --shiftcharts-tooltip-row-padding: 5px 6px;
+    --shiftcharts-tooltip-chip-gap: 8px;
+    --shiftcharts-tooltip-font-size: 12px;
+    --shiftcharts-tooltip-font-weight: var(--shiftcharts-label-font-weight);
+    --shiftcharts-tooltip-value-font-weight: 700;
+    --shiftcharts-tooltip-letter-spacing: var(--shiftcharts-label-letter-spacing);
+    --shiftcharts-tooltip-arrow-size: 6px;
     --shiftcharts-tooltip-delay: 350ms;
     --shiftcharts-tooltip-hide-delay: 500ms;
     --shiftcharts-tooltip-snap: 10px;

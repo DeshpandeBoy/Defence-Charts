@@ -368,21 +368,27 @@
    */
   .shiftcharts-series[data-series-index='0'] {
     --shiftcharts-series-color: var(--shiftcharts-series-1);
+    --shiftcharts-series-dash: var(--shiftcharts-series-1-dash);
   }
   .shiftcharts-series[data-series-index='1'] {
     --shiftcharts-series-color: var(--shiftcharts-series-2);
+    --shiftcharts-series-dash: var(--shiftcharts-series-2-dash);
   }
   .shiftcharts-series[data-series-index='2'] {
     --shiftcharts-series-color: var(--shiftcharts-series-3);
+    --shiftcharts-series-dash: var(--shiftcharts-series-3-dash);
   }
   .shiftcharts-series[data-series-index='3'] {
     --shiftcharts-series-color: var(--shiftcharts-series-4);
+    --shiftcharts-series-dash: var(--shiftcharts-series-4-dash);
   }
   .shiftcharts-series[data-series-index='4'] {
     --shiftcharts-series-color: var(--shiftcharts-series-5);
+    --shiftcharts-series-dash: var(--shiftcharts-series-5-dash);
   }
   .shiftcharts-series[data-series-index='5'] {
     --shiftcharts-series-color: var(--shiftcharts-series-6);
+    --shiftcharts-series-dash: var(--shiftcharts-series-6-dash);
   }
 
   .shiftcharts-line {
@@ -397,7 +403,7 @@
     stroke-linejoin: var(--shiftcharts-line-join);
     stroke-linecap: var(--shiftcharts-line-cap);
     stroke-miterlimit: var(--shiftcharts-line-miter-limit);
-    stroke-dasharray: var(--shiftcharts-line-dash);
+    stroke-dasharray: var(--shiftcharts-series-dash, var(--shiftcharts-line-dash));
     stroke-dashoffset: var(--shiftcharts-line-dash-offset);
   }
 

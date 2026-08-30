@@ -14,6 +14,14 @@ import { createRoot } from 'react-dom/client'
 const points = (values: readonly (number | null)[]): readonly DataPoint[] =>
   values.map((y, index) => ({ x: index, y }))
 
+const categoryPoints = (
+  values: readonly (number | null)[],
+  categories: readonly string[],
+): readonly DataPoint[] => values.map((y, index) => ({ x: index, y, category: categories[index] }))
+
+const temporalPoints = (values: readonly (number | null)[]): readonly DataPoint[] =>
+  values.map((y, index) => ({ x: new Date(Date.UTC(2026, 0, index + 1)), y }))
+
 const READINESS: readonly Series[] = [
   { id: 'readiness', label: 'Readiness', points: points([42, 46, 44, 52, 57, 55, 61, 68, 66, 74, 78, 82]) },
   { id: 'training', label: 'Training', points: points([28, 34, 32, 37, 41, 46, 44, 51, 55, 58, 63, 69]) },
@@ -30,6 +38,53 @@ const FLEET_READINESS: readonly Series[] = [
   { id: 'fleet', label: 'Fleet readiness', unit: '%', target: 90, status: 'positive', points: points([74, 78, 82]) },
 ]
 
+const SORTIE_TEMPO: readonly Series[] = [
+  { id: 'alpha-sqn', label: 'Alpha Squadron', points: temporalPoints([4, 6, 5, 8, 7, 9, 6, 10, 8, 11]) },
+  { id: 'bravo-sqn', label: 'Bravo Squadron', points: temporalPoints([3, 4, 6, 5, 7, 6, 8, 7, 9, 10]) },
+]
+
+const TRAINING_VS_READINESS: readonly Series[] = [
+  { id: 'alpha', label: 'Alpha', points: points([12, 18, 16, 23, 28, 31, 34, 30]) },
+  { id: 'bravo', label: 'Bravo', points: points([7, 11, 15, 14, 21, 24, 27, 26]) },
+]
+
+const FLEET_COMPOSITION: readonly Series[] = [
+  {
+    id: 'fleet-mix',
+    label: 'Fleet composition',
+    points: categoryPoints(
+      [38, 26, 18, 10, 8],
+      ['Armor', 'Infantry', 'Artillery', 'Logistics', 'Medical'],
+    ),
+  },
+]
+
+const READINESS_KPIS: readonly Series[] = [
+  { id: 'fleet', label: 'Fleet readiness', unit: '%', target: 90, status: 'positive', points: points([74, 78, 82]) },
+  { id: 'crew', label: 'Crew certification', unit: '%', target: 95, status: 'warning', points: points([81, 83, 86]) },
+]
+
+const REFIT_PROGRESS: readonly Series[] = [
+  { id: 'overhaul', label: 'Fleet overhaul', unit: '%', target: 100, status: 'positive', points: points([64]) },
+  { id: 'recert', label: 'Crew recertification', unit: '%', target: 100, status: 'warning', points: points([38]) },
+]
+
+const MAINTENANCE_ACTIVITY: readonly Series[] = [
+  { id: 'maintenance', label: 'Maintenance', points: temporalPoints([0, 4, null, 12, 2, 9, 1, 6, 3, 7]) },
+  { id: 'inspection', label: 'Inspection', points: temporalPoints([3, 7, 5, null, 18, 2, 4, 8, 6, 5]) },
+]
+
+const READINESS_PIPELINE: readonly Series[] = [
+  {
+    id: 'readiness-pipeline',
+    label: 'Readiness pipeline',
+    points: categoryPoints(
+      [1000, 620, 400, 260, 130, 52],
+      ['Assigned', 'Screened', 'Trained', 'Certified', 'Deployable', 'Deployed'],
+    ),
+  },
+]
+
 type CardSize = { readonly width: number; readonly height: number }
 
 const SHOWCASE_CARDS: readonly {
@@ -42,6 +97,13 @@ const SHOWCASE_CARDS: readonly {
   { title: 'Unit output · Strip (3×1)', type: 'bar', data: UNIT_OUTPUT, size: { width: 420, height: 190 } },
   { title: 'Readiness trend · Panel (3×3)', type: 'line', data: READINESS, size: { width: 560, height: 320 } },
   { title: 'Readiness trend · Canvas (6×5)', type: 'area', data: READINESS, size: { width: 760, height: 480 } },
+  { title: 'Sortie tempo · Strip (3×1)', type: 'timebar', data: SORTIE_TEMPO, size: { width: 420, height: 190 } },
+  { title: 'Training vs readiness · Panel (3×3)', type: 'scatter', data: TRAINING_VS_READINESS, size: { width: 560, height: 320 } },
+  { title: 'Fleet composition · Panel (3×3)', type: 'donut', data: FLEET_COMPOSITION, size: { width: 420, height: 360 } },
+  { title: 'Readiness KPIs · Tile (2×1)', type: 'kpi', data: READINESS_KPIS, size: { width: 260, height: 150 } },
+  { title: 'Refit progress · Strip (3×1)', type: 'progress', data: REFIT_PROGRESS, size: { width: 420, height: 190 } },
+  { title: 'Maintenance activity · Canvas (6×5)', type: 'heatmap', data: MAINTENANCE_ACTIVITY, size: { width: 760, height: 480 } },
+  { title: 'Readiness pipeline · Panel (3×3)', type: 'funnel', data: READINESS_PIPELINE, size: { width: 420, height: 420 } },
 ]
 
 function ShowcaseGrid() {
