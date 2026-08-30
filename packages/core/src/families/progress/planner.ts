@@ -48,6 +48,7 @@ const NO_PROGRESS_LABELS = Object.freeze({
   valueLabels: 'none' as const,
   axisLabelDegrade: 'none' as const,
   maxChars: null,
+  seriesLabelMaxChars: null,
   labelHalo: 'none' as const,
 })
 

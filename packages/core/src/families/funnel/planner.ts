@@ -180,6 +180,7 @@ function labelsFor(sizeClass: SizeContext['sizeClass']): LabelsPlan {
     // meaningless numeric axis.
     axisLabelDegrade: sizeClass === 'strip' ? 'axis-transpose' : 'none',
     maxChars: null,
+    seriesLabelMaxChars: null,
     labelHalo: 'none',
   })
 }

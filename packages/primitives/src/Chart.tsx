@@ -367,7 +367,7 @@ function SeriesMarks({
         seriesLabels={plan.labels.seriesLabels}
         valueLabels={plan.labels.valueLabels}
         labelHalo={plan.labels.labelHalo}
-        maxChars={plan.labels.maxChars}
+        maxChars={plan.labels.seriesLabelMaxChars}
         policy={policy}
         offsets={labelOffsets}
       />

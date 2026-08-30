@@ -50,7 +50,7 @@
  */
 
 import type { SizeContext } from './context.ts'
-import type { AxisPlan, DegradeStep, LegendPlan, NarrativePlan, TickPlan } from './plan.ts'
+import type { AxisPlan, DegradeStep, LabelsPlan, LegendPlan, NarrativePlan, TickPlan } from './plan.ts'
 import { type PlanPolicy, DEFAULT_POLICY } from './policy.ts'
 import { measureText, type TypeRank } from './text.ts'
 
@@ -86,6 +86,8 @@ export type ChromeSpec = {
   readonly y: AxisPlan
   readonly y2: AxisPlan | null
   readonly legend: LegendPlan
+  /** `'direct-end'` reserves a right-side gutter — see `directLabelGutter()`. */
+  readonly seriesLabels: LabelsPlan['seriesLabels']
   readonly valueDisplay: NarrativePlan['valueDisplay']
   readonly valueTypeScale: NarrativePlan['valueTypeScale']
   /** `'button'` renders a visible affordance and costs a band; `'widget-tap'` costs nothing. */
@@ -208,12 +210,47 @@ function boundAxisExtent(extent: number, axis: AxisPlan): number {
 }
 
 /**
+ * Right-side space a direct-end series label needs. §1.3's chain has no horizontal link for
+ * this — `'direct'` legends are §3's *"the legend at this rung is the end-of-line labels"*,
+ * and until now nothing charged for them: `legendBands()` returns zero for `'direct'` on
+ * purpose, on the assumption the label anchors inward at the final point and never leaves the
+ * plot rectangle already reserved. That assumption holds only if the plot's own right edge
+ * already has room to spare; where the last point sits at the plot's true edge — the normal
+ * case — the label has nowhere to anchor inward *into*, and renders over the widget's own
+ * edge instead. This gutter is the fix: a real right-side reservation, sized the same way
+ * `yAxisGutter()` sizes its own — an `'M'`-repeat over-estimate, because the resolver never
+ * sees the real label text (`DataShape` carries no strings, `./data.ts`).
+ *
+ * ⚠ **Tier C, and the character count is a policy constant, not a measurement.** A `DataShape`
+ * field sized from the real labels (`describeShape()`, mirroring `labelMaxChars`) would be
+ * more accurate but is a public-type change with G9 snapshot fallout — the same tradeoff
+ * `./frame.ts`'s module docblock declines for the *y-axis* gutter, for the same reason.
+ * `policy.directLabelMaxChars` takes the smaller step: a fixed budget, generous enough for a
+ * typical short series name, that also caps the rendered label (`rungs/line.ts`) so a name can
+ * never need more room than this function reserved for it. Erring wide is still the
+ * recoverable direction (`./text.ts` §6.1) — a short name leaves the gutter under-used, not a
+ * long one clipped.
+ */
+export function directLabelGutter(seriesLabels: LabelsPlan['seriesLabels'], policy: PlanPolicy): number {
+  if (seriesLabels !== 'direct-end') return 0
+  const style = policy.typography.byRank[LEGEND_RANK]
+  const sample = 'M'.repeat(policy.directLabelMaxChars)
+  return policy.regionGap + measureText(sample, LEGEND_RANK, policy.typography.metrics, style)
+}
+
+/**
  * The legend's cost, split by axis. `'left'`/`'right'` shrink the plot horizontally,
  * `'top'`/`'bottom'` vertically — the one fact `legend.position` carries (§3).
  *
- * ⚠ `'direct'` costs nothing here even though direct end-of-line labels plainly occupy
- * space. The renderer anchors those labels inward at the final point, so charging a right rail
- * would double-count the space they use inside the plot. `'internal'` is the same case.
+ * ⚠ **`'direct'` still costs nothing here, but not for the reason this comment used to give.**
+ * It used to claim charging a right rail would double-count the label's space, on the
+ * assumption the renderer's inward anchor always lands inside room the plot box already had
+ * to spare. It doesn't — the last point ordinarily sits at the plot's own right edge, leaving
+ * the label nowhere to anchor inward *into*, and the label rendered past the widget's edge
+ * instead. The charge is real; it now lives in `directLabelGutter()`, called separately by
+ * `rawPlotBox()`, kept out of this function because it depends on `seriesLabels`, a field this
+ * function's signature has no room for without widening it past what every other caller
+ * needs. `'internal'` was never examined for the same gap and may have it too — untouched here.
  *
  * `maxEntries` bounds every charged band: a legend that grows with the series count could
  * consume the whole box, which is the containment failure §1.3 exists to prevent. An internal
@@ -395,11 +432,13 @@ function rawPlotBox(
   const legend = legendBands(spec.legend, seriesCount, policy)
 
   // Horizontal: y gutter → plot width. §1.3, verbatim, then a symmetric inner inset.
+  // The direct-label gutter is ours, not §1.3's — see `directLabelGutter()`.
   const width =
     boxWidth -
     yAxisGutter(spec.y, policy) -
     yAxisGutter(spec.y2, policy) -
-    legend.width
+    legend.width -
+    directLabelGutter(spec.seriesLabels, policy)
 
   // Vertical: value → x-axis → legend → table → plot. Ours; see the module docblock.
   const height =

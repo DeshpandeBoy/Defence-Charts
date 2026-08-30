@@ -188,12 +188,12 @@ describe('gridlines', () => {
 
 describe('axis ticks', () => {
   it('keeps identity for the ticks a recompose spares, and detaches the rest', () => {
-    const dense = renderAt(1200, 700, MONTHS)
+    const dense = renderAt(1500, 800, MONTHS)
     const before = axisTicksByValue('x')
     expect(before.size).toBe(dense.xTicks.length)
     expect(before.size).toBeGreaterThan(10)
 
-    const sparse = renderAt(1000, 600, MONTHS)
+    const sparse = renderAt(900, 500, MONTHS)
     const after = axisTicksByValue('x')
     expect(after.size).toBe(sparse.xTicks.length)
     expect(after.size).toBeLessThan(before.size)

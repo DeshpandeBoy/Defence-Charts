@@ -287,6 +287,7 @@ function labelsPlan(): LabelsPlan {
     valueLabels: 'none',
     axisLabelDegrade: 'none',
     maxChars: null,
+    seriesLabelMaxChars: null,
     labelHalo: 'none',
   })
 }

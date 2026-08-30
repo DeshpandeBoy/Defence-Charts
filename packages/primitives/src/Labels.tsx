@@ -30,7 +30,8 @@ export type LabelsProps = {
   readonly seriesLabels: LabelsPlan['seriesLabels']
   readonly valueLabels: LabelsPlan['valueLabels']
   readonly labelHalo?: LabelsPlan['labelHalo']
-  /** `LabelsPlan.maxChars`. `null` means no cap. */
+  /** `LabelsPlan.seriesLabelMaxChars` — the direct-end label's own budget, not the x-axis
+   * tick-label `maxChars`. `null` means no cap. */
   readonly maxChars?: number | null
   /** The same resolved policy used to produce the frame and plot box. */
   readonly policy?: PlanPolicy
@@ -132,7 +133,7 @@ export function resolveLabelOffsets(
   for (const item of series) {
     const last = item.points.at(-1)
     if (labels.seriesLabels === 'direct-end' && last !== undefined) {
-      const text = truncate(item.label, labels.maxChars)
+      const text = truncate(item.label, labels.seriesLabelMaxChars)
       const width = measureText(text, 'C', policy.typography.metrics, lineStyle)
       const right = last.x - policy.regionGap
       candidates.push({
@@ -295,10 +296,12 @@ function valueIndices(
 }
 
 /**
- * ⚠ **`…` (U+2026), and it counts as one of the `maxChars`.** `LabelsPlan.maxChars` is what
- * `measureText()` sized the space against, so a truncation that appends an ellipsis *past* the
- * cap produces a label wider than the one the resolver approved — the overflow the cap exists
- * to prevent, introduced by the code enforcing it.
+ * ⚠ **`…` (U+2026), and it counts as one of the cap.** Whichever budget the caller passes
+ * (`LabelsPlan.maxChars` for x-axis ticks, `LabelsPlan.seriesLabelMaxChars` for direct-end
+ * series labels) is what `measureText()`/`directLabelGutter()` sized the space against, so a
+ * truncation that appends an ellipsis *past* the cap produces a label wider than the one the
+ * resolver approved — the overflow the cap exists to prevent, introduced by the code
+ * enforcing it.
  */
 function truncate(text: string, maxChars: number | null): string {
   if (maxChars === null || maxChars <= 0 || text.length <= maxChars) return text

@@ -157,38 +157,45 @@
     pointer-events: none;
   }
 
+  /* ⚠ **Aligned to the real anchor, not a fixed offset.** `InteractionOverlay.tsx` computes
+     `--tooltip-arrow-inset-start`/`-end` per hover from the anchor's actual pixel
+     position relative to the (possibly edge-clamped) tooltip box, clamped to stay clear of
+     the card's rounded corners. A fixed CSS offset here was only ever correct by coincidence —
+     `placeTooltip()` can clamp the box away from the anchor independently near a widget edge,
+     and a fixed offset has no way to track that. The `18px`/`50%` fallbacks only matter if the
+     custom property is somehow unset; every live render sets it. */
   .shiftcharts-interaction__tooltip[data-tooltip-side='top'] .shiftcharts-interaction__tooltip-arrow {
-    inset-inline-start: 50%;
+    inset-inline-start: var(--tooltip-arrow-inset-start, 50%);
     inset-block-end: 0;
     transform: translate(-50%, 50%) rotate(45deg);
   }
 
   .shiftcharts-interaction__tooltip[data-tooltip-side='bottom'] .shiftcharts-interaction__tooltip-arrow {
-    inset-inline-start: 50%;
+    inset-inline-start: var(--tooltip-arrow-inset-start, 50%);
     inset-block-start: 0;
     transform: translate(-50%, -50%) rotate(45deg);
   }
 
   .shiftcharts-interaction__tooltip[data-tooltip-side='above-right'] .shiftcharts-interaction__tooltip-arrow {
-    inset-inline-start: calc(var(--shiftcharts-tooltip-arrow-size) * 3);
+    inset-inline-start: var(--tooltip-arrow-inset-start, calc(var(--shiftcharts-tooltip-arrow-size) * 3));
     inset-block-end: 0;
     transform: translate(-50%, 50%) rotate(45deg);
   }
 
   .shiftcharts-interaction__tooltip[data-tooltip-side='above-left'] .shiftcharts-interaction__tooltip-arrow {
-    inset-inline-end: calc(var(--shiftcharts-tooltip-arrow-size) * 3);
+    inset-inline-end: var(--tooltip-arrow-inset-end, calc(var(--shiftcharts-tooltip-arrow-size) * 3));
     inset-block-end: 0;
     transform: translate(50%, 50%) rotate(45deg);
   }
 
   .shiftcharts-interaction__tooltip[data-tooltip-side='below-right'] .shiftcharts-interaction__tooltip-arrow {
-    inset-inline-start: calc(var(--shiftcharts-tooltip-arrow-size) * 3);
+    inset-inline-start: var(--tooltip-arrow-inset-start, calc(var(--shiftcharts-tooltip-arrow-size) * 3));
     inset-block-start: 0;
     transform: translate(-50%, -50%) rotate(45deg);
   }
 
   .shiftcharts-interaction__tooltip[data-tooltip-side='below-left'] .shiftcharts-interaction__tooltip-arrow {
-    inset-inline-end: calc(var(--shiftcharts-tooltip-arrow-size) * 3);
+    inset-inline-end: var(--tooltip-arrow-inset-end, calc(var(--shiftcharts-tooltip-arrow-size) * 3));
     inset-block-start: 0;
     transform: translate(50%, -50%) rotate(45deg);
   }

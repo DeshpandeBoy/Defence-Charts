@@ -45,6 +45,13 @@ export type PlanPolicy = {
   readonly yTickCount: number
   /** Series count after which direct labels externalise into a legend. **B** — §4.4/§6. */
   readonly directLabelMaxSeries: number
+  /**
+   * Assumed character budget for a direct-end series label. **C** — ours. Sizes the plot's
+   * right-side gutter via an `'M'`-repeat over-estimate (`./layout.ts`'s `directLabelGutter()`,
+   * same technique `yAxisGutter()` uses) and caps the same label's rendered length, so a name
+   * can never render wider than the space reserved for it.
+   */
+  readonly directLabelMaxChars: number
   /** Minimum series count for the optional secondary axis. **C** — §4.1 leaves it open. */
   readonly secondaryAxisMinSeries: number
   /**
@@ -281,6 +288,7 @@ export const DEFAULT_POLICY: PlanPolicy = Object.freeze({
   labelMinSpacing: 1.5,
   yTickCount: 4,
   directLabelMaxSeries: 4,
+  directLabelMaxChars: 8,
   secondaryAxisMinSeries: 2,
   facetColumnsByAspect: Object.freeze({
     portrait: 2,

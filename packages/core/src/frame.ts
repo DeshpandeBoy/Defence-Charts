@@ -421,7 +421,7 @@ export type ValueDelta = NonNullable<ValueEntry['delta']>
  * The `ChromeSpec` the rung committed to, read back off the finished plan.
  *
  * ⚠ This is a reconstruction, and it is faithful because every field of `ChromeSpec` is a
- * field the plan also carries — `layout.ts` chose those eight deliberately for that reason.
+ * field the plan also carries — `layout.ts` chose those fields deliberately for that reason.
  * With no overrides applied it reproduces the rung's own spec exactly, which is what makes
  * the plot-box equality assertion hold.
  *
@@ -441,6 +441,7 @@ export function chromeFromPlan(plan: ChartPlan, plotInset = 0): ChromeSpec {
     y: plan.axes.y,
     y2: plan.axes.y2,
     legend: plan.legend,
+    seriesLabels: plan.labels.seriesLabels,
     valueDisplay: plan.narrative.valueDisplay,
     valueTypeScale: plan.narrative.valueTypeScale,
     tableDisclosure: plan.dataTable.disclosure,

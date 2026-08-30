@@ -19,6 +19,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type CSSProperties,
   type KeyboardEvent,
   type PointerEvent,
   type RefObject,
@@ -75,6 +76,10 @@ const DEFAULT_TOOLTIP_OFFSET = 16
 const ESTIMATED_HEADER_HEIGHT = 32
 const ESTIMATED_ROW_HEIGHT = 28
 const ESTIMATED_CHARACTER_WIDTH = 8
+// Keeps the caret's rotated-diamond tip clear of the tooltip's own rounded corners — not
+// read from `--shiftcharts-tooltip-radius` at runtime, since "close enough to clear a corner"
+// doesn't need to track that token's exact value.
+const ARROW_EDGE_MARGIN = 16
 
 type InteractionTimingTokens = {
   readonly delayMs: number
@@ -393,6 +398,18 @@ function InteractionLayer({
     return fixed.status === 'fit' ? fixed : place('fluid')
   }, [active, frame.box, frame.plot, plan.interaction.tooltip.placement, tooltipForPlacement])
 
+  // Where the caret should actually point: the anchor's real x, expressed as an offset from
+  // the tooltip box's own left edge, clamped to stay clear of both rounded corners. Every
+  // `data-tooltip-side` variant used a fixed CSS offset here regardless of where placement
+  // put the box relative to the anchor — correct only by coincidence, since `placeTooltip()`
+  // clamps the box to the widget bounds independently of the anchor once near an edge.
+  const arrowInsetStart = useMemo(() => {
+    if (placement === null || active === null) return null
+    const raw = active.point.x - placement.x
+    const margin = Math.min(ARROW_EDGE_MARGIN, placement.width / 2)
+    return Math.min(Math.max(raw, margin), Math.max(margin, placement.width - margin))
+  }, [active, placement])
+
   useIsomorphicLayoutEffect(() => {
     const element = tooltipRef.current
     if (element === null || active === null) return
@@ -644,7 +661,13 @@ function InteractionLayer({
             insetBlockStart: placement.y,
             inlineSize: placement.width,
             blockSize: placement.height,
-          }}
+            ...(arrowInsetStart === null
+              ? null
+              : {
+                  '--tooltip-arrow-inset-start': arrowInsetStart + 'px',
+                  '--tooltip-arrow-inset-end': placement.width - arrowInsetStart + 'px',
+                }),
+          } as CSSProperties}
         >
           <span className="shiftcharts-interaction__tooltip-arrow" aria-hidden="true" />
           <div className="shiftcharts-interaction__tooltip-header">{header}</div>

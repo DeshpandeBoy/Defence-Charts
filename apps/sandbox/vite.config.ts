@@ -10,7 +10,7 @@ const securityHeaders = {
 
 export default defineConfig({
   plugins: [react()],
-  server: { port: 5176, open: false, headers: securityHeaders },
+  server: { port: Number(process.env.PORT) || 5176, open: false, headers: securityHeaders },
   preview: { headers: securityHeaders },
   build: { outDir: 'dist', emptyOutDir: true },
 })

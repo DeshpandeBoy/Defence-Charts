@@ -193,6 +193,7 @@ export const microRung: Rung = ({ type, ctx, shape, policy }) =>
       valueLabels: 'none',
       axisLabelDegrade: 'none',
       maxChars: null,
+      seriesLabelMaxChars: null,
       labelHalo: 'none',
     }),
     legend: Object.freeze({ placement: 'absent' }) as LegendPlan,
@@ -263,6 +264,7 @@ export const tileRung: Rung = ({ type, ctx, shape, policy }) => {
     y: AXIS_OFF,
     y2: null,
     legend: { placement: 'absent' },
+    seriesLabels: 'none',
     valueDisplay: 'latest+delta',
     valueTypeScale: 'fit',
     tableDisclosure: 'widget-tap',
@@ -304,6 +306,7 @@ export const tileRung: Rung = ({ type, ctx, shape, policy }) => {
       valueLabels: 'none',
       axisLabelDegrade: 'none',
       maxChars: null,
+      seriesLabelMaxChars: null,
       labelHalo: 'none',
     }),
     legend,
@@ -399,6 +402,7 @@ export const stripRung: Rung = ({ type, ctx, shape, policy }) => {
     y: AXIS_OFF,
     y2: null,
     legend,
+    seriesLabels: 'none',
     valueDisplay: 'none',
     valueTypeScale: 'fit',
     tableDisclosure: 'button',
@@ -430,6 +434,7 @@ export const stripRung: Rung = ({ type, ctx, shape, policy }) => {
       valueLabels: 'none',
       axisLabelDegrade: degrade.step,
       maxChars: degrade.maxChars,
+      seriesLabelMaxChars: null,
       labelHalo: 'none',
     }),
     legend,
@@ -642,6 +647,10 @@ function valueLegibleRung(
     y,
     y2,
     legend,
+    // Constant for this whole rung — `labels.seriesLabels` below agrees, and both are known
+    // before `resolvePlotBox()` runs regardless, so this isn't the circular case the
+    // `ChromeSpec` docblock warns about (see `directLabelGutter()`'s own note).
+    seriesLabels: 'direct-end',
     valueDisplay: 'none',
     valueTypeScale: isStage ? 12 : 'fit',
     tableDisclosure: 'button',
@@ -687,6 +696,10 @@ function valueLegibleRung(
       valueLabels: isStage ? 'extrema' : 'none',
       axisLabelDegrade: degrade.step,
       maxChars: degrade.maxChars,
+      // The series-label budget `directLabelGutter()` (../layout.ts) reserved space
+      // against — kept separate from `maxChars` above, which is the x-axis tick-label
+      // budget and is invariant-coupled to `axisLabelDegrade` (`invariants.test.ts` §3).
+      seriesLabelMaxChars: policy.directLabelMaxChars,
       labelHalo: 'none',
     }),
     legend,

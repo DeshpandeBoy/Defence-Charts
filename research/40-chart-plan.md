@@ -888,14 +888,24 @@ something the corpus does not say, and each is labelled rather than smoothed ove
    the implementation follows §4 as written. Resolving it needs either a re-read of Heer 2009's
    design or a decision recorded as ours.
 
-8. **Canvas's label degradation departs from §6's literal text, and the departure is arithmetic.**
-   §6:640 gives Canvas no degradation; the implementation abbreviates to 4 characters. Nothing in §6
-   changed — the earlier `'none'` was computed against a placeholder metrics table with zero
-   per-character coverage. With the real table, Canvas's plot is 451.64 px across 5 tick slots: a
-   90.3 px slot, less 1.5 em of mandated spacing, leaves a **73.83 px** budget, and a worst-case
-   5-character label measures **77.12 px** at rank D. A 3.29 px overrun. §6's hand-authored value was
-   written without a measurement available; this is what measuring it produced, and it is the only
-   field in the six rungs that moved.
+8. **Canvas's label degradation departed from §6's literal text, and the departure was arithmetic —
+   until the arithmetic changed again.** §6:640 gives Canvas no degradation; for a time the
+   implementation abbreviated to 4 characters. Nothing in §6 changed either time — the earlier
+   `'none'` was computed against a placeholder metrics table with zero per-character coverage, and
+   with the real table, Canvas's plot measured 451.64 px across 5 tick slots: a 90.3 px slot, less
+   1.5 em of mandated spacing, left a 73.83 px budget against a worst-case 5-character label at
+   77.12 px — a 3.29 px overrun.
+   
+   ⚠ **That overrun is gone, and §6 is right again — not because it was re-read, but because a real
+   gap closed underneath it.** `directLabelGutter()` (`./layout.ts`) now reserves right-side plot
+   space for the direct-end series labels §6:615 already specifies for Panel and this rung inherits
+   — space that plot-width arithmetic never charged for before, silently crowding the last data point
+   against the widget's own edge. Reserving it honestly narrows the plot and drops Canvas to 3 tick
+   slots at the same fixture width; 5 slots of the *old*, over-wide plot needed abbreviation, 3 slots
+   of the *corrected* one do not (323.31 px / 3 ≈ 107.77 px slot, a 91.27 px budget against the same
+   77.12 px worst case — comfortable, not close). §6's hand-authored value was written without a
+   measurement available either time; this is what the measurement, corrected, now produces, and it
+   happens to agree with §6 again. Full derivation in `packages/core/src/rungs/line.snapshot.test.ts`.
 
 9. **`split` assumes a break opportunity exists.** The published degrade order is
    `abbreviate → split → rotate → axis-transpose`, but `DataShape` cannot say whether a label
