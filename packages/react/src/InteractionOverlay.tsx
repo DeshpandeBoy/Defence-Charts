@@ -76,6 +76,35 @@ const ESTIMATED_HEADER_HEIGHT = 32
 const ESTIMATED_ROW_HEIGHT = 28
 const ESTIMATED_CHARACTER_WIDTH = 8
 
+type InteractionTimingTokens = {
+  readonly delayMs: number
+  readonly hideDelayMs: number
+  readonly snapPx: number
+}
+
+/** `getComputedStyle().getPropertyValue()` returns `''` for a variable no stylesheet ever set
+ * (e.g. jsdom with no theme.css loaded) — parse failures fall back to today's behavior: instant
+ * show/hide (0ms) and no distance cutoff (infinite snap), not a broken one. */
+function parseMsToken(raw: string): number {
+  const value = Number.parseFloat(raw)
+  return Number.isFinite(value) ? value : 0
+}
+
+function parseSnapToken(raw: string): number {
+  const value = Number.parseFloat(raw)
+  return Number.isFinite(value) ? value : Number.POSITIVE_INFINITY
+}
+
+function readInteractionTimingTokens(element: Element | null): InteractionTimingTokens {
+  if (element === null) return { delayMs: 0, hideDelayMs: 0, snapPx: Number.POSITIVE_INFINITY }
+  const style = getComputedStyle(element)
+  return {
+    delayMs: parseMsToken(style.getPropertyValue('--shiftcharts-tooltip-delay')),
+    hideDelayMs: parseMsToken(style.getPropertyValue('--shiftcharts-tooltip-hide-delay')),
+    snapPx: parseSnapToken(style.getPropertyValue('--shiftcharts-tooltip-snap')),
+  }
+}
+
 const useIsomorphicLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect
 
 export function InteractionOverlay({
@@ -145,6 +174,9 @@ function InteractionLayer({
   )
   const hoverSchedulerRef = useRef<PointerFrameScheduler<PointerSample> | null>(null)
   const pointerSampleConsumerRef = useRef<(sample: PointerSample) => void>(() => undefined)
+  const timingTokensRef = useRef<InteractionTimingTokens | null>(null)
+  const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   const readSvgBounds = useCallback(() => {
     const svg = svgRef.current
@@ -152,6 +184,29 @@ function InteractionLayer({
     const bounds = svg.getBoundingClientRect()
     svgBoundsRef.current = bounds
     return bounds
+  }, [])
+
+  // Read once per hover session (cached on the ref, like `svgBoundsRef`) rather than on every
+  // rAF-coalesced pointer sample — `getComputedStyle` is cheap but not free, and these tokens
+  // don't change mid-hover.
+  const readTimingTokens = useCallback(() => {
+    const tokens = readInteractionTimingTokens(svgRef.current)
+    timingTokensRef.current = tokens
+    return tokens
+  }, [])
+
+  const clearShowTimer = useCallback(() => {
+    if (showTimerRef.current !== null) {
+      clearTimeout(showTimerRef.current)
+      showTimerRef.current = null
+    }
+  }, [])
+
+  const clearHideTimer = useCallback(() => {
+    if (hideTimerRef.current !== null) {
+      clearTimeout(hideTimerRef.current)
+      hideTimerRef.current = null
+    }
   }, [])
 
   const commitActiveKey = useCallback((next: DatumKey | null) => {
@@ -176,20 +231,77 @@ function InteractionLayer({
     [interactionIndex],
   )
 
+  // Clears (immediately, or after the hide-delay) both the tooltip's active datum and the
+  // crosshair together — they read as one hover state, so they hide as one.
+  const scheduleHide = useCallback(() => {
+    clearShowTimer()
+    clearHideTimer()
+    const tokens = timingTokensRef.current ?? readTimingTokens()
+    if (tokens.hideDelayMs <= 0) {
+      hideCrosshair(crosshairLineRef)
+      commitActiveKey(null)
+      return
+    }
+    hideTimerRef.current = setTimeout(() => {
+      hideTimerRef.current = null
+      hideCrosshair(crosshairLineRef)
+      commitActiveKey(null)
+    }, tokens.hideDelayMs)
+  }, [clearHideTimer, clearShowTimer, commitActiveKey, readTimingTokens])
+
   const consumePointerSample = useCallback(
     (sample: PointerSample) => {
       const bounds = svgBoundsRef.current ?? readSvgBounds()
+      const tokens = timingTokensRef.current ?? readTimingTokens()
       const point = nearestPoint(
         sample,
         interactionIndex,
         bounds,
         plan.type === 'scatter' ? 'xy' : 'x',
+        tokens.snapPx,
       )
-      if (point === null) return
-      if (plan.interaction.crosshair) updateCrosshair(point)
-      if (plan.interaction.trigger === 'hover' && !locked) commitActiveKey(point)
+      if (plan.interaction.crosshair && point !== null) updateCrosshair(point)
+      if (plan.interaction.trigger !== 'hover' || locked) return
+
+      if (point === null) {
+        // Beyond the snap radius: don't leave a stale reading up for a spot the pointer has
+        // drifted away from without actually leaving the chart.
+        if (activeKeyRef.current !== null) scheduleHide()
+        return
+      }
+
+      clearHideTimer()
+      if (sameNullableDatum(activeKeyRef.current, point)) return
+
+      if (activeKeyRef.current === null && tokens.delayMs > 0) {
+        // Cold start only: gate the first appearance behind the show delay so a pointer just
+        // passing through doesn't flash a tooltip. Moving to a *different* point once one is
+        // already showing updates instantly — the delay is for arriving, not for every point
+        // along the way.
+        clearShowTimer()
+        showTimerRef.current = setTimeout(() => {
+          showTimerRef.current = null
+          commitActiveKey(point)
+        }, tokens.delayMs)
+        return
+      }
+      clearShowTimer()
+      commitActiveKey(point)
     },
-    [commitActiveKey, interactionIndex, locked, plan.interaction.crosshair, plan.interaction.trigger, plan.type, readSvgBounds, updateCrosshair],
+    [
+      clearHideTimer,
+      clearShowTimer,
+      commitActiveKey,
+      interactionIndex,
+      locked,
+      plan.interaction.crosshair,
+      plan.interaction.trigger,
+      plan.type,
+      readSvgBounds,
+      readTimingTokens,
+      scheduleHide,
+      updateCrosshair,
+    ],
   )
   pointerSampleConsumerRef.current = consumePointerSample
 
@@ -201,6 +313,13 @@ function InteractionLayer({
     return () => {
       scheduler.cancel()
       if (hoverSchedulerRef.current === scheduler) hoverSchedulerRef.current = null
+    }
+  }, [])
+
+  useEffect(() => {
+    return () => {
+      if (showTimerRef.current !== null) clearTimeout(showTimerRef.current)
+      if (hideTimerRef.current !== null) clearTimeout(hideTimerRef.current)
     }
   }, [])
 
@@ -342,12 +461,23 @@ function InteractionLayer({
   const activateAtPointer = useCallback(
     (event: PointerEvent<SVGRectElement>) => {
       const bounds = svgBoundsRef.current ?? readSvgBounds()
-      const point = nearestPoint(event, interactionIndex, bounds, plan.type === 'scatter' ? 'xy' : 'x')
+      const tokens = timingTokensRef.current ?? readTimingTokens()
+      const point = nearestPoint(
+        event,
+        interactionIndex,
+        bounds,
+        plan.type === 'scatter' ? 'xy' : 'x',
+        tokens.snapPx,
+      )
       if (point === null) return
       const same =
         activeKeyRef.current?.seriesId === point.seriesId && activeKeyRef.current?.pointIndex === point.pointIndex
       if (plan.interaction.crosshair) updateCrosshair(point)
       if (plan.interaction.trigger === 'tap' || event.pointerType === 'touch') {
+        // A tap is an explicit, deliberate action — it always resolves instantly, never through
+        // the hover show/hide delays.
+        clearShowTimer()
+        clearHideTimer()
         if (same && locked) {
           commitActiveKey(null)
           setLocked(false)
@@ -357,22 +487,36 @@ function InteractionLayer({
         }
       }
     },
-    [commitActiveKey, interactionIndex, locked, plan.interaction.crosshair, plan.interaction.trigger, plan.type, readSvgBounds, updateCrosshair],
+    [
+      clearHideTimer,
+      clearShowTimer,
+      commitActiveKey,
+      interactionIndex,
+      locked,
+      plan.interaction.crosshair,
+      plan.interaction.trigger,
+      plan.type,
+      readSvgBounds,
+      readTimingTokens,
+      updateCrosshair,
+    ],
   )
 
   const clearOnLeave = useCallback(() => {
     hoverSchedulerRef.current?.cancel()
     svgBoundsRef.current = null
-    if (!locked) {
-      hideCrosshair(crosshairLineRef)
-      commitActiveKey(null)
-    }
-  }, [commitActiveKey, locked])
+    // Re-read on the next pointer entry rather than every sample — cheap enough per hover
+    // session, and it's the natural point to pick up a theme swap made while not hovering.
+    timingTokensRef.current = null
+    if (!locked) scheduleHide()
+  }, [locked, scheduleHide])
 
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<SVGRectElement>) => {
       if (event.key === 'Escape') {
         event.preventDefault()
+        clearShowTimer()
+        clearHideTimer()
         commitActiveKey(null)
         setLocked(false)
         hideCrosshair(crosshairLineRef)
@@ -382,6 +526,9 @@ function InteractionLayer({
       if (points.length === 0) return
       if (!['ArrowLeft', 'ArrowRight', 'Home', 'End', 'Enter', ' '].includes(event.key)) return
       event.preventDefault()
+      // Keyboard activation, like tap, is explicit and always resolves instantly.
+      clearShowTimer()
+      clearHideTimer()
       if (event.key === 'Enter' || event.key === ' ') {
         const next = activeKey === null ? (points[0] ?? null) : activeKey
         commitActiveKey(next)
@@ -399,7 +546,7 @@ function InteractionLayer({
             : Math.max(0, Math.min(points.length - 1, index + (event.key === 'ArrowRight' ? 1 : -1)))
       commitActiveKey(points[nextIndex] ?? null)
     },
-    [activeKey, commitActiveKey, interactionIndex],
+    [activeKey, clearHideTimer, clearShowTimer, commitActiveKey, interactionIndex],
   )
 
   const clipId = baseId + '-plot-clip'
@@ -548,13 +695,25 @@ function nearestPoint(
   index: InteractionIndex,
   bounds: DOMRect | null,
   mode: 'x' | 'xy',
+  snapPx: number,
 ): DatumKey | null {
   if (bounds === null) return null
   const scaleX = bounds.width > 0 ? index.frame.box.width / bounds.width : 1
   const scaleY = bounds.height > 0 ? index.frame.box.height / bounds.height : 1
   const x = (event.clientX - bounds.left) * scaleX
   const y = (event.clientY - bounds.top) * scaleY
-  return nearestIndexedPoint(index, x, y, mode)
+  const found = nearestIndexedPoint(index, x, y, mode)
+  if (found === null) return null
+  if (Number.isFinite(snapPx)) {
+    // The index works in viewBox units; convert the found point's offset back to the CSS
+    // pixels the snap token is authored in rather than converting the token the other way,
+    // so a non-uniform scaleX/scaleY never distorts the threshold itself.
+    const dx = scaleX > 0 ? (found.x - x) / scaleX : found.x - x
+    const dy = scaleY > 0 ? (found.y - y) / scaleY : found.y - y
+    const distance = mode === 'xy' ? Math.hypot(dx, dy) : Math.abs(dx)
+    if (distance > snapPx) return null
+  }
+  return { seriesId: found.seriesId, pointIndex: found.pointIndex }
 }
 
 function resolveActivePoint(key: DatumKey, index: InteractionIndex): ActivePoint | null {

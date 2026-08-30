@@ -17,7 +17,7 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, it } from 'vitest'
 
 import { collectDeclaredTokens } from './check-tokens.mjs'
-import { renderTokenNames, renderTokensCss } from './generate-tokens-css.mjs'
+import { renderOverrides, renderTokenNames, renderTokensCss } from './generate-tokens-css.mjs'
 import { ALL_TOKENS, THEME_VARIANTS, TOKEN_GROUPS, tierCensus } from '../packages/tokens/src/tokens.ts'
 
 const url = (path) => fileURLToPath(new URL(path, import.meta.url))
@@ -71,14 +71,31 @@ describe('the theme variants', () => {
    * authored list. Hand-maintained they had already diverged: the class copy carried bare
    * hex with the contrast ratios stripped off, so the block a consumer is most likely to
    * read was the block with the evidence missing.
+   *
+   * ⚠ **Checked as one multi-line block per emission site, not one `var()` line at a time.**
+   * A single token's line is not a safe unit to search for globally: two *different* variants
+   * legitimately sharing one override value — `tooltip-color` re-pointing both `rail-light`
+   * and `neutral-light` to `var(--shiftcharts-ramp-neutral-8)`, the correct choice in both, not
+   * a coincidence — makes a plain `css.split(line).length` count every occurrence of that text
+   * anywhere in the file, conflating two variants' emissions into one number. A variant's full
+   * rendered override list, joined as it actually appears in the file, is long and specific
+   * enough that it cannot collide with another variant's equally full, equally specific list —
+   * so scoping the search to that whole block, rendered once per emission site exactly the way
+   * the generator itself renders it, is what removes the blind spot rather than working around
+   * one instance of it.
    */
   it('emit each override identically in both blocks', async () => {
     const css = await readFile(CSS_TARGET, 'utf8')
     for (const variant of THEME_VARIANTS) {
-      for (const token of variant.overrides) {
-        const line = `--shiftcharts-${token.name}: ${token.value};`
-        expect(css.split(line).length - 1, `${token.name} should appear twice`).toBe(2)
+      if (variant.prefersColorScheme === undefined) {
+        const block = renderOverrides(variant.overrides, '    ').join('\n')
+        expect(css.split(block).length - 1, `${variant.id} should appear in both the attribute and class blocks`).toBe(2)
+        continue
       }
+      const mediaBlock = renderOverrides(variant.overrides, '      ').join('\n')
+      const pinBlock = renderOverrides(variant.overrides, '    ').join('\n')
+      expect(css.split(mediaBlock).length - 1, `${variant.id} media block should appear once`).toBe(1)
+      expect(css.split(pinBlock).length - 1, `${variant.id} pin block should appear once`).toBe(1)
     }
   })
 

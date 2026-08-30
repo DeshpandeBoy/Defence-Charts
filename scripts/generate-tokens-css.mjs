@@ -124,7 +124,7 @@ function renderGroups(groups, indent) {
  * @param {string} indent
  * @returns {string[]}
  */
-function renderOverrides(tokens, indent) {
+export function renderOverrides(tokens, indent) {
   return tokens.flatMap((token) => {
     const aside = token.aside === undefined ? '' : ` /* ${token.aside} */`
     return [`${indent}--shiftcharts-${token.name}: ${token.value};${aside}`]

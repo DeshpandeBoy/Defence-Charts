@@ -495,6 +495,124 @@ describe('fixed and fluid tooltip interaction', () => {
   })
 })
 
+describe('delay, hide-delay, and snap tokens', () => {
+  // Restricted to setTimeout/clearTimeout: the top-level beforeEach stubs
+  // `requestAnimationFrame` to `undefined` so the pointer scheduler flushes synchronously (see
+  // its comment above), and a broad `vi.useFakeTimers()` would silently replace that stub with
+  // a fake RAF implementation, breaking every synchronous hover assertion in this block.
+  beforeEach(() => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] })
+  })
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  function setTiming(options: { delay?: string; hideDelay?: string; snap?: string }): void {
+    const svg = container.querySelector('.shiftcharts-interaction__svg')
+    if (!(svg instanceof SVGSVGElement)) throw new Error('interaction svg missing')
+    if (options.delay !== undefined) svg.style.setProperty('--shiftcharts-tooltip-delay', options.delay)
+    if (options.hideDelay !== undefined) svg.style.setProperty('--shiftcharts-tooltip-hide-delay', options.hideDelay)
+    if (options.snap !== undefined) svg.style.setProperty('--shiftcharts-tooltip-snap', options.snap)
+  }
+
+  it('has no delay, hide-delay, or snap cutoff when the tokens are unset — unchanged prior behavior', () => {
+    // No real stylesheet is loaded in this test environment, so this is also what every other
+    // test in this file exercises: getComputedStyle reads back '' for these custom properties,
+    // which parses to 0ms/0ms/no-cutoff, matching the overlay's behavior before these tokens
+    // were wired up.
+    const { renderedFrame } = renderOverlay(context(420, 320))
+    const point = renderedFrame.series[0]?.points[2]
+    if (point === undefined) throw new Error('fixture point missing')
+    dispatchPointer('pointermove', { x: point.x + 40, y: point.y })
+    expect(container.querySelector('[role="tooltip"]')).not.toBeNull()
+    dispatchPointer('pointerout', point)
+    expect(container.querySelector('[role="tooltip"]')).toBeNull()
+  })
+
+  it('gates the first tooltip appearance behind --shiftcharts-tooltip-delay, but not a later move to a different point', () => {
+    const { renderedFrame } = renderOverlay(context(420, 320))
+    setTiming({ delay: '200ms' })
+    const point = renderedFrame.series[0]?.points[2]
+    const nextPoint = renderedFrame.series[0]?.points[4]
+    if (point === undefined || nextPoint === undefined) throw new Error('fixture point missing')
+
+    dispatchPointer('pointermove', point)
+    expect(container.querySelector('[role="tooltip"]')).toBeNull()
+
+    act(() => {
+      vi.advanceTimersByTime(199)
+    })
+    expect(container.querySelector('[role="tooltip"]')).toBeNull()
+
+    act(() => {
+      vi.advanceTimersByTime(1)
+    })
+    expect(container.querySelector('[role="tooltip"]')?.getAttribute('data-point-index')).toBe('2')
+
+    dispatchPointer('pointermove', nextPoint)
+    expect(container.querySelector('[role="tooltip"]')?.getAttribute('data-point-index')).toBe('4')
+  })
+
+  it('keeps the tooltip up for --shiftcharts-tooltip-hide-delay after the pointer leaves', () => {
+    const { renderedFrame } = renderOverlay(context(420, 320))
+    setTiming({ hideDelay: '150ms' })
+    const point = renderedFrame.series[0]?.points[2]
+    if (point === undefined) throw new Error('fixture point missing')
+
+    dispatchPointer('pointermove', point)
+    expect(container.querySelector('[role="tooltip"]')).not.toBeNull()
+
+    dispatchPointer('pointerout', point)
+    expect(container.querySelector('[role="tooltip"]')).not.toBeNull()
+
+    act(() => {
+      vi.advanceTimersByTime(149)
+    })
+    expect(container.querySelector('[role="tooltip"]')).not.toBeNull()
+
+    act(() => {
+      vi.advanceTimersByTime(1)
+    })
+    expect(container.querySelector('[role="tooltip"]')).toBeNull()
+  })
+
+  it('cancels a pending hide when the pointer re-enters before the hide delay elapses', () => {
+    const { renderedFrame } = renderOverlay(context(420, 320))
+    setTiming({ hideDelay: '150ms' })
+    const point = renderedFrame.series[0]?.points[2]
+    if (point === undefined) throw new Error('fixture point missing')
+
+    dispatchPointer('pointermove', point)
+    dispatchPointer('pointerout', point)
+    act(() => {
+      vi.advanceTimersByTime(100)
+    })
+    dispatchPointer('pointermove', point)
+    act(() => {
+      vi.advanceTimersByTime(100)
+    })
+    // 200ms have elapsed in total — past the 150ms hide delay — but the re-entry at the 100ms
+    // mark canceled the pending hide, so the tooltip is still up.
+    expect(container.querySelector('[role="tooltip"]')).not.toBeNull()
+  })
+
+  it('treats a point beyond --shiftcharts-tooltip-snap as no match', () => {
+    const { renderedFrame } = renderOverlay(context(420, 320))
+    setTiming({ snap: '5px' })
+    const point = renderedFrame.series[0]?.points[2]
+    if (point === undefined) throw new Error('fixture point missing')
+
+    dispatchPointer('pointermove', { x: point.x + 3, y: point.y })
+    expect(container.querySelector('[role="tooltip"]')?.getAttribute('data-point-index')).toBe('2')
+
+    dispatchPointer('pointerout', point)
+    expect(container.querySelector('[role="tooltip"]')).toBeNull()
+
+    dispatchPointer('pointermove', { x: point.x + 40, y: point.y })
+    expect(container.querySelector('[role="tooltip"]')).toBeNull()
+  })
+})
+
 describe('dismissal and keyboard access', () => {
   it('dismisses an open tooltip with Escape and exposes the same text through status', () => {
     const { renderedFrame } = renderOverlay(context(420, 320))

@@ -91,6 +91,80 @@
     --shiftcharts-ramp-neutral-8: #c2c4c7;
     --shiftcharts-ramp-neutral-9: #e2e5e8;
 
+    /* --- Sequential ramp --------------------------------------------------------- */
+    /*
+     * Closes `DESIGN.md:105`: *"Sequential and diverging ramps for continuous data are [to be
+     * resolved during implementation]; they must be perceptually uniform and must be evaluated in
+     * greyscale and under deuteranomaly simulation before shipping."* `raw/06` §6.0 already fixed
+     * the shape — `--shiftcharts-ramp-seq-1..9`, one index per stop — the nine hexes below are the
+     * implementation: single hue (255°, a blue-violet sitting clear of series-1's 230.5° and
+     * series-4's 296.3°), built in OKLCH from L 0.22 (index 1) to L 0.93 (index 9), chroma tapered
+     * toward both ends to stay in sRGB gamut. Same direction convention as the neutral ramp: 1 is
+     * darkest, 9 is lightest, absolutely — magnitude, not a per-theme pick.
+     *
+     * ⚠ **Checked, not eyeballed.** Adjacent-stop lightness step is a uniform 0.089 (color-formula.md's
+     * ordinal-ramp floor is 0.06); every stop stays in gamut with no clipping; run through a
+     * Machado-Oliveira-Fernandes 2009 deuteranomaly simulation (severity 1.0 — the model
+     * color-formula.md names as this project's CVD standard), adjacent-stop separation stays
+     * 8.9–10.6 ΔE (OKLab ×100) throughout, so no two neighbours collapse for a deuteranomalous
+     * reader. Monotonic lightness is also what "evaluated in greyscale" means here: strip the hue
+     * and the ramp still reads as a legible light-to-dark sequence.
+     *
+     * ⚠ **Absolute like the neutral ramp — it does not re-anchor per theme.** Index 1 sits at only
+     * ~1.1:1 contrast against the dark-theme ground and index 9 the same against the light-theme
+     * ground, inherent to any single-hue ramp that spans this range and not a defect in the ramp
+     * itself (`ramp-neutral-1` has the identical property). A consuming heatmap should separate
+     * cells with a stroke or gap rather than lean on ramp-extreme contrast against the page —
+     * already this project's stated mark convention for adjacent fills.
+     */
+    --shiftcharts-ramp-seq-1: #021a39;
+    --shiftcharts-ramp-seq-2: #062f5e;
+    --shiftcharts-ramp-seq-3: #0c4686;
+    --shiftcharts-ramp-seq-4: #145eb0;
+    --shiftcharts-ramp-seq-5: #3179cf;
+    --shiftcharts-ramp-seq-6: #4e95ed;
+    --shiftcharts-ramp-seq-7: #7ab2f9;
+    --shiftcharts-ramp-seq-8: #abcefb;
+    --shiftcharts-ramp-seq-9: #dae9fd;
+
+    /* --- Diverging ramp ---------------------------------------------------------- */
+    /*
+     * The other half of `DESIGN.md:105`. `raw/06` §6.0: `--shiftcharts-ramp-div-1..11`, one index per
+     * stop, 11 so a true centre stop exists (index 6) with 5 steps per arm. Two hues + a neutral
+     * midpoint, per this project's own colour-formula convention: blue (250°) for the "cool" arm
+     * (indices 1–5), a light low-chroma grey for the centre (index 6, L 0.75 — pale rather than
+     * mid-grey, so it still reads as "no value" against a dark ground), orange (38°) for the "warm"
+     * arm (indices 7–11). Blue/orange rather than blue/red or red/green specifically to avoid any
+     * red-green pairing, the one combination deuteranomaly and protanomaly both degrade.
+     *
+     * ⚠ **Checked, not eyeballed.** Each arm steps a uniform 0.05 in lightness away from the centre;
+     * no stop clips gamut. Deuteranomaly-simulated (Machado-Oliveira-Fernandes 2009, severity 1.0)
+     * cool-vs-warm separation at matching arm distance grows from ΔE 5.2 at the innermost pair
+     * (index 5 vs 7) to 23.3 at the outermost (index 1 vs 11) — the innermost pair sitting below the
+     * categorical 8/6 target is expected, not a failure: values near the baseline are supposed to
+     * look similar in a diverging scheme, since they *are* similar. It is not this ramp's job to
+     * exaggerate a difference the data does not have.
+     *
+     * ⚠ **Direction is hue-only, and hue is exactly what greyscale removes.** Indices
+     * equidistant from the centre (e.g. 4 and 8) sit at the same lightness by construction, so a
+     * greyscale or fully-desaturated reading cannot tell the negative arm from the positive one —
+     * true of every diverging colour scheme, not a defect specific to this derivation. A chart
+     * using this ramp for polarity should carry the sign in a value label too, the same "never
+     * color alone" rule this project already applies elsewhere, rather than rely on the ramp to
+     * carry direction by itself in greyscale or under strong colour-vision deficiency.
+     */
+    --shiftcharts-ramp-div-1: #1666aa;
+    --shiftcharts-ramp-div-2: #3675b2;
+    --shiftcharts-ramp-div-3: #5384b6;
+    --shiftcharts-ramp-div-4: #7193b5;
+    --shiftcharts-ramp-div-5: #91a0b1;
+    --shiftcharts-ramp-div-6: #a9afb4;
+    --shiftcharts-ramp-div-7: #b19890;
+    --shiftcharts-ramp-div-8: #b28273;
+    --shiftcharts-ramp-div-9: #b16b55;
+    --shiftcharts-ramp-div-10: #af5336;
+    --shiftcharts-ramp-div-11: #a73a14;
+
     /* --- Surface text ------------------------------------------------------------ */
     /*
      * The ramp index this world writes with. Added at A4.
@@ -470,6 +544,7 @@
     --shiftcharts-widget-shadow: 0 2px 8px rgb(0 0 0 / 0.18);
     --shiftcharts-tooltip-radius: 3px;
     --shiftcharts-tooltip-shadow: 0 2px 12px rgb(0 0 0 / 0.18);
+    --shiftcharts-tooltip-color: var(--shiftcharts-ramp-neutral-2);
     --shiftcharts-series-1: #8dd3c7;
     --shiftcharts-series-2: #f28e7b;
     --shiftcharts-series-3: #7eb6d9;
@@ -495,6 +570,7 @@
     --shiftcharts-widget-shadow: 0 2px 8px rgb(0 0 0 / 0.18);
     --shiftcharts-tooltip-radius: 3px;
     --shiftcharts-tooltip-shadow: 0 2px 12px rgb(0 0 0 / 0.18);
+    --shiftcharts-tooltip-color: var(--shiftcharts-ramp-neutral-2);
     --shiftcharts-series-1: #8dd3c7;
     --shiftcharts-series-2: #f28e7b;
     --shiftcharts-series-3: #7eb6d9;
@@ -526,6 +602,7 @@
     --shiftcharts-widget-shadow: 0 2px 10px rgb(0 0 0 / 0.16);
     --shiftcharts-tooltip-radius: 5px;
     --shiftcharts-tooltip-shadow: 0 2px 14px rgb(0 0 0 / 0.16);
+    --shiftcharts-tooltip-color: var(--shiftcharts-ramp-neutral-8);
     --shiftcharts-series-1: #00695c;
     --shiftcharts-series-2: #b23a31;
     --shiftcharts-series-3: #185b83;
@@ -551,6 +628,7 @@
     --shiftcharts-widget-shadow: 0 2px 10px rgb(0 0 0 / 0.16);
     --shiftcharts-tooltip-radius: 5px;
     --shiftcharts-tooltip-shadow: 0 2px 14px rgb(0 0 0 / 0.16);
+    --shiftcharts-tooltip-color: var(--shiftcharts-ramp-neutral-8);
     --shiftcharts-series-1: #00695c;
     --shiftcharts-series-2: #b23a31;
     --shiftcharts-series-3: #185b83;

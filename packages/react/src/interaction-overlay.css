@@ -132,14 +132,25 @@
     color: var(--shiftcharts-surface-text-color);
   }
 
-  /* A small diamond, half-hidden behind the tooltip's own background so only the outward-
-     facing point shows — the standard border-free caret trick. Must come before the header/
-     rows in source order so the (opaque) content paints over its inward half. Positioned per
-     `data-tooltip-side`, the same attribute already used for placement. */
+  /* A small diamond, tucked half behind the tooltip's own background so only the outward-
+     facing point shows past the border — the standard border-free caret trick. Positioned per
+     `data-tooltip-side`, the same attribute already used for placement.
+     ⚠ Two things that look right and aren't, both worth leaving written down:
+     — The box is `arrow-size * sqrt(2)` (~1.4142), not `arrow-size * 2`. Rotating a square by
+       45° around its own center swaps its *side* for its *diagonal* as the visible extent, so
+       a `2×` box overshoots the intended reach by 2/√2 ≈ 1.41× on both the outward point and,
+       worse, the inward side — enough to visibly cross into the last row's text.
+     — `z-index: -1` is load-bearing, not decorative. `position: absolute` with `z-index: auto`
+       stacks *above* in-flow, non-positioned content regardless of DOM order — CSS 2.1's
+       painting order puts positioned descendants after in-flow ones no matter which markup
+       came first. Without this, the arrow paints over the row text it's supposed to hide
+       behind; with it, the arrow lands in the stacking context's negative-z-index step, which
+       paints *before* the in-flow header/rows. */
   .shiftcharts-interaction__tooltip-arrow {
     position: absolute;
-    inline-size: calc(var(--shiftcharts-tooltip-arrow-size) * 2);
-    block-size: calc(var(--shiftcharts-tooltip-arrow-size) * 2);
+    z-index: -1;
+    inline-size: calc(var(--shiftcharts-tooltip-arrow-size) * 1.4142);
+    block-size: calc(var(--shiftcharts-tooltip-arrow-size) * 1.4142);
     background: var(--shiftcharts-tooltip-color);
     border: var(--shiftcharts-tooltip-border-width) solid var(--shiftcharts-tooltip-border-color);
     transform: rotate(45deg);
