@@ -213,6 +213,7 @@ type TickPlan =
 | `y.ticks.count` 3–4 | §4 Panel — *"y-axis 3–4 ticks"* | B |
 | `y.gridlines` true / `x.gridlines` false | §4 Panel — *"horizontal gridlines only"* | B |
 | `y.title` | §4 Canvas — *"y-axis title"* | B |
+| `x.title` | Canvas/Stage shipped chrome — paired axis context once the larger rung can pay for it | C |
 | `y2` | §4 Stage — *"optional secondary axis"* | B |
 
 ⚠ `mode: 'endpoints'` is a distinct mode, not `count: 2`. Two ticks chosen by Talbot's algorithm land
@@ -222,6 +223,12 @@ to a value-legible chart.
 
 ⚠ `ticks-min: 2` (§6, Talbot's *"our lower bound"*) means `count` is never below 2 — but `mode:
 'none'` is still reachable. "At least two ticks *if there are ticks*" is not "there are always ticks".
+
+Visible chart copy is renderer chrome derived from the finished line/area rung: Panel reserves and
+renders the required `title`; Canvas and Stage additionally reserve the optional `subtitle` and the
+axis-title bands already named by `AxisPlan.title`. The strings travel as `Chart`/`AutoChart` props,
+remain inside the measured SVG, and therefore do not become normal-flow siblings that can feed back
+into `ResizeObserver`. These roles use the existing generated typography scale.
 
 ### 4.2 `marks`
 
@@ -283,6 +290,13 @@ type DegradeStep = 'none' | 'abbreviate' | 'split' | 'rotate' | 'axis-transpose'
 `axisLabelDegrade` records the step **reached**, not the sequence applied — steps are cumulative and
 ordered, so the terminal step names the state. That keeps the field a state rather than an action
 (§1.2).
+
+`direct-end` is a semantic name retained for compatibility, not a command to truncate and pin every
+label to the final sample. The renderer first measures the full series name, searches the last 60%
+of defined points for a contained placement, and scores candidates by clearance from other series.
+The latest candidate wins a tie. Only when no full-name candidate fits does
+`seriesLabelMaxChars` apply. Candidate choice and collision packing both use the checked-in font
+metrics, so the static RSC render and the client render are deterministic.
 
 ⚠ `'axis-transpose'` is the one degrade step with a side effect outside this group: reaching it flips
 top-level `orientation`. Those two must be consistent, which is a second place the same fact is
@@ -522,6 +536,9 @@ type PlanPolicy = {
   readonly aggregateAfter:       number;   // 8    — B
   readonly legendMaxEntries:     number;   // 8    — C
   readonly pointBudget:          number;   // 2000 — C
+  readonly lineYDomainMode:      'data' | 'include-zero' | 'symmetric' | 'fixed'; // C
+  readonly lineYDomainMin:       number | null; // required finite bound for fixed
+  readonly lineYDomainMax:       number | null; // required finite bound for fixed
   readonly substitute:           boolean;  // §5.6 — consumer may pin off
   readonly minCellSize:          number;   // C
   readonly typography:          FittingTypography; // six CSS inputs + FontMetrics, atomic
@@ -538,6 +555,17 @@ function planChart(
   overrides?: PlanOverrides,
 ): ChartPlan;
 ```
+
+Line/area domain policy defaults to `data`: position encodings should not silently inherit the
+zero-baseline rule required by length encodings such as bars. `include-zero` and `symmetric` are
+explicit analytical choices. `fixed` preserves the exact supplied endpoints (it does not call
+`nice()` on the domain) and rejects missing, non-finite, or non-increasing bounds before planning.
+
+Axis label semantics remain data-driven and deterministic: `Date` values use the UTC multi-scale
+formatter, numeric x values retain exact grouped formatting, supplied `DataPoint.category` strings
+tick at their real data positions, and y values use compact SI notation. Category axes sample real
+category positions when the tick budget is smaller than the data rather than inventing numeric
+ticks between categories.
 
 ⚠ This adds a fifth parameter to the signature at `20-architecture.md:91`, which has four. The
 existing signature folds policy and overrides into one `overrides` argument — but they are applied at
@@ -895,11 +923,11 @@ something the corpus does not say, and each is labelled rather than smoothed ove
    retaining enough room for the 77.12 px worst-case five-character x label, so
    `axisLabelDegrade: 'none'` is the measured result.
 
-   Direct-end series labels do **not** reserve another right-side rail: the renderer positions them
-   at `last.x - regionGap` with `text-anchor: end`, so their glyphs already extend inward into the
-   plot. Charging their width again produced an empty 128 px band and reduced the live sandbox plot
+   Direct series labels do **not** reserve another right-side rail: the renderer positions a
+   measured candidate at `point.x - regionGap` with `text-anchor: end`, so its glyphs already extend
+   inward into the plot. Charging their width again produced an empty 128 px band and reduced the live sandbox plot
    from roughly 84% to 66% of its SVG width. The independent `seriesLabelMaxChars` field remains a
-   compactness/readability cap, not a layout charge. In the live sandbox the duplicate rail held
+   fallback cap when no full-name candidate fits, not a layout charge. In the live sandbox the duplicate rail held
    the plot to 66% of the SVG; removing it and sizing the y gutter from the formatted value class
    raises that to about 90% while retaining an 8 px right inset. Full derivation lives in
    `packages/core/src/rungs/line.snapshot.test.ts` and the browser evidence in `SB-007`.

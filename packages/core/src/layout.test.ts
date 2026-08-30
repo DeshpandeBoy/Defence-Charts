@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { AXIS_OFF } from './plan.ts'
 import { DEFAULT_POLICY } from './policy.ts'
-import { legendBands, lineHeight, xAxisBand, yAxisGutter } from './layout.ts'
+import { chartHeaderBand, legendBands, lineHeight, xAxisBand, yAxisGutter } from './layout.ts'
 
 const AXIS = {
   ...AXIS_OFF,
@@ -49,5 +49,33 @@ describe('horizontal legend bands', () => {
 
     expect(legendBands(top, 6, DEFAULT_POLICY)).toEqual(expected)
     expect(legendBands(bottom, 6, DEFAULT_POLICY)).toEqual(expected)
+  })
+})
+
+describe('visible chart heading bands', () => {
+  const chrome = {
+    x: AXIS,
+    y: AXIS,
+    y2: null,
+    legend: { placement: 'absent' as const },
+    valueDisplay: 'none' as const,
+    valueTypeScale: 'fit' as const,
+    tableDisclosure: 'button' as const,
+    tablePresent: true,
+    plotPresence: 'present' as const,
+  }
+
+  it('charges title, optional subtitle, and one separation gap', () => {
+    expect(chartHeaderBand({ ...chrome, chartTitle: false }, DEFAULT_POLICY)).toBe(0)
+    expect(chartHeaderBand({ ...chrome, chartTitle: true }, DEFAULT_POLICY)).toBe(
+      lineHeight('A', DEFAULT_POLICY) + DEFAULT_POLICY.regionGap,
+    )
+    expect(
+      chartHeaderBand({ ...chrome, chartTitle: true, chartSubtitle: true }, DEFAULT_POLICY),
+    ).toBe(
+      lineHeight('A', DEFAULT_POLICY) +
+        lineHeight('B', DEFAULT_POLICY) +
+        DEFAULT_POLICY.regionGap,
+    )
   })
 })

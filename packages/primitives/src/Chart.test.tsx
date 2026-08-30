@@ -252,6 +252,38 @@ describe('zero client JS', () => {
   })
 })
 
+describe('Milestone 1 line chrome', () => {
+  it('renders visible title, subtitle, axis titles, and full series names inside the SVG', () => {
+    const ctx = sizeContextFromPixels(700, 520)
+    const data: readonly Series[] = [
+      { ...series('readiness', [42, 55, 68, 82]), label: 'Readiness' },
+      { ...series('maintenance', [61, 53, 45, 41]), label: 'Maintenance' },
+    ]
+    const plan = planChart('line', ctx, describeShape(data))
+    const html = renderToStaticMarkup(
+      <Chart
+        plan={plan}
+        data={data}
+        ctx={ctx}
+        title="Operational readiness"
+        subtitle="Latest training cycles"
+        xAxisTitle="Training cycle"
+        yAxisTitle="Readiness score"
+        id="milestone-one"
+      />,
+    )
+
+    expect(html).toContain('class="shiftcharts-chart__title"')
+    expect(html).toContain('Operational readiness</text>')
+    expect(html).toContain('class="shiftcharts-chart__subtitle"')
+    expect(html).toContain('Latest training cycles</text>')
+    expect(html).toContain('Training cycle</text>')
+    expect(html).toContain('Readiness score</text>')
+    expect(html).toContain('>Maintenance</text>')
+    expect(html).not.toContain('Mainten…')
+  })
+})
+
 describe('accessibility structure', () => {
   /**
    * ⚠ **The single most important assertion in this file.** `role="img"` is Children

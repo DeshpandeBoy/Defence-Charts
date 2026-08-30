@@ -17,7 +17,7 @@ import type { Series } from './data.ts'
 import { describeShape } from './data.ts'
 import { DONUT_FAMILY_FIXTURE } from './families/donut/fixture.ts'
 import { chromeFromPlan, resolveFrame } from './frame.ts'
-import { legendBands, resolvePlotBox, yAxisGutter } from './layout.ts'
+import { chartHeaderBand, legendBands, resolvePlotBox, yAxisGutter } from './layout.ts'
 import { applyOverrides } from './overrides.ts'
 import { planChart } from './plan-chart.ts'
 import { DEFAULT_POLICY } from './policy.ts'
@@ -117,9 +117,27 @@ describe('the plot box is the resolver’s, not a second opinion', () => {
       yAxisGutter(plan.axes.y, DEFAULT_POLICY, yLabelMaxChars) + DEFAULT_POLICY.plotInset,
     )
     expect(frame.box.width - frame.plot.x - frame.plot.width).toBeCloseTo(DEFAULT_POLICY.plotInset)
-    expect(frame.plot.y).toBe(DEFAULT_POLICY.plotInset)
+    expect(frame.plot.y).toBe(
+      chartHeaderBand(chromeFromPlan(plan, DEFAULT_POLICY.plotInset), DEFAULT_POLICY) +
+        DEFAULT_POLICY.plotInset,
+    )
+    expect(frame.title).not.toBeNull()
     expect(frame.plot.y + frame.plot.height).toBeLessThan(frame.box.height)
   })
+
+  it.each([320, 420, 560, 760, 1000])(
+    'keeps at least 75%% of a %d px line card useful when no side legend is present',
+    (width) => {
+      const ctx = sizeContextFromPixels(width, Math.max(220, Math.round(width * 0.65)))
+      const plan = planChart('line', ctx, describeShape(THREE), undefined, {
+        legend: { placement: 'direct' },
+      })
+      const frame = resolveFrame(plan, THREE, ctx)
+      expect(frame.plot.width / frame.box.width).toBeGreaterThanOrEqual(0.75)
+      expect(frame.plot.x).toBeGreaterThanOrEqual(0)
+      expect(frame.plot.x + frame.plot.width).toBeLessThanOrEqual(frame.box.width)
+    },
+  )
 
   it('publishes the exact charged external legend rail for every placement', () => {
     const ctx = sizeContextFromPixels(1000, 700)
@@ -427,12 +445,47 @@ describe('the y axis', () => {
     expect(frame.zeroLine ?? 0).toBeLessThanOrEqual(frame.plot.y + frame.plot.height)
   })
 
+  it('supports include-zero, symmetric, and exact fixed line domains', () => {
+    const positive = [monthly('a', [25, 75])]
+    const plan = planChart('line', PANEL, describeShape(positive))
+    const included = resolveFrame(plan, positive, PANEL, { lineYDomainMode: 'include-zero' })
+    expect(included.zeroLine).not.toBeNull()
+
+    const symmetric = resolveFrame(plan, positive, PANEL, { lineYDomainMode: 'symmetric' })
+    expect(symmetric.zeroLine).toBeCloseTo(symmetric.plot.y + symmetric.plot.height / 2)
+
+    const fixed = resolveFrame(plan, positive, PANEL, {
+      lineYDomainMode: 'fixed',
+      lineYDomainMin: 0,
+      lineYDomainMax: 100,
+    })
+    expect(fixed.series[0]?.points[0]?.y).toBeCloseTo(fixed.plot.y + fixed.plot.height * 0.75)
+    expect(fixed.series[0]?.points[1]?.y).toBeCloseTo(fixed.plot.y + fixed.plot.height * 0.25)
+  })
+
   it('grows downward — a larger value sits higher on screen', () => {
     const frame = resolveFrame(planChart('line', PANEL, SHAPE), ONE, PANEL)
     const points = frame.series[0]?.points ?? []
     const lowest = points.reduce((a, b) => (a.value < b.value ? a : b))
     const highest = points.reduce((a, b) => (a.value > b.value ? a : b))
     expect(highest.y).toBeLessThan(lowest.y)
+  })
+})
+
+describe('categorical x semantics', () => {
+  it('ticks at category positions and uses supplied category text', () => {
+    const data: readonly Series[] = [{
+      id: 'readiness',
+      points: ['Alpha', 'Bravo', 'Charlie', 'Delta'].map((category, x) => ({
+        x,
+        y: 40 + x,
+        category,
+      })),
+    }]
+    const plan = planChart('line', PANEL, describeShape(data))
+    const frame = resolveFrame(plan, data, PANEL)
+    expect(frame.xTicks.map((tick) => tick.label)).toEqual(['Alpha', 'Bravo', 'Charlie', 'Delta'])
+    expect(frame.xTicks.map((tick) => tick.value)).toEqual([0, 1, 2, 3])
   })
 })
 

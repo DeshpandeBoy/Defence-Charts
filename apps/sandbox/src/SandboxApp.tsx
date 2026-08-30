@@ -446,6 +446,9 @@ export function SandboxApp() {
   const [width, setWidth] = useState(760)
   const [height, setHeight] = useState(480)
   const [title, setTitle] = useState(() => CHART_PAGE_DETAILS[initialChartType].defaultTitle)
+  const [subtitle, setSubtitle] = useState('Operational readiness across the latest training cycles')
+  const [xAxisTitle, setXAxisTitle] = useState('Training cycle')
+  const [yAxisTitle, setYAxisTitle] = useState('Readiness score')
   const [dataText, setDataText] = useState(() => json(DATA_BY_TYPE[initialChartType]))
   const [policy, setPolicy] = useState<PlanPolicy>(DEFAULT_POLICY)
   const [policyText, setPolicyText] = useState(() => json(DEFAULT_POLICY))
@@ -468,6 +471,9 @@ export function SandboxApp() {
     setIsInteractionPage(false)
     setChartType(nextType)
     setTitle(CHART_PAGE_DETAILS[nextType].defaultTitle)
+    setSubtitle('Operational readiness across the latest training cycles')
+    setXAxisTitle('Training cycle')
+    setYAxisTitle('Readiness score')
     setDataText(json(DATA_BY_TYPE[nextType]))
     setOverrideText(json(SANDBOX_DEFAULT_OVERRIDES))
     setOverrideError(null)
@@ -861,6 +867,9 @@ export function SandboxApp() {
                   data={data}
                   title={title}
                   description="A measured ShiftCharts sandbox preview generated from the current design controls."
+                  subtitle={subtitle}
+                  xAxisTitle={xAxisTitle}
+                  yAxisTitle={yAxisTitle}
                   policy={policy}
                   overrides={parsedOverrides.value as PlanOverrides | undefined}
                   onResolvedPlan={handleResolvedPlan}
@@ -976,6 +985,14 @@ export function SandboxApp() {
               <span>Chart title</span>
               <input aria-label="Chart title" value={title} onChange={(event) => setTitle(event.target.value)} />
             </label>
+            <label className="sandbox__field">
+              <span>Chart subtitle</span>
+              <input aria-label="Chart subtitle" value={subtitle} onChange={(event) => setSubtitle(event.target.value)} />
+            </label>
+            <div className="sandbox__field-grid">
+              <label className="sandbox__field"><span>X-axis title</span><input aria-label="X-axis title" value={xAxisTitle} onChange={(event) => setXAxisTitle(event.target.value)} /></label>
+              <label className="sandbox__field"><span>Y-axis title</span><input aria-label="Y-axis title" value={yAxisTitle} onChange={(event) => setYAxisTitle(event.target.value)} /></label>
+            </div>
             <div className="sandbox__field">
               <span>Size preset</span>
               <div className="sandbox__segmented" role="group" aria-label="Chart size preset">
@@ -1007,6 +1024,17 @@ export function SandboxApp() {
           <section className="sandbox__control-section">
             <SectionTitle eyebrow="02 / information" title="What the chart says" />
             <div className="sandbox__quick-grid">
+              <OverrideSelect
+                label="Line Y domain"
+                value={policy.lineYDomainMode}
+                options={['data', 'include-zero', 'symmetric', 'fixed']}
+                onChange={(value) => updatePolicy({
+                  ...policy,
+                  lineYDomainMode: value as PlanPolicy['lineYDomainMode'],
+                  lineYDomainMin: value === 'fixed' ? (policy.lineYDomainMin ?? 0) : null,
+                  lineYDomainMax: value === 'fixed' ? (policy.lineYDomainMax ?? 100) : null,
+                })}
+              />
               <OverrideSelect
                 label="Value display"
                 value={displayValue(narrativeOverride.valueDisplay)}

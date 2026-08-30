@@ -42,7 +42,9 @@ import type { SizeContext } from './context.ts'
 import { describeShape, type DataPoint, type MetricStatus, type Series } from './data.ts'
 import { formatHeatmapXLabel, formatXLabel, formatYLabel } from './format.ts'
 import {
+  chartHeaderBand,
   legendBands,
+  lineHeight,
   resolvePlotBox,
   resolvePlotInsets,
   resolvedValueBand,
@@ -256,6 +258,9 @@ export type ChartFrame = {
    * it as CSS layout properties, but must not invent a competing rail.
    */
   readonly legend: Rect | null
+  /** Visible in-SVG heading regions; null below the line/area Panel rung. */
+  readonly title: Rect | null
+  readonly subtitle: Rect | null
   readonly xTicks: readonly ComputedTick[]
   readonly yTicks: readonly ComputedTick[]
   readonly series: readonly SeriesFrame[]
@@ -441,6 +446,12 @@ export function chromeFromPlan(
     tablePresent: plan.dataTable.present,
     plotPresence: plan.marks.primary.kind === 'none' ? 'none' : 'present',
     plotInset,
+    chartTitle:
+      (plan.type === 'line' || plan.type === 'area') &&
+      (plan.sizeClass === 'panel' || plan.sizeClass === 'canvas' || plan.sizeClass === 'stage'),
+    chartSubtitle:
+      (plan.type === 'line' || plan.type === 'area') &&
+      (plan.sizeClass === 'canvas' || plan.sizeClass === 'stage'),
   }
 }
 
@@ -502,6 +513,19 @@ function categoryValues(
   return values.filter((value): value is number => Number.isFinite(value)).sort((a, b) => a - b)
 }
 
+/** Human category labels keyed by their stable numeric x positions. First source wins. */
+function categoryLabels(data: readonly Series[]): ReadonlyMap<number, string> {
+  const labels = new Map<number, string>()
+  for (const series of data) {
+    for (const point of series.points) {
+      const value = xValue(point)
+      if (!Number.isFinite(value) || point.category === undefined || labels.has(value)) continue
+      labels.set(value, point.category)
+    }
+  }
+  return labels
+}
+
 /**
  * Inset the first and last bar categories by half a category gap.
  *
@@ -541,6 +565,9 @@ function paddedBarDomain(
 function yDomain(
   data: readonly Series[],
   mark: ChartPlan['marks']['primary'],
+  mode: PlanPolicy['lineYDomainMode'] = 'data',
+  fixedMin: number | null = null,
+  fixedMax: number | null = null,
 ): readonly [number, number] {
   // A stacked bar's length is the sum of its segments, so the axis must bound the tallest
   // STACK per category, not the tallest individual point — the per-point extent below is
@@ -559,9 +586,16 @@ function yDomain(
   // A bar's length is read from zero. Include the baseline before the scale is built so a
   // positive-only or negative-only series cannot produce a truncated bar that exaggerates its
   // magnitude. Line/area keep the data-only domain described above.
-  return mark.kind === 'bar' || mark.kind === 'cell' || mark.kind === 'funnel'
-    ? [Math.min(0, lo), Math.max(0, hi)]
-    : padDegenerate(lo, hi)
+  if (mark.kind === 'bar' || mark.kind === 'cell' || mark.kind === 'funnel') {
+    return [Math.min(0, lo), Math.max(0, hi)]
+  }
+  if (mode === 'fixed' && fixedMin !== null && fixedMax !== null) return [fixedMin, fixedMax]
+  if (mode === 'include-zero') return padDegenerate(Math.min(0, lo), Math.max(0, hi))
+  if (mode === 'symmetric') {
+    const limit = Math.max(Math.abs(lo), Math.abs(hi))
+    return limit === 0 ? [-1, 1] : [-limit, limit]
+  }
+  return padDegenerate(lo, hi)
 }
 
 /**
@@ -705,6 +739,39 @@ function computeTicks(
   }
 
   return Object.freeze(ticks.map(({ tick }) => tick))
+}
+
+/**
+ * Category axes tick at data positions, not at mathematically nice values between them.
+ * Sampling remains deterministic and includes both endpoints when the requested budget is
+ * smaller than the category count.
+ */
+function computeCategoryTicks(
+  plan: TickPlan,
+  scale: AxisScale,
+  values: readonly number[],
+  labels: ReadonlyMap<number, string>,
+  origin: number,
+): readonly ComputedTick[] {
+  if (plan.mode === 'none' || values.length === 0) return []
+  const count = plan.mode === 'endpoints'
+    ? Math.min(2, values.length)
+    : Math.min(values.length, Math.max(0, Math.floor(plan.count)))
+  if (count === 0) return []
+  const indices = count === 1
+    ? [0]
+    : Array.from({ length: count }, (_, index) =>
+        Math.round((index * (values.length - 1)) / (count - 1)),
+      )
+  return Object.freeze(
+    [...new Set(indices)].flatMap((index) => {
+      const value = values[index]
+      const label = value === undefined ? undefined : labels.get(value)
+      return value === undefined || label === undefined
+        ? []
+        : [Object.freeze({ value, offset: scale.at(value) - origin, label })]
+    }),
+  )
 }
 
 // --- The value display -------------------------------------------------------------------
@@ -1086,14 +1153,28 @@ export function resolveFrame(
   // two chances to pass different arguments, and the disagreement would be invisible — the
   // numbers would both look plausible and the text would sit slightly off its own region.
   const valueHeight = resolvedValueBand(chrome, boxHeight, data.length, resolved)
+  const headerHeight = chartHeaderBand(chrome, resolved)
   const plot: Rect = Object.freeze({
     x: yAxisGutter(plan.axes.y, resolved, chrome.yLabelMaxChars) + legendLeft + insets.inline,
-    y: valueHeight + legendTop + insets.block,
+    y: headerHeight + valueHeight + legendTop + insets.block,
     width: size.width,
     height: size.height,
   })
 
   const legendRegion = resolveLegendRegion(plan.legend, legend, box, plot)
+  const titleHeight = chrome.chartTitle === true ? lineHeight('A', resolved) : 0
+  const subtitleHeight = chrome.chartSubtitle === true ? lineHeight('B', resolved) : 0
+  const titleRegion: Rect | null = chrome.chartTitle === true
+    ? Object.freeze({ x: plot.x, y: legendTop, width: plot.width, height: titleHeight })
+    : null
+  const subtitleRegion: Rect | null = chrome.chartSubtitle === true
+    ? Object.freeze({
+        x: plot.x,
+        y: legendTop + titleHeight,
+        width: plot.width,
+        height: subtitleHeight,
+      })
+    : null
 
   const temporal = data.length > 0 && data.every((s) => s.points.every((p) => p.x instanceof Date))
 
@@ -1106,9 +1187,17 @@ export function resolveFrame(
   }
   const xBin = mark.kind === 'cell' ? plan.aggregate.temporalBin : 'none'
   const sortedX = categoryValues(data, xBin)
+  const xCategoryLabels = categoryLabels(data)
   const xd = xDomain(data, xBin)
   const xScaleDomain = mark.kind === 'bar' ? paddedBarDomain(xd, sortedX) : xd
-  const yd = yDomain(data, mark)
+  const lineDomain = plan.type === 'line' || plan.type === 'area'
+  const yd = yDomain(
+    data,
+    mark,
+    lineDomain ? resolved.lineYDomainMode : 'data',
+    lineDomain ? resolved.lineYDomainMin : null,
+    lineDomain ? resolved.lineYDomainMax : null,
+  )
 
   /**
    * ⚠ **Both x scales are wrapped into one epoch-milliseconds interface, so that nothing
@@ -1121,14 +1210,15 @@ export function resolveFrame(
     ? wrapUtc(scaleUtc().domain([new Date(xScaleDomain[0]), new Date(xScaleDomain[1])]).range([plot.x, plot.x + plot.width]))
     : wrapLinear(scaleLinear().domain([xScaleDomain[0], xScaleDomain[1]]).range([plot.x, plot.x + plot.width]))
 
-  const yScale = scaleLinear()
+  const yScaleBase = scaleLinear()
     .domain([yd[0], yd[1]])
     // SVG's y grows downward, so the range is inverted. Getting this the right way up is the
     // difference between a chart and its reflection, and both render without complaint.
     .range([plot.y + plot.height, plot.y])
-    // `nice()` is what makes `scale.ticks()` land on round values rather than on the data's
-    // own ragged extent — the property `'endpoints'` deliberately does not have.
-    .nice(plan.axes.y.ticks.mode === 'count' ? plan.axes.y.ticks.count : 5)
+  // Fixed means fixed: nice ticks may sit within the bounds, but may not expand them.
+  const yScale = lineDomain && resolved.lineYDomainMode === 'fixed'
+    ? yScaleBase
+    : yScaleBase.nice(plan.axes.y.ticks.mode === 'count' ? plan.axes.y.ticks.count : 5)
 
   // A horizontal bar chart keeps the same zero-baseline value semantics, but values travel
   // along x and categories occupy evenly spaced y bands. This is intentionally resolved in
@@ -1197,7 +1287,7 @@ export function resolveFrame(
           series,
           Object.freeze({
             x: legendLeft,
-            y: legendTop,
+            y: legendTop + headerHeight,
             width: Math.max(0, box.width - legendLeft - legendRight),
             height: valueHeight,
           }),
@@ -1213,9 +1303,19 @@ export function resolveFrame(
     box,
     plot,
     legend: legendRegion,
+    title: titleRegion,
+    subtitle: subtitleRegion,
     xTicks:
       barValueXScale === null
-        ? computeTicks(
+        ? !temporal && xCategoryLabels.size > 0 && mark.kind !== 'cell'
+          ? computeCategoryTicks(
+              plan.axes.x.ticks,
+              x,
+              sortedX,
+              xCategoryLabels,
+              plot.x,
+            )
+          : computeTicks(
             plan.axes.x.ticks,
             x,
             sortedX,
@@ -1225,7 +1325,7 @@ export function resolveFrame(
             temporal,
             plot.x,
             plan.axes.x.tickExtra,
-          )
+            )
         : computeTicks(
             plan.axes.y.ticks,
             wrapLinear(barValueXScale),

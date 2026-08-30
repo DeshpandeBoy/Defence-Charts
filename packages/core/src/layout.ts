@@ -97,6 +97,10 @@ export type ChromeSpec = {
   readonly plotPresence: 'present' | 'none'
   /** px. Inner breathing room for a family that owns a finite plot mark. */
   readonly plotInset?: number
+  /** Visible in-SVG chart heading. Optional only for non-line family compatibility. */
+  readonly chartTitle?: boolean
+  /** Visible in-SVG supporting heading. Optional only for non-line family compatibility. */
+  readonly chartSubtitle?: boolean
 }
 
 /**
@@ -140,6 +144,16 @@ const TICK_LABEL_RANK: TypeRank = 'D'
 const AXIS_TITLE_RANK: TypeRank = 'B'
 /** Legend entries are rank C (*"Signal"*). */
 const LEGEND_RANK: TypeRank = 'C'
+/** Visible chart titles are rank A; supporting subtitles use the 12 px rank-B metrics. */
+const CHART_TITLE_RANK: TypeRank = 'A'
+const CHART_SUBTITLE_RANK: TypeRank = 'B'
+
+/** Height reserved for visible, in-SVG title chrome. */
+export function chartHeaderBand(spec: ChromeSpec, policy: PlanPolicy): number {
+  if (spec.chartTitle !== true) return 0
+  const subtitle = spec.chartSubtitle === true ? lineHeight(CHART_SUBTITLE_RANK, policy) : 0
+  return lineHeight(CHART_TITLE_RANK, policy) + subtitle + policy.regionGap
+}
 
 // --- Bands -----------------------------------------------------------------------------
 
@@ -416,6 +430,7 @@ function rawPlotBox(
   // Vertical: value → x-axis → legend → table → plot. Ours; see the module docblock.
   const height =
     boxHeight -
+    chartHeaderBand(spec, policy) -
     resolvedValueBand(spec, boxHeight, seriesCount, policy) -
     xAxisBand(spec.x, policy) -
     legend.height -

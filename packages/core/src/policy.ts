@@ -71,6 +71,16 @@ export type PlanPolicy = {
   /** px. Symmetric breathing room inside the resolved plot rectangle. **C**. */
   readonly plotInset: number
 
+  /**
+   * Value-domain policy for line and area charts. **C** — explicit consumer semantics.
+   * `data` preserves the truthful position-encoding default; the other modes are opt-in.
+   */
+  readonly lineYDomainMode: 'data' | 'include-zero' | 'symmetric' | 'fixed'
+  /** Finite lower bound required when `lineYDomainMode` is `fixed`; otherwise `null`. */
+  readonly lineYDomainMin: number | null
+  /** Finite upper bound required when `lineYDomainMode` is `fixed`; otherwise `null`. */
+  readonly lineYDomainMax: number | null
+
   /** px. Optimal plot height for a line; below it, change encoding. **A-lit** — Heer 2009. */
   readonly plotHeightOptimal: number
   /**
@@ -301,6 +311,9 @@ export const DEFAULT_POLICY: PlanPolicy = Object.freeze({
   axisRuleWidth: 1,
   regionGap: 4,
   plotInset: 8,
+  lineYDomainMode: 'data',
+  lineYDomainMin: null,
+  lineYDomainMax: null,
   plotHeightOptimal: 24,
   plotHeightMinValues: 40,
   plotHeightSaturation: 80,
@@ -328,5 +341,19 @@ export const DEFAULT_POLICY: PlanPolicy = Object.freeze({
  */
 export function resolvePolicy(policy?: Partial<PlanPolicy>): PlanPolicy {
   if (policy === undefined) return DEFAULT_POLICY
-  return Object.freeze({ ...DEFAULT_POLICY, ...policy })
+  const resolved = { ...DEFAULT_POLICY, ...policy }
+  if (resolved.lineYDomainMode === 'fixed') {
+    if (
+      resolved.lineYDomainMin === null ||
+      resolved.lineYDomainMax === null ||
+      !Number.isFinite(resolved.lineYDomainMin) ||
+      !Number.isFinite(resolved.lineYDomainMax) ||
+      resolved.lineYDomainMin >= resolved.lineYDomainMax
+    ) {
+      throw new Error(
+        '@shiftcharts/core: fixed line y-domain requires finite lineYDomainMin < lineYDomainMax.',
+      )
+    }
+  }
+  return Object.freeze(resolved)
 }

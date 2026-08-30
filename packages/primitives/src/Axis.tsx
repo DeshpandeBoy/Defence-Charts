@@ -27,7 +27,13 @@
  * having to re-derive an offset or re-read the plan. Absent, the default ticks render.
  */
 
-import { DEFAULT_POLICY, type ComputedTick, type PlanPolicy, type Rect } from '@shiftcharts/core'
+import {
+  DEFAULT_POLICY,
+  lineHeight,
+  type ComputedTick,
+  type PlanPolicy,
+  type Rect,
+} from '@shiftcharts/core'
 import type { ReactNode } from 'react'
 
 import { classes, roundCoord, translate } from './svg.ts'
@@ -42,6 +48,10 @@ export type AxisProps = {
   /** Draw the tick marks themselves. Labels without marks is a legitimate sparse style. */
   readonly marks?: boolean
   readonly labels?: boolean
+  /** Visible axis title; geometry is rendered only when the resolved plan reserved it. */
+  readonly title?: string | undefined
+  /** Optional measured gutter offset for a rotated y-axis title. */
+  readonly titleOffset?: number | undefined
   readonly className?: string
   readonly children?: (ticks: readonly ComputedTick[]) => ReactNode
   readonly labelFlush?: boolean | number
@@ -62,6 +72,8 @@ export function Axis({
   rule = true,
   marks = true,
   labels = true,
+  title,
+  titleOffset,
   className,
   children,
   labelFlush = false,
@@ -92,6 +104,9 @@ export function Axis({
   // because alignment is visual; its distance is an attribute, because the resolver already
   // subtracted that distance from the plot.
   const labelOffset = tickLength + tickLabelGap
+  const titleDistance = horizontal
+    ? labelOffset + (labels ? lineHeight('D', policy) : 0) + policy.axisTitleGap
+    : titleOffset ?? labelOffset + lineHeight('D', policy) + policy.axisTitleGap
 
   return (
     <g
@@ -183,6 +198,16 @@ export function Axis({
               ) : null}
             </g>
         ))}
+      {title === undefined || title === '' ? null : (
+        <text
+          className="shiftcharts-axis__title"
+          x={horizontal ? plot.width / 2 : -titleDistance}
+          y={horizontal ? titleDistance : plot.height / 2}
+          transform={horizontal ? undefined : `rotate(-90 ${roundCoord(-titleDistance)} ${roundCoord(plot.height / 2)})`}
+        >
+          {title}
+        </text>
+      )}
     </g>
   )
 }

@@ -627,7 +627,7 @@ function valueLegibleRung(
     visible: true,
     domainLine: true,
     ticks: Object.freeze({ mode: 'count', count: policy.ticksMin }) as TickPlan,
-    title: false,
+    title: atLeastCanvas,
     gridlines: false,
     labelFlush: false,
     labelBound: false,
@@ -651,6 +651,8 @@ function valueLegibleRung(
     tableDisclosure: 'button',
     tablePresent: true,
     plotPresence: 'present',
+    chartTitle: true,
+    chartSubtitle: atLeastCanvas,
     // Reuse the published family inset so the top/bottom tick glyphs remain inside the SVG
     // and the plot keeps a deliberate optical edge on every side.
     plotInset: policy.plotInset,
