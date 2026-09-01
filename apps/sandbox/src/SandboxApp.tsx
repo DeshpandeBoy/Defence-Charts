@@ -17,6 +17,9 @@ import {
   sizeContextFromPixels,
 } from '@shiftcharts/core'
 import { AutoChart, LegendControl } from '@shiftcharts/react'
+// The benchmark intentionally uses the current client interaction implementation directly so
+// its lookup numbers describe the shipped baseline, including the documented full `'xy'` scan.
+import { nearestIndexedPoint, prepareInteractionIndex } from '../../../packages/react/src/interaction-index.ts'
 import {
   SHIFTCHARTS_THEMES,
   SHIFTCHARTS_TOKENS,
@@ -130,6 +133,10 @@ function isInteractionPagePath(pathname: string): boolean {
 
 function isMotionPagePath(pathname: string): boolean {
   return pathname === '/motion' || pathname === '/motion/'
+}
+
+function isPerformancePagePath(pathname: string): boolean {
+  return pathname === '/performance' || pathname === '/performance/'
 }
 
 const SIZE_PRESETS = [
@@ -450,6 +457,9 @@ export function SandboxApp() {
   const [isMotionPage, setIsMotionPage] = useState(() =>
     typeof window !== 'undefined' && isMotionPagePath(window.location.pathname),
   )
+  const [isPerformancePage, setIsPerformancePage] = useState(() =>
+    typeof window !== 'undefined' && isPerformancePagePath(window.location.pathname),
+  )
   const [theme, setTheme] = useState<ShiftChartsTheme>('rail-dark')
   const [width, setWidth] = useState(760)
   const [height, setHeight] = useState(480)
@@ -475,6 +485,7 @@ export function SandboxApp() {
     setIsTokenExplorer(false)
     setIsInteractionPage(false)
     setIsMotionPage(false)
+    setIsPerformancePage(false)
     setChartType(nextType)
     setTitle(CHART_PAGE_DETAILS[nextType].defaultTitle)
     setDataText(json(DATA_BY_TYPE[nextType]))
@@ -490,6 +501,7 @@ export function SandboxApp() {
     setIsTokenExplorer(true)
     setIsInteractionPage(false)
     setIsMotionPage(false)
+    setIsPerformancePage(false)
   }, [])
 
   const loadInteractionPage = useCallback(() => {
@@ -497,6 +509,7 @@ export function SandboxApp() {
     setIsInteractionPage(true)
     setIsTokenExplorer(false)
     setIsMotionPage(false)
+    setIsPerformancePage(false)
   }, [])
 
   const loadMotionPage = useCallback(() => {
@@ -504,6 +517,15 @@ export function SandboxApp() {
     setIsMotionPage(true)
     setIsTokenExplorer(false)
     setIsInteractionPage(false)
+    setIsPerformancePage(false)
+  }, [])
+
+  const loadPerformancePage = useCallback(() => {
+    if (typeof window !== 'undefined') window.history.pushState({}, '', '/performance')
+    setIsPerformancePage(true)
+    setIsTokenExplorer(false)
+    setIsInteractionPage(false)
+    setIsMotionPage(false)
   }, [])
 
   useEffect(() => {
@@ -512,18 +534,28 @@ export function SandboxApp() {
         setIsTokenExplorer(true)
         setIsInteractionPage(false)
         setIsMotionPage(false)
+        setIsPerformancePage(false)
         return
       }
       if (isInteractionPagePath(window.location.pathname)) {
         setIsInteractionPage(true)
         setIsTokenExplorer(false)
         setIsMotionPage(false)
+        setIsPerformancePage(false)
         return
       }
       if (isMotionPagePath(window.location.pathname)) {
         setIsMotionPage(true)
         setIsTokenExplorer(false)
         setIsInteractionPage(false)
+        setIsPerformancePage(false)
+        return
+      }
+      if (isPerformancePagePath(window.location.pathname)) {
+        setIsPerformancePage(true)
+        setIsTokenExplorer(false)
+        setIsInteractionPage(false)
+        setIsMotionPage(false)
         return
       }
       loadChartPage(chartTypeFromPath(window.location.pathname), true)
@@ -769,6 +801,10 @@ export function SandboxApp() {
     return <MotionComparison theme={theme} onOpenChart={() => loadChartPage('line')} onOpenTokens={loadTokenExplorer} />
   }
 
+  if (isPerformancePage) {
+    return <PerformancePage theme={theme} onThemeChange={setTheme} onOpenChart={() => loadChartPage('line')} onOpenTokens={loadTokenExplorer} onOpenInteraction={loadInteractionPage} onOpenMotion={loadMotionPage} />
+  }
+
   return (
     <main
       className={`sandbox shiftcharts-theme-${theme}`}
@@ -786,6 +822,7 @@ export function SandboxApp() {
           <a href="/tokens" onClick={(event) => { event.preventDefault(); loadTokenExplorer() }}>Tokens</a>
           <a href="/interaction" onClick={(event) => { event.preventDefault(); loadInteractionPage() }}>Interaction</a>
           <a href="/motion" onClick={(event) => { event.preventDefault(); loadMotionPage() }}>Motion lab</a>
+          <a href="/performance" onClick={(event) => { event.preventDefault(); loadPerformancePage() }}>Performance</a>
           {CHART_TYPES.map((type) => (
             <a
               key={type}
@@ -1198,6 +1235,332 @@ function tokenPurpose(token: Token, group: string): string {
   if (token.name.startsWith('tooltip-') || token.name.startsWith('crosshair-')) return `Controls the interaction-layer ${label.replace(/^(tooltip|crosshair) /, '')}.`
   if (token.name.startsWith('axis-') || token.name.startsWith('grid-') || token.name.startsWith('tick-')) return `Controls axis or guide ${label.replace(/^(axis|grid|tick) /, '')}.`
   return `Controls ${label} in the ${group.toLowerCase()} system.`
+}
+
+type ScatterBenchmarkScenario = {
+  readonly id: string
+  readonly label: string
+  readonly pointCount: number
+  readonly seriesCount: number
+  readonly purpose: string
+}
+
+type ScatterBenchmarkResult = {
+  readonly id: string
+  readonly label: string
+  readonly pointCount: number
+  readonly seriesCount: number
+  readonly renderer: string
+  readonly generationMs: number
+  readonly shapeMs: number
+  readonly planMs: number
+  readonly frameMs: number
+  readonly indexMs: number
+  readonly lookupMs: number
+  readonly lookupCount: number
+  readonly dataBytes: number
+  readonly frameBytes: number
+}
+
+type BenchmarkRunState = {
+  readonly status: 'idle' | 'running' | 'complete' | 'error'
+  readonly activeId: string | null
+  readonly results: readonly ScatterBenchmarkResult[]
+  readonly error: string | null
+}
+
+const SCATTER_BENCHMARK_SCENARIOS: readonly ScatterBenchmarkScenario[] = [
+  { id: 'scatter-1k', label: '1,000 points', pointCount: 1_000, seriesCount: 1, purpose: 'Small interaction baseline' },
+  { id: 'scatter-2k', label: '2,000 points', pointCount: 2_000, seriesCount: 1, purpose: 'Default SVG point-budget boundary' },
+  { id: 'scatter-10k', label: '10,000 points', pointCount: 10_000, seriesCount: 1, purpose: 'Dense single-series scatter' },
+  { id: 'scatter-30k-3-series', label: '30,000 / 3 series', pointCount: 30_000, seriesCount: 3, purpose: 'Multi-series interaction pressure' },
+  { id: 'scatter-50k', label: '50,000 points', pointCount: 50_000, seriesCount: 1, purpose: 'Large data preparation' },
+  { id: 'scatter-100k', label: '100,000 points', pointCount: 100_000, seriesCount: 1, purpose: 'Stress case for the current full xy scan' },
+]
+
+const BENCHMARK_CONTEXT = sizeContextFromPixels(760, 480)
+
+function benchmarkClock(): number {
+  return typeof performance === 'undefined' ? Date.now() : performance.now()
+}
+
+function benchmarkBytes(value: unknown): number {
+  const text = JSON.stringify(value)
+  return typeof TextEncoder === 'undefined' ? text.length : new TextEncoder().encode(text).byteLength
+}
+
+function denseScatterData(pointCount: number, seriesCount: number): readonly Series[] {
+  const pointsPerSeries = Math.ceil(pointCount / seriesCount)
+  return Array.from({ length: seriesCount }, (_, seriesIndex) => ({
+    id: `benchmark-${seriesIndex + 1}`,
+    label: `Benchmark ${seriesIndex + 1}`,
+    points: Array.from({ length: Math.min(pointsPerSeries, pointCount - seriesIndex * pointsPerSeries) }, (_, pointIndex) => denseScatterPoint(seriesIndex, pointIndex)),
+  }))
+}
+
+function denseScatterPoint(seriesIndex: number, pointIndex: number): DataPoint {
+  return {
+    x: pointIndex,
+    // Deterministic variation keeps the benchmark realistic without randomising runs.
+    y: 50 + Math.sin((pointIndex + seriesIndex * 37) * 0.017) * 28 + Math.cos(pointIndex * 0.003) * 12,
+  }
+}
+
+function denseScatterPreview(scenario: ScatterBenchmarkScenario): readonly Series[] {
+  const pointsPerSeries = Math.ceil(scenario.pointCount / scenario.seriesCount)
+  const sampleIndexes = (total: number): readonly number[] => [...new Set([0, 1, 2, total - 3, total - 2, total - 1].filter((index) => index >= 0 && index < total))]
+  return Array.from({ length: scenario.seriesCount }, (_, seriesIndex) => ({
+    id: `benchmark-${seriesIndex + 1}`,
+    label: `Benchmark ${seriesIndex + 1}`,
+    points: sampleIndexes(Math.min(pointsPerSeries, scenario.pointCount - seriesIndex * pointsPerSeries)).map((pointIndex) => denseScatterPoint(seriesIndex, pointIndex)),
+  }))
+}
+
+function nextAnimationFrame(): Promise<void> {
+  return new Promise((resolve) => window.requestAnimationFrame(() => resolve()))
+}
+
+async function measureScatterScenario(scenario: ScatterBenchmarkScenario): Promise<ScatterBenchmarkResult> {
+  const generationStart = benchmarkClock()
+  const data = denseScatterData(scenario.pointCount, scenario.seriesCount)
+  const generationMs = benchmarkClock() - generationStart
+
+  const shapeStart = benchmarkClock()
+  const shape = describeShape(data)
+  const shapeMs = benchmarkClock() - shapeStart
+
+  const planStart = benchmarkClock()
+  const plan = planChart('scatter', BENCHMARK_CONTEXT, shape, DEFAULT_POLICY)
+  const planMs = benchmarkClock() - planStart
+
+  const frameStart = benchmarkClock()
+  const frame = resolveFrame(plan, data, BENCHMARK_CONTEXT, DEFAULT_POLICY)
+  const frameMs = benchmarkClock() - frameStart
+
+  const indexStart = benchmarkClock()
+  const index = prepareInteractionIndex(frame, data)
+  const indexMs = benchmarkClock() - indexStart
+
+  const lookupCount = Math.min(48, Math.max(12, Math.ceil(index.points.length / 2_500)))
+  const lookupStart = benchmarkClock()
+  for (let queryIndex = 0; queryIndex < lookupCount; queryIndex += 1) {
+    const point = index.points[(queryIndex * Math.max(1, Math.floor(index.points.length / lookupCount))) % index.points.length]
+    if (point !== undefined) nearestIndexedPoint(index, point.x + 1.25, point.y - 0.75, 'xy')
+  }
+  const lookupMs = benchmarkClock() - lookupStart
+
+  return {
+    id: scenario.id,
+    label: scenario.label,
+    pointCount: shape.points,
+    seriesCount: shape.series,
+    renderer: plan.marks.renderer,
+    generationMs,
+    shapeMs,
+    planMs,
+    frameMs,
+    indexMs,
+    lookupMs,
+    lookupCount,
+    dataBytes: benchmarkBytes(data),
+    frameBytes: benchmarkBytes(frame),
+  }
+}
+
+function formatMilliseconds(value: number): string {
+  return value < 0.01 ? '<0.01 ms' : `${value.toFixed(value < 10 ? 2 : 1)} ms`
+}
+
+function formatBytes(value: number): string {
+  if (value < 1024) return `${value} B`
+  if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`
+  return `${(value / (1024 * 1024)).toFixed(2)} MB`
+}
+
+function PerformancePage({
+  theme,
+  onThemeChange,
+  onOpenChart,
+  onOpenTokens,
+  onOpenInteraction,
+  onOpenMotion,
+}: {
+  readonly theme: ShiftChartsTheme
+  readonly onThemeChange: (theme: ShiftChartsTheme) => void
+  readonly onOpenChart: () => void
+  readonly onOpenTokens: () => void
+  readonly onOpenInteraction: () => void
+  readonly onOpenMotion: () => void
+}) {
+  const runIdRef = useRef(0)
+  const [state, setState] = useState<BenchmarkRunState>({ status: 'idle', activeId: null, results: [], error: null })
+  const familyScenarioRows = useMemo(() => CHART_TYPES.map((type) => {
+    const data = DATA_BY_TYPE[type]
+    return { type, data, shape: describeShape(data) }
+  }), [])
+  const denseScenarioPreviews = useMemo(() => SCATTER_BENCHMARK_SCENARIOS.map((scenario) => ({ scenario, data: denseScatterPreview(scenario) })), [])
+  const resultById = useMemo(() => new Map(state.results.map((result) => [result.id, result])), [state.results])
+  const totalMeasuredPoints = state.results.reduce((total, result) => total + result.pointCount, 0)
+
+  useEffect(() => () => { runIdRef.current += 1 }, [])
+
+  const runAllBenchmarks = async () => {
+    const runId = runIdRef.current + 1
+    runIdRef.current = runId
+    let results: ScatterBenchmarkResult[] = []
+    setState({ status: 'running', activeId: SCATTER_BENCHMARK_SCENARIOS[0]?.id ?? null, results: [], error: null })
+
+    try {
+      for (const scenario of SCATTER_BENCHMARK_SCENARIOS) {
+        if (runIdRef.current !== runId) return
+        setState((current) => ({ ...current, activeId: scenario.id }))
+        // Yield between cases so the browser can paint the active scenario label and button state.
+        await nextAnimationFrame()
+        const result = await measureScatterScenario(scenario)
+        if (runIdRef.current !== runId) return
+        results = [...results, result]
+        setState({ status: 'running', activeId: scenario.id, results, error: null })
+        await nextAnimationFrame()
+      }
+      if (runIdRef.current === runId) setState({ status: 'complete', activeId: null, results, error: null })
+    } catch (error) {
+      if (runIdRef.current === runId) {
+        setState({ status: 'error', activeId: null, results, error: error instanceof Error ? error.message : 'The benchmark could not complete.' })
+      }
+    }
+  }
+
+  return (
+    <main className={`sandbox sandbox--performance shiftcharts-theme-${theme}`} data-shiftcharts-theme={theme}>
+      <nav className="sandbox__family-nav" aria-label="Sandbox pages">
+        <div className="sandbox__family-nav-intro"><strong>ShiftCharts sandbox</strong></div>
+        <div className="sandbox__family-links">
+          <a href="/charts/line" onClick={(event) => { event.preventDefault(); onOpenChart() }}>Chart studio</a>
+          <a href="/interaction" onClick={(event) => { event.preventDefault(); onOpenInteraction() }}>Interaction</a>
+          <a href="/motion" onClick={(event) => { event.preventDefault(); onOpenMotion() }}>Motion lab</a>
+          <a href="/tokens" onClick={(event) => { event.preventDefault(); onOpenTokens() }}>Tokens</a>
+          <a href="/performance" aria-current="page">Performance</a>
+        </div>
+      </nav>
+
+      <header className="sandbox__token-header sandbox__performance-header">
+        <div>
+          <p className="sandbox__eyebrow">Recommendation 01 / evidence workbench</p>
+          <h1>Performance, measured.<br /><em>Before we optimize.</em></h1>
+          <p className="sandbox__lede">
+            This page runs the current pure core pipeline and the shipped scatter interaction index
+            against deterministic data. It is a baseline for deciding whether spatial indexing earns
+            its complexity — not a claim that the optimization is already implemented.
+          </p>
+        </div>
+        <label className="sandbox__performance-theme"><span>Theme</span><select value={theme} onChange={(event) => onThemeChange(event.target.value as ShiftChartsTheme)}>{SHIFTCHARTS_THEMES.map((option) => <option key={option} value={option}>{option}</option>)}</select></label>
+      </header>
+
+      <section className="sandbox__performance-section" aria-labelledby="benchmark-title">
+        <div className="sandbox__performance-section-heading">
+          <div>
+            <p className="sandbox__section-label">01 / dense scatter benchmark</p>
+            <h2 id="benchmark-title">The current cost curve</h2>
+          </div>
+          <button type="button" className="sandbox__button" onClick={runAllBenchmarks} disabled={state.status === 'running'}>
+            {state.status === 'running' ? `Running ${state.activeId ?? 'scenario'}…` : state.status === 'complete' ? 'Run all again' : 'Run all benchmarks'}
+          </button>
+        </div>
+        <p className="sandbox__help">
+          Every case uses a 760 × 480 content box, the default point budget of 2,000, one deterministic
+          dataset per case, and the same browser main thread as the page. Lookup measures the current
+          nearest-point <code>'xy'</code> path over {SCATTER_BENCHMARK_SCENARIOS[0]?.pointCount.toLocaleString()}–{SCATTER_BENCHMARK_SCENARIOS.at(-1)?.pointCount.toLocaleString()} points.
+        </p>
+        <output className="sandbox__performance-status" aria-live="polite">
+          {state.status === 'idle' ? 'No run yet. The page stays idle until you start the benchmark.' : state.status === 'running' ? `Measured ${state.results.length} of ${SCATTER_BENCHMARK_SCENARIOS.length} cases · ${totalMeasuredPoints.toLocaleString()} points completed.` : state.status === 'complete' ? `Complete · ${state.results.length} cases · ${totalMeasuredPoints.toLocaleString()} points measured.` : `Stopped after ${state.results.length} cases.`}
+        </output>
+        {state.error === null ? null : <p className="sandbox__error" role="alert">{state.error}</p>}
+
+        <div className="sandbox__performance-table-wrap">
+          <table className="sandbox__performance-table">
+            <caption>Browser benchmark results. Times are measured in this tab and vary by machine.</caption>
+            <thead><tr><th scope="col">Scenario</th><th scope="col">Renderer</th><th scope="col">Generate</th><th scope="col">Shape</th><th scope="col">Plan</th><th scope="col">Frame</th><th scope="col">Index</th><th scope="col">xy lookups</th><th scope="col">Payloads</th></tr></thead>
+            <tbody>
+              {SCATTER_BENCHMARK_SCENARIOS.map((scenario) => {
+                const result = resultById.get(scenario.id)
+                return (
+                  <tr key={scenario.id} data-testid={`benchmark-${scenario.id}`}>
+                    <th scope="row"><strong>{scenario.label}</strong><small>{scenario.purpose}</small></th>
+                    <td>{result === undefined ? '—' : <span className={`sandbox__performance-renderer sandbox__performance-renderer--${result.renderer}`}>{result.renderer}</span>}</td>
+                    <td>{result === undefined ? '—' : formatMilliseconds(result.generationMs)}</td>
+                    <td>{result === undefined ? '—' : formatMilliseconds(result.shapeMs)}</td>
+                    <td>{result === undefined ? '—' : formatMilliseconds(result.planMs)}</td>
+                    <td>{result === undefined ? '—' : formatMilliseconds(result.frameMs)}</td>
+                    <td>{result === undefined ? '—' : formatMilliseconds(result.indexMs)}</td>
+                    <td>{result === undefined ? '—' : `${formatMilliseconds(result.lookupMs)} / ${result.lookupCount}`}</td>
+                    <td>{result === undefined ? '—' : `${formatBytes(result.dataBytes)} data · ${formatBytes(result.frameBytes)} frame`}</td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+        <p className="sandbox__performance-footnote">
+          “Canvas” here is the current <code>ChartPlan</code> renderer decision above the point budget.
+          The dense visual layer is intentionally not mounted because the scatter Canvas renderer is
+          an explicit future boundary; the benchmark measures preparation and interaction without
+          hiding that limitation behind a crashing preview.
+        </p>
+      </section>
+
+      <section className="sandbox__performance-section" aria-labelledby="dense-input-title">
+        <div className="sandbox__performance-section-heading">
+          <div>
+            <p className="sandbox__section-label">01a / benchmark inputs</p>
+            <h2 id="dense-input-title">The data behind every stress case</h2>
+          </div>
+          <span className="sandbox__performance-count">first 3 + last 3 points shown</span>
+        </div>
+        <p className="sandbox__help">Each card shows the deterministic input shape used by the run. Only a compact preview is printed for the large cases; the benchmark still processes the complete point count shown in the table above.</p>
+        <div className="sandbox__performance-scenario-grid">
+          {denseScenarioPreviews.map(({ scenario, data }) => (
+            <article className="sandbox__performance-scenario sandbox__performance-dense" key={scenario.id}>
+              <header><div><p className="sandbox__section-label">{scenario.label}</p><h3>{scenario.purpose}</h3></div><code>{scenario.seriesCount} series</code></header>
+              <pre className="sandbox__performance-data" aria-label={`${scenario.label} input preview`}>{json(data)}</pre>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="sandbox__performance-section" aria-labelledby="scenario-data-title">
+        <div className="sandbox__performance-section-heading">
+          <div>
+            <p className="sandbox__section-label">02 / all shipped fixtures</p>
+            <h2 id="scenario-data-title">Every family, with its scenario data</h2>
+          </div>
+          <span className="sandbox__performance-count">{familyScenarioRows.length} chart families</span>
+        </div>
+        <p className="sandbox__help">These are the exact samples used by the chart studio’s “Use sample” controls. The full JSON stays visible here so performance results can be read against real family shapes, not anonymous point counts.</p>
+        <div className="sandbox__performance-scenario-grid">
+          {familyScenarioRows.map(({ type, data, shape }) => (
+            <article className="sandbox__performance-scenario" key={type}>
+              <header>
+                <div><p className="sandbox__section-label">{CHART_PAGE_DETAILS[type].label}</p><h3>{CHART_PAGE_DETAILS[type].geometryFocus}</h3></div>
+                <code>{type}</code>
+              </header>
+              <dl><div><dt>Series</dt><dd>{shape.series}</dd></div><div><dt>Points</dt><dd>{shape.points}</dd></div><div><dt>Categories</dt><dd>{shape.categories}</dd></div><div><dt>Temporal</dt><dd>{shape.temporal ? 'yes' : 'no'}</dd></div></dl>
+              <pre className="sandbox__performance-data" aria-label={`${type} scenario data`}>{json(data)}</pre>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="sandbox__performance-section sandbox__performance-method" aria-labelledby="method-title">
+        <p className="sandbox__section-label">03 / how to read it</p>
+        <h2 id="method-title">What this first build proves</h2>
+        <div className="sandbox__performance-method-grid">
+          <article><h3>Measured now</h3><p>Data generation, shape scanning, pure plan resolution, frame geometry, interaction-index construction, nearest <code>'xy'</code> lookup, and serialised data/frame size.</p></article>
+          <article><h3>Still unchanged</h3><p>The library still uses a full scan for scatter-like nearest lookup, and the current scatter Canvas path remains an explicit renderer boundary. This page exposes both facts.</p></article>
+          <article><h3>Decision after evidence</h3><p>Compare lookup time and index build time as point count grows. Only then decide whether a quadtree/KD-tree improves a real workload enough to justify memory, invalidation, and interaction complexity.</p></article>
+        </div>
+      </section>
+    </main>
+  )
 }
 
 function TokenExplorer({

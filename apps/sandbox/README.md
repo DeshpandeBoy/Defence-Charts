@@ -22,6 +22,7 @@ Each registered family has a geometry-first page:
 - `/charts/progress`
 - `/charts/heatmap`
 - `/charts/funnel`
+- `/performance`
 
 The family navigation and chart-type selector load the matching valid sample. The geometry
 inspector reports the measured content box, SVG viewBox, resolved plot box, and legend mode for
@@ -44,5 +45,12 @@ The preview uses the measured `<AutoChart>` boundary from `@shiftcharts/react`. 
 same `planChart()` from `@shiftcharts/core` against the actual available content box and renders
 the same `@shiftcharts/primitives` `<Chart>`, so a constrained preview cannot clip a nominally wider
 SVG. The implementation analysis is recorded in [`CHART-ANALYSIS.md`](./CHART-ANALYSIS.md).
+
+The Performance page is the first recommendation workbench. It runs deterministic 1k, 2k, 10k,
+30k/3-series, 50k, and 100k scatter cases in the browser and reports generation, shape, plan,
+frame, interaction-index, nearest-`xy` lookup, and serialised payload timings. It also shows the
+complete JSON for all ten shipped family samples. Dense scatter cases are measured without mounting
+the current Canvas-bound visual renderer, so the page exposes the existing boundary instead of
+silently treating it as complete.
 
 The existing demo app remains the product showcase and browser-fixture surface.

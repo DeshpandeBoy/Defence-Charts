@@ -1429,4 +1429,297 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
+
+  /* --- Performance workbench ---------------------------------------------------- */
+
+  .sandbox--performance {
+    min-block-size: 100vh;
+    padding-block-end: calc(var(--shiftcharts-size-gap) * 12);
+  }
+
+  .sandbox__performance-header,
+  .sandbox__performance-section {
+    max-inline-size: 1440px;
+    margin-inline: auto;
+    padding-inline: clamp(20px, 5vw, 72px);
+  }
+
+  .sandbox__performance-header {
+    align-items: end;
+  }
+
+  .sandbox__performance-theme {
+    display: grid;
+    flex: 0 0 180px;
+    gap: calc(var(--shiftcharts-size-gap) * 1.5);
+    color: var(--sandbox-muted);
+    font-size: 0.78rem;
+  }
+
+  .sandbox__performance-theme select {
+    min-block-size: 38px;
+    border: 1px solid var(--sandbox-rule);
+    border-radius: var(--shiftcharts-widget-radius-inner);
+    background: var(--sandbox-panel);
+    color: var(--sandbox-ink);
+    padding-inline: calc(var(--shiftcharts-size-gap) * 2);
+  }
+
+  .sandbox__performance-section {
+    padding-block-start: calc(var(--shiftcharts-size-gap) * 8);
+  }
+
+  .sandbox__performance-section-heading {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: calc(var(--shiftcharts-size-gap) * 4);
+    margin-block-end: calc(var(--shiftcharts-size-gap) * 3);
+  }
+
+  .sandbox__performance-section-heading h2 {
+    margin: calc(var(--shiftcharts-size-gap) * 2) 0 0;
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    letter-spacing: -0.04em;
+  }
+
+  .sandbox__performance-status {
+    display: block;
+    margin-block: calc(var(--shiftcharts-size-gap) * 4);
+    padding-block: calc(var(--shiftcharts-size-gap) * 2);
+    border-block: 1px solid var(--sandbox-rule);
+    color: var(--sandbox-muted);
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sandbox__performance-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--sandbox-rule);
+    border-radius: var(--shiftcharts-widget-radius);
+    background: var(--sandbox-panel);
+  }
+
+  .sandbox__performance-table {
+    inline-size: 100%;
+    min-inline-size: 1040px;
+    border-collapse: collapse;
+    font-size: 0.74rem;
+  }
+
+  .sandbox__performance-table caption {
+    padding: calc(var(--shiftcharts-size-gap) * 3);
+    color: var(--sandbox-muted);
+    text-align: start;
+    caption-side: bottom;
+  }
+
+  .sandbox__performance-table th,
+  .sandbox__performance-table td {
+    padding: calc(var(--shiftcharts-size-gap) * 2.5) calc(var(--shiftcharts-size-gap) * 2);
+    border-block-end: 1px solid var(--sandbox-rule);
+    text-align: end;
+    vertical-align: top;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  .sandbox__performance-table thead th {
+    color: var(--sandbox-muted);
+    font-size: 0.64rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .sandbox__performance-table th:first-child,
+  .sandbox__performance-table td:first-child {
+    text-align: start;
+  }
+
+  .sandbox__performance-table tbody tr:last-child th,
+  .sandbox__performance-table tbody tr:last-child td {
+    border-block-end: 0;
+  }
+
+  .sandbox__performance-table tbody th {
+    color: var(--sandbox-ink);
+    font-weight: 600;
+  }
+
+  .sandbox__performance-table tbody th small {
+    display: block;
+    margin-block-start: calc(var(--shiftcharts-size-gap) / 2);
+    color: var(--sandbox-faint);
+    font-size: 0.66rem;
+    font-weight: 400;
+  }
+
+  .sandbox__performance-renderer {
+    display: inline-block;
+    border-radius: 999px;
+    padding: calc(var(--shiftcharts-size-gap) / 2) calc(var(--shiftcharts-size-gap) * 1.25);
+    background: color-mix(in srgb, var(--sandbox-ink) 12%, transparent);
+    color: var(--sandbox-muted);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+  }
+
+  .sandbox__performance-renderer--canvas {
+    background: color-mix(in srgb, var(--shiftcharts-series-1) 16%, transparent);
+    color: var(--shiftcharts-series-1);
+  }
+
+  .sandbox__performance-footnote {
+    max-inline-size: 900px;
+    margin-block: calc(var(--shiftcharts-size-gap) * 3) 0;
+    color: var(--sandbox-muted);
+    font-size: 0.78rem;
+    line-height: 1.6;
+  }
+
+  .sandbox__performance-count {
+    color: var(--sandbox-muted);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sandbox__performance-scenario-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: calc(var(--shiftcharts-size-gap) * 3);
+  }
+
+  .sandbox__performance-scenario {
+    min-inline-size: 0;
+    padding: calc(var(--shiftcharts-size-gap) * 3);
+    border: 1px solid var(--sandbox-rule);
+    border-radius: var(--shiftcharts-widget-radius);
+    background: var(--sandbox-panel);
+  }
+
+  .sandbox__performance-scenario > header {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: calc(var(--shiftcharts-size-gap) * 3);
+    margin-block-end: calc(var(--shiftcharts-size-gap) * 3);
+  }
+
+  .sandbox__performance-scenario h3 {
+    max-inline-size: 28ch;
+    margin: calc(var(--shiftcharts-size-gap) * 1.5) 0 0;
+    font-size: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  .sandbox__performance-scenario > header > code {
+    color: var(--shiftcharts-series-1);
+    font-size: 0.72rem;
+  }
+
+  .sandbox__performance-scenario dl {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: calc(var(--shiftcharts-size-gap) * 2);
+    margin: 0;
+  }
+
+  .sandbox__performance-scenario dl div {
+    min-inline-size: 0;
+    padding-block-start: calc(var(--shiftcharts-size-gap) * 1.5);
+    border-block-start: 1px solid var(--sandbox-rule);
+  }
+
+  .sandbox__performance-scenario dt {
+    color: var(--sandbox-faint);
+    font-size: 0.63rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .sandbox__performance-scenario dd {
+    margin: calc(var(--shiftcharts-size-gap) / 2) 0 0;
+    color: var(--sandbox-ink);
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .sandbox__performance-data {
+    max-block-size: 260px;
+    margin: calc(var(--shiftcharts-size-gap) * 3) 0 0;
+    padding: calc(var(--shiftcharts-size-gap) * 2.5);
+    overflow: auto;
+    border: 1px solid var(--sandbox-rule);
+    border-radius: var(--shiftcharts-widget-radius-inner);
+    background: var(--sandbox-panel-strong);
+    color: var(--sandbox-muted);
+    font-size: 0.66rem;
+    line-height: 1.5;
+    white-space: pre;
+  }
+
+  .sandbox__performance-method {
+    border-block-start: 1px solid var(--sandbox-rule);
+  }
+
+  .sandbox__performance-method > h2 {
+    margin: calc(var(--shiftcharts-size-gap) * 2) 0 calc(var(--shiftcharts-size-gap) * 4);
+    font-size: clamp(1.5rem, 3vw, 2.5rem);
+    letter-spacing: -0.04em;
+  }
+
+  .sandbox__performance-method-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: calc(var(--shiftcharts-size-gap) * 3);
+  }
+
+  .sandbox__performance-method-grid article {
+    padding-block-start: calc(var(--shiftcharts-size-gap) * 2);
+    border-block-start: 1px solid var(--sandbox-rule);
+  }
+
+  .sandbox__performance-method-grid h3 {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+
+  .sandbox__performance-method-grid p {
+    margin: calc(var(--shiftcharts-size-gap) * 1.5) 0 0;
+    color: var(--sandbox-muted);
+    font-size: 0.78rem;
+    line-height: 1.6;
+  }
+
+  @media (max-width: 58rem) {
+    .sandbox__performance-header {
+      align-items: start;
+    }
+
+    .sandbox__performance-theme {
+      flex-basis: auto;
+    }
+
+    .sandbox__performance-scenario-grid,
+    .sandbox__performance-method-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  @media (max-width: 34rem) {
+    .sandbox__performance-header,
+    .sandbox__performance-section {
+      padding-inline: 16px;
+    }
+
+    .sandbox__performance-section-heading {
+      align-items: start;
+      flex-direction: column;
+    }
+
+    .sandbox__performance-scenario dl {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
 }
