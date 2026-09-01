@@ -122,6 +122,7 @@ function renderStage(
       <rect
         className={classes('shiftcharts-funnel-stage', 'shiftcharts-funnel-stage__mark')}
         data-funnel-part="stage"
+        data-shiftcharts-mark-id={`funnel:${stage.id}`}
         height={roundCoord(stage.height)}
         width={roundCoord(stage.width)}
         x={roundCoord(stage.x)}

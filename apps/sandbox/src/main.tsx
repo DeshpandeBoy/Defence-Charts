@@ -5,6 +5,7 @@ import { SandboxApp } from './SandboxApp.tsx'
 import '@shiftcharts/primitives/chart.css'
 import '@shiftcharts/react/auto-chart.css'
 import '@shiftcharts/react/interaction-overlay.css'
+import '@shiftcharts/motion/motion.css'
 import './sandbox.css'
 
 const root = document.querySelector('#root')

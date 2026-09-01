@@ -12,6 +12,7 @@ import '@shiftcharts/grid/widget-states.css'
 import '@shiftcharts/primitives/chart.css'
 import '@shiftcharts/react/auto-chart.css'
 import '@shiftcharts/react/interaction-overlay.css'
+import '@shiftcharts/motion/motion.css'
 import '@shiftcharts/tokens/theme.css'
 
 const DATA: readonly Series[] = [

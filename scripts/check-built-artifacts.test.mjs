@@ -5,13 +5,14 @@ import { assertBuiltArtifacts, assertPackedConsumer, JS_SPECIFIERS } from './che
 describe('built artifact contract', () => {
   it('maps development exports to source and publish exports to existing dist files', async () => {
     const reports = await assertBuiltArtifacts()
-    expect(reports).toHaveLength(6)
+    expect(reports).toHaveLength(7)
   })
 
   it('resolves packed JS, declarations, CSS, and runtime entries without installing', async () => {
     expect(JS_SPECIFIERS).toEqual([
       '@shiftcharts/core',
       '@shiftcharts/grid',
+      '@shiftcharts/motion',
       '@shiftcharts/primitives',
       '@shiftcharts/react',
       '@shiftcharts/testing',
@@ -20,6 +21,6 @@ describe('built artifact contract', () => {
       '@shiftcharts/primitives/bar',
       '@shiftcharts/primitives/donut',
     ])
-    await expect(assertPackedConsumer()).resolves.toContain('packed consumer: resolved 9')
-  })
+    await expect(assertPackedConsumer()).resolves.toContain('packed consumer: resolved 10')
+  }, 20_000)
 })

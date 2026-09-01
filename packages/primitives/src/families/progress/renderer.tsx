@@ -62,6 +62,7 @@ export const renderProgress: MarkRenderer = ({ frame, plan }) => {
           <rect
             className="shiftcharts-progress__track"
             data-progress-part="track"
+            data-shiftcharts-mark-id={`${frame.id}:progress:track`}
             x={roundCoord(progress.track!.x)}
             y={roundCoord(progress.track!.y)}
             width={roundCoord(progress.track!.width)}
@@ -71,6 +72,7 @@ export const renderProgress: MarkRenderer = ({ frame, plan }) => {
             <rect
               className="shiftcharts-progress__fill"
               data-progress-part="fill"
+              data-shiftcharts-mark-id={`${frame.id}:progress:fill`}
               x={roundCoord(progress.fill.x)}
               y={roundCoord(progress.fill.y)}
               width={roundCoord(progress.fill.width)}
@@ -83,12 +85,14 @@ export const renderProgress: MarkRenderer = ({ frame, plan }) => {
           <path
             className="shiftcharts-progress__track"
             data-progress-part="track"
+            data-shiftcharts-mark-id={`${frame.id}:progress:track`}
             d={progress.trackPath!}
           />
           {progress.fillPath === null ? null : (
             <path
               className="shiftcharts-progress__fill"
               data-progress-part="fill"
+              data-shiftcharts-mark-id={`${frame.id}:progress:fill`}
               d={progress.fillPath}
             />
           )}

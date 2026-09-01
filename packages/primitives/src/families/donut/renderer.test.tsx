@@ -28,6 +28,7 @@ describe('donut family renderer', () => {
 
     expect((html.match(/class="shiftcharts-arc/g) ?? []).length).toBe(3)
     expect(html).toContain('data-slice-id="sales:north"')
+    expect(html).toContain('data-shiftcharts-mark-id="arc:sales:north"')
     expect(html).toContain('data-slice-id="sales:south"')
     expect(html).toContain('data-slice-id="sales:other"')
     expect(html).toContain('data-slice-kind="other"')

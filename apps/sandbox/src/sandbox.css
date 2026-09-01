@@ -1188,4 +1188,245 @@
       transition: none;
     }
   }
+
+  /* --- Motion comparison --------------------------------------------------------- */
+
+  .sandbox--motion-comparison {
+    min-block-size: 100vh;
+    padding-block-end: calc(var(--shiftcharts-size-gap) * 10);
+  }
+
+  .sandbox--motion-comparison .sandbox__family-links button {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    font: inherit;
+    padding: 0;
+  }
+
+  .motion-comparison__header,
+  .motion-comparison__controls,
+  .motion-comparison__grid,
+  .motion-comparison__readout,
+  .motion-comparison__footer {
+    inline-size: min(1400px, calc(100% - 40px));
+    margin-inline: auto;
+  }
+
+  .motion-comparison__header {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: calc(var(--shiftcharts-size-gap) * 6);
+    padding-block: clamp(48px, 8vw, 112px) calc(var(--shiftcharts-size-gap) * 8);
+  }
+
+  .motion-comparison__header h1 {
+    max-inline-size: 12ch;
+    margin: calc(var(--shiftcharts-size-gap) * 2) 0;
+    font-size: clamp(2.6rem, 7vw, 7rem);
+    line-height: 0.92;
+    letter-spacing: -0.07em;
+  }
+
+  .motion-comparison__header-note {
+    display: grid;
+    gap: calc(var(--shiftcharts-size-gap) * 2);
+    color: var(--sandbox-muted);
+    font-size: 0.82rem;
+    text-align: end;
+  }
+
+  .motion-comparison__controls {
+    display: grid;
+    grid-template-columns: minmax(160px, 0.8fr) minmax(180px, 1fr) minmax(180px, 1fr) minmax(220px, 1.5fr) minmax(220px, 1.5fr);
+    align-items: end;
+    gap: calc(var(--shiftcharts-size-gap) * 3);
+    padding: calc(var(--shiftcharts-size-gap) * 4);
+    border: 1px solid var(--sandbox-rule);
+    border-radius: var(--shiftcharts-widget-radius);
+    background: var(--sandbox-panel);
+  }
+
+  .motion-comparison__range,
+  .motion-comparison__preset-control {
+    display: grid;
+    gap: calc(var(--shiftcharts-size-gap) * 1.5);
+    color: var(--sandbox-muted);
+    font-size: 0.78rem;
+  }
+
+  .motion-comparison__range span,
+  .motion-comparison__preset-control > span {
+    display: flex;
+    justify-content: space-between;
+    gap: calc(var(--shiftcharts-size-gap) * 2);
+  }
+
+  .motion-comparison__range output {
+    color: var(--sandbox-ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .motion-comparison__range input {
+    inline-size: 100%;
+    accent-color: var(--shiftcharts-series-1);
+  }
+
+  .motion-comparison__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: calc(var(--shiftcharts-size-gap) * 4);
+    padding-block: calc(var(--shiftcharts-size-gap) * 6);
+  }
+
+  .motion-comparison__card {
+    min-inline-size: 0;
+    padding: calc(var(--shiftcharts-size-gap) * 4);
+    border: 1px solid var(--sandbox-rule);
+    border-radius: var(--shiftcharts-widget-radius);
+    background: var(--sandbox-panel);
+  }
+
+  .motion-comparison__legacy .motion-comparison__card {
+    border-color: color-mix(in srgb, var(--sandbox-ink) 32%, transparent);
+  }
+
+  .motion-comparison__card--new-behavior {
+    border-color: color-mix(in srgb, var(--shiftcharts-series-1) 62%, transparent);
+  }
+
+  .motion-comparison__card-header {
+    display: flex;
+    align-items: start;
+    justify-content: space-between;
+    gap: calc(var(--shiftcharts-size-gap) * 3);
+    margin-block-end: calc(var(--shiftcharts-size-gap) * 3);
+  }
+
+  .motion-comparison__card-header h2 {
+    margin: calc(var(--shiftcharts-size-gap) * 1.5) 0 0;
+    font-size: 1.1rem;
+  }
+
+  .motion-comparison__badge {
+    padding: calc(var(--shiftcharts-size-gap) * 1) calc(var(--shiftcharts-size-gap) * 1.5);
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--shiftcharts-series-1) 14%, transparent);
+    color: var(--shiftcharts-series-1);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .motion-comparison__chart-frame {
+    display: grid;
+    place-items: stretch;
+    max-inline-size: 100%;
+    overflow: hidden;
+    border: 1px solid var(--sandbox-rule);
+    background: var(--shiftcharts-plot-color);
+  }
+
+  .motion-comparison__chart-frame .shiftcharts-auto-chart {
+    min-block-size: 100%;
+  }
+
+  .motion-comparison__legacy .shiftcharts-bar,
+  .motion-comparison__legacy .shiftcharts-arc {
+    transition: none !important;
+  }
+
+  .motion-comparison__stats {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: calc(var(--shiftcharts-size-gap) * 2);
+    margin: calc(var(--shiftcharts-size-gap) * 3) 0 0;
+  }
+
+  .motion-comparison__stats div {
+    min-inline-size: 0;
+    padding-block-start: calc(var(--shiftcharts-size-gap) * 1.5);
+    border-block-start: 1px solid var(--sandbox-rule);
+  }
+
+  .motion-comparison__stats dt {
+    color: var(--sandbox-muted);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .motion-comparison__stats dd {
+    margin: calc(var(--shiftcharts-size-gap) / 2) 0 0;
+    overflow-wrap: anywhere;
+    font-size: 0.8rem;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .motion-comparison__readout,
+  .motion-comparison__footer {
+    display: flex;
+    justify-content: space-between;
+    gap: calc(var(--shiftcharts-size-gap) * 3);
+    padding-block: calc(var(--shiftcharts-size-gap) * 3);
+    border-block: 1px solid var(--sandbox-rule);
+    color: var(--sandbox-muted);
+    font-size: 0.82rem;
+  }
+
+  .motion-comparison__readout strong {
+    color: var(--shiftcharts-series-1);
+  }
+
+  @media (max-width: 70rem) {
+    .motion-comparison__controls {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 52rem) {
+    .motion-comparison__header,
+    .motion-comparison__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .motion-comparison__header {
+      align-items: start;
+      flex-direction: column;
+    }
+
+    .motion-comparison__header-note {
+      text-align: start;
+    }
+
+    .motion-comparison__grid {
+      display: grid;
+    }
+
+    .motion-comparison__readout,
+    .motion-comparison__footer {
+      align-items: start;
+      flex-direction: column;
+    }
+  }
+
+  @media (max-width: 34rem) {
+    .motion-comparison__header,
+    .motion-comparison__controls,
+    .motion-comparison__grid,
+    .motion-comparison__readout,
+    .motion-comparison__footer {
+      inline-size: min(100% - 32px, 1400px);
+    }
+
+    .motion-comparison__controls {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .motion-comparison__stats {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
 }

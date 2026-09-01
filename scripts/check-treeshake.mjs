@@ -148,6 +148,7 @@ export const EXPECTED = {
   },
   '@shiftcharts/react': {},
   '@shiftcharts/grid': {},
+  '@shiftcharts/motion': {},
 }
 
 /**

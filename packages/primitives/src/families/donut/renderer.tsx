@@ -47,6 +47,7 @@ export const renderDonut: MarkRenderer = ({ frame, plan }) => {
         return (
           <path
             className={classes('shiftcharts-arc', isOther && 'shiftcharts-arc--other')}
+            data-shiftcharts-mark-id={`arc:${arc.id}`}
             data-slice-id={arc.id}
             data-slice-index={index}
             data-slice-kind={isOther ? 'other' : 'value'}

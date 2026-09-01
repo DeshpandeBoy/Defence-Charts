@@ -139,6 +139,7 @@ describe('the real tree', () => {
     expect(world.map((p) => p.name).sort()).toEqual([
       '@shiftcharts/core',
       '@shiftcharts/grid',
+      '@shiftcharts/motion',
       '@shiftcharts/primitives',
       '@shiftcharts/react',
       '@shiftcharts/testing',

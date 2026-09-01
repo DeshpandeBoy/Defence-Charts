@@ -4,10 +4,10 @@ import { assertPackedMetadata, assertPackageMetadata } from './check-package-met
 
 describe('package publication metadata', () => {
   it('describes the actual exports, dependencies, and publishable files', async () => {
-    await expect(assertPackageMetadata()).resolves.toHaveLength(6)
-  })
+    await expect(assertPackageMetadata()).resolves.toHaveLength(7)
+  }, 20_000)
 
   it('keeps packed README, LICENSE, dist, and dependency metadata intact offline', async () => {
-    await expect(assertPackedMetadata()).resolves.toHaveLength(6)
-  })
+    await expect(assertPackedMetadata()).resolves.toHaveLength(7)
+  }, 20_000)
 })

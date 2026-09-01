@@ -32,6 +32,7 @@ describe('bar family renderer', () => {
   it('renders stable keyed rectangles from frame cells', () => {
     const html = renderToStaticMarkup(renderBar(input))
     expect(html).toContain('class="shiftcharts-bar"')
+    expect(html).toContain('data-shiftcharts-mark-id="north:bar:0"')
     expect(html).toContain('data-bar-index="0"')
     expect(html).toContain('data-series-id="north"')
     expect(html).toContain('data-series-index="0"')

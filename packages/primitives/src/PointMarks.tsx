@@ -21,6 +21,7 @@ import { classes, roundCoord } from './svg.ts'
 
 export type PointMarksProps = {
   readonly points: readonly PointPos[]
+  readonly seriesId?: string
   /** `SeriesFrame.extrema` — indices into `points`. Required by `mode: 'extrema'`. */
   readonly extrema?: SeriesFrame['extrema']
   readonly mode: PointPlan['mode']
@@ -39,6 +40,7 @@ export type PointMarksProps = {
 
 export function PointMarks({
   points,
+  seriesId,
   extrema,
   mode,
   budget,
@@ -83,6 +85,7 @@ export function PointMarks({
             // the position within `visible` would break exactly that.
             key={i}
             data-index={i}
+            data-shiftcharts-mark-id={seriesId === undefined ? `point:${i}` : `${seriesId}:point:${i}`}
             cx={roundCoord(p.x)}
             cy={roundCoord(p.y)}
           />

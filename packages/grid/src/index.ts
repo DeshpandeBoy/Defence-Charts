@@ -55,13 +55,14 @@ export {
   interpretKeyboardKey,
   previewKeyboardStep,
 } from './keyboard.ts'
-export type { KeyboardGridHostMode, KeyboardGridProps } from './KeyboardGrid.tsx'
+export type { KeyboardGridHostMode, KeyboardGridInteractionHandler, KeyboardGridProps } from './KeyboardGrid.tsx'
 export { KeyboardGrid } from './KeyboardGrid.tsx'
 export type {
   WidgetGridInteraction,
   WidgetGridInteractionHandler,
   WidgetGridMode,
   WidgetGridProps,
+  WidgetGridRenderContext,
 } from './WidgetGrid.tsx'
 export { WidgetGrid } from './WidgetGrid.tsx'
 export type { WidgetShellProps } from './WidgetShell.tsx'

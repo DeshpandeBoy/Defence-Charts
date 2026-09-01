@@ -46,6 +46,7 @@ const EXPECTED = {
   testing: false,
   react: true,
   grid: true,
+  motion: true,
 }
 
 const DIRECTIVE = /^\s*(['"])use client\1\s*;?\s*$/

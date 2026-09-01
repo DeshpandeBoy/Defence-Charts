@@ -22,6 +22,7 @@ const renderScatter: MarkRenderer = ({ frame, plan }) => {
         <circle
           className={classes('shiftcharts-point', 'shiftcharts-scatter-point')}
           data-scatter-index={index}
+          data-shiftcharts-mark-id={`${frame.id}:point:${index}`}
           key={`${frame.id}:${index}`}
           cx={roundCoord(point.x)}
           cy={roundCoord(point.y)}
