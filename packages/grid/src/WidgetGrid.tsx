@@ -51,11 +51,17 @@ export type WidgetGridInteraction = {
 
 export type WidgetGridInteractionHandler = (interaction: WidgetGridInteraction) => void
 
+export type WidgetGridRenderContext = {
+  readonly interactionKind: GridInteractionKind | null
+  readonly interactionPhase: 'idle' | 'preview'
+  readonly activeWidgetId: WidgetId | null
+}
+
 /** Project-owned controlled grid props; no RGL types cross this public boundary. */
 export type WidgetGridProps = {
   readonly layout: readonly WidgetLayoutInput[]
   readonly width: number
-  readonly renderItem: (item: WidgetLayout) => ReactElement
+  readonly renderItem: (item: WidgetLayout, context: WidgetGridRenderContext) => ReactElement
   readonly mode?: WidgetGridMode
   readonly rowHeight?: number
   readonly margin?: readonly [number, number]
@@ -79,6 +85,11 @@ export type WidgetGridProps = {
 const DEFAULT_ROW_HEIGHT = 80
 const DEFAULT_MARGIN: readonly [number, number] = [12, 12]
 const DEFAULT_CONTAINER_PADDING: readonly [number, number] = [0, 0]
+const IDLE_RENDER_CONTEXT: WidgetGridRenderContext = Object.freeze({
+  interactionKind: null,
+  interactionPhase: 'idle',
+  activeWidgetId: null,
+})
 
 function toInput(item: RglLayoutItem): WidgetLayoutInput {
   return {
@@ -176,11 +187,43 @@ export function WidgetGrid({
 }: WidgetGridProps): ReactElement {
   const normalizedLayout = useMemo(() => normalizeGridLayout(layout), [layout])
   const [keyboardLayout, setKeyboardLayout] = useState<readonly WidgetLayout[] | null>(null)
+  const [renderContext, setRenderContext] = useState<WidgetGridRenderContext>({
+    interactionKind: null,
+    interactionPhase: 'idle',
+    activeWidgetId: null,
+  })
   const keyboardInteractionRef = useRef(false)
+  const keyboardInteractionKindRef = useRef<GridInteractionKind | null>(null)
   const keyboardCancelSignatureRef = useRef<string | null>(null)
   const activeInteractionRef = useRef<GridInteractionState | null>(null)
   const lastCommitSignatureRef = useRef<string | null>(null)
   const cancelTokenRef = useRef<number | undefined>(cancelInteractionToken)
+  const settleFrameRef = useRef<number | null>(null)
+
+  const clearRenderContext = useCallback(() => {
+    if (settleFrameRef.current !== null) {
+      cancelAnimationFrame(settleFrameRef.current)
+      settleFrameRef.current = null
+    }
+    setRenderContext(IDLE_RENDER_CONTEXT)
+  }, [])
+
+  const settleRenderContext = useCallback((kind: GridInteractionKind, activeWidgetId: WidgetId) => {
+    if (settleFrameRef.current !== null) cancelAnimationFrame(settleFrameRef.current)
+    setRenderContext({ interactionKind: kind, interactionPhase: 'idle', activeWidgetId })
+    if (typeof requestAnimationFrame !== 'function') {
+      setRenderContext(IDLE_RENDER_CONTEXT)
+      return
+    }
+    settleFrameRef.current = requestAnimationFrame(() => {
+      settleFrameRef.current = null
+      setRenderContext(IDLE_RENDER_CONTEXT)
+    })
+  }, [])
+
+  useEffect(() => () => {
+    if (settleFrameRef.current !== null) cancelAnimationFrame(settleFrameRef.current)
+  }, [])
 
   const emitCommittedLayout = useCallback(
     (snapshot: LayoutSnapshot) => {
@@ -198,7 +241,13 @@ export function WidgetGrid({
   const children = useMemo(
     () =>
       displayLayout.map((item) => (
-        <div key={item.id} data-shiftcharts-widget-id={item.id}>
+        <div
+          key={item.id}
+          data-shiftcharts-widget-id={item.id}
+          data-shiftcharts-interaction-kind={renderContext.interactionKind ?? undefined}
+          data-shiftcharts-interaction-phase={renderContext.interactionPhase}
+          data-shiftcharts-active-widget={renderContext.activeWidgetId === item.id ? '' : undefined}
+        >
           <KeyboardGrid
             item={item}
             layout={displayLayout}
@@ -209,6 +258,15 @@ export function WidgetGrid({
               keyboardInteractionRef.current = true
               onLayoutStart?.(createLayoutSnapshot(nextLayout))
             }}
+            onInteractionStart={(kind, nextLayout) => {
+              const itemInLayout = nextLayout.find((candidate) => candidate.id === item.id) ?? item
+              keyboardInteractionKindRef.current = kind === 'resize' ? 'resize' : 'drag'
+              setRenderContext({
+                interactionKind: keyboardInteractionKindRef.current,
+                interactionPhase: 'preview',
+                activeWidgetId: itemInLayout.id,
+              })
+            }}
             onLayoutPreview={(nextLayout) => {
               setKeyboardLayout(nextLayout)
               onLayoutPreview?.(createLayoutSnapshot(nextLayout))
@@ -216,8 +274,13 @@ export function WidgetGrid({
             onLayoutCommit={(nextLayout) => {
               keyboardCancelSignatureRef.current = null
               keyboardInteractionRef.current = false
+              const kind = keyboardInteractionKindRef.current ?? 'resize'
+              keyboardInteractionKindRef.current = null
               setKeyboardLayout(null)
-              emitCommittedLayout(createLayoutSnapshot(nextLayout))
+              const committed = createLayoutSnapshot(nextLayout)
+              const activeId = committed.items.find((candidate) => candidate.id === item.id)?.id ?? item.id
+              settleRenderContext(kind, activeId)
+              emitCommittedLayout(committed)
             }}
             onLayoutCancel={(nextLayout) => {
               // RGL can emit stale preview geometry while the controlled layout is being
@@ -226,15 +289,17 @@ export function WidgetGrid({
               const snapshot = createLayoutSnapshot(nextLayout)
               keyboardCancelSignatureRef.current = serializeLayoutSnapshot(snapshot)
               keyboardInteractionRef.current = false
+              keyboardInteractionKindRef.current = null
               setKeyboardLayout(null)
+              clearRenderContext()
               onLayoutCancel?.(snapshot)
             }}
           >
-            {renderItem(item)}
+            {renderItem(item, renderContext)}
           </KeyboardGrid>
         </div>
       )),
-    [cancelInteractionToken, displayLayout, emitCommittedLayout, mode, onLayoutCancel, onLayoutPreview, onLayoutStart, renderItem],
+    [cancelInteractionToken, clearRenderContext, displayLayout, emitCommittedLayout, mode, onLayoutCancel, onLayoutPreview, onLayoutStart, renderContext, renderItem, settleRenderContext],
   )
 
   const gridConfig = useMemo(
@@ -263,6 +328,7 @@ export function WidgetGrid({
       if (item === null) return
       const snapshot = toSnapshot(nextLayout)
       activeInteractionRef.current = beginGridInteraction(kind, item.i, snapshot)
+      setRenderContext({ interactionKind: kind, interactionPhase: 'preview', activeWidgetId: createWidgetId(item.i) })
       onLayoutStart?.(snapshot)
     },
     [onLayoutStart],
@@ -289,9 +355,10 @@ export function WidgetGrid({
       }
       const committed = commitGridInteraction(previewGridInteraction(active, snapshot))
       activeInteractionRef.current = null
+      settleRenderContext(kind, active.id)
       emitCommittedLayout(committed.snapshot)
     },
-    [emitCommittedLayout],
+    [emitCommittedLayout, settleRenderContext],
   )
 
   useEffect(() => {
@@ -301,16 +368,20 @@ export function WidgetGrid({
     if (active !== null) {
       const cancelled = cancelGridInteraction(active)
       activeInteractionRef.current = null
+      clearRenderContext()
       onLayoutCancel?.(cancelled.snapshot)
     }
     keyboardInteractionRef.current = false
+    keyboardInteractionKindRef.current = null
     setKeyboardLayout(null)
-  }, [cancelInteractionToken, onLayoutCancel])
+    clearRenderContext()
+  }, [cancelInteractionToken, clearRenderContext, onLayoutCancel])
 
   useEffect(() => {
     keyboardInteractionRef.current = false
     setKeyboardLayout(null)
-  }, [mode])
+    clearRenderContext()
+  }, [clearRenderContext, mode])
 
   const handleLayoutChange = useCallback(
     (nextLayout: RglLayout) => {

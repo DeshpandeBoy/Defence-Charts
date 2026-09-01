@@ -79,6 +79,7 @@ export const renderHeatmap: MarkRenderer = ({ frame, plan }) => {
             data-cell-id={id}
             data-cell-index={index}
             data-cell-series-id={frame.id}
+            data-shiftcharts-mark-id={`${frame.id}:cell:${id}`}
             data-heatmap-cell-id={id}
             {...(heatmapCell.value === null ? { 'data-heatmap-state': 'missing' } : {})}
             {...(heatmapCell.value !== undefined &&

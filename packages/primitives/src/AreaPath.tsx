@@ -15,10 +15,17 @@ import { classes } from './svg.ts'
 export type AreaPathProps = {
   /** `SeriesFrame.area`. `null` unless the plan asked for an area. */
   readonly d: string | null
+  readonly seriesId?: string
   readonly className?: string
 }
 
-export function AreaPath({ d, className }: AreaPathProps) {
+export function AreaPath({ d, seriesId, className }: AreaPathProps) {
   if (d === null || d === '') return null
-  return <path className={classes('shiftcharts-area', className)} d={d} />
+  return (
+    <path
+      className={classes('shiftcharts-area', className)}
+      d={d}
+      data-shiftcharts-mark-id={seriesId === undefined ? undefined : `${seriesId}:area`}
+    />
+  )
 }

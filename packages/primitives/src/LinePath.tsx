@@ -16,13 +16,20 @@ import { classes } from './svg.ts'
 export type LinePathProps = {
   /** `SeriesFrame.line`. `null` when the plan's mark kind is not `'line'`. */
   readonly d: string | null
+  readonly seriesId?: string
   readonly className?: string
 }
 
-export function LinePath({ d, className }: LinePathProps) {
+export function LinePath({ d, seriesId, className }: LinePathProps) {
   // ⚠ `null` is the plan saying "not this mark", and the empty string is d3-shape saying
   // "nothing was defined". Both render nothing; neither is an error. An empty `<path d="">`
   // would still be an element in G14's snapshot, so it is not emitted.
   if (d === null || d === '') return null
-  return <path className={classes('shiftcharts-line', className)} d={d} />
+  return (
+    <path
+      className={classes('shiftcharts-line', className)}
+      d={d}
+      data-shiftcharts-mark-id={seriesId === undefined ? undefined : `${seriesId}:line`}
+    />
+  )
 }

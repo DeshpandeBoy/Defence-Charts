@@ -30,6 +30,7 @@ describe('scatter family renderer', () => {
     const html = renderToStaticMarkup(renderScatter(base))
     expect((html.match(/shiftcharts-scatter-point/g) ?? []).length).toBe(3)
     expect(html).toContain('data-scatter-index="0"')
+    expect(html).toContain('data-shiftcharts-mark-id="risk:point:0"')
     expect(html).toContain('data-scatter-index="2"')
   })
 

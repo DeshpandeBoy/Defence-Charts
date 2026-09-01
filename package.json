@@ -34,7 +34,8 @@
     "lint:grid": "node scripts/check-grid-browser.mjs",
     "lint:rsc": "node scripts/check-rsc.mjs",
     "verify:packages": "pnpm build && node scripts/check-package-gates.mjs",
-    "lint:motion": "node scripts/check-motion.mjs",
+    "lint:motion": "node scripts/check-motion.mjs && node scripts/check-motion-comparison.mjs",
+    "capture:motion": "node scripts/capture-motion-screenshots.mjs",
     "probe:motion": "node scripts/probe-motion.mjs",
     "probe:flicker": "node scripts/probe-flicker.mjs",
     "lint:typography": "node scripts/generate-typography-css.mjs",
@@ -66,6 +67,7 @@
     "turbo": "^2.10.11",
     "typescript": "6.0.3",
     "typescript-eslint": "^8.67.0",
+    "unrun": "0.3.1",
     "vitest": "^4.1.11"
   }
 }

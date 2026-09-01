@@ -15,13 +15,14 @@ const HOMEPAGE = 'https://github.com/DeshpandeBoy/Defence-Charts'
 const BUGS_URL = HOMEPAGE + '/issues'
 const NODE_ENGINE = '>=22.18'
 
-/** @typedef {'@shiftcharts/core' | '@shiftcharts/grid' | '@shiftcharts/primitives' | '@shiftcharts/react' | '@shiftcharts/testing' | '@shiftcharts/tokens'} PackageName */
+/** @typedef {'@shiftcharts/core' | '@shiftcharts/grid' | '@shiftcharts/motion' | '@shiftcharts/primitives' | '@shiftcharts/react' | '@shiftcharts/testing' | '@shiftcharts/tokens'} PackageName */
 /** @typedef {{ dependencies: readonly string[], peers: readonly string[], css: boolean }} PackageExpectation */
 
 /** @type {readonly PackageName[]} */
 export const PACKAGE_NAMES = Object.freeze([
   '@shiftcharts/core',
   '@shiftcharts/grid',
+  '@shiftcharts/motion',
   '@shiftcharts/primitives',
   '@shiftcharts/react',
   '@shiftcharts/testing',
@@ -38,6 +39,11 @@ const EXPECTED = Object.freeze({
   '@shiftcharts/grid': {
     dependencies: ['@shiftcharts/core', 'react-grid-layout'],
     peers: ['react', 'react-dom'],
+    css: true,
+  },
+  '@shiftcharts/motion': {
+    dependencies: [],
+    peers: ['react'],
     css: true,
   },
   '@shiftcharts/primitives': {

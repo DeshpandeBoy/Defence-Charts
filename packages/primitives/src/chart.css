@@ -783,6 +783,29 @@
     --shiftcharts-motion-stage-delay: 0ms;
   }
 
+  /*
+   * A grid preview is direct manipulation, not a semantic chart update. Let the frame follow
+   * the handle without restarting the long recompose transition on every ResizeObserver sample.
+   * The wrapper keeps the resize kind for one frame after release so the final commit receives
+   * the short resize-settle tokens below; WidgetGrid then returns the attribute to idle.
+   */
+  [data-shiftcharts-interaction-phase='preview'] .shiftcharts-chart {
+    --shiftcharts-motion-duration: 0ms;
+    --shiftcharts-motion-stage-delay: 0ms;
+  }
+
+  [data-shiftcharts-interaction-kind='resize'][data-shiftcharts-interaction-phase='idle'] .shiftcharts-chart[data-motion-duration='rescale'] {
+    --shiftcharts-motion-duration: var(--shiftcharts-motion-duration-resize-rescale);
+    --shiftcharts-motion-stage-delay: 0ms;
+    --shiftcharts-motion-easing: var(--shiftcharts-motion-easing-resize);
+  }
+
+  [data-shiftcharts-interaction-kind='resize'][data-shiftcharts-interaction-phase='idle'] .shiftcharts-chart[data-motion-duration='recompose'] {
+    --shiftcharts-motion-duration: var(--shiftcharts-motion-duration-resize-recompose);
+    --shiftcharts-motion-stage-delay: var(--shiftcharts-motion-stage-delay-resize-recompose);
+    --shiftcharts-motion-easing: var(--shiftcharts-motion-easing-resize);
+  }
+
   @media (prefers-reduced-motion: no-preference) {
     /*
      * Stage 1 — the frame of reference. Axis, ticks and gridlines move first, so the marks
@@ -835,12 +858,15 @@
     .shiftcharts-line,
     .shiftcharts-area,
     .shiftcharts-band,
+    .shiftcharts-bar,
+    .shiftcharts-arc,
     .shiftcharts-progress__fill,
     .shiftcharts-progress__track,
     .shiftcharts-heatmap-cell,
     .shiftcharts-funnel-stage__mark {
       transition:
         d var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing) var(--shiftcharts-motion-stage-delay),
+        transform var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing) var(--shiftcharts-motion-stage-delay),
         x var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing) var(--shiftcharts-motion-stage-delay),
         y var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing) var(--shiftcharts-motion-stage-delay),
         height var(--shiftcharts-motion-duration) var(--shiftcharts-motion-easing) var(--shiftcharts-motion-stage-delay),

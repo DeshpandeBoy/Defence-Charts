@@ -639,6 +639,42 @@ export const TOKEN_GROUPS: readonly TokenGroup[] = [
         ].join('\n'),
       },
       {
+        name: 'motion-duration-resize-rescale',
+        value: '220ms',
+        tier: 'C',
+        source: 'Ours — direct manipulation settles faster than a semantic chart recompose.',
+      },
+      {
+        name: 'motion-duration-resize-recompose',
+        value: '460ms',
+        tier: 'C',
+        source: 'Ours — bounded resize settle candidate for a rung change.',
+      },
+      {
+        name: 'motion-stage-delay-resize-recompose',
+        value: '100ms',
+        tier: 'C',
+        source: 'Ours — short overlap for direct manipulation; avoids the semantic 500ms dead interval.',
+      },
+      {
+        name: 'motion-easing-resize',
+        value: 'cubic-bezier(0.22, 1, 0.36, 1)',
+        tier: 'C',
+        source: 'Ours — bounded ease-out candidate for pointer release.',
+      },
+      {
+        name: 'motion-duration-cinematic-preview',
+        value: '120ms',
+        tier: 'C',
+        source: 'Ours — maximum preview tail target for the opt-in cinematic coordinator.',
+      },
+      {
+        name: 'motion-duration-cinematic-settle',
+        value: '420ms',
+        tier: 'C',
+        source: 'Ours — opt-in cinematic release settle candidate.',
+      },
+      {
         name: 'motion-duration',
         value: 'var(--shiftcharts-motion-duration-rescale)',
         tier: 'B',

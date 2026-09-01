@@ -26,6 +26,9 @@ export const CSS_ASSETS = Object.freeze({
     { exportPath: './auto-chart.css', source: 'src/auto-chart.css', dist: 'dist/auto-chart.css' },
     { exportPath: './interaction-overlay.css', source: 'src/interaction-overlay.css', dist: 'dist/interaction-overlay.css' },
   ]),
+  '@shiftcharts/motion': Object.freeze([
+    { exportPath: './motion.css', source: 'src/motion.css', dist: 'dist/motion.css' },
+  ]),
   '@shiftcharts/tokens': Object.freeze([
     { exportPath: './theme.css', source: 'src/themes/theme.css', dist: 'dist/themes/theme.css' },
     { exportPath: null, source: 'src/themes/typography.css', dist: 'dist/themes/typography.css' },

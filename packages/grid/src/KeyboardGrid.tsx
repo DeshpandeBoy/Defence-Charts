@@ -25,6 +25,8 @@ import type { KeyboardEditMode, KeyboardEditSession } from './keyboard.ts'
 
 export type KeyboardGridHostMode = 'edit' | 'read-only'
 
+export type KeyboardGridInteractionHandler = (mode: KeyboardEditMode, layout: readonly WidgetLayout[]) => void
+
 export type KeyboardGridProps = {
   readonly item: WidgetLayout
   readonly layout: readonly WidgetLayout[]
@@ -35,6 +37,7 @@ export type KeyboardGridProps = {
   readonly onLayoutPreview?: (layout: readonly WidgetLayout[]) => void
   readonly onLayoutCommit?: (layout: readonly WidgetLayout[]) => void
   readonly onLayoutCancel?: (layout: readonly WidgetLayout[]) => void
+  readonly onInteractionStart?: KeyboardGridInteractionHandler
 }
 
 function modeLabel(mode: KeyboardEditMode): string {
@@ -65,6 +68,7 @@ export function KeyboardGrid({
   onLayoutPreview,
   onLayoutCommit,
   onLayoutCancel,
+  onInteractionStart,
 }: KeyboardGridProps): ReactElement {
   const moveRef = useRef<HTMLButtonElement>(null)
   const resizeRef = useRef<HTMLButtonElement>(null)
@@ -108,6 +112,7 @@ export function KeyboardGrid({
     setSession(next)
     setAnnouncement(startAnnouncement(modeToStart))
     onLayoutStart?.(layout)
+    onInteractionStart?.(modeToStart, layout)
   }
 
   function finish(kind: 'commit' | 'cancel'): void {

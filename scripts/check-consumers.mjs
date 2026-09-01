@@ -19,6 +19,7 @@ const PACKAGES_ROOT = join(REPO_ROOT, 'packages')
 export const PACKAGE_NAMES = Object.freeze([
   '@shiftcharts/core',
   '@shiftcharts/grid',
+  '@shiftcharts/motion',
   '@shiftcharts/primitives',
   '@shiftcharts/react',
   '@shiftcharts/testing',
@@ -51,6 +52,7 @@ const PACKAGE_BUILD_ORDER = Object.freeze([
   '@shiftcharts/primitives',
   '@shiftcharts/react',
   '@shiftcharts/grid',
+  '@shiftcharts/motion',
   '@shiftcharts/testing',
   '@shiftcharts/tokens',
 ])

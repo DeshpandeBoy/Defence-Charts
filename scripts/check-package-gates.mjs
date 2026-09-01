@@ -21,6 +21,7 @@ export const PACKAGE_NAMES = Object.freeze([
   '@shiftcharts/grid',
   '@shiftcharts/primitives',
   '@shiftcharts/react',
+  '@shiftcharts/motion',
   '@shiftcharts/testing',
   '@shiftcharts/tokens',
 ])
@@ -124,7 +125,7 @@ async function packAll(packRoot) {
   await mkdir(packRoot, { recursive: true })
   for (const packageName of PACKAGE_NAMES) await packPackage(packageName, packRoot)
   const tarballs = (await readdir(packRoot)).filter((file) => file.endsWith('.tgz')).sort()
-  assert(tarballs.length === PACKAGE_NAMES.length, 'package gates: expected six local tarballs')
+  assert(tarballs.length === PACKAGE_NAMES.length, `package gates: expected ${PACKAGE_NAMES.length} local tarballs`)
   return tarballs
 }
 
@@ -286,7 +287,10 @@ export async function runPackageGates() {
       'packed consumer build and no-network',
       noNetworkEnvironment(),
     )
-    assert(consumerOutput.includes('packed tarballs: 6'), 'consumer-build: E1.3 did not pack six tarballs')
+    assert(
+      consumerOutput.includes('packed tarballs: ' + PACKAGE_NAMES.length),
+      'consumer-build: E1.3 did not pack ' + PACKAGE_NAMES.length + ' tarballs',
+    )
     for (const fixture of ['react-consumer', 'next-rsc-consumer', 'vite-consumer']) {
       assert(consumerOutput.includes(fixture + ': install, typecheck, build'), 'consumer-build: missing ' + fixture)
     }

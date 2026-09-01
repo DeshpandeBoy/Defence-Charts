@@ -24,6 +24,7 @@ const renderBar: MarkRenderer = ({ frame, plan }) => {
         <rect
           className={classes('shiftcharts-bar')}
           data-bar-index={index}
+          data-shiftcharts-mark-id={`${frame.id}:bar:${index}`}
           data-series-id={frame.id}
           data-series-index={frame.index}
           data-stacked={stacked ? '' : undefined}

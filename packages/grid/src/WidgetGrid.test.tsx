@@ -21,14 +21,10 @@ type MockGridProps = {
   readonly onLayoutCancel?: (snapshot: LayoutSnapshot) => void
   readonly onDragStart?: MockEventCallback
   readonly onDrag?: MockEventCallback
-  readonly onDragStop?: (
-    layout: RglLayout,
-    oldItem: RglLayoutItem | null,
-    newItem: RglLayoutItem | null,
-    placeholder: RglLayoutItem | null,
-    event: Event,
-    element: HTMLElement | null,
-  ) => void
+  readonly onDragStop?: MockEventCallback
+  readonly onResizeStart?: MockEventCallback
+  readonly onResize?: MockEventCallback
+  readonly onResizeStop?: MockEventCallback
 }
 
 type MockEventCallback = (
@@ -115,6 +111,14 @@ describe('WidgetGrid controlled wrapper', () => {
       .toEqual(['sales', 'margin'])
     expect([...container.querySelectorAll('[data-item]')].map((node) => node.getAttribute('data-item')))
       .toEqual(['sales', 'margin'])
+    expect([...container.querySelectorAll('[data-shiftcharts-interaction-phase]')].map((node) => ({
+      phase: node.getAttribute('data-shiftcharts-interaction-phase'),
+      kind: node.getAttribute('data-shiftcharts-interaction-kind'),
+      active: node.getAttribute('data-shiftcharts-active-widget'),
+    }))).toEqual([
+      { phase: 'idle', kind: null, active: null },
+      { phase: 'idle', kind: null, active: null },
+    ])
   })
 
   it('reflects a controlled layout update without changing widget identity', () => {
@@ -380,6 +384,59 @@ describe('WidgetGrid controlled wrapper', () => {
     expect(onLayoutCommit).toHaveBeenCalledWith(expect.objectContaining({ items: expect.arrayContaining([
       expect.objectContaining({ id: 'sales', y: 2 }),
     ]) }))
+  })
+
+  it('publishes resize preview context and keeps the active widget addressable', () => {
+    mount()
+    const initial = latest().layout ?? []
+    const preview: RglLayout = [
+      { i: 'sales', x: 0, y: 0, w: 5, h: 2, isResizable: false },
+      { i: 'margin', x: 5, y: 0, w: 4, h: 1 },
+    ]
+
+    act(() => {
+      latest().onResizeStart?.(initial, initial[0] ?? null, initial[0] ?? null, null, new Event('resizestart'), null)
+    })
+
+    const activeWidget = container.querySelector<HTMLElement>('[data-shiftcharts-widget-id="sales"]')
+    expect(activeWidget).not.toBeNull()
+    expect(activeWidget?.dataset).toMatchObject({
+      shiftchartsInteractionKind: 'resize',
+      shiftchartsInteractionPhase: 'preview',
+      shiftchartsActiveWidget: '',
+    })
+    expect(container.querySelector('[data-shiftcharts-widget-id="margin"]')?.getAttribute('data-shiftcharts-active-widget'))
+      .toBeNull()
+
+    act(() => {
+      latest().onResize?.(preview, initial[0] ?? null, preview[0] ?? null, null, new Event('resize'), null)
+      latest().onResizeStop?.(preview, initial[0] ?? null, preview[0] ?? null, null, new Event('resizestop'), null)
+    })
+
+    expect(container.querySelector('[data-shiftcharts-widget-id="sales"]')?.getAttribute('data-shiftcharts-interaction-phase'))
+      .toBe('idle')
+    expect(container.querySelector('[data-shiftcharts-widget-id="sales"]')?.getAttribute('data-shiftcharts-interaction-kind'))
+      .toBe('resize')
+  })
+
+  it('publishes keyboard resize preview context and clears it on cancel', () => {
+    mount()
+    const resize = container.querySelector<HTMLButtonElement>('[data-shiftcharts-keyboard-control="resize"]')
+    if (resize === null) throw new Error('missing keyboard resize control')
+
+    act(() => resize.focus())
+    press(resize, 'Enter')
+
+    expect(container.querySelector('[data-shiftcharts-widget-id="sales"]')?.getAttribute('data-shiftcharts-interaction-kind'))
+      .toBe('resize')
+    expect(container.querySelector('[data-shiftcharts-widget-id="sales"]')?.getAttribute('data-shiftcharts-interaction-phase'))
+      .toBe('preview')
+
+    press(resize, 'Escape')
+    expect(container.querySelector('[data-shiftcharts-widget-id="sales"]')?.getAttribute('data-shiftcharts-interaction-kind'))
+      .toBeNull()
+    expect(container.querySelector('[data-shiftcharts-widget-id="sales"]')?.getAttribute('data-shiftcharts-interaction-phase'))
+      .toBe('idle')
   })
 
   it('cancels an active interaction back to its initial snapshot', () => {

@@ -26,6 +26,7 @@ import {
   type ShiftChartsTokenName,
   type Token,
 } from '@shiftcharts/tokens'
+import { MotionComparison } from './MotionComparison.tsx'
 
 const CHART_TYPES: readonly ChartType[] = [
   'line',
@@ -125,6 +126,10 @@ function isTokenExplorerPath(pathname: string): boolean {
 
 function isInteractionPagePath(pathname: string): boolean {
   return pathname === '/interaction' || pathname === '/interaction/'
+}
+
+function isMotionPagePath(pathname: string): boolean {
+  return pathname === '/motion' || pathname === '/motion/'
 }
 
 const SIZE_PRESETS = [
@@ -442,6 +447,9 @@ export function SandboxApp() {
   const [isInteractionPage, setIsInteractionPage] = useState(() =>
     typeof window !== 'undefined' && isInteractionPagePath(window.location.pathname),
   )
+  const [isMotionPage, setIsMotionPage] = useState(() =>
+    typeof window !== 'undefined' && isMotionPagePath(window.location.pathname),
+  )
   const [theme, setTheme] = useState<ShiftChartsTheme>('rail-dark')
   const [width, setWidth] = useState(760)
   const [height, setHeight] = useState(480)
@@ -466,6 +474,7 @@ export function SandboxApp() {
     }
     setIsTokenExplorer(false)
     setIsInteractionPage(false)
+    setIsMotionPage(false)
     setChartType(nextType)
     setTitle(CHART_PAGE_DETAILS[nextType].defaultTitle)
     setDataText(json(DATA_BY_TYPE[nextType]))
@@ -480,12 +489,21 @@ export function SandboxApp() {
     if (typeof window !== 'undefined') window.history.pushState({}, '', '/tokens')
     setIsTokenExplorer(true)
     setIsInteractionPage(false)
+    setIsMotionPage(false)
   }, [])
 
   const loadInteractionPage = useCallback(() => {
     if (typeof window !== 'undefined') window.history.pushState({}, '', '/interaction')
     setIsInteractionPage(true)
     setIsTokenExplorer(false)
+    setIsMotionPage(false)
+  }, [])
+
+  const loadMotionPage = useCallback(() => {
+    if (typeof window !== 'undefined') window.history.pushState({}, '', '/motion')
+    setIsMotionPage(true)
+    setIsTokenExplorer(false)
+    setIsInteractionPage(false)
   }, [])
 
   useEffect(() => {
@@ -493,11 +511,19 @@ export function SandboxApp() {
       if (isTokenExplorerPath(window.location.pathname)) {
         setIsTokenExplorer(true)
         setIsInteractionPage(false)
+        setIsMotionPage(false)
         return
       }
       if (isInteractionPagePath(window.location.pathname)) {
         setIsInteractionPage(true)
         setIsTokenExplorer(false)
+        setIsMotionPage(false)
+        return
+      }
+      if (isMotionPagePath(window.location.pathname)) {
+        setIsMotionPage(true)
+        setIsTokenExplorer(false)
+        setIsInteractionPage(false)
         return
       }
       loadChartPage(chartTypeFromPath(window.location.pathname), true)
@@ -739,6 +765,10 @@ export function SandboxApp() {
     return <InteractionPage theme={theme} onOpenChart={() => loadChartPage('line')} onOpenTokens={loadTokenExplorer} />
   }
 
+  if (isMotionPage) {
+    return <MotionComparison theme={theme} onOpenChart={() => loadChartPage('line')} onOpenTokens={loadTokenExplorer} />
+  }
+
   return (
     <main
       className={`sandbox shiftcharts-theme-${theme}`}
@@ -755,6 +785,7 @@ export function SandboxApp() {
         <div className="sandbox__family-links">
           <a href="/tokens" onClick={(event) => { event.preventDefault(); loadTokenExplorer() }}>Tokens</a>
           <a href="/interaction" onClick={(event) => { event.preventDefault(); loadInteractionPage() }}>Interaction</a>
+          <a href="/motion" onClick={(event) => { event.preventDefault(); loadMotionPage() }}>Motion lab</a>
           {CHART_TYPES.map((type) => (
             <a
               key={type}

@@ -15,12 +15,12 @@ const renderNone: MarkRenderer = () => null
 
 const renderLine: MarkRenderer = ({ frame }) => (
   <>
-    <AreaPath d={frame.area} />
-    <LinePath d={frame.line} />
+    <AreaPath d={frame.area} seriesId={frame.id} />
+    <LinePath d={frame.line} seriesId={frame.id} />
   </>
 )
 
-const renderHorizon: MarkRenderer = ({ frame }) => <HorizonBands bands={frame.bands} />
+const renderHorizon: MarkRenderer = ({ frame }) => <HorizonBands bands={frame.bands} seriesId={frame.id} />
 
 export const LINE_MARK_RENDERERS: readonly MarkRendererRegistration[] = Object.freeze([
   Object.freeze({

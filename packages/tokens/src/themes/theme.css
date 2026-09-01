@@ -412,6 +412,12 @@
      * is exactly what `unverified` means.
      */
     --shiftcharts-motion-stage-delay-recompose: calc(var(--shiftcharts-motion-duration-recompose) / 2);
+    --shiftcharts-motion-duration-resize-rescale: 220ms;
+    --shiftcharts-motion-duration-resize-recompose: 460ms;
+    --shiftcharts-motion-stage-delay-resize-recompose: 100ms;
+    --shiftcharts-motion-easing-resize: cubic-bezier(0.22, 1, 0.36, 1);
+    --shiftcharts-motion-duration-cinematic-preview: 120ms;
+    --shiftcharts-motion-duration-cinematic-settle: 420ms;
     --shiftcharts-motion-duration: var(--shiftcharts-motion-duration-rescale);
     --shiftcharts-motion-stage-delay: var(--shiftcharts-motion-stage-delay-rescale);
     --shiftcharts-motion-easing: ease-out;

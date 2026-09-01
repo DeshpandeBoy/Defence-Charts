@@ -395,6 +395,14 @@ describe('the plan is obeyed, not approximated', () => {
     expect(groups.map((g) => g.attrs['data-series-index'])).toEqual(['0', '1', '2'])
   })
 
+  it('emits stable identity metadata for paths, points, and their series', () => {
+    const html = render(900, 520)
+    expect(html).toContain('data-shiftcharts-mark-id="alpha:line"')
+    expect(html).toContain('data-shiftcharts-mark-id="alpha:point:0"')
+    expect(html).toContain('data-series-id="alpha"')
+    expect(html).toContain('data-shiftcharts-series-id="alpha"')
+  })
+
   /**
    * ⚠ An override, because it is the only way to reach a mark kind the ladder will not hand
    * out at a size this file can render. `applyOverrides` forces the value *after* resolution,

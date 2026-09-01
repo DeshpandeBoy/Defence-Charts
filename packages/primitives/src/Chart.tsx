@@ -352,10 +352,16 @@ function SeriesMarks({
   readonly renderMark: MarkRenderer
 }) {
   return (
-    <g className="shiftcharts-series" data-series-id={frame.id} data-series-index={frame.index}>
+    <g
+      className="shiftcharts-series"
+      data-series-id={frame.id}
+      data-shiftcharts-series-id={frame.id}
+      data-series-index={frame.index}
+    >
       <title>{frame.label}</title>
       {renderMark({ frame, plan, policy })}
       <PointMarks
+        seriesId={frame.id}
         points={frame.points}
         extrema={frame.extrema}
         mode={plan.marks.points.mode}

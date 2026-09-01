@@ -1,0 +1,11 @@
+@layer shiftcharts.motion {
+  .shiftcharts-motion-boundary {
+    display: contents;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .shiftcharts-motion-boundary[data-shiftcharts-motion-preset='cinematic'] .shiftcharts-chart * {
+      transition: none !important;
+    }
+  }
+}

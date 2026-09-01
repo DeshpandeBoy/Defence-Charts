@@ -28,6 +28,7 @@ describe('heatmap family renderer', () => {
 
     expect((html.match(/class="shiftcharts-cell shiftcharts-heatmap-cell"/g) ?? []).length).toBe(4)
     expect(html).toContain('data-cell-id="activity:missing"')
+    expect(html).toContain('data-shiftcharts-mark-id="activity:cell:activity:missing"')
     expect(html).toContain('data-cell-id="activity:extreme"')
     expect(html).toContain('data-cell-series-id="activity"')
     expect(html).toContain('data-heatmap-cell-id="activity:missing"')

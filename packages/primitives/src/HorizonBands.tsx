@@ -24,10 +24,11 @@ import { classes } from './svg.ts'
 
 export type HorizonBandsProps = {
   readonly bands: readonly HorizonBand[]
+  readonly seriesId?: string
   readonly className?: string
 }
 
-export function HorizonBands({ bands, className }: HorizonBandsProps) {
+export function HorizonBands({ bands, seriesId, className }: HorizonBandsProps) {
   return (
     <>
       {bands.map((b) =>
@@ -37,6 +38,7 @@ export function HorizonBands({ bands, className }: HorizonBandsProps) {
             key={`${b.sign}-${b.band}`}
             d={b.d}
             data-band={b.band}
+            data-shiftcharts-mark-id={seriesId === undefined ? `band:${b.sign}:${b.band}` : `${seriesId}:band:${b.sign}:${b.band}`}
             data-sign={b.sign}
           />
         ),
