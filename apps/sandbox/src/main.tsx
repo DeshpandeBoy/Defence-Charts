@@ -6,7 +6,11 @@ import '@shiftcharts/primitives/chart.css'
 import '@shiftcharts/react/auto-chart.css'
 import '@shiftcharts/react/interaction-overlay.css'
 import '@shiftcharts/motion/motion.css'
+import '@shiftcharts/grid/keyboard-grid.css'
+import '@shiftcharts/grid/widget-shell.css'
+import '@shiftcharts/grid/widget-states.css'
 import './sandbox.css'
+import './dashboard.css'
 
 const root = document.querySelector('#root')
 if (root === null) throw new Error('#root is missing from the ShiftCharts sandbox.')

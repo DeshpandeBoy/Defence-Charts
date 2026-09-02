@@ -31,6 +31,7 @@ import {
   type Token,
 } from '@shiftcharts/tokens'
 import { MotionComparison } from './MotionComparison.tsx'
+import { DashboardPage } from './DashboardPage.tsx'
 
 const CHART_TYPES: readonly ChartType[] = [
   'line',
@@ -138,6 +139,10 @@ function isMotionPagePath(pathname: string): boolean {
 
 function isPerformancePagePath(pathname: string): boolean {
   return pathname === '/performance' || pathname === '/performance/'
+}
+
+function isDashboardPagePath(pathname: string): boolean {
+  return pathname === '/dashboard' || pathname === '/dashboard/'
 }
 
 const SIZE_PRESETS = [
@@ -470,6 +475,9 @@ export function SandboxApp() {
   const [isPerformancePage, setIsPerformancePage] = useState(() =>
     typeof window !== 'undefined' && isPerformancePagePath(window.location.pathname),
   )
+  const [isDashboardPage, setIsDashboardPage] = useState(() =>
+    typeof window !== 'undefined' && isDashboardPagePath(window.location.pathname),
+  )
   const [theme, setTheme] = useState<ShiftChartsTheme>('rail-dark')
   const [width, setWidth] = useState(760)
   const [height, setHeight] = useState(480)
@@ -500,6 +508,7 @@ export function SandboxApp() {
     setIsInteractionPage(false)
     setIsMotionPage(false)
     setIsPerformancePage(false)
+    setIsDashboardPage(false)
     setChartType(nextType)
     setTitle(CHART_PAGE_DETAILS[nextType].defaultTitle)
     setSubtitle('Operational readiness across the latest training cycles')
@@ -519,6 +528,7 @@ export function SandboxApp() {
     setIsInteractionPage(false)
     setIsMotionPage(false)
     setIsPerformancePage(false)
+    setIsDashboardPage(false)
   }, [])
 
   const loadInteractionPage = useCallback(() => {
@@ -527,6 +537,7 @@ export function SandboxApp() {
     setIsTokenExplorer(false)
     setIsMotionPage(false)
     setIsPerformancePage(false)
+    setIsDashboardPage(false)
   }, [])
 
   const loadMotionPage = useCallback(() => {
@@ -535,6 +546,7 @@ export function SandboxApp() {
     setIsTokenExplorer(false)
     setIsInteractionPage(false)
     setIsPerformancePage(false)
+    setIsDashboardPage(false)
   }, [])
 
   const loadPerformancePage = useCallback(() => {
@@ -543,12 +555,31 @@ export function SandboxApp() {
     setIsTokenExplorer(false)
     setIsInteractionPage(false)
     setIsMotionPage(false)
+    setIsDashboardPage(false)
+  }, [])
+
+  const loadDashboardPage = useCallback(() => {
+    if (typeof window !== 'undefined') window.history.pushState({}, '', '/dashboard')
+    setIsDashboardPage(true)
+    setIsTokenExplorer(false)
+    setIsInteractionPage(false)
+    setIsMotionPage(false)
+    setIsPerformancePage(false)
   }, [])
 
   useEffect(() => {
     const handlePopState = () => {
       if (isTokenExplorerPath(window.location.pathname)) {
         setIsTokenExplorer(true)
+        setIsInteractionPage(false)
+        setIsMotionPage(false)
+        setIsPerformancePage(false)
+        setIsDashboardPage(false)
+        return
+      }
+      if (isDashboardPagePath(window.location.pathname)) {
+        setIsDashboardPage(true)
+        setIsTokenExplorer(false)
         setIsInteractionPage(false)
         setIsMotionPage(false)
         setIsPerformancePage(false)
@@ -559,6 +590,7 @@ export function SandboxApp() {
         setIsTokenExplorer(false)
         setIsMotionPage(false)
         setIsPerformancePage(false)
+        setIsDashboardPage(false)
         return
       }
       if (isMotionPagePath(window.location.pathname)) {
@@ -566,6 +598,7 @@ export function SandboxApp() {
         setIsTokenExplorer(false)
         setIsInteractionPage(false)
         setIsPerformancePage(false)
+        setIsDashboardPage(false)
         return
       }
       if (isPerformancePagePath(window.location.pathname)) {
@@ -573,6 +606,7 @@ export function SandboxApp() {
         setIsTokenExplorer(false)
         setIsInteractionPage(false)
         setIsMotionPage(false)
+        setIsDashboardPage(false)
         return
       }
       loadChartPage(chartTypeFromPath(window.location.pathname), true)
@@ -823,6 +857,10 @@ export function SandboxApp() {
     return <PerformancePage theme={theme} onThemeChange={setTheme} onOpenChart={() => loadChartPage('line')} onOpenTokens={loadTokenExplorer} onOpenInteraction={loadInteractionPage} onOpenMotion={loadMotionPage} />
   }
 
+  if (isDashboardPage) {
+    return <DashboardPage theme={theme} motionPreset={motionPreset} onThemeChange={setTheme} onMotionPresetChange={setMotionPreset} onOpenChart={() => loadChartPage('line')} onOpenTokens={loadTokenExplorer} onOpenInteraction={loadInteractionPage} onOpenMotion={loadMotionPage} onOpenPerformance={loadPerformancePage} />
+  }
+
   return (
     <main
       className={`sandbox shiftcharts-theme-${theme}`}
@@ -837,6 +875,7 @@ export function SandboxApp() {
           <strong>Geometry first · grid later</strong>
         </div>
         <div className="sandbox__family-links">
+          <a href="/dashboard" onClick={(event) => { event.preventDefault(); loadDashboardPage() }}>Dashboard</a>
           <a href="/tokens" onClick={(event) => { event.preventDefault(); loadTokenExplorer() }}>Tokens</a>
           <a href="/interaction" onClick={(event) => { event.preventDefault(); loadInteractionPage() }}>Interaction</a>
           <a href="/motion" onClick={(event) => { event.preventDefault(); loadMotionPage() }}>Motion lab</a>

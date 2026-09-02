@@ -10,6 +10,11 @@ pnpm --filter @shiftcharts/sandbox dev
 
 Open <http://localhost:5176>.
 
+The final-product V1 dashboard demo is available at `/dashboard`. It composes all ten shipped
+families in a controlled 12-column bento layout using `@shiftcharts/grid`, with pointer and
+keyboard move/resize, resettable layout state, widget-state previews, theme/motion controls, and
+an eight-footprint variation matrix covering 1x1 through 9x6.
+
 Each registered family has a geometry-first page:
 
 - `/charts/line`
@@ -23,17 +28,20 @@ Each registered family has a geometry-first page:
 - `/charts/heatmap`
 - `/charts/funnel`
 - `/performance`
+- `/dashboard`
 
 The family navigation and chart-type selector load the matching valid sample. The geometry
 inspector reports the measured content box, SVG viewBox, resolved plot box, and legend mode for
-the current page. This pass intentionally studies standalone pixel geometry; React-grid widget
-placement and cell constraints are deferred to a later integration pass.
+the current page. The `/dashboard` route then exercises the same charts as real grid consumers,
+with 12-column placement and cell constraints owned by `@shiftcharts/grid`.
 
 ## What it controls
 
 - all ten registered chart types and sample data;
 - preview width, height, title, and the four shipped themes;
 - Core CSS and Cinematic motion modes for the chart preview, size ladder, and interaction examples;
+- the dashboard composes `@shiftcharts/core`, `@shiftcharts/primitives`, `@shiftcharts/react`,
+  `@shiftcharts/grid`, `@shiftcharts/motion`, and `@shiftcharts/tokens` in one real consumer;
 - value display, labels, legend, gridline, and table `PlanOverrides`;
 - interaction trigger, tooltip placement, tooltip visibility, crosshair, and active-point controls;
 - a controlled five-series legend study using the shipped `LegendControl`;

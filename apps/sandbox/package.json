@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@shiftcharts/core": "workspace:*",
+    "@shiftcharts/grid": "workspace:*",
     "@shiftcharts/motion": "workspace:*",
     "@shiftcharts/primitives": "workspace:*",
     "@shiftcharts/react": "workspace:*",
