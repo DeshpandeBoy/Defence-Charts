@@ -73,6 +73,22 @@
     overflow: visible;
   }
 
+  .shiftcharts-chart__title {
+    fill: currentColor;
+    font-size: var(--shiftcharts-title-font-size);
+    font-weight: var(--shiftcharts-title-font-weight);
+    letter-spacing: var(--shiftcharts-title-letter-spacing);
+    dominant-baseline: auto;
+  }
+
+  .shiftcharts-chart__subtitle {
+    fill: currentColor;
+    font-size: var(--shiftcharts-subtitle-font-size);
+    font-weight: var(--shiftcharts-subtitle-font-weight);
+    letter-spacing: var(--shiftcharts-subtitle-letter-spacing);
+    dominant-baseline: auto;
+  }
+
   .shiftcharts-chart__caption {
     position: absolute;
     inset-inline: 0;
@@ -333,6 +349,19 @@
     font-size: var(--shiftcharts-label-font-size);
     font-weight: var(--shiftcharts-label-font-weight);
     letter-spacing: var(--shiftcharts-label-letter-spacing);
+  }
+
+  .shiftcharts-axis__title {
+    fill: currentColor;
+    font-size: var(--shiftcharts-axis-title-font-size);
+    font-weight: var(--shiftcharts-axis-title-font-weight);
+    letter-spacing: var(--shiftcharts-axis-title-letter-spacing);
+    text-anchor: middle;
+    dominant-baseline: hanging;
+  }
+
+  .shiftcharts-axis--y .shiftcharts-axis__title {
+    dominant-baseline: middle;
   }
 
   /*

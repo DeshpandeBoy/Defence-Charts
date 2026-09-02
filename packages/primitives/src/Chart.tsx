@@ -43,6 +43,8 @@ import {
   type PlanPolicy,
   resolveFrame,
   resolvePolicy,
+  lineHeight,
+  measureText,
   type Series,
   type SizeContext,
 } from '@shiftcharts/core'
@@ -95,6 +97,10 @@ export type ChartProps = {
    * accidental one. React's own `@types/react` writes it this way throughout.
    */
   readonly description?: string | undefined
+  /** Optional visible supporting text. The accessible description remains separate. */
+  readonly subtitle?: string | undefined
+  readonly xAxisTitle?: string | undefined
+  readonly yAxisTitle?: string | undefined
   /** Must be the same policy the plan was resolved under, for the same reason as `ctx`. */
   readonly policy?: Partial<PlanPolicy> | undefined
   /**
@@ -121,6 +127,9 @@ export function ChartView({
   ctx,
   title,
   description,
+  subtitle,
+  xAxisTitle,
+  yAxisTitle,
   policy,
   id,
   className,
@@ -179,6 +188,33 @@ export function ChartView({
         <title id={titleId}>{title}</title>
         {description === undefined ? null : <desc id={descId}>{description}</desc>}
 
+        {frame.title === null ? null : (
+          <text
+            className="shiftcharts-chart__title"
+            x={roundCoord(frame.title.x)}
+            y={roundCoord(
+              frame.title.y +
+                resolvedPolicy.typography.metrics.vertical.ascent *
+                  resolvedPolicy.typography.byRank.A.fontSize,
+            )}
+          >
+            {fitChromeText(title, frame.title.width, 'A', resolvedPolicy)}
+          </text>
+        )}
+        {frame.subtitle === null || subtitle === undefined || subtitle === '' ? null : (
+          <text
+            className="shiftcharts-chart__subtitle"
+            x={roundCoord(frame.subtitle.x)}
+            y={roundCoord(
+              frame.subtitle.y +
+                resolvedPolicy.typography.metrics.vertical.ascent *
+                  resolvedPolicy.typography.byRank.B.fontSize,
+            )}
+          >
+            {fitChromeText(subtitle, frame.subtitle.width, 'B', resolvedPolicy)}
+          </text>
+        )}
+
         {plan.axes.x.gridlines || plan.axes.y.gridlines ? (
           <Grid
             plot={frame.plot}
@@ -205,6 +241,8 @@ export function ChartView({
             plan={plan}
             policy={resolvedPolicy}
             renderMark={renderMark}
+            xAxisTitle={xAxisTitle}
+            yAxisTitle={yAxisTitle}
           />
         ) : (
           <g className="shiftcharts-compact-plot" data-compact-plot="" transform={compactKey.plotTransform}>
@@ -214,6 +252,8 @@ export function ChartView({
               plan={plan}
               policy={resolvedPolicy}
               renderMark={renderMark}
+              xAxisTitle={xAxisTitle}
+              yAxisTitle={yAxisTitle}
             />
           </g>
         )}
@@ -268,12 +308,16 @@ function PlotContent({
   plan,
   policy,
   renderMark,
+  xAxisTitle,
+  yAxisTitle,
 }: {
   readonly base: string
   readonly frame: ChartFrame
   readonly plan: ChartPlan
   readonly policy: PlanPolicy
   readonly renderMark: MarkRenderer
+  readonly xAxisTitle: string | undefined
+  readonly yAxisTitle: string | undefined
 }) {
   const labelOffsets = resolveLabelOffsets(frame.series, plan.labels, frame.plot, policy)
 
@@ -303,6 +347,7 @@ function PlotContent({
           translateOffset={plan.axes.x.translate}
           clipId={`${base}-axis-x-bound`}
           policy={policy}
+          title={plan.axes.x.title ? xAxisTitle : undefined}
         />
       ) : null}
       {plan.axes.y.visible ? (
@@ -318,10 +363,34 @@ function PlotContent({
           translateOffset={plan.axes.y.translate}
           clipId={`${base}-axis-y-bound`}
           policy={policy}
+          title={plan.axes.y.title ? yAxisTitle : undefined}
+          titleOffset={Math.max(
+            lineHeight('B', policy) / 2,
+            frame.plot.x - lineHeight('B', policy) / 2 - policy.regionGap,
+          )}
         />
       ) : null}
     </>
   )
+}
+
+function fitChromeText(
+  text: string,
+  width: number,
+  rank: 'A' | 'B',
+  policy: PlanPolicy,
+): string {
+  const style = policy.typography.byRank[rank]
+  if (measureText(text, rank, policy.typography.metrics, style) <= width) return text
+  let low = 0
+  let high = text.length
+  while (low < high) {
+    const middle = Math.ceil((low + high) / 2)
+    const candidate = `${text.slice(0, middle)}…`
+    if (measureText(candidate, rank, policy.typography.metrics, style) <= width) low = middle
+    else high = middle - 1
+  }
+  return low === 0 ? '' : `${text.slice(0, low)}…`
 }
 
 /**
@@ -348,7 +417,7 @@ function SeriesMarks({
   readonly frame: ChartFrame['series'][number]
   readonly plan: ChartPlan
   readonly policy: PlanPolicy
-  readonly labelOffsets: ReadonlyMap<string, number>
+  readonly labelOffsets: ReturnType<typeof resolveLabelOffsets>
   readonly renderMark: MarkRenderer
 }) {
   return (

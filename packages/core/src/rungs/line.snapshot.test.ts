@@ -235,7 +235,7 @@ const CANVAS_PLAN: ChartPlan = {
     // scale class. After that gutter, the right legend, and 16 px symmetric inset, the plot
     // resolves to five target tick slots. Direct labels remain an in-plot identity channel
     // and therefore do not charge a second right-side band.
-    x: { visible: true, domainLine: true, ticks: { mode: 'count', count: 5 }, title: false, gridlines: false, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
+    x: { visible: true, domainLine: true, ticks: { mode: 'count', count: 5 }, title: true, gridlines: false, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
     y: { visible: true, domainLine: false, ticks: { mode: 'count', count: 4 }, title: true, gridlines: true, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
     y2: null,
   },
@@ -273,7 +273,7 @@ const STAGE_PLAN: ChartPlan = {
   axes: {
     // The same formatted-y-label metadata tightens both y-axis rails; after the external
     // legend and symmetric inset the Stage plot resolves to seven target tick slots.
-    x: { visible: true, domainLine: true, ticks: { mode: 'count', count: 7 }, title: false, gridlines: false, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
+    x: { visible: true, domainLine: true, ticks: { mode: 'count', count: 7 }, title: true, gridlines: false, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
     y: { visible: true, domainLine: false, ticks: { mode: 'count', count: 4 }, title: true, gridlines: true, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
     y2: { visible: true, domainLine: false, ticks: { mode: 'count', count: 4 }, title: true, gridlines: false, labelFlush: false, labelBound: false, tickBand: 'center', tickExtra: false, minExtent: 0, maxExtent: 0, translate: 0, strokeCap: 'butt', dashPhase: 0 },
   },

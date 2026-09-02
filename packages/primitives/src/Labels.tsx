@@ -35,7 +35,11 @@ export type LabelsProps = {
   readonly maxChars?: number | null
   /** The same resolved policy used to produce the frame and plot box. */
   readonly policy?: PlanPolicy
-  readonly offsets?: ReadonlyMap<string, number> | undefined
+  readonly offsets?: ReadonlyMap<string, {
+    readonly offset: number
+    readonly pointIndex: number
+    readonly text: string
+  }> | undefined
   readonly className?: string
 }
 
@@ -49,23 +53,25 @@ export function Labels({
   policy = DEFAULT_POLICY,
   offsets,
 }: LabelsProps) {
-  const last = series.points.at(-1)
   const indices = valueIndices(series, valueLabels)
 
   return (
     <>
-      {seriesLabels === 'direct-end' && last !== undefined ? (
+      {seriesLabels === 'direct-end' && series.points.length > 0 ? (
         (() => {
-          const offset = offsets?.get(seriesLabelKey(series.id)) ?? 0
-          return Number.isFinite(offset) ? (
+          const fallbackIndex = series.points.length - 1
+          const placement = offsets?.get(seriesLabelKey(series.id))
+          const point = series.points[placement?.pointIndex ?? fallbackIndex]
+          const offset = placement?.offset ?? 0
+          return point !== undefined && Number.isFinite(offset) ? (
             <text
               className={classes('shiftcharts-label', className)}
               data-label-kind="series"
               data-halo={labelHalo !== 'none' ? labelHalo : undefined}
-              x={roundCoord(last.x - policy.regionGap)}
-              y={roundCoord(last.y + offset)}
+              x={roundCoord(point.x - policy.regionGap)}
+              y={roundCoord(point.y + offset)}
             >
-              {truncate(series.label, maxChars)}
+              {placement?.text ?? truncate(series.label, maxChars)}
             </text>
           ) : null
         })()
@@ -74,7 +80,7 @@ export function Labels({
       {indices.map((i) => {
         const p = series.points[i]
         if (p === undefined) return null
-        const offset = offsets?.get(valueLabelKey(series.id, i)) ?? 0
+        const offset = offsets?.get(valueLabelKey(series.id, i))?.offset ?? 0
         if (!Number.isFinite(offset)) return null
         return (
           <text
@@ -105,11 +111,19 @@ type LabelCandidate = {
   readonly y: number
   readonly height: number
   readonly priority: number
+  readonly pointIndex: number
+  readonly text: string
 }
 
 type LabelPlacement = LabelCandidate & {
   readonly top: number
   readonly bottom: number
+}
+
+type LabelResolution = {
+  readonly offset: number
+  readonly pointIndex: number
+  readonly text: string
 }
 
 /**
@@ -123,7 +137,7 @@ export function resolveLabelOffsets(
   labels: LabelsPlan,
   plot: Rect,
   policy: PlanPolicy,
-): ReadonlyMap<string, number> {
+): ReadonlyMap<string, LabelResolution> {
   const candidates: LabelCandidate[] = []
   const lineStyle = policy.typography.byRank.C
   const valueStyle = policy.typography.byRank.B
@@ -133,17 +147,27 @@ export function resolveLabelOffsets(
   for (const item of series) {
     const last = item.points.at(-1)
     if (labels.seriesLabels === 'direct-end' && last !== undefined) {
-      const text = truncate(item.label, labels.seriesLabelMaxChars)
+      const selected = selectSeriesLabelCandidate(
+        item,
+        series,
+        plot,
+        policy,
+        labels.seriesLabelMaxChars,
+      )
+      const point = item.points[selected.pointIndex] ?? last
+      const text = selected.text
       const width = measureText(text, 'C', policy.typography.metrics, lineStyle)
-      const right = last.x - policy.regionGap
+      const right = point.x - policy.regionGap
       candidates.push({
         key: seriesLabelKey(item.id),
         kind: 'series',
         left: right - width,
         right,
-        y: last.y,
+        y: point.y,
         height: labelHeight,
         priority: 100,
+        pointIndex: selected.pointIndex,
+        text,
       })
     }
 
@@ -161,6 +185,8 @@ export function resolveLabelOffsets(
         // Keep the latest reading before lower-priority extrema when an overfull measured
         // box needs an explicit occlusion policy.
         priority: index === item.points.length - 1 ? 50 : 10,
+        pointIndex: index,
+        text: formatYLabel(point.value),
       })
     }
   }
@@ -239,13 +265,61 @@ export function resolveLabelOffsets(
     }
   }
 
-  const offsets = new Map<string, number>()
+  const offsets = new Map<string, LabelResolution>()
   for (const candidate of visibleCandidates) {
     const placement = placed.get(candidate.key)
-    if (placement !== undefined) offsets.set(candidate.key, (placement.top + placement.bottom) / 2 - candidate.y)
+    if (placement !== undefined) offsets.set(candidate.key, {
+      offset: (placement.top + placement.bottom) / 2 - candidate.y,
+      pointIndex: candidate.pointIndex,
+      text: candidate.text,
+    })
   }
-  for (const key of hidden) offsets.set(key, Number.NaN)
+  for (const key of hidden) offsets.set(key, { offset: Number.NaN, pointIndex: 0, text: '' })
   return offsets
+}
+
+function selectSeriesLabelCandidate(
+  item: SeriesFrame,
+  allSeries: readonly SeriesFrame[],
+  plot: Rect,
+  policy: PlanPolicy,
+  maxChars: number | null,
+): { readonly pointIndex: number; readonly text: string } {
+  const fullWidth = measureText(
+    item.label,
+    'C',
+    policy.typography.metrics,
+    policy.typography.byRank.C,
+  )
+  const firstCandidate = Math.floor(item.points.length * 0.4)
+  let bestIndex = -1
+  let bestClearance = Number.NEGATIVE_INFINITY
+
+  for (let index = item.points.length - 1; index >= firstCandidate; index -= 1) {
+    const point = item.points[index]
+    if (point === undefined) continue
+    const right = point.x - policy.regionGap
+    const left = right - fullWidth
+    if (left < plot.x || right > plot.x + plot.width) continue
+    let clearance = Number.POSITIVE_INFINITY
+    for (const other of allSeries) {
+      if (other.id === item.id) continue
+      for (const otherPoint of other.points) {
+        if (otherPoint.x < left || otherPoint.x > right) continue
+        clearance = Math.min(clearance, Math.abs(otherPoint.y - point.y))
+      }
+    }
+    if (clearance > bestClearance) {
+      bestClearance = clearance
+      bestIndex = index
+    }
+  }
+
+  if (bestIndex >= 0) return { pointIndex: bestIndex, text: item.label }
+  return {
+    pointIndex: Math.max(0, item.points.length - 1),
+    text: truncate(item.label, maxChars),
+  }
 }
 
 function labelBudget(candidates: readonly LabelCandidate[], gap: number): number {

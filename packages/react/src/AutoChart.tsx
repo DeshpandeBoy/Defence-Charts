@@ -75,6 +75,9 @@ export type AutoChartProps = {
   readonly title: string
   /** ⚠ `| undefined` throughout — see `ChartProps` in `@shiftcharts/primitives` for why. */
   readonly description?: string | undefined
+  readonly subtitle?: string | undefined
+  readonly xAxisTitle?: string | undefined
+  readonly yAxisTitle?: string | undefined
   readonly policy?: Partial<PlanPolicy> | undefined
   readonly overrides?: PlanOverrides | undefined
   /**
@@ -115,6 +118,9 @@ export function AutoChart({
   data,
   title,
   description,
+  subtitle,
+  xAxisTitle,
+  yAxisTitle,
   policy,
   overrides,
   nominalCellSize,
@@ -228,6 +234,9 @@ export function AutoChart({
             ctx={ctx}
             title={title}
             description={description}
+            subtitle={subtitle}
+            xAxisTitle={xAxisTitle}
+            yAxisTitle={yAxisTitle}
             policy={policy}
             id={id}
           />

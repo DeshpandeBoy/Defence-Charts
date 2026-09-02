@@ -161,6 +161,16 @@ describe('resolvePolicy', () => {
     const b = resolvePolicy({ legendMaxEntries: 3 })
     expect(a).toStrictEqual(b)
   })
+
+  it('validates fixed line-domain bounds before planning or rendering', () => {
+    expect(() => resolvePolicy({ lineYDomainMode: 'fixed' })).toThrow(/lineYDomainMin/)
+    expect(() =>
+      resolvePolicy({ lineYDomainMode: 'fixed', lineYDomainMin: 10, lineYDomainMax: 10 }),
+    ).toThrow(/lineYDomainMin/)
+    expect(
+      resolvePolicy({ lineYDomainMode: 'fixed', lineYDomainMin: -20, lineYDomainMax: 80 }),
+    ).toMatchObject({ lineYDomainMode: 'fixed', lineYDomainMin: -20, lineYDomainMax: 80 })
+  })
 })
 
 describe('PlanOverrides — DeepPartial', () => {
