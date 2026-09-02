@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* global console */
 // Bundles src/entry.tsx with esbuild and copies the packages' own CSS files verbatim.
 // No dev server, no watch mode, no CDN — the output is a self-contained dist/ that
 // index.html loads as plain <link>/<script type="module"> tags.

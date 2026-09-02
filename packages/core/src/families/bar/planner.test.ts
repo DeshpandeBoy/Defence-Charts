@@ -80,7 +80,7 @@ describe('bar/timebar family planner', () => {
     expect(plan.axes.y.visible).toBe(true)
     expect(plan.legend).toEqual({
       placement: 'external',
-      position: 'top',
+      position: 'right',
       maxEntries: policy.legendMaxEntries,
       showValues: false,
       showPercent: false,

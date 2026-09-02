@@ -51,10 +51,10 @@ function barMark(input: FamilyPlannerInput<BarChartType>, seed: ChartPlan): Mark
 /**
  * Bar identity needs a dedicated home because end-of-line labels are not a stable affordance
  * for a finite rectangle: on the last category they sit over the mark and make the plot edge
- * feel clipped. The compact strip gets one reserved identity row; larger bars get a centered
- * top band where the identity is encountered before the marks. Micro has no mark, Tile is still
- * a value/sparkline budget, and one-series bars retain the seed's direct label because there is
- * no competing series identity to decode.
+ * feel clipped. The compact strip gets one reserved identity row; larger bars get a right-side
+ * vertical rail that keeps the series identity visible without competing with category labels.
+ * Micro has no mark, Tile is still a value/sparkline budget, and one-series bars retain the
+ * seed's direct label because there is no competing series identity to decode.
  */
 function barLegend(
   input: FamilyPlannerInput<BarChartType>,
