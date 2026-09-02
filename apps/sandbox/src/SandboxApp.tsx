@@ -1,4 +1,4 @@
-import type { CSSProperties, ChangeEvent } from 'react'
+import type { CSSProperties, ChangeEvent, ReactNode } from 'react'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import type {
@@ -17,6 +17,7 @@ import {
   sizeContextFromPixels,
 } from '@shiftcharts/core'
 import { AutoChart, LegendControl } from '@shiftcharts/react'
+import { MotionBoundary, type MotionPreset } from '@shiftcharts/motion'
 // The benchmark intentionally uses the current client interaction implementation directly so
 // its lookup numbers describe the shipped baseline, including the documented full `'xy'` scan.
 import { nearestIndexedPoint, prepareInteractionIndex } from '../../../packages/react/src/interaction-index.ts'
@@ -445,6 +446,15 @@ function displayValue(value: unknown): string {
   return typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' ? String(value) : 'resolver default'
 }
 
+const SANDBOX_MOTION_MODES: readonly { readonly id: MotionPreset; readonly label: string; readonly description: string }[] = [
+  { id: 'core', label: 'Core CSS', description: 'Plan-driven CSS transitions' },
+  { id: 'cinematic', label: 'Cinematic', description: 'Interruptible geometry motion' },
+]
+
+function SandboxMotionBoundary({ preset, children }: { readonly preset: MotionPreset; readonly children: ReactNode }) {
+  return <MotionBoundary preset={preset} quality="auto" debug>{children}</MotionBoundary>
+}
+
 export function SandboxApp() {
   const initialChartType = chartTypeFromPath(typeof window === 'undefined' ? '/' : window.location.pathname)
   const [chartType, setChartType] = useState<ChartType>(initialChartType)
@@ -463,6 +473,7 @@ export function SandboxApp() {
   const [theme, setTheme] = useState<ShiftChartsTheme>('rail-dark')
   const [width, setWidth] = useState(760)
   const [height, setHeight] = useState(480)
+  const [motionPreset, setMotionPreset] = useState<MotionPreset>('cinematic')
   const [title, setTitle] = useState(() => CHART_PAGE_DETAILS[initialChartType].defaultTitle)
   const [subtitle, setSubtitle] = useState('Operational readiness across the latest training cycles')
   const [xAxisTitle, setXAxisTitle] = useState('Training cycle')
@@ -614,6 +625,7 @@ export function SandboxApp() {
     overrides: parsedOverrides.value ?? {},
     tokenOverrides,
     activePointHighlight,
+    motionPreset,
   })
   const cssOutput = Object.entries(tokenOverrides)
     .map(([name, value]) => `  --shiftcharts-${name}: ${value};`)
@@ -800,7 +812,7 @@ export function SandboxApp() {
   }
 
   if (isInteractionPage) {
-    return <InteractionPage theme={theme} onOpenChart={() => loadChartPage('line')} onOpenTokens={loadTokenExplorer} />
+    return <InteractionPage theme={theme} motionPreset={motionPreset} onOpenChart={() => loadChartPage('line')} onOpenTokens={loadTokenExplorer} />
   }
 
   if (isMotionPage) {
@@ -930,20 +942,22 @@ export function SandboxApp() {
               {resolved.plan === null ? (
                 <div className="sandbox__preview-error" role="alert">{resolved.error}</div>
               ) : (
-                <AutoChart
-                  type={chartType}
-                  data={data}
-                  title={title}
-                  description="A measured ShiftCharts sandbox preview generated from the current design controls."
-                  subtitle={subtitle}
-                  xAxisTitle={xAxisTitle}
-                  yAxisTitle={yAxisTitle}
-                  policy={policy}
-                  overrides={parsedOverrides.value as PlanOverrides | undefined}
-                  onResolvedPlan={handleResolvedPlan}
-                  activePointHighlight={activePointHighlight}
-                  id="sandbox-chart"
-                />
+                <SandboxMotionBoundary preset={motionPreset}>
+                  <AutoChart
+                    type={chartType}
+                    data={data}
+                    title={title}
+                    description="A measured ShiftCharts sandbox preview generated from the current design controls."
+                    subtitle={subtitle}
+                    xAxisTitle={xAxisTitle}
+                    yAxisTitle={yAxisTitle}
+                    policy={policy}
+                    overrides={parsedOverrides.value as PlanOverrides | undefined}
+                    onResolvedPlan={handleResolvedPlan}
+                    activePointHighlight={activePointHighlight}
+                    id="sandbox-chart"
+                  />
+                </SandboxMotionBoundary>
               )}
             </div>
           </div>
@@ -1012,16 +1026,18 @@ export function SandboxApp() {
                       style={{ inlineSize: rung.width, blockSize: rung.height }}
                     >
                       {resolved.plan === null ? null : (
-                        <AutoChart
-                          type={chartType}
-                          data={data}
-                          title={`${title} — ${rung.label}`}
-                          description={`Size-class ladder preview forced to the ${rung.label} rung.`}
-                          policy={policy}
-                          overrides={parsedOverrides.value as PlanOverrides | undefined}
-                          gridSize={{ cols: rung.cols, rows: rung.rows }}
-                          id={`sandbox-bar-ladder-${rung.sizeClass}`}
-                        />
+                        <SandboxMotionBoundary preset={motionPreset}>
+                          <AutoChart
+                            type={chartType}
+                            data={data}
+                            title={`${title} — ${rung.label}`}
+                            description={`Size-class ladder preview forced to the ${rung.label} rung.`}
+                            policy={policy}
+                            overrides={parsedOverrides.value as PlanOverrides | undefined}
+                            gridSize={{ cols: rung.cols, rows: rung.rows }}
+                            id={`sandbox-bar-ladder-${rung.sizeClass}`}
+                          />
+                        </SandboxMotionBoundary>
                       )}
                     </div>
                   </div>
@@ -1060,6 +1076,17 @@ export function SandboxApp() {
             <div className="sandbox__field-grid">
               <label className="sandbox__field"><span>X-axis title</span><input aria-label="X-axis title" value={xAxisTitle} onChange={(event) => setXAxisTitle(event.target.value)} /></label>
               <label className="sandbox__field"><span>Y-axis title</span><input aria-label="Y-axis title" value={yAxisTitle} onChange={(event) => setYAxisTitle(event.target.value)} /></label>
+            </div>
+            <div className="sandbox__field">
+              <span>Chart motion</span>
+              <div className="sandbox__segmented" role="group" aria-label="Chart motion mode">
+                {SANDBOX_MOTION_MODES.map((mode) => (
+                  <button key={mode.id} type="button" className={motionPreset === mode.id ? 'is-active' : ''} aria-pressed={motionPreset === mode.id} onClick={() => setMotionPreset(mode.id)}>
+                    {mode.label}
+                  </button>
+                ))}
+              </div>
+              <small className="sandbox__help">{SANDBOX_MOTION_MODES.find((mode) => mode.id === motionPreset)?.description}</small>
             </div>
             <div className="sandbox__field">
               <span>Size preset</span>
@@ -1696,10 +1723,12 @@ function TokenExplorer({
 
 function InteractionPage({
   theme,
+  motionPreset,
   onOpenChart,
   onOpenTokens,
 }: {
   readonly theme: ShiftChartsTheme
+  readonly motionPreset: MotionPreset
   readonly onOpenChart: () => void
   readonly onOpenTokens: () => void
 }) {
@@ -1750,7 +1779,9 @@ function InteractionPage({
                   ['--shiftcharts-series-2-dash' as string]: example.dash,
                 }}
               >
-                <AutoChart type="line" data={THROUGHPUT} title={example.label} />
+                <SandboxMotionBoundary preset={motionPreset}>
+                  <AutoChart type="line" data={THROUGHPUT} title={example.label} />
+                </SandboxMotionBoundary>
               </div>
               <p className="sandbox__help">{example.help}</p>
             </div>
@@ -1783,7 +1814,9 @@ function InteractionPage({
                 ['--shiftcharts-tooltip-radius' as string]: '20px',
               }}
             >
-              <AutoChart type="line" data={THROUGHPUT} title="Glass tooltip material" />
+              <SandboxMotionBoundary preset={motionPreset}>
+                <AutoChart type="line" data={THROUGHPUT} title="Glass tooltip material" />
+              </SandboxMotionBoundary>
             </div>
             <p className="sandbox__help">Four token overrides, zero code.</p>
           </div>

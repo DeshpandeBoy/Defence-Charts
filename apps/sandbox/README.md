@@ -33,6 +33,7 @@ placement and cell constraints are deferred to a later integration pass.
 
 - all ten registered chart types and sample data;
 - preview width, height, title, and the four shipped themes;
+- Core CSS and Cinematic motion modes for the chart preview, size ladder, and interaction examples;
 - value display, labels, legend, gridline, and table `PlanOverrides`;
 - interaction trigger, tooltip placement, tooltip visibility, crosshair, and active-point controls;
 - a controlled five-series legend study using the shipped `LegendControl`;
